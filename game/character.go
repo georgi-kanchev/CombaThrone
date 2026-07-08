@@ -29,8 +29,10 @@ var Characters map[Character]CharacterData = make(map[Character]CharacterData)
 func InitCharacters() {
 	var animations = assets.LoadAnimations(assets.LoadImage("data/units.png"), "data/animations.xml")
 
-	Characters[CharacterMan] = CharacterData{Stats: Stats{Name: "Man", Health: 20, Damage: 2},
+	Characters[CharacterMan] = CharacterData{Stats: Stats{Name: "Man", Health: 10, Damage: 2},
 		AnimationPrefix: "man", Brain: BrainMan}
+	Characters[CharacterWoman] = CharacterData{Stats: Stats{Name: "Woman", Health: 5, Damage: 1},
+		AnimationPrefix: "woman", Brain: BrainWoman}
 
 	for i, c := range Characters {
 		c.Animations.Idle = animations.Frames(c.AnimationPrefix + "-idle")

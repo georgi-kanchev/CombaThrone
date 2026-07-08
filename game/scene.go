@@ -27,6 +27,8 @@ func InitScene() {
 	}
 
 	SpawnUnit(CharacterMan, DutyWalkStraight, TeamAlly)
+	SpawnUnit(CharacterWoman, DutyWalkStraight, TeamAlly)
+	Units[0].X = 200
 }
 
 func UpdateScene() {

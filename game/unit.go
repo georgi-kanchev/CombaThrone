@@ -53,7 +53,7 @@ func (u *Unit) PlayDie() {
 func SpawnUnit(character Character, duty Duty, team Team) {
 	var char = Characters[character]
 	var anim = motion.NewAnimation(0, false, char.Animations.Idle...)
-	var unit = Unit{Object: graphics.NewSprite(0, 0, 1, 0), Character: character, Team: team, Duty: duty,
+	var unit = Unit{Object: graphics.NewSprite(0, 580, 1, 0), Character: character, Team: team, Duty: duty,
 		Brain: char.Brain, Stats: char.Stats, Anim: &anim}
 	Units = append(Units, unit)
 }
@@ -63,6 +63,10 @@ func UpdateUnits() {
 		u.Brain(&u)
 
 		if keyboard.IsKeyJustPressed(key.A) {
+			u.PlayWalk()
+		} else if keyboard.IsKeyPressed(key.D) {
+			u.PlayWalk()
+		} else if keyboard.IsKeyJustPressed(key.Space) {
 			u.PlayAttack()
 		}
 
