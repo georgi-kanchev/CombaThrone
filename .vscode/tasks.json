@@ -1,0 +1,12 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+      {
+          "label": "start-wine-dlv",
+          "type": "shell",
+          "command": "WINEDEBUG=-all wine ~/go/bin/windows_amd64/dlv.exe exec /home/gojur/code/pure-game-kit/build/windows-debug/game.exe --headless --listen=:2345 --api-version=2 --accept-multiclient",
+          "problemMatcher": [],
+          "isBackground": true
+      },
+    ]
+}
