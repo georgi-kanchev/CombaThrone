@@ -6,7 +6,9 @@ import (
 )
 
 func main() {
-	window.Create("CombaThrone", true, true)
+	window.Create("CombaThrone", false, true)
+
+	window.SetTargetFPS(0)
 
 	game.InitCharacters()
 
@@ -14,5 +16,6 @@ func main() {
 	for window.KeepOpen() {
 		game.UpdateScene()
 		game.UpdateUnits()
+		game.UpdateDebug()
 	}
 }

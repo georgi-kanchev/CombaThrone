@@ -3,7 +3,10 @@ package game
 // Defines the base stats, animations, behaviors (brain functions) etc of all characters - being a class/template.
 // The Unit copies that base data in different points in time and uses/edits it to make the character alive.
 
-import "pure-game-kit/packages/assets"
+import (
+	"pure-game-kit/packages/assets"
+	"pure-game-kit/packages/geometry"
+)
 
 type Animations struct {
 	Idle, Walk, Attack, Hurt, Die []assets.ImageId
@@ -18,6 +21,7 @@ type CharacterData struct {
 	Stats           Stats
 	Animations      Animations
 	AnimationPrefix string
+	Hitbox          geometry.Area
 
 	Brain func(self *Unit)
 }
@@ -29,10 +33,12 @@ var Characters map[Character]CharacterData = make(map[Character]CharacterData)
 func InitCharacters() {
 	var animations = assets.LoadAnimations(assets.LoadImage("data/units.png"), "data/animations.xml")
 
-	Characters[CharacterMan] = CharacterData{Stats: Stats{Name: "Man", Health: 10, Damage: 2},
-		AnimationPrefix: "man", Brain: BrainMan}
-	Characters[CharacterWoman] = CharacterData{Stats: Stats{Name: "Woman", Health: 5, Damage: 1},
-		AnimationPrefix: "woman", Brain: BrainWoman}
+	Characters[CharacterMan] = CharacterData{AnimationPrefix: "man", Brain: BrainMan,
+		Stats:  Stats{Name: "Man", Health: 10, Damage: 2},
+		Hitbox: geometry.NewArea(0, 7, 18, 35)}
+	Characters[CharacterWoman] = CharacterData{AnimationPrefix: "woman", Brain: BrainWoman,
+		Stats:  Stats{Name: "Woman", Health: 5, Damage: 1},
+		Hitbox: geometry.NewArea(0, 7, 18, 35)}
 
 	for i, c := range Characters {
 		c.Animations.Idle = animations.Frames(c.AnimationPrefix + "-idle")
