@@ -12,5 +12,5 @@ func UpdateDebug() {
 		return
 	}
 
-	View.DrawDebugInfo(false)
+	View.DrawDebugInfo(true)
 }

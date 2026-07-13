@@ -1,7 +1,5 @@
 package game
 
-// Handles the playground
-
 import (
 	"pure-game-kit/packages/assets"
 	"pure-game-kit/packages/geometry"
