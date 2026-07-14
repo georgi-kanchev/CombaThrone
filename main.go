@@ -6,12 +6,11 @@ import (
 )
 
 func main() {
-	window.Create("CombaThrone", false, true)
-
+	window.Create("CombaThrone", false, false)
+	window.SetMode(window.ModeFullscreenBorderless)
 	window.SetTargetFPS(0)
 
 	game.InitCharacters()
-
 	game.InitScene()
 	for window.KeepOpen() {
 		game.UpdateScene()

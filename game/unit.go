@@ -18,12 +18,13 @@ type Character uint8
 
 type Unit struct {
 	graphics.Object
-	Stats     Stats
-	Character Character
-	Team      Team
-	Duty      Duty
-	Brain     func(self *Unit)
-	Anim      *motion.Animation[assets.ImageId]
+	CellX, CellY float32
+	Stats        Stats
+	Character    Character
+	Team         Team
+	Duty         Duty
+	Brain        func(self *Unit)
+	Anim         *motion.Animation[assets.ImageId]
 }
 
 const TeamAlly, TeamEnemy, TeamNeutral Team = 0, 1, 2
@@ -34,11 +35,9 @@ const DutyWalkStraight, DutyUseStairs, DutyStayGarrison Duty = 0, 1, 2
 var Units []*Unit
 
 func (u *Unit) Hitbox() geometry.Area {
-	var scale = SceneScale()
 	var char = Characters[u.Character]
 	var hitbox = char.Hitbox
-	hitbox.X, hitbox.Y = u.X+hitbox.X*scale, u.Y+hitbox.Y*scale
-	hitbox.Width, hitbox.Height = hitbox.Width*scale, hitbox.Height*scale
+	hitbox.X, hitbox.Y = u.X+hitbox.X, u.Y+hitbox.Y
 	return hitbox
 }
 
@@ -63,13 +62,15 @@ func (u *Unit) PlayDie() {
 func SpawnUnit(character Character, duty Duty, team Team) {
 	var char = Characters[character]
 	var anim = motion.NewAnimation(0, false, char.Animations.Idle...)
-	var unit = Unit{Object: graphics.NewSprite(0, 580, 1, 0), Character: character, Team: team, Duty: duty,
-		Brain: char.Brain, Stats: char.Stats, Anim: &anim}
+	var unit = Unit{Object: graphics.NewSprite(0, 0, 1, 0), Character: character, Team: team, Duty: duty,
+		Brain: char.Brain, Stats: char.Stats, Anim: &anim, CellX: 1, CellY: 8}
 	Units = append(Units, &unit)
 }
 
 func UpdateUnits() {
 	for _, u := range Units {
+		u.X, u.Y = PointAt(int(u.CellX), int(u.CellY))
+		u.Y -= 8
 		u.Brain(u)
 
 		if keyboard.IsKeyJustPressed(key.A) {
@@ -84,15 +85,17 @@ func UpdateUnits() {
 			u.PlayIdle()
 		}
 
-		var frame, scale = u.Anim.Frame(), SceneScale()
+		var frame = u.Anim.Frame()
 		var _, _, w, h = frame.CropArea()
 
-		u.ImageId, u.Width, u.Height = frame, w*scale, h*scale
+		u.ImageId, u.Width, u.Height = frame, w, h
 
 		if Debug {
 			var hb = u.Hitbox()
 			View.DrawShape(u.X, u.Y, u.Width, u.Height, 0, 0, DebugUnitColor, geometry.Area{})
 			View.DrawShape(hb.X, hb.Y, hb.Width, hb.Height, 0, 0, DebugHitboxColor, geometry.Area{})
+
+			// View.DrawText(info, u.X-u.Width/2, u.Y-u.Height/2, 30, 0, palette.White, geometry.Area{})
 		}
 		View.DrawObject(&u.Object)
 	}
