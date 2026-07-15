@@ -2,6 +2,7 @@ package game
 
 import (
 	"pure-game-kit/packages/assets"
+	"pure-game-kit/packages/geometry"
 	"pure-game-kit/packages/graphics"
 	"pure-game-kit/packages/utility/color"
 )
@@ -14,6 +15,7 @@ var Background graphics.Object
 
 var Layers []assets.TileLayerId
 var Tilemaps []graphics.Object
+var Terrain geometry.ShapeGrid
 
 func InitScene() {
 	View = graphics.NewView(5.68)
@@ -26,12 +28,20 @@ func InitScene() {
 		Tilemaps[i] = graphics.NewTilemap(1, Layers[i])
 	}
 	Tilemaps[LayerGrid].Effects.Tint = DebugGridColor
+	Terrain = geometry.NewShapeGrid(64)
+	Terrain.AddShapes(Tilemaps[LayerMap].TilemapShapes()...)
 
-	SpawnUnit(CharacterMan, DutyWalkStraight, TeamAlly)
-	SpawnUnit(CharacterWoman, DutyWalkStraight, TeamAlly)
-	Units[0].CellX = 3
+	SpawnUnit(CharacterMan, DutyUseStairs, TeamAlly)
+	SpawnUnit(CharacterWoman, DutyWalkStraight, TeamEnemy)
+	Units[0].X = -32*8 + 16
+	Units[1].X = 48
 }
 func UpdateScene() {
+	var _, bly = Background.PointFromEdge(0.5, 1)
+	View.FitSize(Background.Width, 0)
+	var _, h = View.Size()
+	View.Y = (bly - h/2) - 8
+
 	View.DrawColor(skyColor)
 	View.DrawObject(&Background)
 
@@ -43,16 +53,16 @@ func UpdateScene() {
 	}
 }
 
-func PointAt(cellX, cellY int) (x, y float32) {
+func PointAtCell(cellX, cellY float32) (x, y float32) {
 	var tw, th = Layers[LayerMap].TileSize()
 	var cols, rows = Layers[LayerMap].Size()
-	return (float32(cellX)-float32(cols)/2)*tw + (tw / 2), (float32(cellY)-float32(rows)/2)*th + (th / 2)
+	return (cellX-float32(cols)/2)*tw + (tw / 2), (cellY-float32(rows)/2)*th + (th / 2)
 }
-func CellAt(x, y float32) (cellX, cellY int) {
+func CellAtPoint(x, y float32) (cellX, cellY float32) {
 	var tw, th = Layers[LayerMap].TileSize()
 	var cols, rows = Layers[LayerMap].Size()
-	return int(x/tw + float32(cols)/2), int(y/th + float32(rows)/2)
+	return x/tw + float32(cols)/2, y/th + float32(rows)/2
 }
-func TileAt(cellX, cellY, layer int) assets.Tile {
+func TileAtCell(cellX, cellY, layer int) assets.Tile {
 	return Layers[layer].TileAtCell(cellX, cellY)
 }

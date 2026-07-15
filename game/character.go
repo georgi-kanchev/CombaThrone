@@ -21,7 +21,7 @@ type CharacterData struct {
 	Stats           Stats
 	Animations      Animations
 	AnimationPrefix string
-	Hitbox          geometry.Area
+	Hitbox          geometry.Shape
 
 	Brain func(self *Unit)
 }
@@ -35,10 +35,10 @@ func InitCharacters() {
 
 	Characters[CharacterMan] = CharacterData{AnimationPrefix: "man", Brain: BrainMan,
 		Stats:  Stats{Name: "Man", Health: 10, Damage: 2},
-		Hitbox: geometry.NewArea(0, 6.5, 18, 35)}
+		Hitbox: geometry.NewRoundedRectangle(0, 6.5, 18, 35, 0, 1)}
 	Characters[CharacterWoman] = CharacterData{AnimationPrefix: "woman", Brain: BrainWoman,
 		Stats:  Stats{Name: "Woman", Health: 5, Damage: 1},
-		Hitbox: geometry.NewArea(0, 6.5, 18, 35)}
+		Hitbox: geometry.NewRoundedRectangle(0, 6.5, 18, 35, 0, 1)}
 
 	for i, c := range Characters {
 		c.Animations.Idle = animations.Frames(c.AnimationPrefix + "-idle")

@@ -2,6 +2,35 @@
 <map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="18" height="10" tilewidth="32" tileheight="32" infinite="0" nextlayerid="7" nextobjectid="1">
  <tileset firstgid="1" name="tileset" tilewidth="32" tileheight="32" tilecount="30" columns="15">
   <image source="tileset.png" width="480" height="64"/>
+  <tile id="1">
+   <objectgroup draworder="index" id="2">
+    <object id="7" x="32" y="-1" width="4.24264" height="46.669" rotation="45">
+     <capsule/>
+    </object>
+   </objectgroup>
+  </tile>
+  <tile id="2">
+   <objectgroup draworder="index" id="2">
+    <object id="1" x="0" y="0" width="32" height="15"/>
+   </objectgroup>
+  </tile>
+  <tile id="3">
+   <objectgroup draworder="index" id="2">
+    <object id="1" x="-3" y="2" width="4.24264" height="45.9619" rotation="315">
+     <capsule/>
+    </object>
+   </objectgroup>
+  </tile>
+  <tile id="19">
+   <objectgroup draworder="index" id="2">
+    <object id="1" x="12" y="0" width="20" height="32"/>
+   </objectgroup>
+  </tile>
+  <tile id="21">
+   <objectgroup draworder="index" id="2">
+    <object id="1" x="0" y="0" width="20" height="32"/>
+   </objectgroup>
+  </tile>
  </tileset>
  <layer id="1" name="Map" width="18" height="10">
   <data encoding="base64" compression="zlib">
