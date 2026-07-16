@@ -2,7 +2,6 @@ package game
 
 import (
 	"pure-game-kit/packages/assets"
-	"pure-game-kit/packages/geometry"
 	"pure-game-kit/packages/graphics"
 	"pure-game-kit/packages/utility/color"
 )
@@ -15,7 +14,6 @@ var Background graphics.Object
 
 var Layers []assets.TileLayerId
 var Tilemaps []graphics.Object
-var Terrain geometry.ShapeGrid
 
 func InitScene() {
 	View = graphics.NewView(5.68)
@@ -28,8 +26,6 @@ func InitScene() {
 		Tilemaps[i] = graphics.NewTilemap(1, Layers[i])
 	}
 	Tilemaps[LayerGrid].Effects.Tint = DebugGridColor
-	Terrain = geometry.NewShapeGrid(64)
-	Terrain.AddShapes(Tilemaps[LayerMap].TilemapShapes()...)
 
 	SpawnUnit(CharacterMan, DutyUseStairs, TeamAlly)
 	SpawnUnit(CharacterWoman, DutyWalkStraight, TeamEnemy)
