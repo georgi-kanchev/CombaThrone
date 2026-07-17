@@ -30,7 +30,7 @@ func InitScene() {
 	SpawnUnit(CharacterMan, DutyUseStairs, TeamAlly)
 	SpawnUnit(CharacterWoman, DutyWalkStraight, TeamEnemy)
 	Units[0].X = -32*8 + 16
-	Units[1].X = 48
+	Units[1].X = 32*7 + 16
 }
 func UpdateScene() {
 	var _, bly = Background.PointFromEdge(0.5, 1)
