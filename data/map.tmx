@@ -21,6 +21,11 @@
     </object>
    </objectgroup>
   </tile>
+  <tile id="16">
+   <objectgroup draworder="index" id="2">
+    <object id="1" x="0" y="0" width="32" height="32"/>
+   </objectgroup>
+  </tile>
   <tile id="19">
    <objectgroup draworder="index" id="2">
     <object id="1" x="12" y="0" width="20" height="32"/>
@@ -34,7 +39,7 @@
  </tileset>
  <layer id="1" name="Map" width="18" height="10">
   <data encoding="base64" compression="zlib">
-   eJxjYBgFQwmwU8EMViAWo4I5ImjmMAExM5GYBc0cYvURwgBWvAC7
+   eJxjYBgFQwmwU8EMViAWo4I5ImjmMAExM5GYBc0cQSphAHwkAbc=
   </data>
  </layer>
  <layer id="3" name="Flags" width="18" height="10">

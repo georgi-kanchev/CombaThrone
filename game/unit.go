@@ -27,6 +27,7 @@ type Unit struct {
 	Anim      *motion.Animation[assets.ImageId]
 
 	Collisions, Center, Down, Left, Right []geometry.Shape
+	CollidableTileIds                     []uint16
 
 	VelocityX, VelocityY float32
 	IsGrounded           bool
@@ -35,7 +36,7 @@ type Unit struct {
 }
 
 const TeamAlly, TeamEnemy, TeamNeutral Team = 0, 1, 2
-const DutyWalkStraight, DutyUseStairs, DutyStayGarrison Duty = 0, 1, 2
+const DutyLow, DutyMiddle, DutyHigh, DutyGarrison Duty = 0, 1, 2, 3
 const Gravity = 256
 
 //=================================================================
@@ -49,22 +50,6 @@ func (u *Unit) Hitbox() geometry.Shape {
 	return hitbox
 }
 
-func (u *Unit) PlayIdle() {
-	u.Anim.Frames, u.Anim.Time, u.Anim.IsLooping, u.Anim.FPS = Characters[u.Character].Animations.Idle, 0, true, 3
-}
-func (u *Unit) PlayWalk() {
-	u.Anim.Frames, u.Anim.Time, u.Anim.IsLooping, u.Anim.FPS = Characters[u.Character].Animations.Walk, 0, true, 6
-}
-func (u *Unit) PlayAttack() {
-	u.Anim.Frames, u.Anim.Time, u.Anim.IsLooping, u.Anim.FPS = Characters[u.Character].Animations.Attack, 0, false, 7
-}
-func (u *Unit) PlayHurt() {
-	u.Anim.Frames, u.Anim.Time, u.Anim.IsLooping, u.Anim.FPS = Characters[u.Character].Animations.Hurt, 0, false, 4
-}
-func (u *Unit) PlayDie() {
-	u.Anim.Frames, u.Anim.Time, u.Anim.IsLooping, u.Anim.FPS = Characters[u.Character].Animations.Die, 0, false, 4
-}
-
 //=================================================================
 
 func SpawnUnit(character Character, duty Duty, team Team) {
@@ -73,6 +58,16 @@ func SpawnUnit(character Character, duty Duty, team Team) {
 	var unit = Unit{Object: graphics.NewSprite(0, 0, 1, 0), Character: character, Team: team, Duty: duty,
 		Brain: char.Brain, Stats: char.Stats, Anim: &anim, Collisions: []geometry.Shape{},
 		Center: []geometry.Shape{}, Down: []geometry.Shape{}, Left: []geometry.Shape{}, Right: []geometry.Shape{}}
+
+	switch duty {
+	case DutyLow:
+		unit.CollidableTileIds = []uint16{16, 19, 21}
+	case DutyMiddle:
+		unit.CollidableTileIds = []uint16{1, 2, 3, 16, 19, 21}
+	case DutyGarrison:
+		unit.CollidableTileIds = []uint16{4, 5, 6, 19, 20, 21}
+	}
+
 	Units = append(Units, &unit)
 }
 func UpdateUnits() {
@@ -106,14 +101,30 @@ func (u *Unit) applyCollisions() {
 	var hb = u.Hitbox()
 	var cellX, cellY = CellAtPoint(u.X, u.Y)
 	var diffX, diffY = u.X - hb.X, u.Y - hb.Y // cache hitbox and obj offset
+	var tileDown = Layers[LayerMap].TileAtCell(int(cellX), int(cellY)+1).Id
+	var tileLeft = Layers[LayerMap].TileAtCell(int(cellX)-1, int(cellY)).Id
+	var tileRight = Layers[LayerMap].TileAtCell(int(cellX)+1, int(cellY)).Id
+	var tileCenter = Layers[LayerMap].TileAtCell(int(cellX), int(cellY)).Id
 
-	u.IsGrounded = false
-	u.Down = Tilemaps[LayerMap].TilemapShapesAtCell(int(cellX), int(cellY+1))
-	u.Left = Tilemaps[LayerMap].TilemapShapesAtCell(int(cellX)-1, int(cellY))
-	u.Right = Tilemaps[LayerMap].TilemapShapesAtCell(int(cellX)+1, int(cellY))
-	u.Center = Tilemaps[LayerMap].TilemapShapesAtCell(int(cellX), int(cellY))
 	u.Collisions = collection.Clear(u.Collisions)
+	u.Down = collection.Clear(u.Down)
+	u.Left = collection.Clear(u.Left)
+	u.Right = collection.Clear(u.Right)
+	u.Center = collection.Clear(u.Center)
+	if collection.Contains(u.CollidableTileIds, tileDown) {
+		u.Down = Tilemaps[LayerMap].TilemapShapesAtCell(int(cellX), int(cellY)+1)
+	}
+	if collection.Contains(u.CollidableTileIds, tileLeft) {
+		u.Left = Tilemaps[LayerMap].TilemapShapesAtCell(int(cellX)-1, int(cellY))
+	}
+	if collection.Contains(u.CollidableTileIds, tileRight) {
+		u.Right = Tilemaps[LayerMap].TilemapShapesAtCell(int(cellX)+1, int(cellY))
+	}
+	if collection.Contains(u.CollidableTileIds, tileCenter) {
+		u.Center = Tilemaps[LayerMap].TilemapShapesAtCell(int(cellX), int(cellY))
+	}
 	u.Collisions = collection.Join(u.Collisions, u.Center, u.Down, u.Left, u.Right)
+	u.IsGrounded = false
 
 	for _, s := range u.Collisions {
 		if Debug {

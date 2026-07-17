@@ -27,8 +27,8 @@ func InitScene() {
 	}
 	Tilemaps[LayerGrid].Effects.Tint = DebugGridColor
 
-	SpawnUnit(CharacterMan, DutyUseStairs, TeamAlly)
-	SpawnUnit(CharacterWoman, DutyWalkStraight, TeamEnemy)
+	SpawnUnit(CharacterMan, DutyMiddle, TeamAlly)
+	SpawnUnit(CharacterWoman, DutyLow, TeamEnemy)
 	Units[0].X = -32*8 + 16
 	Units[1].X = 32*7 + 16
 }
