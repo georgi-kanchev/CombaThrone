@@ -9,7 +9,9 @@ import (
 	"pure-game-kit/packages/graphics"
 	"pure-game-kit/packages/motion"
 	"pure-game-kit/packages/utility/collection"
+	"pure-game-kit/packages/utility/color/palette"
 	"pure-game-kit/packages/utility/number"
+	"pure-game-kit/packages/utility/text"
 	"pure-game-kit/packages/utility/time"
 )
 
@@ -22,17 +24,19 @@ type Unit struct {
 	Stats     Stats
 	Character Character
 	Team      Team
-	Duty      Duty
 	Brain     func(self *Unit)
 	Anim      *motion.Animation[assets.ImageId]
 
-	Collisions, Center, Down, Left, Right []geometry.Shape
-	CollidableTileIds                     []uint16
+	SolidsAll, SolidsCenter, SolidsDown,
+	SolidsLeft, SolidsRight []geometry.Shape
+	CollidableTileIds []uint16
 
 	VelocityX, VelocityY float32
 	IsGrounded           bool
 
-	prevX, prevY float32
+	UnitFront, UnitBehind *Unit
+
+	prevX, prevY, currentSpeed float32
 }
 
 const TeamAlly, TeamEnemy, TeamNeutral Team = 0, 1, 2
@@ -52,14 +56,14 @@ func (u *Unit) Hitbox() geometry.Shape {
 
 //=================================================================
 
-func SpawnUnit(character Character, duty Duty, team Team) {
+func SpawnUnit(character Character, team Team) {
 	var char = Characters[character]
 	var anim = motion.NewAnimation(0, false, char.Animations.Idle...)
-	var unit = Unit{Object: graphics.NewSprite(0, 0, 1, 0), Character: character, Team: team, Duty: duty,
-		Brain: char.Brain, Stats: char.Stats, Anim: &anim, Collisions: []geometry.Shape{},
-		Center: []geometry.Shape{}, Down: []geometry.Shape{}, Left: []geometry.Shape{}, Right: []geometry.Shape{}}
+	var unit = Unit{Object: graphics.NewSprite(0, 0, 1, 0), Character: character, Team: team,
+		Brain: char.Brain, Stats: char.Stats, Anim: &anim, SolidsAll: []geometry.Shape{},
+		SolidsCenter: []geometry.Shape{}, SolidsDown: []geometry.Shape{}, SolidsLeft: []geometry.Shape{}, SolidsRight: []geometry.Shape{}}
 
-	switch duty {
+	switch unit.Stats.Duty {
 	case DutyLow:
 		unit.CollidableTileIds = []uint16{16, 19, 21}
 	case DutyMiddle:
@@ -76,6 +80,9 @@ func UpdateUnits() {
 		u.applyCollisions()
 		u.Brain(u)
 		u.applyAnimations()
+
+		var curHorSpeed = number.Absolute(u.X-u.prevX) / time.Delta()       // smooth out for FPS dips
+		u.currentSpeed = u.currentSpeed + (curHorSpeed-u.currentSpeed)*0.15 // 0.15 = how fast it catches up
 		u.prevX, u.prevY = u.X, u.Y
 	}
 }
@@ -90,8 +97,7 @@ func (u *Unit) applyPhysics() {
 	} else if u.IsGrounded && u.Team == TeamEnemy {
 		u.VelocityX = -float32(u.Stats.Speed)
 	}
-	u.X += u.VelocityX * time.Delta()
-	u.Y += u.VelocityY * time.Delta()
+	u.X, u.Y = u.X+u.VelocityX*time.Delta(), u.Y+u.VelocityY*time.Delta()
 
 	if Debug {
 		View.DrawShape(u.X, u.Y, u.Width, u.Height, 0, 0, DebugUnitColor, geometry.Area{})
@@ -99,42 +105,59 @@ func (u *Unit) applyPhysics() {
 }
 func (u *Unit) applyCollisions() {
 	var hb = u.Hitbox()
-	var cellX, cellY = CellAtPoint(u.X, u.Y)
 	var diffX, diffY = u.X - hb.X, u.Y - hb.Y // cache hitbox and obj offset
+	var cellX, cellY = CellAtPoint(u.X, u.Y)
 	var tileDown = Layers[LayerMap].TileAtCell(int(cellX), int(cellY)+1).Id
 	var tileLeft = Layers[LayerMap].TileAtCell(int(cellX)-1, int(cellY)).Id
 	var tileRight = Layers[LayerMap].TileAtCell(int(cellX)+1, int(cellY)).Id
 	var tileCenter = Layers[LayerMap].TileAtCell(int(cellX), int(cellY)).Id
 
-	u.Collisions = collection.Clear(u.Collisions)
-	u.Down = collection.Clear(u.Down)
-	u.Left = collection.Clear(u.Left)
-	u.Right = collection.Clear(u.Right)
-	u.Center = collection.Clear(u.Center)
+	u.SolidsAll = collection.Clear(u.SolidsAll)
+	u.SolidsDown = collection.Clear(u.SolidsDown)
+	u.SolidsLeft = collection.Clear(u.SolidsLeft)
+	u.SolidsRight = collection.Clear(u.SolidsRight)
+	u.SolidsCenter = collection.Clear(u.SolidsCenter)
 	if collection.Contains(u.CollidableTileIds, tileDown) {
-		u.Down = Tilemaps[LayerMap].TilemapShapesAtCell(int(cellX), int(cellY)+1)
+		u.SolidsDown = Tilemaps[LayerMap].TilemapShapesAtCell(int(cellX), int(cellY)+1)
 	}
 	if collection.Contains(u.CollidableTileIds, tileLeft) {
-		u.Left = Tilemaps[LayerMap].TilemapShapesAtCell(int(cellX)-1, int(cellY))
+		u.SolidsLeft = Tilemaps[LayerMap].TilemapShapesAtCell(int(cellX)-1, int(cellY))
 	}
 	if collection.Contains(u.CollidableTileIds, tileRight) {
-		u.Right = Tilemaps[LayerMap].TilemapShapesAtCell(int(cellX)+1, int(cellY))
+		u.SolidsRight = Tilemaps[LayerMap].TilemapShapesAtCell(int(cellX)+1, int(cellY))
 	}
 	if collection.Contains(u.CollidableTileIds, tileCenter) {
-		u.Center = Tilemaps[LayerMap].TilemapShapesAtCell(int(cellX), int(cellY))
+		u.SolidsCenter = Tilemaps[LayerMap].TilemapShapesAtCell(int(cellX), int(cellY))
 	}
-	u.Collisions = collection.Join(u.Collisions, u.Center, u.Down, u.Left, u.Right)
+	u.SolidsAll = collection.Join(u.SolidsAll, u.SolidsCenter, u.SolidsDown, u.SolidsLeft, u.SolidsRight)
 	u.IsGrounded = false
 
-	for _, s := range u.Collisions {
+	for _, s := range u.SolidsAll {
 		if Debug {
 			View.DrawShape(s.X, s.Y, s.Width, s.Height, s.Angle, s.Roundness, DebugCollisionColor, geometry.Area{})
 		}
 		if hb.Overlaps(s) {
-			hb = hb.Collide(s)                // move hitbox
-			u.X, u.Y = hb.X+diffX, hb.Y+diffY // move object according to collision + original hitbox offset
+			hb = hb.Collide(s)
+			u.X, u.Y = hb.X+diffX, hb.Y+diffY
 			u.VelocityY = 0
 			u.IsGrounded = true
+		}
+	}
+
+	u.UnitBehind, u.UnitFront = nil, nil
+	for _, other := range Units {
+		if other == u {
+			continue
+		}
+		var ohb = other.Hitbox()
+		if hb.Overlaps(ohb) {
+			hb = hb.Collide(ohb)
+			u.X, u.Y = hb.X+diffX, hb.Y+diffY
+			if (u.Team == TeamAlly && u.X < other.X) || (u.Team == TeamEnemy && u.X > other.X) {
+				u.UnitFront = other
+			} else if (u.Team == TeamAlly && u.X > other.X) || (u.Team == TeamEnemy && u.X < other.X) {
+				u.UnitBehind = other
+			}
 		}
 	}
 	if Debug {
@@ -143,12 +166,12 @@ func (u *Unit) applyCollisions() {
 }
 func (u *Unit) applyAnimations() {
 	if u.IsGrounded {
-		if number.IsWithin(u.X-u.prevX, 0, 0.1) {
+		if number.IsWithin(u.X-u.prevX, 0, 0.01) {
 			u.Anim.Frames = Characters[u.Character].Animations.Idle
 			u.Anim.IsLooping, u.Anim.FPS = true, 3
 		} else {
 			u.Anim.Frames = Characters[u.Character].Animations.Walk
-			u.Anim.IsLooping, u.Anim.FPS = true, number.Absolute(u.X-u.prevX)*15
+			u.Anim.IsLooping, u.Anim.FPS = true, u.currentSpeed*0.25
 		}
 	}
 
@@ -160,4 +183,10 @@ func (u *Unit) applyAnimations() {
 		u.Width = -w
 	}
 	View.DrawObject(&u.Object)
+	u.Width = w
+
+	if Debug && u.Object.ContainsPoint(View.MousePosition()) {
+		var txt = text.New("Speed: ", number.Round(u.currentSpeed, 2))
+		View.DrawText(txt, u.X-u.Width/2, u.Y-100, 20, 0, palette.White, geometry.Area{})
+	}
 }

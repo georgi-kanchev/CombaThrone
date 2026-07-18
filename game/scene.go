@@ -6,6 +6,7 @@ import (
 	"pure-game-kit/packages/utility/color"
 )
 
+const TileSize = 32
 const LayerMap, LayerDoors, LayerFlags, LayerGrid = 0, 1, 2, 3
 
 var View graphics.View
@@ -27,8 +28,8 @@ func InitScene() {
 	}
 	Tilemaps[LayerGrid].Effects.Tint = DebugGridColor
 
-	SpawnUnit(CharacterMan, DutyMiddle, TeamAlly)
-	SpawnUnit(CharacterWoman, DutyLow, TeamEnemy)
+	SpawnUnit(CharacterMan, TeamAlly)
+	SpawnUnit(CharacterWoman, TeamEnemy)
 	Units[0].X = -32*8 + 16
 	Units[1].X = 32*7 + 16
 }
