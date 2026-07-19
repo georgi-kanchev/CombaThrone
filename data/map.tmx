@@ -1,60 +1,154 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="18" height="10" tilewidth="32" tileheight="32" infinite="0" nextlayerid="7" nextobjectid="1">
- <tileset firstgid="1" name="tileset" tilewidth="32" tileheight="32" tilecount="30" columns="15">
-  <image source="tileset.png" width="480" height="64"/>
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="18" height="10" tilewidth="32" tileheight="32" infinite="0" nextlayerid="44" nextobjectid="1">
+ <tileset firstgid="1" name="tileset" tilewidth="32" tileheight="32" tilecount="225" columns="15">
+  <image source="tileset.png" width="480" height="480"/>
   <tile id="1">
    <objectgroup draworder="index" id="2">
-    <object id="7" x="32" y="-1" width="4.24264" height="46.669" rotation="45">
+    <object id="1" x="32" y="-1" width="5" height="48.0833" rotation="45">
      <capsule/>
     </object>
    </objectgroup>
   </tile>
   <tile id="2">
    <objectgroup draworder="index" id="2">
-    <object id="1" x="0" y="0" width="32" height="15"/>
+    <object id="1" x="0" y="0" width="32" height="7"/>
    </objectgroup>
   </tile>
   <tile id="3">
    <objectgroup draworder="index" id="2">
-    <object id="1" x="-3" y="2" width="4.24264" height="45.9619" rotation="315">
-     <capsule/>
-    </object>
+    <object id="1" x="0" y="30" width="32" height="2"/>
+   </objectgroup>
+  </tile>
+  <tile id="4">
+   <objectgroup draworder="index" id="2">
+    <object id="1" x="0" y="30" width="32" height="2"/>
+   </objectgroup>
+  </tile>
+  <tile id="5">
+   <objectgroup draworder="index" id="2">
+    <object id="1" x="0" y="30" width="32" height="2"/>
    </objectgroup>
   </tile>
   <tile id="16">
    <objectgroup draworder="index" id="2">
-    <object id="1" x="0" y="0" width="32" height="32"/>
+    <object id="2" x="32" y="-1" width="5" height="48.0833" rotation="45">
+     <capsule/>
+    </object>
+   </objectgroup>
+  </tile>
+  <tile id="17">
+   <objectgroup draworder="index" id="2">
+    <object id="1" x="0" y="0" width="32" height="7"/>
+   </objectgroup>
+  </tile>
+  <tile id="18">
+   <objectgroup draworder="index" id="2">
+    <object id="1" x="0" y="9" width="2" height="23"/>
+    <object id="2" x="2" y="30" width="30" height="2"/>
    </objectgroup>
   </tile>
   <tile id="19">
    <objectgroup draworder="index" id="2">
-    <object id="1" x="12" y="0" width="20" height="32"/>
+    <object id="1" x="0" y="30" width="32" height="2"/>
    </objectgroup>
   </tile>
-  <tile id="21">
+  <tile id="20">
    <objectgroup draworder="index" id="2">
-    <object id="1" x="0" y="0" width="20" height="32"/>
+    <object id="1" x="30" y="9" width="2" height="23"/>
+    <object id="2" x="0" y="30" width="30" height="2"/>
+   </objectgroup>
+  </tile>
+  <tile id="32">
+   <objectgroup draworder="index" id="2">
+    <object id="1" x="0" y="0" width="32" height="32"/>
    </objectgroup>
   </tile>
  </tileset>
- <layer id="1" name="Map" width="18" height="10">
+ <group id="8" name="Maps">
+  <layer id="1" name="1" width="18" height="10">
+   <data encoding="base64" compression="zlib">
+   eJxjYBgFowABmICYGQ0DxRqI1S8IxEIEsCAW8xSphAEz5wQV
+  </data>
+  </layer>
+ </group>
+ <layer id="17" name="Barrack" width="18" height="10" visible="0">
   <data encoding="base64" compression="zlib">
-   eJxjYBgFQwmwU8EMViAWo4I5ImjmMAExM5GYBc0cQSphAHwkAbc=
+   eJxjYBgFQwkYU8kcIyB2ooI5jlQwg5oAAMGYAOk=
   </data>
  </layer>
- <layer id="3" name="Flags" width="18" height="10">
-  <data encoding="base64" compression="zlib">
-   eJxjYBgFQwnwUcEMfiCWpYI5ckAsRgVzqAkAVaQAbw==
+ <group id="21" name="Fort">
+  <layer id="7" name="Garrisons1" width="18" height="10" visible="0">
+   <data encoding="base64" compression="zlib">
+   eJxjYBgFQwmIUskclUFmDrUAAE0QAF4=
   </data>
- </layer>
- <layer id="5" name="Doors" width="18" height="10">
-  <data encoding="base64" compression="zlib">
-   eJxjYBgFIxFwUskMCSqYQw0zYAAAJDwAQw==
+  </layer>
+  <layer id="20" name="Garrisons2" width="18" height="10" visible="0">
+   <data encoding="base64" compression="zlib">
+   eJxjYBgF9ACiVDKHjUpmKQOxyiAyh1oAAKEcAL8=
   </data>
- </layer>
- <layer id="6" name="Grid" width="18" height="10">
+  </layer>
+  <layer id="23" name="Garrisons3" width="18" height="10" visible="0">
+   <data encoding="base64" compression="zlib">
+   eJxjYBgF+IAolcxho5JZrFQySxmKVQaJOdQCAADrASU=
+  </data>
+  </layer>
+ </group>
+ <group id="40" name="Fortress">
+  <layer id="41" name="Garrisons1" width="18" height="10" visible="0">
+   <data encoding="base64" compression="zlib">
+   eJxjYBgF9ACiVDJHZZiaQy0AAHt4AII=
+  </data>
+  </layer>
+  <layer id="42" name="Garrisons2" width="18" height="10" visible="0">
+   <data encoding="base64" compression="zlib">
+   eJxjYBgF+IAolcxho5JZykCsMgzNoRYAAP3sAQY=
+  </data>
+  </layer>
+  <layer id="43" name="Garrisons3" width="18" height="10" visible="0">
+   <data encoding="base64" compression="zlib">
+   eJxjYBieQJRK5rBRySxWKpmlDMUqw8wcagEAjP8Bjw==
+  </data>
+  </layer>
+ </group>
+ <group id="11" name="Gates">
+  <layer id="5" name="Hole" width="18" height="10" visible="0">
+   <data encoding="base64" compression="zlib">
+   eJxjYBgFIxGoUskcEyqZQy0AAD9IAFo=
+  </data>
+  </layer>
+  <layer id="12" name="Door" width="18" height="10" visible="0">
+   <data encoding="base64" compression="zlib">
+   eJxjYBgFIxFwUMkccSqZQy0AABaAACA=
+  </data>
+  </layer>
+  <group id="38" name="Iron Gate" visible="0">
+   <layer id="36" name="Back" width="18" height="10">
+    <data encoding="base64" compression="zlib">
+   eJxjYBgFIxGYDDJzqAUAS/AAaQ==
+  </data>
+   </layer>
+   <layer id="13" name="Front" width="18" height="10">
+    <data encoding="base64" compression="zlib">
+   eJxjYBgFIxGoUckcFyqZQy0AAEkgAGs=
+  </data>
+   </layer>
+  </group>
+  <group id="37" name="Steel Gate" visible="0">
+   <layer id="39" name="Back" width="18" height="10">
+    <data encoding="base64" compression="zlib">
+   eJxjYBgFQwmYDFNzqAUAhnAAnQ==
+  </data>
+   </layer>
+   <layer id="14" name="Front" width="18" height="10">
+    <data encoding="base64" compression="zlib">
+   eJxjYBgFQwmoUckcUyqZ40Ilc6gFAICIAKA=
+  </data>
+   </layer>
+  </group>
+ </group>
+ <layer id="6" name="Grid" width="18" height="10" visible="0">
   <data encoding="base64" compression="zlib">
-   eJxjYBgFQwkIjGK8GACT7gSB
+   eJwTYGBgEBjFo3iYYADsMQtB
   </data>
  </layer>
 </map>

@@ -1,0 +1,17 @@
+upgrades:
+- building:
+    - none     (default)
+    - barrack  (health, unlocks gates)
+    - fort     (+health, unlocks garrisons)
+    - fortress (++health, unlocks steel gate, requires iron gate)
+- gate:
+    - none  (default)
+    - wood  (defence)
+    - iron  (+defence, unlocks tall characters, unlocks fort)
+    - steel (++defence, unlocks giant characters)
+- garrisons:
+    - none  (default)
+    - one   (low 1, mid 0, high 0)
+    - two   (low 2, mid 1, high 0)
+    - three (low 3, mid 2, high 1)
+

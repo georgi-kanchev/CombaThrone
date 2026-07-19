@@ -29,17 +29,12 @@ type CharacterData struct {
 
 const CharacterMan, CharacterWoman Character = 0, 1
 
-var Characters map[Character]CharacterData = make(map[Character]CharacterData)
+var Characters map[Character]CharacterData = map[Character]CharacterData{
+	CharacterMan: CharacterDataMan(), CharacterWoman: CharacterDataWoman(),
+}
 
 func InitCharacters() {
 	var animations = assets.LoadAnimations(assets.LoadImage("data/units.png"), "data/animations.xml")
-
-	Characters[CharacterMan] = CharacterData{AnimationPrefix: "man", Brain: BrainMan,
-		Stats:  Stats{Name: "Man", Health: 10, Damage: 2, Speed: 35, Duty: DutyMiddle},
-		Hitbox: geometry.NewRoundedRectangle(0, 7, 18, 30, 0, 1)}
-	Characters[CharacterWoman] = CharacterData{AnimationPrefix: "woman", Brain: BrainWoman,
-		Stats:  Stats{Name: "Woman", Health: 5, Damage: 1, Speed: 20, Duty: DutyLow},
-		Hitbox: geometry.NewRoundedRectangle(0, 7, 18, 30, 0, 1)}
 
 	for i, c := range Characters {
 		c.Animations.Idle = animations.Frames(c.AnimationPrefix + "-idle")

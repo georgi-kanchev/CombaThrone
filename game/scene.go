@@ -7,7 +7,7 @@ import (
 )
 
 const TileSize = 32
-const LayerMap, LayerDoors, LayerFlags, LayerGrid = 0, 1, 2, 3
+const LayerBelow, LayerMap, LayerAbove, LayerGates, LayerGrid = 0, 1, 2, 3, 4
 
 var View graphics.View
 var skyColor = color.TagRGBA("rgb(90, 135, 218)")
