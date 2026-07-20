@@ -12,6 +12,7 @@ var DebugUnitColor = color.TagRGBA("rgba(0, 255, 0, 0.5)")
 var DebugHitboxColor = color.TagRGBA("rgba(255, 0, 0, 0.5)")
 var DebugGridColor = color.TagRGBA("rgba(0, 0, 0, 0.2)")
 var DebugCollisionColor = color.TagRGBA("rgba(0, 255, 255, 0.5)")
+var DebugAttackColor = color.TagRGBA("rgb(255, 0, 0)")
 
 func UpdateDebug() {
 	View.DrawDebugInfo(Debug)
