@@ -11,10 +11,8 @@ const TileSize, MapCount = 32, 4
 var View graphics.View
 var Background graphics.Object
 
-var LayerGrid assets.TileLayerId
-var LayerMaps []assets.TileLayerId
+var LayerGrid, LayerMap assets.TileLayerId
 var TilesMap graphics.Object
-var CurrentMap = 3
 
 func InitScene() {
 	View = graphics.NewView(5.68)
@@ -23,8 +21,8 @@ func InitScene() {
 
 	var layers = assets.LoadTileLayersFromTiled("data/map.tmx")
 	LayerGrid = layers[len(layers)-1]
-	LayerMaps = layers[0:MapCount]
-	TilesMap = graphics.NewTilemap(1, LayerMaps[CurrentMap])
+	LayerMap = layers[0]
+	TilesMap = graphics.NewTilemap(1, LayerMap)
 
 	SpawnUnit(CharacterMan, TeamAlly)
 	SpawnUnit(CharacterWoman, TeamEnemy)

@@ -129,10 +129,10 @@ func (u *Unit) applyCollisions() {
 	var hb = u.Hitbox()
 	var diffX, diffY = u.X - hb.X, u.Y - hb.Y // cache hitbox and obj offset
 	var cellX, cellY = CellAtPoint(u.X, u.Y)
-	var tileDown = LayerMaps[CurrentMap].TileAtCell(int(cellX), int(cellY)+1).Id
-	var tileLeft = LayerMaps[CurrentMap].TileAtCell(int(cellX)-1, int(cellY)).Id
-	var tileRight = LayerMaps[CurrentMap].TileAtCell(int(cellX)+1, int(cellY)).Id
-	var tileCenter = LayerMaps[CurrentMap].TileAtCell(int(cellX), int(cellY)).Id
+	var tileDown = LayerMap.TileAtCell(int(cellX), int(cellY)+1).Id
+	var tileLeft = LayerMap.TileAtCell(int(cellX)-1, int(cellY)).Id
+	var tileRight = LayerMap.TileAtCell(int(cellX)+1, int(cellY)).Id
+	var tileCenter = LayerMap.TileAtCell(int(cellX), int(cellY)).Id
 
 	u.SolidsAll = collection.Clear(u.SolidsAll)
 	u.SolidsDown = collection.Clear(u.SolidsDown)
