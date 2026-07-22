@@ -129,10 +129,10 @@ func (u *Unit) applyCollisions() {
 	var hb = u.Hitbox()
 	var diffX, diffY = u.X - hb.X, u.Y - hb.Y // cache hitbox and obj offset
 	var cellX, cellY = CellAtPoint(u.X, u.Y)
-	var tileDown = LayerMap.TileAtCell(int(cellX), int(cellY)+1).Id
-	var tileLeft = LayerMap.TileAtCell(int(cellX)-1, int(cellY)).Id
-	var tileRight = LayerMap.TileAtCell(int(cellX)+1, int(cellY)).Id
-	var tileCenter = LayerMap.TileAtCell(int(cellX), int(cellY)).Id
+	var tileDown = MapLayer.TileAtCell(int(cellX), int(cellY)+1).Id
+	var tileLeft = MapLayer.TileAtCell(int(cellX)-1, int(cellY)).Id
+	var tileRight = MapLayer.TileAtCell(int(cellX)+1, int(cellY)).Id
+	var tileCenter = MapLayer.TileAtCell(int(cellX), int(cellY)).Id
 
 	u.SolidsAll = collection.Clear(u.SolidsAll)
 	u.SolidsDown = collection.Clear(u.SolidsDown)
@@ -140,16 +140,16 @@ func (u *Unit) applyCollisions() {
 	u.SolidsRight = collection.Clear(u.SolidsRight)
 	u.SolidsCenter = collection.Clear(u.SolidsCenter)
 	if collection.Contains(u.CollidableTileIds, tileDown) {
-		u.SolidsDown = TilesMap.TilemapShapesAtCell(int(cellX), int(cellY)+1)
+		u.SolidsDown = Map.TilemapShapesAtCell(int(cellX), int(cellY)+1)
 	}
 	if collection.Contains(u.CollidableTileIds, tileLeft) {
-		u.SolidsLeft = TilesMap.TilemapShapesAtCell(int(cellX)-1, int(cellY))
+		u.SolidsLeft = Map.TilemapShapesAtCell(int(cellX)-1, int(cellY))
 	}
 	if collection.Contains(u.CollidableTileIds, tileRight) {
-		u.SolidsRight = TilesMap.TilemapShapesAtCell(int(cellX)+1, int(cellY))
+		u.SolidsRight = Map.TilemapShapesAtCell(int(cellX)+1, int(cellY))
 	}
 	if collection.Contains(u.CollidableTileIds, tileCenter) {
-		u.SolidsCenter = TilesMap.TilemapShapesAtCell(int(cellX), int(cellY))
+		u.SolidsCenter = Map.TilemapShapesAtCell(int(cellX), int(cellY))
 	}
 	u.SolidsAll = collection.Join(u.SolidsAll, u.SolidsCenter, u.SolidsDown, u.SolidsLeft, u.SolidsRight)
 	u.IsGrounded = false
