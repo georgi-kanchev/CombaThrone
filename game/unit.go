@@ -27,9 +27,7 @@ type Unit struct {
 	Brain     func(self *Unit)
 	Anim      *motion.Animation[assets.ImageId]
 
-	SolidsAll, SolidsCenter, SolidsDown,
-	SolidsLeft, SolidsRight []geometry.Shape
-	CollidableTileIds []uint16
+	CollidableShapes []geometry.Shape
 
 	VelocityX, VelocityY float32
 	IsGrounded           bool
@@ -40,7 +38,7 @@ type Unit struct {
 }
 
 const TeamAlly, TeamEnemy, TeamNeutral Team = 0, 1, 2
-const DutyLow, DutyMiddle, DutyHigh, DutyGarrison Duty = 0, 1, 2, 3
+const DutyLower, DutyMiddle, DutyUpper, DutyGarrison Duty = 0, 1, 2, 3
 const Gravity = 256
 
 //=================================================================
@@ -70,32 +68,18 @@ func SpawnUnit(character Character, team Team) {
 	var char = Characters[character]
 	var anim = motion.NewAnimation(0, false, char.Animations.Idle...)
 	var unit = Unit{Object: graphics.NewSprite(0, 0, 1, 0), Character: character, Team: team,
-		Brain: char.Brain, Stats: char.Stats, Anim: &anim, SolidsAll: []geometry.Shape{},
-		SolidsCenter: []geometry.Shape{}, SolidsDown: []geometry.Shape{}, SolidsLeft: []geometry.Shape{}, SolidsRight: []geometry.Shape{}}
-
-	switch unit.Stats.Duty {
-	case DutyLow:
-		unit.CollidableTileIds = []uint16{32}
-	case DutyMiddle:
-		unit.CollidableTileIds = []uint16{32, 16, 17, 18}
-	case DutyHigh:
-		unit.CollidableTileIds = []uint16{32, 16, 17, 18, 1, 2, 3}
-	}
+		Brain: char.Brain, Stats: char.Stats, Anim: &anim, CollidableShapes: []geometry.Shape{}}
 
 	Units = append(Units, &unit)
 }
 func UpdateUnits() {
-	if Debug {
-		for _, u := range Units {
-			View.DrawShape(u.X, u.Y, u.Width, u.Height, 0, 0, DebugUnitColor, geometry.Area{})
-		}
-	}
 	for _, u := range Units {
 		if Debug {
 			var hb = u.Hitbox()
 			View.DrawShape(hb.X, hb.Y, hb.Width, hb.Height, 0, hb.Roundness, DebugHitboxColor, geometry.Area{})
 		}
 
+		u.updateLaneData()
 		u.applyPhysics()
 		u.applyCollisions()
 		u.Brain(u)
@@ -105,16 +89,24 @@ func UpdateUnits() {
 		u.currentSpeed = u.currentSpeed + (curHorSpeed-u.currentSpeed)*0.15 // 0.15 = how fast it catches up
 		u.prevX, u.prevY = u.X, u.Y
 	}
-	if Debug {
-		for _, u := range Units {
-			var x, y = u.AttackPoint()
-			View.DrawShape(x, y, 5, 5, 0, 1, DebugAttackColor, geometry.Area{})
-		}
-	}
 }
 
 //=================================================================
 
+func (u *Unit) updateLaneData() {
+	u.CollidableShapes = collection.Clear(u.CollidableShapes)
+	switch u.Stats.Duty {
+	case DutyLower:
+		u.Mask = geometry.NewArea(0, 0, 560, 1000)
+		u.CollidableShapes = LaneLower[:]
+	case DutyMiddle:
+		u.Mask = geometry.NewArea(0, 0, 500, 1000)
+		u.CollidableShapes = LaneMiddle[:]
+	case DutyUpper:
+		u.Mask = geometry.NewArea(0, 0, 432, 1000)
+		u.CollidableShapes = LaneUpper[:]
+	}
+}
 func (u *Unit) applyPhysics() {
 	u.VelocityY += Gravity * time.Delta()
 
@@ -128,76 +120,41 @@ func (u *Unit) applyPhysics() {
 func (u *Unit) applyCollisions() {
 	var hb = u.Hitbox()
 	var diffX, diffY = u.X - hb.X, u.Y - hb.Y // cache hitbox and obj offset
-	var cellX, cellY = CellAtPoint(u.X, u.Y)
-	var tileDown = MapLayer.TileAtCell(int(cellX), int(cellY)+1).Id
-	var tileLeft = MapLayer.TileAtCell(int(cellX)-1, int(cellY)).Id
-	var tileRight = MapLayer.TileAtCell(int(cellX)+1, int(cellY)).Id
-	var tileCenter = MapLayer.TileAtCell(int(cellX), int(cellY)).Id
 
-	u.SolidsAll = collection.Clear(u.SolidsAll)
-	u.SolidsDown = collection.Clear(u.SolidsDown)
-	u.SolidsLeft = collection.Clear(u.SolidsLeft)
-	u.SolidsRight = collection.Clear(u.SolidsRight)
-	u.SolidsCenter = collection.Clear(u.SolidsCenter)
-	if collection.Contains(u.CollidableTileIds, tileDown) {
-		u.SolidsDown = Map.TilemapShapesAtCell(int(cellX), int(cellY)+1)
-	}
-	if collection.Contains(u.CollidableTileIds, tileLeft) {
-		u.SolidsLeft = Map.TilemapShapesAtCell(int(cellX)-1, int(cellY))
-	}
-	if collection.Contains(u.CollidableTileIds, tileRight) {
-		u.SolidsRight = Map.TilemapShapesAtCell(int(cellX)+1, int(cellY))
-	}
-	if collection.Contains(u.CollidableTileIds, tileCenter) {
-		u.SolidsCenter = Map.TilemapShapesAtCell(int(cellX), int(cellY))
-	}
-	u.SolidsAll = collection.Join(u.SolidsAll, u.SolidsCenter, u.SolidsDown, u.SolidsLeft, u.SolidsRight)
 	u.IsGrounded = false
-
-	for _, s := range u.SolidsAll {
-		if Debug {
-			View.DrawShape(s.X, s.Y, s.Width, s.Height, s.Angle, s.Roundness, DebugCollisionColor, geometry.Area{})
-		}
-		if hb.Overlaps(s) {
-			hb = hb.Collide(s)
-			u.X, u.Y = hb.X+diffX, hb.Y+diffY
-			u.VelocityY = 0
-			u.IsGrounded = true
+	if u.VelocityY > 0 { // collide with ground only when falling down
+		for _, s := range u.CollidableShapes {
+			if hb.Overlaps(s) {
+				hb = hb.Collide(s)
+				u.X, u.Y = hb.X+diffX, hb.Y+diffY
+				u.VelocityY = 0
+				u.IsGrounded = true
+			}
 		}
 	}
 
 	u.UnitBehind, u.UnitFront = nil, nil
 	for _, other := range Units {
-		if other == u {
+		var ohb = other.Hitbox()
+		if other == u || u.Stats.Duty != other.Stats.Duty || !hb.Overlaps(ohb) {
 			continue
 		}
-		var ohb = other.Hitbox()
-		if u.Team == TeamAlly && hb.X+hb.Width/2-0.5 > ohb.X-ohb.Width/2+0.5 {
-			continue // walking past the proper X positions results in no collision at all
-		} else if u.Team == TeamEnemy && hb.X-hb.Width/2+0.5 < ohb.X+ohb.Width/2-0.5 {
-			continue // walking past the proper X positions results in no collision at all
-		}
-		var shouldFightY = number.IsWithin(hb.Y, ohb.Y, max(hb.Height/2, ohb.Height/2))
-		if shouldFightY && hb.Overlaps(ohb) { // no collision outside of Y range to fight
-			hb = hb.Collide(ohb)
-			u.X, u.Y = hb.X+diffX, hb.Y+diffY
-			if (u.Team == TeamAlly && u.X < other.X) || (u.Team == TeamEnemy && u.X > other.X) {
-				u.UnitFront = other
-			} else if (u.Team == TeamAlly && u.X > other.X) || (u.Team == TeamEnemy && u.X < other.X) {
-				u.UnitBehind = other
-			}
+		hb = hb.Collide(ohb)
+		u.X, u.Y = hb.X+diffX, hb.Y+diffY
+		if (u.Team == TeamAlly && u.X < other.X) || (u.Team == TeamEnemy && u.X > other.X) {
+			u.UnitFront = other
+		} else if (u.Team == TeamAlly && u.X > other.X) || (u.Team == TeamEnemy && u.X < other.X) {
+			u.UnitBehind = other
 		}
 	}
 }
 func (u *Unit) applyAnimations() {
-	if u.IsGrounded {
-		if number.IsWithin(u.X-u.prevX, 0, time.Delta()) {
-			u.Anim.Frames = Characters[u.Character].Animations.Idle
-			u.Anim.IsLooping, u.Anim.FPS = true, 3
-		} else {
-			u.Anim.Frames = Characters[u.Character].Animations.Walk
-			u.Anim.IsLooping, u.Anim.FPS = true, u.currentSpeed*0.25
-		}
+	if !u.IsGrounded || u.X == u.prevX {
+		u.Anim.Frames = Characters[u.Character].Animations.Idle
+		u.Anim.IsLooping, u.Anim.FPS = true, 3
+	} else if u.IsGrounded && u.X != u.prevX {
+		u.Anim.Frames = Characters[u.Character].Animations.Walk
+		u.Anim.IsLooping, u.Anim.FPS = true, u.currentSpeed*0.25
 	}
 
 	var frame = u.Anim.Frame()

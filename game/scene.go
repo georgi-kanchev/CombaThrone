@@ -2,6 +2,7 @@ package game
 
 import (
 	"pure-game-kit/packages/assets"
+	"pure-game-kit/packages/geometry"
 	"pure-game-kit/packages/graphics"
 	"pure-game-kit/packages/utility/color"
 )
@@ -11,9 +12,11 @@ const TileSize, MapCount = 32, 4
 var View graphics.View
 var Background graphics.Object
 
-var GridLayer, MapLayer assets.TileLayerId
-var Map, AllyBase, EnemyBase graphics.Object
+var MapLayer assets.TileLayerId
+var Map, Grid, AllyBase, EnemyBase, Flags graphics.Object
 var AllyGates, EnemyGates [2]graphics.Object
+
+var LaneUpper, LaneMiddle, LaneLower [2]geometry.Shape
 
 func InitScene() {
 	View = graphics.NewView(5.68)
@@ -21,15 +24,19 @@ func InitScene() {
 	Background = graphics.NewSprite(0, 0, 1, assets.LoadImage("data/bgr-field.png"))
 
 	var layers = assets.LoadTileLayersFromTiled("data/map.tmx")
-	GridLayer = layers[len(layers)-1]
+	var upper = graphics.NewTilemap(1, layers[20])
+	var middle = graphics.NewTilemap(1, layers[19])
+	var lower = graphics.NewTilemap(1, layers[18])
+	LaneUpper[0] = upper.TilemapShapes()[0]
+	LaneMiddle[0] = middle.TilemapShapes()[0]
+	LaneLower[0] = lower.TilemapShapes()[0]
 	MapLayer = layers[0]
-	Map = graphics.NewTilemap(1, MapLayer)
+	Grid, Map = graphics.NewTilemap(1, layers[17]), graphics.NewTilemap(1, MapLayer)
+	Flags = graphics.NewTilemap(1, layers[16])
 	AllyBase = graphics.NewTilemap(1, layers[1])
-	AllyGates[0] = graphics.NewTilemap(1, layers[11])
-	AllyGates[1] = graphics.NewTilemap(1, layers[11])
+	AllyGates[0], AllyGates[1] = graphics.NewTilemap(1, layers[11]), graphics.NewTilemap(1, layers[11])
 	EnemyBase = graphics.NewTilemap(1, layers[1])
-	EnemyGates[0] = graphics.NewTilemap(1, layers[10])
-	EnemyGates[1] = graphics.NewTilemap(1, layers[10])
+	EnemyGates[0], EnemyGates[1] = graphics.NewTilemap(1, layers[10]), graphics.NewTilemap(1, layers[10])
 	EnemyBase.Width *= -1
 	EnemyGates[0].Width *= -1
 	EnemyGates[1].Width *= -1
@@ -55,16 +62,17 @@ func UpdateScene() {
 	View.DrawObject(&EnemyBase)
 	View.DrawObject(&EnemyGates[0])
 	View.DrawObject(&EnemyGates[1])
+	View.DrawObject(&Flags)
 }
 
 func PointAtCell(cellX, cellY float32) (x, y float32) {
-	var tw, th = GridLayer.TileSize()
-	var cols, rows = GridLayer.Size()
+	var tw, th = MapLayer.TileSize()
+	var cols, rows = MapLayer.Size()
 	return (cellX-float32(cols)/2)*tw + (tw / 2), (cellY-float32(rows)/2)*th + (th / 2)
 }
 func CellAtPoint(x, y float32) (cellX, cellY float32) {
-	var tw, th = GridLayer.TileSize()
-	var cols, rows = GridLayer.Size()
+	var tw, th = MapLayer.TileSize()
+	var cols, rows = MapLayer.Size()
 	return x/tw + float32(cols)/2, y/th + float32(rows)/2
 }
 func TileAtCell(cellX, cellY int, layer assets.TileLayerId) assets.Tile {
