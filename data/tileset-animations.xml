@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<data grid="32">
+  <frames>
+    <frame x="96" y="64" w="32" h="96"/>
+    <frame x="128" y="64" w="32" h="96"/>
+    <frame x="160" y="64" w="32" h="96"/>
+    <frame x="192" y="64" w="32" h="96"/>
+    <frame x="224" y="64" w="32" h="96"/>
+    <frame x="256" y="64" w="32" h="96"/>
+    <frame x="96" y="160" w="32" h="96"/>
+    <frame x="128" y="160" w="32" h="96"/>
+    <frame x="160" y="160" w="32" h="96"/>
+    <frame x="192" y="160" w="32" h="96"/>
+    <frame x="224" y="160" w="32" h="96"/>
+    <frame x="256" y="160" w="32" h="96"/>
+  </frames>
+  <animations>
+    <animation name="Hole" frames="0"/>
+    <animation name="Door" frames="1 2 3 4 5"/>
+    <animation name="Gate" frames="6 7 8 9 10 11"/>
+  </animations>
+</data>

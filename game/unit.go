@@ -8,26 +8,20 @@ import (
 	"pure-game-kit/packages/geometry"
 	"pure-game-kit/packages/graphics"
 	"pure-game-kit/packages/motion"
-	"pure-game-kit/packages/utility/collection"
 	"pure-game-kit/packages/utility/color/palette"
 	"pure-game-kit/packages/utility/number"
 	"pure-game-kit/packages/utility/text"
 	"pure-game-kit/packages/utility/time"
 )
 
-type Team uint8
-type Duty uint8
-type Character uint8
-
 type Unit struct {
 	graphics.Object
 	Stats     Stats
 	Character Character
+	Duty      Duty
 	Team      Team
 	Brain     func(self *Unit)
 	Anim      *motion.Animation[assets.ImageId]
-
-	CollidableShapes []geometry.Shape
 
 	VelocityX, VelocityY float32
 	IsGrounded           bool
@@ -36,6 +30,10 @@ type Unit struct {
 
 	prevX, prevY, currentSpeed float32
 }
+
+type Team uint8
+type Duty uint8
+type Character uint8
 
 const TeamAlly, TeamEnemy, TeamNeutral Team = 0, 1, 2
 const DutyLower, DutyMiddle, DutyUpper, DutyGarrison Duty = 0, 1, 2, 3
@@ -64,11 +62,26 @@ func (u *Unit) AttackPoint() (x, y float32) {
 
 //=================================================================
 
-func SpawnUnit(character Character, team Team) {
+func SpawnUnit(character Character, team Team, duty Duty) {
 	var char = Characters[character]
 	var anim = motion.NewAnimation(0, false, char.Animations.Idle...)
-	var unit = Unit{Object: graphics.NewSprite(0, 0, 1, 0), Character: character, Team: team,
-		Brain: char.Brain, Stats: char.Stats, Anim: &anim, CollidableShapes: []geometry.Shape{}}
+	var unit = Unit{Object: graphics.NewSprite(0, 0, 1, 0), Character: character, Team: team, Duty: duty,
+		Brain: char.Brain, Stats: char.Stats, Anim: &anim}
+
+	unit.applyAnimations()
+
+	var lane = Collisions[duty]
+	switch duty {
+	case DutyLower:
+		unit.X, unit.Y = lane[0].X+lane[0].Width/2-48, lane[0].Y-lane[0].Height/2-unit.Height/2
+	case DutyMiddle:
+		unit.X, unit.Y = lane[0].X+lane[0].Width/2-80, lane[0].Y-lane[0].Height/2-unit.Height/2
+	case DutyUpper:
+		unit.X, unit.Y = lane[0].X+lane[0].Width/2-112, lane[0].Y-lane[0].Height/2-unit.Height/2
+	}
+	if team == TeamAlly {
+		unit.X = -unit.X
+	}
 
 	Units = append(Units, &unit)
 }
@@ -79,7 +92,7 @@ func UpdateUnits() {
 			View.DrawShape(hb.X, hb.Y, hb.Width, hb.Height, 0, hb.Roundness, DebugHitboxColor, geometry.Area{})
 		}
 
-		u.updateLaneData()
+		u.Mask = Masks[u.Duty] // applied every frame to account for any changes in duty
 		u.applyPhysics()
 		u.applyCollisions()
 		u.Brain(u)
@@ -93,20 +106,6 @@ func UpdateUnits() {
 
 //=================================================================
 
-func (u *Unit) updateLaneData() {
-	u.CollidableShapes = collection.Clear(u.CollidableShapes)
-	switch u.Stats.Duty {
-	case DutyLower:
-		u.Mask = geometry.NewArea(0, 0, 560, 1000)
-		u.CollidableShapes = LaneLower[:]
-	case DutyMiddle:
-		u.Mask = geometry.NewArea(0, 0, 500, 1000)
-		u.CollidableShapes = LaneMiddle[:]
-	case DutyUpper:
-		u.Mask = geometry.NewArea(0, 0, 432, 1000)
-		u.CollidableShapes = LaneUpper[:]
-	}
-}
 func (u *Unit) applyPhysics() {
 	u.VelocityY += Gravity * time.Delta()
 
@@ -122,8 +121,8 @@ func (u *Unit) applyCollisions() {
 	var diffX, diffY = u.X - hb.X, u.Y - hb.Y // cache hitbox and obj offset
 
 	u.IsGrounded = false
-	if u.VelocityY > 0 { // collide with ground only when falling down
-		for _, s := range u.CollidableShapes {
+	if u.VelocityY > 0 { // collide with ground only when falling down (allows jumping up to a lane/other duty)
+		for _, s := range Collisions[u.Duty] {
 			if hb.Overlaps(s) {
 				hb = hb.Collide(s)
 				u.X, u.Y = hb.X+diffX, hb.Y+diffY
@@ -136,7 +135,7 @@ func (u *Unit) applyCollisions() {
 	u.UnitBehind, u.UnitFront = nil, nil
 	for _, other := range Units {
 		var ohb = other.Hitbox()
-		if other == u || u.Stats.Duty != other.Stats.Duty || !hb.Overlaps(ohb) {
+		if other == u || u.Duty != other.Duty || !hb.Overlaps(ohb) {
 			continue
 		}
 		hb = hb.Collide(ohb)

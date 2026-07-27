@@ -7,7 +7,7 @@ import (
 	"pure-game-kit/packages/utility/color"
 )
 
-var Debug = false
+var Debug = true
 
 var DebugUnitColor = color.TagRGBA("rgba(0, 255, 0, 0.3)")
 var DebugHitboxColor = color.TagRGBA("rgba(255, 0, 0, 0.3)")
@@ -35,10 +35,9 @@ func UpdateDebug() {
 	Grid.Effects.Tint = color.RGBA(0, 0, 0, 50)
 	View.DrawObject(&Grid)
 
-	var ux, uy, uw, uh = LaneUpper[0].X, LaneUpper[0].Y, LaneUpper[0].Width, LaneUpper[0].Height
-	View.DrawShape(ux, uy, uw, uh, 0, 0, DebugCollisionColor, geometry.Area{})
-	var mx, my, mw, mh = LaneMiddle[0].X, LaneMiddle[0].Y, LaneMiddle[0].Width, LaneMiddle[0].Height
-	View.DrawShape(mx, my, mw, mh, 0, 0, DebugCollisionColor, geometry.Area{})
-	var lx, ly, lw, lh = LaneLower[0].X, LaneLower[0].Y, LaneLower[0].Width, LaneLower[0].Height
-	View.DrawShape(lx, ly, lw, lh, 0, 0, DebugCollisionColor, geometry.Area{})
+	for _, cols := range Collisions {
+		for _, s := range cols {
+			View.DrawShape(s.X, s.Y, s.Width, s.Height, 0, 0, DebugCollisionColor, geometry.Area{})
+		}
+	}
 }

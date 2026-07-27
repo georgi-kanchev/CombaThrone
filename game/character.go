@@ -15,7 +15,6 @@ type Animations struct {
 type Stats struct {
 	Name                  string
 	Health, Damage, Speed int
-	Duty                  Duty
 }
 
 type CharacterData struct {
@@ -34,7 +33,7 @@ var Characters map[Character]CharacterData = map[Character]CharacterData{
 }
 
 func InitCharacters() {
-	var animations = assets.LoadAnimations(assets.LoadImage("data/units.png"), "data/animations.xml")
+	var animations = assets.LoadAnimations(assets.LoadImage("data/units.png"), "data/units-animations.xml")
 
 	for i, c := range Characters {
 		c.Animations.Idle = animations.Frames(c.AnimationPrefix + "-idle")

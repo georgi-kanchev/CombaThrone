@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<data>
+<data grid="16">
   <frames>
     <frame x="32" y="0" w="32" h="48"/>
     <frame x="64" y="0" w="32" h="48"/>
