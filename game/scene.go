@@ -16,7 +16,8 @@ var Background graphics.Object
 
 var MapLayer assets.TileLayerId
 var Map, Grid, AllyBase, EnemyBase, Flags graphics.Object
-var GatesData assets.AnimationsId
+var TilesetCrops, UserInterfaceCrops assets.AnimationsId
+var UserInterfaceImg assets.ImageId
 
 var Collisions = make(map[Duty][]geometry.Shape)
 var Masks = map[Duty]geometry.Area{
@@ -31,12 +32,15 @@ var Gates []*EntryData
 func InitScene() {
 	View = graphics.NewView(5.68)
 	Background = graphics.NewSprite(0, 0, 1, assets.LoadImage("data/bgr-field.png"))
+	UserInterfaceImg = assets.LoadImage("data/user-interface.png")
+	UserInterfaceCrops = assets.LoadAnimations(UserInterfaceImg, "data/user-interface.xml")
 
 	var layers, tileset = assets.LoadTileLayersFromTiled("data/map.tmx")
 	var upper = graphics.NewTilemap(1, layers[20])
 	var middle = graphics.NewTilemap(1, layers[19])
 	var lower = graphics.NewTilemap(1, layers[18])
-	GatesData = assets.LoadAnimations(tileset, "data/tileset-animations.xml")
+	TilesetCrops = assets.LoadAnimations(tileset, "data/tileset.xml")
+	TilesetCrops = assets.LoadAnimations(tileset, "data/tileset.xml")
 	Collisions[DutyLower] = lower.TilemapShapes()
 	Collisions[DutyMiddle] = middle.TilemapShapes()
 	Collisions[DutyUpper] = upper.TilemapShapes()
@@ -46,17 +50,17 @@ func InitScene() {
 	AllyBase = graphics.NewTilemap(1, layers[0])
 	EnemyBase = graphics.NewTilemap(1, layers[0])
 	EnemyBase.Width *= -1
-	// Units = append(Units, NewUnit(CharacterWoman, TeamEnemy, DutyUpper))
-	// Units = append(Units, NewUnit(CharacterWoman, TeamEnemy, DutyMiddle))
-	// Units = append(Units, NewUnit(CharacterWoman, TeamEnemy, DutyLower))
+	Units = append(Units, NewUnit(CharacterMan, TeamAlly, DutyLower))
+	Units = append(Units, NewUnit(CharacterWoman, TeamEnemy, DutyMiddle))
+	Units = append(Units, NewUnit(CharacterWoman, TeamEnemy, DutyLower))
 
-	Gates = append(Gates, NewGate(EntryHole, TeamAlly, DutyUpper))
-	Gates = append(Gates, NewGate(EntryTallGate, TeamAlly, DutyMiddle))
-	Gates = append(Gates, NewGate(EntryDoor, TeamAlly, DutyLower))
+	Gates = append(Gates, NewEntry(EntryHole, TeamAlly, DutyUpper))
+	Gates = append(Gates, NewEntry(EntryTallGate, TeamAlly, DutyMiddle))
+	Gates = append(Gates, NewEntry(EntryDoor, TeamAlly, DutyLower))
 
-	Gates = append(Gates, NewGate(EntryDoor, TeamEnemy, DutyUpper))
-	Gates = append(Gates, NewGate(EntryShortGate, TeamEnemy, DutyMiddle))
-	Gates = append(Gates, NewGate(EntryHole, TeamEnemy, DutyLower))
+	Gates = append(Gates, NewEntry(EntryDoor, TeamEnemy, DutyUpper))
+	Gates = append(Gates, NewEntry(EntryShortGate, TeamEnemy, DutyMiddle))
+	Gates = append(Gates, NewEntry(EntryHole, TeamEnemy, DutyLower))
 }
 func UpdateScene() {
 	var _, bly = Background.PointFromEdge(0.5, 1)
@@ -82,6 +86,16 @@ func UpdateScene() {
 
 	for _, u := range Units {
 		u.Update()
+	}
+	for _, g := range Gates {
+		g.HealthBar.Update(g.Tiles[0].Shape, g.Health, g.MaxHealth)
+	}
+	for _, u := range Units {
+		u.HealthBar.Update(u.Shape, u.Stats.Health, Characters[u.Character].Stats.Health)
+	}
+
+	if keyboard.IsKeyPressed(key.A) {
+		Gates[1].ApplyDamage(1)
 	}
 }
 

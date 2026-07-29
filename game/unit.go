@@ -8,9 +8,7 @@ import (
 	"pure-game-kit/packages/geometry"
 	"pure-game-kit/packages/graphics"
 	"pure-game-kit/packages/motion"
-	"pure-game-kit/packages/utility/color/palette"
 	"pure-game-kit/packages/utility/number"
-	"pure-game-kit/packages/utility/text"
 	"pure-game-kit/packages/utility/time"
 )
 
@@ -22,6 +20,7 @@ type Unit struct {
 	Team      Team
 	Brain     func(self *Unit)
 	Anim      *motion.Animation[assets.ImageId]
+	HealthBar HealthBar
 
 	VelocityX, VelocityY float32
 	IsGrounded           bool
@@ -60,6 +59,8 @@ func NewUnit(character Character, team Team, duty Duty) *Unit {
 		unit.X = -unit.X
 	}
 
+	var hb = unit.Hitbox()
+	unit.HealthBar = NewHealthBar(hb.Width-1, false, team)
 	return &unit
 }
 
@@ -85,11 +86,6 @@ func (u *Unit) AttackPoint() (x, y float32) {
 //=================================================================
 
 func (u *Unit) Update() {
-	if Debug {
-		var hb = u.Hitbox()
-		View.DrawShape(hb.X, hb.Y, hb.Width, hb.Height, 0, hb.Roundness, DebugHitboxColor, geometry.Area{})
-	}
-
 	u.Mask = Masks[u.Duty] // applied every frame to account for any changes in duty
 	u.applyPhysics()
 	u.applyCollisions()
@@ -160,9 +156,4 @@ func (u *Unit) applyAnimations() {
 	}
 	View.DrawObject(&u.Object)
 	u.Width = crop.Width
-
-	if Debug && u.Object.ContainsPoint(View.MousePosition()) {
-		var txt = text.New("Speed: ", number.Round(u.currentSpeed, 2))
-		View.DrawText(txt, u.X-u.Width/2, u.Y-100, 20, 0, palette.White, geometry.Area{})
-	}
 }

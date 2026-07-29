@@ -34,7 +34,7 @@ var Characters map[Character]CharacterData = map[Character]CharacterData{
 }
 
 func InitCharacters() {
-	var animations = assets.LoadAnimations(assets.LoadImage("data/units.png"), "data/units-animations.xml")
+	var animations = assets.LoadAnimations(assets.LoadImage("data/units.png"), "data/units.xml")
 
 	for i, c := range Characters {
 		c.Animations.Idle = animations.Frames(c.AnimationPrefix + "-idle")
