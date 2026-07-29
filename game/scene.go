@@ -16,7 +16,7 @@ var Background graphics.Object
 
 var MapLayer assets.TileLayerId
 var Map, Grid, AllyBase, EnemyBase, Flags graphics.Object
-var AllyGates, EnemyGates [2]graphics.Object
+var GatesData assets.AnimationsId
 
 var Collisions = make(map[Duty][]geometry.Shape)
 var Masks = map[Duty]geometry.Area{
@@ -25,31 +25,38 @@ var Masks = map[Duty]geometry.Area{
 	DutyUpper:  geometry.NewArea(0, 0, 432, 1000),
 }
 
+var Units []*Unit
+var Gates []*EntryData
+
 func InitScene() {
 	View = graphics.NewView(5.68)
 	Background = graphics.NewSprite(0, 0, 1, assets.LoadImage("data/bgr-field.png"))
 
-	var layers = assets.LoadTileLayersFromTiled("data/map.tmx")
+	var layers, tileset = assets.LoadTileLayersFromTiled("data/map.tmx")
 	var upper = graphics.NewTilemap(1, layers[20])
 	var middle = graphics.NewTilemap(1, layers[19])
 	var lower = graphics.NewTilemap(1, layers[18])
+	GatesData = assets.LoadAnimations(tileset, "data/tileset-animations.xml")
 	Collisions[DutyLower] = lower.TilemapShapes()
 	Collisions[DutyMiddle] = middle.TilemapShapes()
 	Collisions[DutyUpper] = upper.TilemapShapes()
-	MapLayer = layers[0]
+	MapLayer = layers[15]
 	Grid, Map = graphics.NewTilemap(1, layers[17]), graphics.NewTilemap(1, MapLayer)
 	Flags = graphics.NewTilemap(1, layers[16])
-	AllyBase = graphics.NewTilemap(1, layers[1])
-	AllyGates[0], AllyGates[1] = graphics.NewTilemap(1, layers[11]), graphics.NewTilemap(1, layers[11])
-	EnemyBase = graphics.NewTilemap(1, layers[1])
-	EnemyGates[0], EnemyGates[1] = graphics.NewTilemap(1, layers[10]), graphics.NewTilemap(1, layers[10])
+	AllyBase = graphics.NewTilemap(1, layers[0])
+	EnemyBase = graphics.NewTilemap(1, layers[0])
 	EnemyBase.Width *= -1
-	EnemyGates[0].Width *= -1
-	EnemyGates[1].Width *= -1
+	// Units = append(Units, NewUnit(CharacterWoman, TeamEnemy, DutyUpper))
+	// Units = append(Units, NewUnit(CharacterWoman, TeamEnemy, DutyMiddle))
+	// Units = append(Units, NewUnit(CharacterWoman, TeamEnemy, DutyLower))
 
-	SpawnUnit(CharacterWoman, TeamEnemy, DutyUpper)
-	SpawnUnit(CharacterWoman, TeamEnemy, DutyMiddle)
-	SpawnUnit(CharacterWoman, TeamEnemy, DutyLower)
+	Gates = append(Gates, NewGate(EntryHole, TeamAlly, DutyUpper))
+	Gates = append(Gates, NewGate(EntryTallGate, TeamAlly, DutyMiddle))
+	Gates = append(Gates, NewGate(EntryDoor, TeamAlly, DutyLower))
+
+	Gates = append(Gates, NewGate(EntryDoor, TeamEnemy, DutyUpper))
+	Gates = append(Gates, NewGate(EntryShortGate, TeamEnemy, DutyMiddle))
+	Gates = append(Gates, NewGate(EntryHole, TeamEnemy, DutyLower))
 }
 func UpdateScene() {
 	var _, bly = Background.PointFromEdge(0.5, 1)
@@ -58,20 +65,24 @@ func UpdateScene() {
 	View.Y = (bly - h/2) - 2
 
 	if keyboard.IsKeyJustPressed(key.A) {
-		SpawnUnit(CharacterWoman, TeamEnemy, DutyUpper)
+		NewUnit(CharacterWoman, TeamEnemy, DutyUpper)
 	}
 
 	View.DrawColor(skyColor)
 	View.DrawObject(&Background)
 
-	View.DrawObject(&Map)
 	View.DrawObject(&AllyBase)
-	View.DrawObject(&AllyGates[0])
-	View.DrawObject(&AllyGates[1])
 	View.DrawObject(&EnemyBase)
-	View.DrawObject(&EnemyGates[0])
-	View.DrawObject(&EnemyGates[1])
 	View.DrawObject(&Flags)
+
+	for _, g := range Gates {
+		g.Update()
+	}
+	View.DrawObject(&Map)
+
+	for _, u := range Units {
+		u.Update()
+	}
 }
 
 func PointAtCell(cellX, cellY float32) (x, y float32) {
@@ -90,4 +101,4 @@ func TileAtCell(cellX, cellY int, layer assets.TileLayerId) assets.Tile {
 
 // private ========================================================
 
-var skyColor = color.TagRGBA("rgb(90, 135, 218)")
+var skyColor = color.TagRGBA("rgb(98, 171, 212)")

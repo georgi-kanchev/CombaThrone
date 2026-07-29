@@ -7,7 +7,7 @@ import (
 
 func main() {
 	window.Create("CombaThrone", true, false)
-	// window.SetQuality(2, window.FilterPoint)
+	// window.SetQuality(1.5, window.FilterPoint)
 	// window.SetMode(window.ModeFullscreenBorderless)
 	window.SetTargetFPS(0)
 
@@ -15,7 +15,6 @@ func main() {
 	game.InitScene()
 	for window.KeepOpen() {
 		game.UpdateScene()
-		game.UpdateUnits()
 		game.UpdateDebug()
 	}
 }

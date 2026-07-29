@@ -13,8 +13,9 @@ type Animations struct {
 }
 
 type Stats struct {
-	Name                  string
-	Health, Damage, Speed int
+	Name string
+
+	Health, Damage, MoveSpeed, AttackSpeed int
 }
 
 type CharacterData struct {

@@ -39,30 +39,7 @@ const TeamAlly, TeamEnemy, TeamNeutral Team = 0, 1, 2
 const DutyLower, DutyMiddle, DutyUpper, DutyGarrison Duty = 0, 1, 2, 3
 const Gravity = 256
 
-//=================================================================
-
-var Units []*Unit
-
-func (u *Unit) Hitbox() geometry.Shape {
-	var char = Characters[u.Character]
-	var hitbox = char.Hitbox
-	hitbox.X, hitbox.Y = u.X+hitbox.X, u.Y+hitbox.Y
-	return hitbox
-}
-func (u *Unit) AttackPoint() (x, y float32) {
-	var hb = u.Hitbox()
-	if u.Team == TeamAlly {
-		return hb.X + hb.Width, hb.Y
-	}
-	if u.Team == TeamEnemy {
-		return hb.X - hb.Width, hb.Y
-	}
-	return hb.X, hb.Y
-}
-
-//=================================================================
-
-func SpawnUnit(character Character, team Team, duty Duty) {
+func NewUnit(character Character, team Team, duty Duty) *Unit {
 	var char = Characters[character]
 	var anim = motion.NewAnimation(0, false, char.Animations.Idle...)
 	var unit = Unit{Object: graphics.NewSprite(0, 0, 1, 0), Character: character, Team: team, Duty: duty,
@@ -83,36 +60,54 @@ func SpawnUnit(character Character, team Team, duty Duty) {
 		unit.X = -unit.X
 	}
 
-	Units = append(Units, &unit)
-}
-func UpdateUnits() {
-	for _, u := range Units {
-		if Debug {
-			var hb = u.Hitbox()
-			View.DrawShape(hb.X, hb.Y, hb.Width, hb.Height, 0, hb.Roundness, DebugHitboxColor, geometry.Area{})
-		}
-
-		u.Mask = Masks[u.Duty] // applied every frame to account for any changes in duty
-		u.applyPhysics()
-		u.applyCollisions()
-		u.Brain(u)
-		u.applyAnimations()
-
-		var curHorSpeed = number.Absolute(u.X-u.prevX) / time.Delta()       // smooth out for FPS dips
-		u.currentSpeed = u.currentSpeed + (curHorSpeed-u.currentSpeed)*0.15 // 0.15 = how fast it catches up
-		u.prevX, u.prevY = u.X, u.Y
-	}
+	return &unit
 }
 
 //=================================================================
+
+func (u *Unit) Hitbox() geometry.Shape {
+	var char = Characters[u.Character]
+	var hitbox = char.Hitbox
+	hitbox.X, hitbox.Y = u.X+hitbox.X, u.Y+hitbox.Y
+	return hitbox
+}
+func (u *Unit) AttackPoint() (x, y float32) {
+	var hb = u.Hitbox()
+	if u.Team == TeamAlly {
+		return hb.X + hb.Width, hb.Y
+	}
+	if u.Team == TeamEnemy {
+		return hb.X - hb.Width, hb.Y
+	}
+	return hb.X, hb.Y
+}
+
+//=================================================================
+
+func (u *Unit) Update() {
+	if Debug {
+		var hb = u.Hitbox()
+		View.DrawShape(hb.X, hb.Y, hb.Width, hb.Height, 0, hb.Roundness, DebugHitboxColor, geometry.Area{})
+	}
+
+	u.Mask = Masks[u.Duty] // applied every frame to account for any changes in duty
+	u.applyPhysics()
+	u.applyCollisions()
+	u.Brain(u)
+	u.applyAnimations()
+
+	var curHorSpeed = number.Absolute(u.X-u.prevX) / time.Delta()       // smooth out for FPS dips
+	u.currentSpeed = u.currentSpeed + (curHorSpeed-u.currentSpeed)*0.15 // 0.15 = how fast it catches up
+	u.prevX, u.prevY = u.X, u.Y
+}
 
 func (u *Unit) applyPhysics() {
 	u.VelocityY += Gravity * time.Delta()
 
 	if u.IsGrounded && u.Team == TeamAlly {
-		u.VelocityX = float32(u.Stats.Speed)
+		u.VelocityX = float32(u.Stats.MoveSpeed)
 	} else if u.IsGrounded && u.Team == TeamEnemy {
-		u.VelocityX = -float32(u.Stats.Speed)
+		u.VelocityX = -float32(u.Stats.MoveSpeed)
 	}
 	u.X, u.Y = u.X+u.VelocityX*time.Delta(), u.Y+u.VelocityY*time.Delta()
 }
@@ -157,14 +152,14 @@ func (u *Unit) applyAnimations() {
 	}
 
 	var frame = u.Anim.Frame()
-	var _, _, w, h = frame.CropArea()
+	var crop = frame.CropArea()
 
-	u.ImageId, u.Width, u.Height = frame, w, h
+	u.ImageId, u.Width, u.Height = frame, crop.Width, crop.Height
 	if u.Team == TeamEnemy {
-		u.Width = -w
+		u.Width = -crop.Width
 	}
 	View.DrawObject(&u.Object)
-	u.Width = w
+	u.Width = crop.Width
 
 	if Debug && u.Object.ContainsPoint(View.MousePosition()) {
 		var txt = text.New("Speed: ", number.Round(u.currentSpeed, 2))
