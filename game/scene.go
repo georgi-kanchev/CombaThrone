@@ -97,6 +97,9 @@ func UpdateScene() {
 	if keyboard.IsKeyPressed(key.A) {
 		Gates[1].ApplyDamage(1)
 	}
+	if keyboard.IsKeyJustPressed(key.S) {
+		Units[2].Stats.Health--
+	}
 }
 
 func PointAtCell(cellX, cellY float32) (x, y float32) {
