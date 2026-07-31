@@ -16,6 +16,8 @@ type Stats struct {
 	Name string
 
 	Health, Damage, MoveSpeed, AttackSpeed int
+
+	HurtTime float32
 }
 
 type CharacterData struct {
@@ -41,7 +43,7 @@ func InitCharacters() {
 		c.Animations.Walk = animations.Frames(c.AnimationPrefix + "-walk")
 		c.Animations.Attack = animations.Frames(c.AnimationPrefix + "-attack")
 		c.Animations.Hurt = animations.Frames(c.AnimationPrefix + "-hurt")
-		c.Animations.Die = animations.Frames(c.AnimationPrefix + "-die")
+		c.Animations.Die = animations.Frames(c.AnimationPrefix + "-death")
 		Characters[i] = c
 	}
 }

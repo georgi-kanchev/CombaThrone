@@ -24,7 +24,7 @@ func NewEntry(entry Entry, team Team, duty Duty) *EntryData {
 	var x, y float32 = -208, 48 // ally upper lane by default
 
 	if entry != EntryHole {
-		gate.HealthBar = NewHealthBar(TileSize-2, true, team)
+		gate.HealthBar = NewHealthBar(TileSize-2, team)
 		gate.MaxHealth, gate.Health = 100, 100
 	}
 
@@ -73,12 +73,16 @@ func NewEntry(entry Entry, team Team, duty Duty) *EntryData {
 	return &gate
 }
 
-func (g *EntryData) ApplyDamage(damage int) {
+func (g *EntryData) TakeDamage(damage int) {
 	if g.Health <= 0 {
 		return
 	}
 
 	g.Health -= damage
+
+	if g.Health <= 0 {
+		g.HealthBar.FadeOut(1.5)
+	}
 
 	var breakIndex = number.Map(g.Health, 0, g.MaxHealth, 5, 1)
 	switch g.Entry {

@@ -6,7 +6,9 @@ import (
 	"pure-game-kit/packages/graphics"
 	"pure-game-kit/packages/input/keyboard"
 	"pure-game-kit/packages/input/keyboard/key"
+	"pure-game-kit/packages/utility/collection"
 	"pure-game-kit/packages/utility/color"
+	"pure-game-kit/packages/utility/number"
 )
 
 const TileSize, MapCount = 32, 4
@@ -27,7 +29,7 @@ var Masks = map[Duty]geometry.Area{
 }
 
 var Units []*Unit
-var Gates []*EntryData
+var Entries []*EntryData
 
 func InitScene() {
 	View = graphics.NewView(5.68)
@@ -47,20 +49,20 @@ func InitScene() {
 	MapLayer = layers[15]
 	Grid, Map = graphics.NewTilemap(1, layers[17]), graphics.NewTilemap(1, MapLayer)
 	Flags = graphics.NewTilemap(1, layers[16])
-	AllyBase = graphics.NewTilemap(1, layers[0])
-	EnemyBase = graphics.NewTilemap(1, layers[0])
+	AllyBase = graphics.NewTilemap(1, layers[5])
+	EnemyBase = graphics.NewTilemap(1, layers[6])
 	EnemyBase.Width *= -1
 	Units = append(Units, NewUnit(CharacterMan, TeamAlly, DutyLower))
 	Units = append(Units, NewUnit(CharacterWoman, TeamEnemy, DutyMiddle))
 	Units = append(Units, NewUnit(CharacterWoman, TeamEnemy, DutyLower))
 
-	Gates = append(Gates, NewEntry(EntryHole, TeamAlly, DutyUpper))
-	Gates = append(Gates, NewEntry(EntryTallGate, TeamAlly, DutyMiddle))
-	Gates = append(Gates, NewEntry(EntryDoor, TeamAlly, DutyLower))
+	Entries = append(Entries, NewEntry(EntryHole, TeamAlly, DutyUpper))
+	Entries = append(Entries, NewEntry(EntryTallGate, TeamAlly, DutyMiddle))
+	Entries = append(Entries, NewEntry(EntryDoor, TeamAlly, DutyLower))
 
-	Gates = append(Gates, NewEntry(EntryDoor, TeamEnemy, DutyUpper))
-	Gates = append(Gates, NewEntry(EntryShortGate, TeamEnemy, DutyMiddle))
-	Gates = append(Gates, NewEntry(EntryHole, TeamEnemy, DutyLower))
+	Entries = append(Entries, NewEntry(EntryDoor, TeamEnemy, DutyUpper))
+	Entries = append(Entries, NewEntry(EntryShortGate, TeamEnemy, DutyMiddle))
+	Entries = append(Entries, NewEntry(EntryHole, TeamEnemy, DutyLower))
 }
 func UpdateScene() {
 	var _, bly = Background.PointFromEdge(0.5, 1)
@@ -79,26 +81,40 @@ func UpdateScene() {
 	View.DrawObject(&EnemyBase)
 	View.DrawObject(&Flags)
 
-	for _, g := range Gates {
+	for _, g := range Entries {
 		g.Update()
 	}
 	View.DrawObject(&Map)
 
+	collection.SortByField(Units, func(u *Unit) float32 {
+		if u.Stats.Health <= 0 { // dead units go behind all alive units
+			return number.NegativeInfinity()
+		}
+		return u.Y // fall back to Y sort
+	})
+
 	for _, u := range Units {
 		u.Update()
 	}
-	for _, g := range Gates {
-		g.HealthBar.Update(g.Tiles[0].Shape, g.Health, g.MaxHealth)
+	for _, g := range Entries {
+		g.HealthBar.Update(g.Tiles[0].Shape, g.Health, g.MaxHealth, geometry.Area{})
 	}
-	for _, u := range Units {
-		u.HealthBar.Update(u.Shape, u.Stats.Health, Characters[u.Character].Stats.Health)
+	for _, u := range Units { // health bars take the Z order of the units
+		u.HealthBar.Update(u.Shape, u.Stats.Health, Characters[u.Character].Stats.Health, u.Mask)
 	}
 
-	if keyboard.IsKeyPressed(key.A) {
-		Gates[1].ApplyDamage(1)
+	if keyboard.IsKeyJustPressed(key.A) {
+		Entries[2].TakeDamage(110)
 	}
 	if keyboard.IsKeyJustPressed(key.S) {
-		Units[2].Stats.Health--
+		Units[2].TakeDamage(1)
+	}
+	if keyboard.IsKeyJustPressed(key.W) {
+		Units[0].VelocityY = -100
+		Units[0].Duty = DutyUpper
+	}
+	if keyboard.IsKeyJustPressed(key.E) {
+		Units = append(Units, NewUnit(CharacterWoman, TeamEnemy, DutyLower))
 	}
 }
 

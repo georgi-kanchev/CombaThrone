@@ -23,11 +23,14 @@ type Unit struct {
 	HealthBar HealthBar
 
 	VelocityX, VelocityY float32
-	IsGrounded           bool
+
+	IsGrounded bool
+
+	LastHurtTime float32
 
 	UnitFront, UnitBehind *Unit
 
-	prevX, prevY, currentSpeed float32
+	prevX, prevY, currentSpeedX float32
 }
 
 type Team uint8
@@ -37,30 +40,31 @@ type Character uint8
 const TeamAlly, TeamEnemy, TeamNeutral Team = 0, 1, 2
 const DutyLower, DutyMiddle, DutyUpper, DutyGarrison Duty = 0, 1, 2, 3
 const Gravity = 256
+const GroundFrictionPercent = 5.0
 
 func NewUnit(character Character, team Team, duty Duty) *Unit {
 	var char = Characters[character]
 	var anim = motion.NewAnimation(0, false, char.Animations.Idle...)
-	var unit = Unit{Object: graphics.NewSprite(0, 0, 1, 0), Character: character, Team: team, Duty: duty,
+	var unit = Unit{Object: graphics.NewSprite(-2000, -2000, 1, 0), Character: character, Team: team, Duty: duty,
 		Brain: char.Brain, Stats: char.Stats, Anim: &anim}
 
-	unit.applyAnimations()
+	unit.draw() // update frame size
 
 	var lane = Collisions[duty]
 	switch duty {
 	case DutyLower:
-		unit.X, unit.Y = lane[0].X+lane[0].Width/2-48, lane[0].Y-lane[0].Height/2-unit.Height/2
+		unit.X, unit.Y = lane[0].X+lane[0].Width/2-56, lane[0].Y-lane[0].Height/2-unit.Height/2
 	case DutyMiddle:
-		unit.X, unit.Y = lane[0].X+lane[0].Width/2-80, lane[0].Y-lane[0].Height/2-unit.Height/2
+		unit.X, unit.Y = lane[0].X+lane[0].Width/2-88, lane[0].Y-lane[0].Height/2-unit.Height/2
 	case DutyUpper:
-		unit.X, unit.Y = lane[0].X+lane[0].Width/2-112, lane[0].Y-lane[0].Height/2-unit.Height/2
+		unit.X, unit.Y = lane[0].X+lane[0].Width/2-120, lane[0].Y-lane[0].Height/2-unit.Height/2
 	}
 	if team == TeamAlly {
 		unit.X = -unit.X
 	}
 
 	var hb = unit.Hitbox()
-	unit.HealthBar = NewHealthBar(hb.Width-1, false, team)
+	unit.HealthBar = NewHealthBar(hb.Width-1, team)
 	return &unit
 }
 
@@ -82,6 +86,9 @@ func (u *Unit) AttackPoint() (x, y float32) {
 	}
 	return hb.X, hb.Y
 }
+func (u *Unit) IsHurting() bool {
+	return time.Running() < u.LastHurtTime+u.Stats.HurtTime
+}
 
 //=================================================================
 
@@ -90,22 +97,57 @@ func (u *Unit) Update() {
 	u.applyPhysics()
 	u.applyCollisions()
 	u.Brain(u)
-	u.applyAnimations()
+	u.draw()
 
-	var curHorSpeed = number.Absolute(u.X-u.prevX) / time.Delta()       // smooth out for FPS dips
-	u.currentSpeed = u.currentSpeed + (curHorSpeed-u.currentSpeed)*0.15 // 0.15 = how fast it catches up
+	var speedX = number.Absolute(u.X-u.prevX) / time.Delta()          // smooth out for FPS dips
+	u.currentSpeedX = u.currentSpeedX + (speedX-u.currentSpeedX)*0.15 // 0.15 = how fast it catches up
 	u.prevX, u.prevY = u.X, u.Y
+}
+func (u *Unit) TakeDamage(damage int) {
+	if u.Stats.Health <= 0 {
+		return
+	}
+
+	u.Stats.Health -= damage
+	u.LastHurtTime = time.Running()
+
+	u.Anim.Frames = Characters[u.Character].Animations.Hurt
+	u.Anim.IsLooping, u.Anim.FPS, u.Anim.Time = false, 4, 0
+
+	if u.Stats.Health <= 0 {
+		u.Anim.Frames = Characters[u.Character].Animations.Die
+		u.Anim.IsLooping, u.Anim.FPS, u.Anim.Time = false, 8, 0
+		u.HealthBar.FadeOut(1.5)
+	}
 }
 
 func (u *Unit) applyPhysics() {
 	u.VelocityY += Gravity * time.Delta()
 
-	if u.IsGrounded && u.Team == TeamAlly {
-		u.VelocityX = float32(u.Stats.MoveSpeed)
-	} else if u.IsGrounded && u.Team == TeamEnemy {
-		u.VelocityX = -float32(u.Stats.MoveSpeed)
+	if u.Stats.Health > 0 && u.IsGrounded && !u.IsHurting() {
+		switch u.Team {
+		case TeamAlly:
+			u.VelocityX = float32(u.Stats.MoveSpeed)
+		case TeamEnemy:
+			u.VelocityX = -float32(u.Stats.MoveSpeed)
+		}
 	}
+
+	if u.IsGrounded {
+		u.VelocityX *= 1.0 - (GroundFrictionPercent / 100.0)
+	}
+
 	u.X, u.Y = u.X+u.VelocityX*time.Delta(), u.Y+u.VelocityY*time.Delta()
+
+	if u.Stats.Health > 0 && !u.IsHurting() {
+		if !u.IsGrounded || u.currentSpeedX < 0.01 {
+			u.Anim.Frames = Characters[u.Character].Animations.Idle
+			u.Anim.IsLooping, u.Anim.FPS = true, 3
+		} else if u.IsGrounded && u.currentSpeedX > 0.01 {
+			u.Anim.Frames = Characters[u.Character].Animations.Walk
+			u.Anim.IsLooping, u.Anim.FPS = true, u.currentSpeedX*0.25
+		}
+	}
 }
 func (u *Unit) applyCollisions() {
 	var hb = u.Hitbox()
@@ -126,7 +168,8 @@ func (u *Unit) applyCollisions() {
 	u.UnitBehind, u.UnitFront = nil, nil
 	for _, other := range Units {
 		var ohb = other.Hitbox()
-		if other == u || u.Duty != other.Duty || !hb.Overlaps(ohb) {
+		var anyoneDead = u.Stats.Health <= 0 || other.Stats.Health <= 0
+		if other == u || u.Duty != other.Duty || anyoneDead || !hb.Overlaps(ohb) {
 			continue
 		}
 		hb = hb.Collide(ohb)
@@ -138,15 +181,7 @@ func (u *Unit) applyCollisions() {
 		}
 	}
 }
-func (u *Unit) applyAnimations() {
-	if !u.IsGrounded || u.X == u.prevX {
-		u.Anim.Frames = Characters[u.Character].Animations.Idle
-		u.Anim.IsLooping, u.Anim.FPS = true, 3
-	} else if u.IsGrounded && u.X != u.prevX {
-		u.Anim.Frames = Characters[u.Character].Animations.Walk
-		u.Anim.IsLooping, u.Anim.FPS = true, u.currentSpeed*0.25
-	}
-
+func (u *Unit) draw() {
 	var frame = u.Anim.Frame()
 	var crop = frame.CropArea()
 
