@@ -45,12 +45,14 @@
   <animations>
     <animation name="man-idle" frames="0 1 2 3"/>
     <animation name="man-walk" frames="4 5 6 7 8 9"/>
-    <animation name="man-attack" frames="10 11 12 13"/>
+    <animation name="man-attack-start" frames="10 11"/>
+    <animation name="man-attack-end" frames="12 13"/>
     <animation name="man-hurt" frames="14 15"/>
     <animation name="man-death" frames="16 17 18 19"/>
     <animation name="woman-idle" frames="20 21 22 23"/>
     <animation name="woman-walk" frames="24 25 26 27 28 29"/>
-    <animation name="woman-attack" frames="30 31 32 33"/>
+    <animation name="woman-attack-start" frames="30 31"/>
+    <animation name="woman-attack-end" frames="32 33"/>
     <animation name="woman-hurt" frames="34 35"/>
     <animation name="woman-death" frames="36 37 38 39"/>
   </animations>

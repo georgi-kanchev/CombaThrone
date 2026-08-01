@@ -5,7 +5,9 @@ import (
 	"pure-game-kit/packages/input/keyboard"
 	"pure-game-kit/packages/input/keyboard/key"
 	"pure-game-kit/packages/utility/color"
+	"pure-game-kit/packages/utility/color/palette"
 	"pure-game-kit/packages/utility/number"
+	"pure-game-kit/packages/utility/text"
 )
 
 type Debug uint8
@@ -19,6 +21,8 @@ var DebugHitboxColor = color.TagRGBA("rgba(255, 0, 0, 0.3)")
 var DebugGridColor = color.TagRGBA("rgba(0, 0, 0, 0.2)")
 var DebugCollisionColor = color.TagRGBA("rgba(0, 255, 255, 0.15)")
 var DebugAttackColor = color.TagRGBA("rgb(255, 255, 255)")
+
+var DebugHoveredUnit *Unit
 
 func UpdateDebug() {
 	if keyboard.IsKeyJustPressed(key.F3) {
@@ -38,6 +42,17 @@ func UpdateDebug() {
 			var x, y = u.AttackPoint()
 			View.DrawShape(x, y, 2, 2, 0, 1, DebugAttackColor, geometry.Area{})
 			View.DrawShape(hb.X, hb.Y, hb.Width, hb.Height, 0, hb.Roundness, DebugHitboxColor, geometry.Area{})
+			if u.ContainsPoint(View.MousePosition()) {
+				DebugHoveredUnit = u
+			}
+		}
+		var hovered = DebugHoveredUnit
+		if hovered != nil {
+			var states = [7]string{"idling", "walking", "attacking", "attacking", "attacking", "hurting", "dead"}
+			var info = text.New(states[hovered.State], "\n",
+				"attack timer: ", number.Round(hovered.attackTimer, 1), "\n",
+				"hurt timer: ", number.Round(hovered.hurtTimer, 1))
+			View.DrawText(info, hovered.X-hovered.Width/2, hovered.Y-100, 50, 0, palette.White, geometry.Area{})
 		}
 		for _, cols := range Collisions {
 			for _, s := range cols {
@@ -51,5 +66,4 @@ func UpdateDebug() {
 	case DebugStats:
 		View.DrawDebugInfo(true)
 	}
-
 }

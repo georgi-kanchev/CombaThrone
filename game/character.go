@@ -9,13 +9,15 @@ import (
 )
 
 type Animations struct {
-	Idle, Walk, Attack, Hurt, Die []assets.ImageId
+	Idle, Walk, AttackStart, AttackEnd, Hurt, Die []assets.ImageId
 }
 
 type Stats struct {
 	Name string
 
-	Health, Damage, MoveSpeed, AttackSpeed int
+	Health, MoveSpeed int
+
+	AttackDamage, AttackSpeed, AttackRange int
 
 	HurtTime float32
 }
@@ -41,7 +43,8 @@ func InitCharacters() {
 	for i, c := range Characters {
 		c.Animations.Idle = animations.Frames(c.AnimationPrefix + "-idle")
 		c.Animations.Walk = animations.Frames(c.AnimationPrefix + "-walk")
-		c.Animations.Attack = animations.Frames(c.AnimationPrefix + "-attack")
+		c.Animations.AttackStart = animations.Frames(c.AnimationPrefix + "-attack-start")
+		c.Animations.AttackEnd = animations.Frames(c.AnimationPrefix + "-attack-end")
 		c.Animations.Hurt = animations.Frames(c.AnimationPrefix + "-hurt")
 		c.Animations.Die = animations.Frames(c.AnimationPrefix + "-death")
 		Characters[i] = c

@@ -18,25 +18,26 @@ type Unit struct {
 	Character Character
 	Duty      Duty
 	Team      Team
-	Brain     func(self *Unit)
+	Behavior  func(self *Unit)
 	Anim      *motion.Animation[assets.ImageId]
 	HealthBar HealthBar
+	State     State
 
 	VelocityX, VelocityY float32
-
-	IsGrounded bool
-
-	LastHurtTime float32
+	IsGrounded           bool
 
 	UnitFront, UnitBehind *Unit
 
-	prevX, prevY, currentSpeedX float32
+	lastX, lastY, moveSpeedX float32
+	attackTimer, hurtTimer   float32 // negative values can be used for "time since last"
 }
 
 type Team uint8
 type Duty uint8
 type Character uint8
+type State uint8
 
+const StateIdle, StateWalk, StateAttackStart, StateAttacking, StateAttackEnd, StateHurt, StateDead = 0, 1, 2, 3, 4, 5, 6
 const TeamAlly, TeamEnemy, TeamNeutral Team = 0, 1, 2
 const DutyLower, DutyMiddle, DutyUpper, DutyGarrison Duty = 0, 1, 2, 3
 const Gravity = 256
@@ -46,7 +47,7 @@ func NewUnit(character Character, team Team, duty Duty) *Unit {
 	var char = Characters[character]
 	var anim = motion.NewAnimation(0, false, char.Animations.Idle...)
 	var unit = Unit{Object: graphics.NewSprite(-2000, -2000, 1, 0), Character: character, Team: team, Duty: duty,
-		Brain: char.Brain, Stats: char.Stats, Anim: &anim}
+		Behavior: char.Brain, Stats: char.Stats, Anim: &anim, attackTimer: number.NaN(), hurtTimer: number.NaN()}
 
 	unit.draw() // update frame size
 
@@ -86,22 +87,24 @@ func (u *Unit) AttackPoint() (x, y float32) {
 	}
 	return hb.X, hb.Y
 }
-func (u *Unit) IsHurting() bool {
-	return time.Running() < u.LastHurtTime+u.Stats.HurtTime
-}
 
 //=================================================================
 
 func (u *Unit) Update() {
+	u.hurtTimer -= time.Delta()
+	u.attackTimer -= time.Delta()
 	u.Mask = Masks[u.Duty] // applied every frame to account for any changes in duty
+
+	u.applyState()
+	u.actUponState()
 	u.applyPhysics()
 	u.applyCollisions()
-	u.Brain(u)
+	u.Behavior(u)
 	u.draw()
 
-	var speedX = number.Absolute(u.X-u.prevX) / time.Delta()          // smooth out for FPS dips
-	u.currentSpeedX = u.currentSpeedX + (speedX-u.currentSpeedX)*0.15 // 0.15 = how fast it catches up
-	u.prevX, u.prevY = u.X, u.Y
+	var speedX = number.Absolute(u.X-u.lastX) / time.Delta() // smooth out for FPS dips
+	u.moveSpeedX = u.moveSpeedX + (speedX-u.moveSpeedX)*0.15 // 0.15 = how fast it catches up
+	u.lastX, u.lastY = u.X, u.Y
 }
 func (u *Unit) TakeDamage(damage int) {
 	if u.Stats.Health <= 0 {
@@ -109,45 +112,81 @@ func (u *Unit) TakeDamage(damage int) {
 	}
 
 	u.Stats.Health -= damage
-	u.LastHurtTime = time.Running()
+	u.hurtTimer = u.Stats.HurtTime
 
 	u.Anim.Frames = Characters[u.Character].Animations.Hurt
 	u.Anim.IsLooping, u.Anim.FPS, u.Anim.Time = false, 4, 0
 
 	if u.Stats.Health <= 0 {
 		u.Anim.Frames = Characters[u.Character].Animations.Die
-		u.Anim.IsLooping, u.Anim.FPS, u.Anim.Time = false, 8, 0
+		u.Anim.IsLooping, u.Anim.FPS = false, 8
 		u.HealthBar.FadeOut(1.5)
 	}
 }
 
-func (u *Unit) applyPhysics() {
-	u.VelocityY += Gravity * time.Delta()
+//=================================================================
 
-	if u.Stats.Health > 0 && u.IsGrounded && !u.IsHurting() {
+func (u *Unit) applyState() {
+	if u.State == StateWalk && (!u.IsGrounded || u.moveSpeedX < 0.01) {
+		u.State = StateIdle
+	}
+	if u.State == StateAttackEnd || (u.IsGrounded && u.moveSpeedX > 0.01 && u.UnitFront == nil) {
+		u.State = StateWalk
+	}
+	if u.State == StateAttacking && u.Anim.IsFinished() {
+		u.State = StateAttackEnd
+	}
+	if u.State == StateAttackStart {
+		u.State = StateAttacking
+	}
+	if u.UnitFront != nil && (u.attackTimer < 0 || number.IsNaN(u.attackTimer)) {
+		u.State = StateAttackStart
+	}
+	if u.hurtTimer > 0 {
+		u.State = StateHurt
+	}
+	if u.Stats.Health <= 0 {
+		u.State = StateDead
+	}
+}
+func (u *Unit) actUponState() {
+	switch u.State {
+	case StateIdle:
+		u.Anim.Frames = Characters[u.Character].Animations.Idle
+		u.Anim.IsLooping, u.Anim.FPS = true, 3
+	case StateWalk:
+		u.Anim.Frames = Characters[u.Character].Animations.Walk
+		u.Anim.IsLooping, u.Anim.FPS = true, u.moveSpeedX*0.25
+
 		switch u.Team {
 		case TeamAlly:
 			u.VelocityX = float32(u.Stats.MoveSpeed)
 		case TeamEnemy:
 			u.VelocityX = -float32(u.Stats.MoveSpeed)
 		}
+	case StateAttackStart:
+		u.attackTimer = float32(u.Stats.AttackSpeed) / 10
+		u.Anim.Frames = Characters[u.Character].Animations.AttackStart
+		u.Anim.IsLooping, u.Anim.FPS, u.Anim.Time = false, 8, 0
+	case StateAttacking:
+		if u.Anim.IsFinished() {
+			u.Anim.Frames = Characters[u.Character].Animations.AttackEnd
+			u.Anim.IsLooping, u.Anim.FPS, u.Anim.Time = false, 8, 0
+		}
+	case StateAttackEnd:
+		if u.UnitFront != nil {
+			u.UnitFront.TakeDamage(u.Stats.AttackDamage)
+		}
+	case StateHurt, StateDead: // empty - just prevents running any other code, animations play once upon taking damage
 	}
+}
 
+func (u *Unit) applyPhysics() {
 	if u.IsGrounded {
 		u.VelocityX *= 1.0 - (GroundFrictionPercent / 100.0)
 	}
-
+	u.VelocityY += Gravity * time.Delta()
 	u.X, u.Y = u.X+u.VelocityX*time.Delta(), u.Y+u.VelocityY*time.Delta()
-
-	if u.Stats.Health > 0 && !u.IsHurting() {
-		if !u.IsGrounded || u.currentSpeedX < 0.01 {
-			u.Anim.Frames = Characters[u.Character].Animations.Idle
-			u.Anim.IsLooping, u.Anim.FPS = true, 3
-		} else if u.IsGrounded && u.currentSpeedX > 0.01 {
-			u.Anim.Frames = Characters[u.Character].Animations.Walk
-			u.Anim.IsLooping, u.Anim.FPS = true, u.currentSpeedX*0.25
-		}
-	}
 }
 func (u *Unit) applyCollisions() {
 	var hb = u.Hitbox()
