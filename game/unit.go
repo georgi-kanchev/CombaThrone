@@ -41,7 +41,7 @@ const StateIdle, StateWalk, StateAttackStart, StateAttacking, StateAttackEnd, St
 const TeamAlly, TeamEnemy, TeamNeutral Team = 0, 1, 2
 const DutyLower, DutyMiddle, DutyUpper, DutyGarrison Duty = 0, 1, 2, 3
 const Gravity = 256
-const GroundFrictionPercent = 5.0
+const GroundFrictionPercent = 10.0
 
 func NewUnit(character Character, team Team, duty Duty) *Unit {
 	var char = Characters[character]
@@ -54,11 +54,11 @@ func NewUnit(character Character, team Team, duty Duty) *Unit {
 	var lane = Collisions[duty]
 	switch duty {
 	case DutyLower:
-		unit.X, unit.Y = lane[0].X+lane[0].Width/2-56, lane[0].Y-lane[0].Height/2-unit.Height/2
+		unit.X, unit.Y = lane[0].X+lane[0].Width/2-52, lane[0].Y-lane[0].Height/2-unit.Height/2
 	case DutyMiddle:
-		unit.X, unit.Y = lane[0].X+lane[0].Width/2-88, lane[0].Y-lane[0].Height/2-unit.Height/2
+		unit.X, unit.Y = lane[0].X+lane[0].Width/2-84, lane[0].Y-lane[0].Height/2-unit.Height/2
 	case DutyUpper:
-		unit.X, unit.Y = lane[0].X+lane[0].Width/2-120, lane[0].Y-lane[0].Height/2-unit.Height/2
+		unit.X, unit.Y = lane[0].X+lane[0].Width/2-116, lane[0].Y-lane[0].Height/2-unit.Height/2
 	}
 	if team == TeamAlly {
 		unit.X = -unit.X
@@ -68,8 +68,6 @@ func NewUnit(character Character, team Team, duty Duty) *Unit {
 	unit.HealthBar = NewHealthBar(hb.Width-1, team)
 	return &unit
 }
-
-//=================================================================
 
 func (u *Unit) Hitbox() geometry.Shape {
 	var char = Characters[u.Character]
@@ -86,6 +84,14 @@ func (u *Unit) AttackPoint() (x, y float32) {
 		return hb.X - hb.Width, hb.Y
 	}
 	return hb.X, hb.Y
+}
+func (u *Unit) EnemyEntry() (attack bool, entry *EntryData) {
+	var e *EntryData
+	if u.Team != TeamNeutral && (u.Duty == DutyUpper || u.Duty == DutyMiddle || u.Duty == DutyLower) {
+		e = Entrances[int(3*(1-u.Team))+int(u.Duty)]
+	}
+	attack = e != nil && !e.IsOpen() && e.Health > 0 && number.IsWithin(u.X, e.Tiles[0].X, TileSize/2)
+	return attack, e
 }
 
 //=================================================================
@@ -127,10 +133,13 @@ func (u *Unit) TakeDamage(damage int) {
 //=================================================================
 
 func (u *Unit) applyState() {
-	if u.State == StateWalk && (!u.IsGrounded || u.moveSpeedX < 0.01) {
+	var blocked, _ = u.EnemyEntry()
+	var attack = blocked || (u.UnitFront != nil && u.Team != u.UnitFront.Team)
+
+	if u.State == StateAttackEnd || (u.State == StateWalk && (!u.IsGrounded || u.moveSpeedX < 0.01)) {
 		u.State = StateIdle
 	}
-	if u.State == StateAttackEnd || (u.IsGrounded && u.moveSpeedX > 0.01 && u.UnitFront == nil) {
+	if u.UnitFront == nil && !blocked {
 		u.State = StateWalk
 	}
 	if u.State == StateAttacking && u.Anim.IsFinished() {
@@ -139,7 +148,7 @@ func (u *Unit) applyState() {
 	if u.State == StateAttackStart {
 		u.State = StateAttacking
 	}
-	if u.UnitFront != nil && (u.attackTimer < 0 || number.IsNaN(u.attackTimer)) {
+	if attack && (u.attackTimer < 0 || number.IsNaN(u.attackTimer)) {
 		u.State = StateAttackStart
 	}
 	if u.hurtTimer > 0 {
@@ -176,6 +185,11 @@ func (u *Unit) actUponState() {
 	case StateAttackEnd:
 		if u.UnitFront != nil {
 			u.UnitFront.TakeDamage(u.Stats.AttackDamage)
+		} else {
+			var attack, entry = u.EnemyEntry()
+			if attack && entry != nil {
+				entry.TakeDamage(u.Stats.AttackDamage)
+			}
 		}
 	case StateHurt, StateDead: // empty - just prevents running any other code, animations play once upon taking damage
 	}
@@ -185,6 +199,11 @@ func (u *Unit) applyPhysics() {
 	if u.IsGrounded {
 		u.VelocityX *= 1.0 - (GroundFrictionPercent / 100.0)
 	}
+	var attack, entry = u.EnemyEntry()
+	if attack && entry != nil {
+		u.VelocityX = 0
+	}
+
 	u.VelocityY += Gravity * time.Delta()
 	u.X, u.Y = u.X+u.VelocityX*time.Delta(), u.Y+u.VelocityY*time.Delta()
 }

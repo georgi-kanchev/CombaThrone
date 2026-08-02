@@ -21,15 +21,14 @@ var Map, Grid, AllyBase, EnemyBase, Flags graphics.Object
 var TilesetCrops, UserInterfaceCrops assets.AnimationsId
 var UserInterfaceImg assets.ImageId
 
-var Collisions = make(map[Duty][]geometry.Shape)
-var Masks = map[Duty]geometry.Area{
-	DutyLower:  geometry.NewArea(0, 0, 560, 1000),
-	DutyMiddle: geometry.NewArea(0, 0, 500, 1000),
-	DutyUpper:  geometry.NewArea(0, 0, 432, 1000),
+var Collisions = make([][]geometry.Shape, 3)
+var Masks = [3]geometry.Area{
+	DutyLower:  geometry.NewArea(0, 0, 556, 1000),
+	DutyMiddle: geometry.NewArea(0, 0, 492, 1000),
+	DutyUpper:  geometry.NewArea(0, 0, 428, 1000),
 }
-
+var Entrances [6]*EntryData // index is Ally[Lower, Middle, Upper], Enemy[Lower, Middle, Upper]
 var Units []*Unit
-var Entries []*EntryData
 
 func InitScene() {
 	View = graphics.NewView(5.68)
@@ -52,17 +51,20 @@ func InitScene() {
 	AllyBase = graphics.NewTilemap(1, layers[5])
 	EnemyBase = graphics.NewTilemap(1, layers[6])
 	EnemyBase.Width *= -1
-	Units = append(Units, NewUnit(CharacterMan, TeamAlly, DutyLower))
+
+	Units = append(Units, NewUnit(CharacterMan, TeamAlly, DutyUpper))
+	Units = append(Units, NewUnit(CharacterWoman, TeamEnemy, DutyUpper))
 	Units = append(Units, NewUnit(CharacterWoman, TeamEnemy, DutyMiddle))
 	Units = append(Units, NewUnit(CharacterWoman, TeamEnemy, DutyLower))
 
-	Entries = append(Entries, NewEntry(EntryHole, TeamAlly, DutyUpper))
-	Entries = append(Entries, NewEntry(EntryTallGate, TeamAlly, DutyMiddle))
-	Entries = append(Entries, NewEntry(EntryDoor, TeamAlly, DutyLower))
-
-	Entries = append(Entries, NewEntry(EntryDoor, TeamEnemy, DutyUpper))
-	Entries = append(Entries, NewEntry(EntryShortGate, TeamEnemy, DutyMiddle))
-	Entries = append(Entries, NewEntry(EntryHole, TeamEnemy, DutyLower))
+	Entrances = [6]*EntryData{
+		DutyLower:      NewEntry(EntryDoor, TeamAlly, DutyLower),
+		DutyMiddle:     NewEntry(EntryTallGate, TeamAlly, DutyMiddle),
+		DutyUpper:      NewEntry(EntryHole, TeamAlly, DutyUpper),
+		DutyLower + 3:  NewEntry(EntryDoor, TeamEnemy, DutyLower),
+		DutyMiddle + 3: NewEntry(EntryDoor, TeamEnemy, DutyMiddle),
+		DutyUpper + 3:  NewEntry(EntryDoor, TeamEnemy, DutyUpper),
+	}
 }
 func UpdateScene() {
 	var _, bly = Background.PointFromEdge(0.5, 1)
@@ -81,7 +83,7 @@ func UpdateScene() {
 	View.DrawObject(&EnemyBase)
 	View.DrawObject(&Flags)
 
-	for _, g := range Entries {
+	for _, g := range Entrances {
 		g.Update()
 	}
 	View.DrawObject(&Map)
@@ -96,7 +98,7 @@ func UpdateScene() {
 	for _, u := range Units {
 		u.Update()
 	}
-	for _, g := range Entries {
+	for _, g := range Entrances {
 		g.HealthBar.Update(g.Tiles[0].Shape, g.Health, g.MaxHealth, geometry.Area{})
 	}
 	for _, u := range Units { // health bars take the Z order of the units
@@ -104,10 +106,10 @@ func UpdateScene() {
 	}
 
 	if keyboard.IsKeyJustPressed(key.A) {
-		Entries[2].TakeDamage(110)
+		Entrances[2].TakeDamage(110)
 	}
 	if keyboard.IsKeyJustPressed(key.S) {
-		Units[2].TakeDamage(1)
+		Units = append(Units, NewUnit(CharacterWoman, TeamEnemy, DutyUpper))
 	}
 	if keyboard.IsKeyJustPressed(key.W) {
 		Units[0].VelocityY = -100

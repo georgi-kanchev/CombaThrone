@@ -12,12 +12,12 @@ import (
 
 type Debug uint8
 
-const DebugOff, DebugUnits, DebugGrid, DebugStats = 0, 1, 2, 3
+const DebugOff, DebugGame, DebugProfile = 0, 1, 2
 
 var DebugMode Debug
 
 var DebugUnitColor = color.TagRGBA("rgba(0, 255, 0, 0.3)")
-var DebugHitboxColor = color.TagRGBA("rgba(255, 0, 0, 0.3)")
+var DebugHitboxColor = color.TagRGBA("rgba(255, 0, 0, 0.4)")
 var DebugGridColor = color.TagRGBA("rgba(0, 0, 0, 0.2)")
 var DebugCollisionColor = color.TagRGBA("rgba(0, 255, 255, 0.15)")
 var DebugAttackColor = color.TagRGBA("rgb(255, 255, 255)")
@@ -26,13 +26,15 @@ var DebugHoveredUnit *Unit
 
 func UpdateDebug() {
 	if keyboard.IsKeyJustPressed(key.F3) {
-		DebugMode = number.Wrap(DebugMode+1, 0, 4)
+		DebugMode = number.Wrap(DebugMode+1, 0, 3)
 	}
 
 	switch DebugMode {
 	case DebugOff:
 		View.DrawDebugInfo(false)
-	case DebugUnits:
+	case DebugGame:
+		Grid.Effects.Tint = color.RGBA(0, 0, 0, 50)
+		View.DrawObject(&Grid)
 		View.DrawDebugInfo(false)
 		for _, u := range Units {
 			View.DrawShape(u.X, u.Y, u.Width, u.Height, 0, 0, DebugUnitColor, geometry.Area{})
@@ -59,11 +61,7 @@ func UpdateDebug() {
 				View.DrawShape(s.X, s.Y, s.Width, s.Height, 0, 0, DebugCollisionColor, geometry.Area{})
 			}
 		}
-	case DebugGrid:
-		View.DrawDebugInfo(false)
-		Grid.Effects.Tint = color.RGBA(0, 0, 0, 50)
-		View.DrawObject(&Grid)
-	case DebugStats:
+	case DebugProfile:
 		View.DrawDebugInfo(true)
 	}
 }

@@ -17,15 +17,18 @@ type EntryData struct {
 	HealthBar HealthBar
 
 	MaxHealth, Health int
+
+	originalTileYs  []float32
+	openY, maxOpenY float32
 }
 
 func NewEntry(entry Entry, team Team, duty Duty) *EntryData {
-	var gate = EntryData{Entry: entry, Team: team, Duty: duty}
+	var data = EntryData{Entry: entry, Team: team, Duty: duty, maxOpenY: TileSize + (TileSize * (float32(entry) - 1))}
 	var x, y float32 = -208, 48 // ally upper lane by default
 
 	if entry != EntryHole {
-		gate.HealthBar = NewHealthBar(TileSize-2, team)
-		gate.MaxHealth, gate.Health = 100, 100
+		data.HealthBar = NewHealthBar(TileSize-2, team)
+		data.MaxHealth, data.Health = 100, 100
 	}
 
 	if duty == DutyMiddle {
@@ -40,10 +43,10 @@ func NewEntry(entry Entry, team Team, duty Duty) *EntryData {
 	switch entry {
 	case EntryHole:
 		var hole = graphics.NewSprite(x, y, 1, TilesetCrops.Frame("hole", 0))
-		gate.Tiles = []*graphics.Object{&hole}
+		data.Tiles = []*graphics.Object{&hole}
 	case EntryDoor:
 		var door = graphics.NewSprite(x, y, 1, TilesetCrops.Frame("door", 1))
-		gate.Tiles = []*graphics.Object{&door}
+		data.Tiles = []*graphics.Object{&door}
 	case EntryShortGate:
 		var top0 = graphics.NewSprite(x, y-TileSize, 1, TilesetCrops.Frame("gate-top", 0))
 		var mid0 = graphics.NewSprite(x, y, 1, TilesetCrops.Frame("gate-middle", 0))
@@ -51,7 +54,7 @@ func NewEntry(entry Entry, team Team, duty Duty) *EntryData {
 		var top1 = graphics.NewSprite(x, y-TileSize, 1, TilesetCrops.Frame("gate-top", 1))
 		var mid1 = graphics.NewSprite(x, y, 1, TilesetCrops.Frame("gate-middle", 1))
 		var bot1 = graphics.NewSprite(x, y+TileSize, 1, TilesetCrops.Frame("gate-bottom", 1))
-		gate.Tiles = []*graphics.Object{&top0, &mid0, &bot0, &top1, &mid1, &bot1}
+		data.Tiles = []*graphics.Object{&top0, &mid0, &bot0, &top1, &mid1, &bot1}
 	case EntryTallGate:
 		y -= TileSize / 2
 		var top0 = graphics.NewSprite(x, y-TileSize*1.5, 1, TilesetCrops.Frame("gate-top", 0))
@@ -62,46 +65,82 @@ func NewEntry(entry Entry, team Team, duty Duty) *EntryData {
 		var midU1 = graphics.NewSprite(x, y-TileSize*0.5, 1, TilesetCrops.Frame("gate-middle", 1))
 		var midD1 = graphics.NewSprite(x, y+TileSize*0.5, 1, TilesetCrops.Frame("gate-middle", 1))
 		var bot1 = graphics.NewSprite(x, y+TileSize*1.5, 1, TilesetCrops.Frame("gate-bottom", 1))
-		gate.Tiles = []*graphics.Object{&top0, &midU0, &midD0, &bot0, &top1, &midU1, &midD1, &bot1}
+		data.Tiles = []*graphics.Object{&top0, &midU0, &midD0, &bot0, &top1, &midU1, &midD1, &bot1}
 	}
-	if team == TeamEnemy {
-		for _, o := range gate.Tiles {
-			o.X *= -1
-			o.Width *= -1
+
+	for _, t := range data.Tiles {
+		data.originalTileYs = append(data.originalTileYs, t.Y)
+		if team == TeamEnemy {
+			t.X *= -1
+			t.Width *= -1
 		}
 	}
-	return &gate
+	return &data
 }
 
-func (g *EntryData) TakeDamage(damage int) {
-	if g.Health <= 0 {
+func (e *EntryData) IsOpen() bool {
+	return number.IsWithin(e.openY, e.maxOpenY, 0.1)
+}
+
+//=================================================================
+
+func (e *EntryData) Update() {
+	var sensorDistance = float32(TileSize) * 0.75
+	if e.Entry == EntryDoor {
+		sensorDistance = TileSize
+	}
+	var shortestDistance float32 = sensorDistance
+	for _, u := range Units {
+		var distance = number.Absolute(u.X - e.Tiles[0].X)
+		if e.Team == u.Team && e.Duty == u.Duty && distance < shortestDistance {
+			shortestDistance = distance
+		}
+	}
+	var holdOpenDistance float32 = sensorDistance / 2
+	var distance = number.Limit(shortestDistance-holdOpenDistance, 0, sensorDistance-holdOpenDistance)
+	e.openY = number.Map(distance, sensorDistance-holdOpenDistance, 0, 0, e.maxOpenY)
+
+	switch e.Entry {
+	case EntryDoor:
+		var breakIndex = number.Map(e.Health, 0, e.MaxHealth, 5, 1)
+		if e.IsOpen() {
+			breakIndex = 0
+		}
+		e.Tiles[0].ImageId = TilesetCrops.Frame("door", breakIndex)
+	case EntryShortGate, EntryTallGate:
+
+		for i := len(e.Tiles) / 2; i < len(e.Tiles); i++ {
+			e.Tiles[i].Y = e.originalTileYs[i] + e.openY
+		}
+	}
+
+	for _, t := range e.Tiles {
+		View.DrawObject(t)
+	}
+}
+func (e *EntryData) TakeDamage(damage int) {
+	if e.Health <= 0 {
 		return
 	}
 
-	g.Health -= damage
+	e.Health -= damage
 
-	if g.Health <= 0 {
-		g.HealthBar.FadeOut(1.5)
+	if e.Health <= 0 {
+		e.HealthBar.FadeOut(1.5)
 	}
 
-	var breakIndex = number.Map(g.Health, 0, g.MaxHealth, 5, 1)
-	switch g.Entry {
-	case EntryDoor:
-		g.Tiles[0].ImageId = TilesetCrops.Frame("door", breakIndex)
+	var breakIndex = number.Map(e.Health, 0, e.MaxHealth, 5, 1)
+	switch e.Entry { // EntryDoor done in update
 	case EntryShortGate:
-		g.Tiles[3].ImageId = TilesetCrops.Frame("gate-top", breakIndex)
-		g.Tiles[4].ImageId = TilesetCrops.Frame("gate-middle", breakIndex)
-		g.Tiles[5].ImageId = TilesetCrops.Frame("gate-bottom", breakIndex)
+		e.Tiles[3].ImageId = TilesetCrops.Frame("gate-top", breakIndex)
+		e.Tiles[4].ImageId = TilesetCrops.Frame("gate-middle", breakIndex)
+		e.Tiles[5].ImageId = TilesetCrops.Frame("gate-bottom", breakIndex)
 	case EntryTallGate:
-		g.Tiles[4].ImageId = TilesetCrops.Frame("gate-top", breakIndex)
-		g.Tiles[5].ImageId = TilesetCrops.Frame("gate-middle", breakIndex)
-		g.Tiles[6].ImageId = TilesetCrops.Frame("gate-middle", breakIndex)
-		g.Tiles[7].ImageId = TilesetCrops.Frame("gate-bottom", breakIndex)
+		e.Tiles[4].ImageId = TilesetCrops.Frame("gate-top", breakIndex)
+		e.Tiles[5].ImageId = TilesetCrops.Frame("gate-middle", breakIndex)
+		e.Tiles[6].ImageId = TilesetCrops.Frame("gate-middle", breakIndex)
+		e.Tiles[7].ImageId = TilesetCrops.Frame("gate-bottom", breakIndex)
 	}
 }
 
-func (g *EntryData) Update() {
-	for _, v := range g.Tiles {
-		View.DrawObject(v)
-	}
-}
+//=================================================================

@@ -10,7 +10,7 @@ import (
 	"pure-game-kit/packages/utility/time"
 )
 
-var healthBarColors = map[Team]uint{TeamAlly: palette.Green, TeamEnemy: palette.Red, TeamNeutral: palette.Cyan}
+var healthBarColors = [3]uint{TeamAlly: palette.Green, TeamEnemy: palette.Red, TeamNeutral: palette.Cyan}
 
 type HealthBar struct {
 	background, fill, label graphics.Object

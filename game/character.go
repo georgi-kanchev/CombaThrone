@@ -33,8 +33,8 @@ type CharacterData struct {
 
 const CharacterMan, CharacterWoman Character = 0, 1
 
-var Characters map[Character]CharacterData = map[Character]CharacterData{
-	CharacterMan: CharacterDataMan(), CharacterWoman: CharacterDataWoman(),
+var Characters = [2]CharacterData{
+	CharacterDataMan(), CharacterDataWoman(),
 }
 
 func InitCharacters() {
