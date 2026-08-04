@@ -16,7 +16,7 @@ type Unit struct {
 	graphics.Object
 	Stats     Stats
 	Character Character
-	Duty      Duty
+	Lane      Lane
 	Team      Team
 	Behavior  func(self *Unit)
 	Anim      *motion.Animation[assets.ImageId]
@@ -33,32 +33,32 @@ type Unit struct {
 }
 
 type Team uint8
-type Duty uint8
+type Lane uint8
 type Character uint8
 type State uint8
 
 const StateIdle, StateWalk, StateAttackStart, StateAttacking, StateAttackEnd, StateHurt, StateDead = 0, 1, 2, 3, 4, 5, 6
 const TeamAlly, TeamEnemy, TeamNeutral Team = 0, 1, 2
-const DutyLower, DutyMiddle, DutyUpper, DutyGarrison Duty = 0, 1, 2, 3
+const LaneLower, LaneMiddle, LaneUpper, LaneBridge Lane = 0, 1, 2, 3
 const Gravity = 256
 const GroundFrictionPercent = 10.0
 
-func NewUnit(character Character, team Team, duty Duty) *Unit {
+func NewUnit(character Character, team Team, lane Lane) *Unit {
 	var char = Characters[character]
 	var anim = motion.NewAnimation(0, false, char.Animations.Idle...)
-	var unit = Unit{Object: graphics.NewSprite(-2000, -2000, 1, 0), Character: character, Team: team, Duty: duty,
+	var unit = Unit{Object: graphics.NewSprite(-2000, -2000, 1, 0), Character: character, Team: team, Lane: lane,
 		Behavior: char.Brain, Stats: char.Stats, Anim: &anim, attackTimer: number.NaN(), hurtTimer: number.NaN()}
 
 	unit.draw() // update frame size
 
-	var lane = Collisions[duty]
-	switch duty {
-	case DutyLower:
-		unit.X, unit.Y = lane[0].X+lane[0].Width/2-52, lane[0].Y-lane[0].Height/2-unit.Height/2
-	case DutyMiddle:
-		unit.X, unit.Y = lane[0].X+lane[0].Width/2-84, lane[0].Y-lane[0].Height/2-unit.Height/2
-	case DutyUpper:
-		unit.X, unit.Y = lane[0].X+lane[0].Width/2-116, lane[0].Y-lane[0].Height/2-unit.Height/2
+	var col = Collisions[lane]
+	switch lane {
+	case LaneLower:
+		unit.X, unit.Y = col[0].X+col[0].Width/2-52, col[0].Y-col[0].Height/2-unit.Height/2
+	case LaneMiddle:
+		unit.X, unit.Y = col[0].X+col[0].Width/2-84, col[0].Y-col[0].Height/2-unit.Height/2
+	case LaneUpper:
+		unit.X, unit.Y = col[0].X+col[0].Width/2-116, col[0].Y-col[0].Height/2-unit.Height/2
 	}
 	if team == TeamAlly {
 		unit.X = -unit.X
@@ -75,20 +75,10 @@ func (u *Unit) Hitbox() geometry.Shape {
 	hitbox.X, hitbox.Y = u.X+hitbox.X, u.Y+hitbox.Y
 	return hitbox
 }
-func (u *Unit) AttackPoint() (x, y float32) {
-	var hb = u.Hitbox()
-	if u.Team == TeamAlly {
-		return hb.X + hb.Width, hb.Y
-	}
-	if u.Team == TeamEnemy {
-		return hb.X - hb.Width, hb.Y
-	}
-	return hb.X, hb.Y
-}
 func (u *Unit) EnemyEntry() (attack bool, entry *EntryData) {
 	var e *EntryData
-	if u.Team != TeamNeutral && (u.Duty == DutyUpper || u.Duty == DutyMiddle || u.Duty == DutyLower) {
-		e = Entrances[int(3*(1-u.Team))+int(u.Duty)]
+	if u.Team != TeamNeutral && (u.Lane == LaneUpper || u.Lane == LaneMiddle || u.Lane == LaneLower) {
+		e = Entrances[int(3*(1-u.Team))+int(u.Lane)]
 	}
 	attack = e != nil && !e.IsOpen() && e.Health > 0 && number.IsWithin(u.X, e.Tiles[0].X, TileSize/2)
 	return attack, e
@@ -99,7 +89,7 @@ func (u *Unit) EnemyEntry() (attack bool, entry *EntryData) {
 func (u *Unit) Update() {
 	u.hurtTimer -= time.Delta()
 	u.attackTimer -= time.Delta()
-	u.Mask = Masks[u.Duty] // applied every frame to account for any changes in duty
+	u.Mask = Masks[u.Lane] // applied every frame to account for any changes in lane
 
 	u.applyState()
 	u.actUponState()
@@ -212,8 +202,8 @@ func (u *Unit) applyCollisions() {
 	var diffX, diffY = u.X - hb.X, u.Y - hb.Y // cache hitbox and obj offset
 
 	u.IsGrounded = false
-	if u.VelocityY > 0 { // collide with ground only when falling down (allows jumping up to a lane/other duty)
-		for _, s := range Collisions[u.Duty] {
+	if u.VelocityY > 0 { // collide with ground only when falling down (allows jumping up to a lane)
+		for _, s := range Collisions[u.Lane] {
 			if hb.Overlaps(s) {
 				hb = hb.Collide(s)
 				u.X, u.Y = hb.X+diffX, hb.Y+diffY
@@ -227,7 +217,7 @@ func (u *Unit) applyCollisions() {
 	for _, other := range Units {
 		var ohb = other.Hitbox()
 		var anyoneDead = u.Stats.Health <= 0 || other.Stats.Health <= 0
-		if other == u || u.Duty != other.Duty || anyoneDead || !hb.Overlaps(ohb) {
+		if other == u || u.Lane != other.Lane || anyoneDead || !hb.Overlaps(ohb) {
 			continue
 		}
 		hb = hb.Collide(ohb)

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="18" height="10" tilewidth="32" tileheight="32" infinite="0" nextlayerid="64" nextobjectid="5">
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="18" height="10" tilewidth="32" tileheight="32" infinite="0" nextlayerid="66" nextobjectid="9">
  <tileset firstgid="1" name="tileset" tilewidth="32" tileheight="32" tilecount="240" columns="16">
   <image source="tileset.png" width="512" height="480"/>
  </tileset>
@@ -8,86 +8,46 @@
    eJxjYBgF+IAiECsBsTKF5hgCsREQGwNxEgXmOAKxExA7U+ieQKg5wRSakwjEQRSaAQKFVDADBAAglAQv
   </data>
  </layer>
- <group id="21" name="Fort">
-  <layer id="7" name="Garrisons0" width="18" height="10" visible="0">
-   <data encoding="base64" compression="zlib">
+ <layer id="7" name="Fort" width="18" height="10">
+  <data encoding="base64" compression="zlib">
    eJxjYBgF+AAzELMAMSuF5ggDsQgQiwIxFxBzQmlkNjEAZgYHlC+JJCeJqRwngJkhQYIebIAaZjBQyQwQAABlmwFT
   </data>
-  </layer>
-  <layer id="57" name="Garrisons1" width="18" height="10" visible="0">
-   <data encoding="base64" compression="zlib">
+ </layer>
+ <layer id="57" name="FortGarrisons1" width="18" height="10" visible="0">
+  <data encoding="base64" compression="zlib">
    eJxjYBgF+AAzELMAMSsQs1NgjjAQiwCxKBCLAzEnEHNBMYxNDICZwQE1RxJJThKrDuwAZoYECXqwAWqYwUAlM0AAAJuPAX4=
   </data>
-  </layer>
-  <layer id="20" name="Garrisons2" width="18" height="10" visible="0">
-   <data encoding="base64" compression="zlib">
+ </layer>
+ <layer id="20" name="FortGarrisons2" width="18" height="10" visible="0">
+  <data encoding="base64" compression="zlib">
    eJxjYBgF+AAzELMAMSsQswExO5nmCAOxCBCLArEYEIsDMRcUc0JpYgDMDA4kc2BAkgT3wMyQIEEPNkANMxioZAYIAACziwGO
   </data>
-  </layer>
-  <layer id="23" name="Garrisons3" width="18" height="10" visible="0">
-   <data encoding="base64" compression="zlib">
+ </layer>
+ <layer id="23" name="FortGarrisons3" width="18" height="10" visible="0">
+  <data encoding="base64" compression="zlib">
    eJxjYBgF+AAzELMAMSsQs0ExOxnmCAOxCBCLArEYFIsDMRcQc0JpYgDMDA40c0BAkgT3wMyQIEEPNkANMxioZAYIAADkHwG2
   </data>
-  </layer>
- </group>
- <group id="40" name="Fortress">
-  <layer id="41" name="Garrisons0" width="18" height="10" visible="0">
-   <data encoding="base64" compression="zlib">
+ </layer>
+ <layer id="41" name="Fortress" width="18" height="10" visible="0">
+  <data encoding="base64" compression="zlib">
    eJxjYBiegA2IWYCYlUJzhIFYBIhFgZgLiDmhNDKbGAAzgwPKl0SSk8RUjhPAzKDUHJgZEiTowWUOpWYwUMkMEAAA/icBoA==
   </data>
-  </layer>
-  <layer id="58" name="Garrisons1" width="18" height="10" visible="0">
-   <data encoding="base64" compression="zlib">
+ </layer>
+ <layer id="58" name="FortressGarrisons1" width="18" height="10" visible="0">
+  <data encoding="base64" compression="zlib">
    eJxjYBiegA2IWYCYFYjZKTBHGIhFgFgUiMWBmBOIuaAYxiYGwMzggJojiSQniVUHdgAzg1JzYGZIkKAHlzmUmsFAJTNAAABZDgHi
   </data>
-  </layer>
-  <layer id="42" name="Garrisons2" width="18" height="10" visible="0">
-   <data encoding="base64" compression="zlib">
+ </layer>
+ <layer id="42" name="FortressGarrisons2" width="18" height="10" visible="0">
+  <data encoding="base64" compression="zlib">
    eJxjYBiegA2IWYCYFcpmJ9McYSAWAWJRIBYDYnEg5oJiTihNDICZwYFkDgxIkuAemBmUmgMzQ4IEPbjModQMBiqZAQIAclYB7w==
   </data>
-  </layer>
-  <layer id="43" name="Garrisons3" width="18" height="10" visible="0">
-   <data encoding="base64" compression="zlib">
+ </layer>
+ <layer id="43" name="FortressGarrisons3" width="18" height="10" visible="0">
+  <data encoding="base64" compression="zlib">
    eJxjYBiegA2IWYCYFcoGYXYyzBEGYhEgFgViMSgWB2IuIOaE0sQAmBkcaOaAgCQJ7oGZQak5MDMkSNCDyxxKzWCgkhkgAADFLgIt
   </data>
-  </layer>
- </group>
- <group id="11" name="Gates">
-  <layer id="5" name="Hole" width="18" height="10" visible="0">
-   <data encoding="base64" compression="zlib">
-   eJxjYBgF9AQqVDLDhEpmuFBoDjXMYKCSGSAAAGtvAdU=
-  </data>
-  </layer>
-  <layer id="12" name="Door" width="18" height="10" visible="0">
-   <data encoding="base64" compression="zlib">
-   eJxjYBgF9ARqVDLDjEpmuFFoDjXMYKCSGSAAAHpXAec=
-  </data>
-  </layer>
-  <group id="38" name="Iron Gate" visible="0">
-   <layer id="36" name="Back" width="18" height="10">
-    <data encoding="base64" compression="zlib">
-   eJxjYBgF9ARRVDIji0pmVFFoDjXMYKCSGSAAAP32A7s=
-  </data>
-   </layer>
-   <layer id="13" name="Front" width="18" height="10">
-    <data encoding="base64" compression="zlib">
-   eJxjYBgF9ATRVDIjm0pmVFNoDjXMYKCSGSAAAAV5A8Q=
-  </data>
-   </layer>
-  </group>
-  <group id="37" name="Steel Gate">
-   <layer id="39" name="Back" width="18" height="10">
-    <data encoding="base64" compression="zlib">
-   eJxjYBgFxIAoKpmRRSUzKDUHZkYVFcyh1AwGKpkBAgCqzAT5
-  </data>
-   </layer>
-   <layer id="14" name="Front" width="18" height="10">
-    <data encoding="base64" compression="zlib">
-   eJxjYBgFxIBoKpmRTSUzKDUHZkY1Fcyh1AwGKpkBAgC2bAUF
-  </data>
-   </layer>
-  </group>
- </group>
+ </layer>
  <layer id="46" name="Map" width="18" height="10">
   <data encoding="base64" compression="zlib">
    eJxjYBgFIxkIATETiRiop4FSM9DNosQMZLMAxpACQQ==
@@ -111,5 +71,10 @@
  </objectgroup>
  <objectgroup id="63" name="LaneUpper">
   <object id="1" x="-62" y="245" width="700" height="15"/>
+ </objectgroup>
+ <objectgroup id="65" name="LaneGarrison">
+  <object id="6" x="-62" y="161" width="700" height="9"/>
+  <object id="7" x="-5" y="252" width="128" height="4" rotation="315"/>
+  <object id="8" x="578" y="254.35" width="128" height="4" rotation="225"/>
  </objectgroup>
 </map>

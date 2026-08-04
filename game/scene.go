@@ -18,14 +18,14 @@ var Background graphics.Object
 
 var MapLayer assets.TileLayerId
 var Map, Grid, AllyBase, EnemyBase, Flags graphics.Object
-var TilesetCrops, UserInterfaceCrops assets.AnimationsId
+var TilesetCrops, UserInterfaceCrops assets.AtlasId
 var UserInterfaceImg assets.ImageId
 
-var Collisions = make([][]geometry.Shape, 3)
+var Collisions = make([][]geometry.Shape, 4)
 var Masks = [3]geometry.Area{
-	DutyLower:  geometry.NewArea(0, 0, 556, 1000),
-	DutyMiddle: geometry.NewArea(0, 0, 492, 1000),
-	DutyUpper:  geometry.NewArea(0, 0, 428, 1000),
+	LaneLower:  geometry.NewArea(0, 0, 556, 1000),
+	LaneMiddle: geometry.NewArea(0, 0, 492, 1000),
+	LaneUpper:  geometry.NewArea(0, 0, 428, 1000),
 }
 var Entrances [6]*EntryData // index is Ally[Lower, Middle, Upper], Enemy[Lower, Middle, Upper]
 var Units []*Unit
@@ -34,36 +34,37 @@ func InitScene() {
 	View = graphics.NewView(5.68)
 	Background = graphics.NewSprite(0, 0, 1, assets.LoadImage("data/bgr-field.png"))
 	UserInterfaceImg = assets.LoadImage("data/user-interface.png")
-	UserInterfaceCrops = assets.LoadAnimations(UserInterfaceImg, "data/user-interface.xml")
+	UserInterfaceCrops = assets.LoadAtlas(UserInterfaceImg, "data/user-interface.xml")
 
 	var layers, tileset = assets.LoadTileLayersFromTiled("data/map.tmx")
-	var upper = graphics.NewTilemap(1, layers[20])
-	var middle = graphics.NewTilemap(1, layers[19])
-	var lower = graphics.NewTilemap(1, layers[18])
-	TilesetCrops = assets.LoadAnimations(tileset, "data/tileset.xml")
-	TilesetCrops = assets.LoadAnimations(tileset, "data/tileset.xml")
-	Collisions[DutyLower] = lower.TilemapShapes()
-	Collisions[DutyMiddle] = middle.TilemapShapes()
-	Collisions[DutyUpper] = upper.TilemapShapes()
-	MapLayer = layers[15]
-	Grid, Map = graphics.NewTilemap(1, layers[17]), graphics.NewTilemap(1, MapLayer)
-	Flags = graphics.NewTilemap(1, layers[16])
-	AllyBase = graphics.NewTilemap(1, layers[5])
-	EnemyBase = graphics.NewTilemap(1, layers[6])
+	var bridge = graphics.NewTilemap(layers[15])
+	var upper = graphics.NewTilemap(layers[14])
+	var middle = graphics.NewTilemap(layers[13])
+	var lower = graphics.NewTilemap(layers[12])
+	TilesetCrops = assets.LoadAtlas(tileset, "data/tileset.xml")
+	TilesetCrops = assets.LoadAtlas(tileset, "data/tileset.xml")
+	Collisions[LaneLower] = lower.TilemapShapes()
+	Collisions[LaneMiddle] = middle.TilemapShapes()
+	Collisions[LaneUpper] = upper.TilemapShapes()
+	Collisions[LaneBridge] = bridge.TilemapShapes()
+	MapLayer, Map = layers[9], graphics.NewTilemap(layers[9])
+	Flags, Grid = graphics.NewTilemap(layers[10]), graphics.NewTilemap(layers[11])
+	AllyBase = graphics.NewTilemap(layers[1])
+	EnemyBase = graphics.NewTilemap(layers[1])
 	EnemyBase.Width *= -1
 
-	Units = append(Units, NewUnit(CharacterMan, TeamAlly, DutyUpper))
-	Units = append(Units, NewUnit(CharacterWoman, TeamEnemy, DutyUpper))
-	Units = append(Units, NewUnit(CharacterWoman, TeamEnemy, DutyMiddle))
-	Units = append(Units, NewUnit(CharacterWoman, TeamEnemy, DutyLower))
+	Units = append(Units, NewUnit(CharacterMan, TeamAlly, LaneUpper))
+	Units = append(Units, NewUnit(CharacterWoman, TeamEnemy, LaneUpper))
+	Units = append(Units, NewUnit(CharacterWoman, TeamEnemy, LaneMiddle))
+	Units = append(Units, NewUnit(CharacterWoman, TeamEnemy, LaneLower))
 
 	Entrances = [6]*EntryData{
-		DutyLower:      NewEntry(EntryDoor, TeamAlly, DutyLower),
-		DutyMiddle:     NewEntry(EntryTallGate, TeamAlly, DutyMiddle),
-		DutyUpper:      NewEntry(EntryHole, TeamAlly, DutyUpper),
-		DutyLower + 3:  NewEntry(EntryDoor, TeamEnemy, DutyLower),
-		DutyMiddle + 3: NewEntry(EntryDoor, TeamEnemy, DutyMiddle),
-		DutyUpper + 3:  NewEntry(EntryDoor, TeamEnemy, DutyUpper),
+		LaneLower:      NewEntry(EntryDoor, TeamAlly, LaneLower),
+		LaneMiddle:     NewEntry(EntryTallGate, TeamAlly, LaneMiddle),
+		LaneUpper:      NewEntry(EntryHole, TeamAlly, LaneUpper),
+		LaneLower + 3:  NewEntry(EntryDoor, TeamEnemy, LaneLower),
+		LaneMiddle + 3: NewEntry(EntryDoor, TeamEnemy, LaneMiddle),
+		LaneUpper + 3:  NewEntry(EntryDoor, TeamEnemy, LaneUpper),
 	}
 }
 func UpdateScene() {
@@ -73,7 +74,7 @@ func UpdateScene() {
 	View.Y = (bly - h/2) - 2
 
 	if keyboard.IsKeyJustPressed(key.A) {
-		NewUnit(CharacterWoman, TeamEnemy, DutyUpper)
+		NewUnit(CharacterWoman, TeamEnemy, LaneUpper)
 	}
 
 	View.DrawColor(skyColor)
@@ -109,14 +110,14 @@ func UpdateScene() {
 		Entrances[2].TakeDamage(110)
 	}
 	if keyboard.IsKeyJustPressed(key.S) {
-		Units = append(Units, NewUnit(CharacterWoman, TeamEnemy, DutyUpper))
+		Units = append(Units, NewUnit(CharacterWoman, TeamEnemy, LaneUpper))
 	}
 	if keyboard.IsKeyJustPressed(key.W) {
 		Units[0].VelocityY = -100
-		Units[0].Duty = DutyUpper
+		Units[0].Lane = LaneUpper
 	}
 	if keyboard.IsKeyJustPressed(key.E) {
-		Units = append(Units, NewUnit(CharacterWoman, TeamEnemy, DutyLower))
+		Units = append(Units, NewUnit(CharacterWoman, TeamEnemy, LaneLower))
 	}
 }
 
