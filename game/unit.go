@@ -8,8 +8,9 @@ import (
 	"pure-game-kit/packages/geometry"
 	"pure-game-kit/packages/graphics"
 	"pure-game-kit/packages/motion"
+	"pure-game-kit/packages/utility/collection"
+	"pure-game-kit/packages/utility/color"
 	"pure-game-kit/packages/utility/number"
-	"pure-game-kit/packages/utility/time"
 )
 
 type Unit struct {
@@ -40,8 +41,7 @@ type State uint8
 const StateIdle, StateWalk, StateAttackStart, StateAttacking, StateAttackEnd, StateHurt, StateDead = 0, 1, 2, 3, 4, 5, 6
 const TeamAlly, TeamEnemy, TeamNeutral Team = 0, 1, 2
 const LaneLower, LaneMiddle, LaneUpper, LaneBridge Lane = 0, 1, 2, 3
-const Gravity = 256
-const GroundFrictionPercent = 10.0
+const Gravity, GroundFrictionPercent, DeathFadeOutTime = 256, 10.0, 30.0
 
 func NewUnit(character Character, team Team, lane Lane) *Unit {
 	var char = Characters[character]
@@ -75,8 +75,8 @@ func (u *Unit) Hitbox() geometry.Shape {
 	hitbox.X, hitbox.Y = u.X+hitbox.X, u.Y+hitbox.Y
 	return hitbox
 }
-func (u *Unit) EnemyEntry() (attack bool, entry *EntryData) {
-	var e *EntryData
+func (u *Unit) EnemyEntrance() (attack bool, entrance *EntranceData) {
+	var e *EntranceData
 	if u.Team != TeamNeutral && (u.Lane == LaneUpper || u.Lane == LaneMiddle || u.Lane == LaneLower) {
 		e = Entrances[int(3*(1-u.Team))+int(u.Lane)]
 	}
@@ -87,8 +87,9 @@ func (u *Unit) EnemyEntry() (attack bool, entry *EntryData) {
 //=================================================================
 
 func (u *Unit) Update() {
-	u.hurtTimer -= time.Delta()
-	u.attackTimer -= time.Delta()
+	u.Anim.TimeScale = TimeScale
+	u.hurtTimer -= DeltaTimeScaled()
+	u.attackTimer -= DeltaTimeScaled()
 	u.Mask = Masks[u.Lane] // applied every frame to account for any changes in lane
 
 	u.applyState()
@@ -98,8 +99,11 @@ func (u *Unit) Update() {
 	u.Behavior(u)
 	u.draw()
 
-	var speedX = number.Absolute(u.X-u.lastX) / time.Delta() // smooth out for FPS dips
-	u.moveSpeedX = u.moveSpeedX + (speedX-u.moveSpeedX)*0.15 // 0.15 = how fast it catches up
+	var speedX = number.Absolute(u.X-u.lastX) / DeltaTimeScaled() // smooth out for FPS dips
+	u.moveSpeedX = u.moveSpeedX + (speedX-u.moveSpeedX)*0.15      // 0.15 = how fast it catches up
+	if number.IsNaN(u.moveSpeedX) {
+		u.moveSpeedX = 0
+	}
 	u.lastX, u.lastY = u.X, u.Y
 }
 func (u *Unit) TakeDamage(damage int) {
@@ -123,7 +127,7 @@ func (u *Unit) TakeDamage(damage int) {
 //=================================================================
 
 func (u *Unit) applyState() {
-	var blocked, _ = u.EnemyEntry()
+	var blocked, _ = u.EnemyEntrance()
 	var attack = blocked || (u.UnitFront != nil && u.Team != u.UnitFront.Team)
 
 	if u.State == StateAttackEnd || (u.State == StateWalk && (!u.IsGrounded || u.moveSpeedX < 0.01)) {
@@ -176,12 +180,18 @@ func (u *Unit) actUponState() {
 		if u.UnitFront != nil {
 			u.UnitFront.TakeDamage(u.Stats.AttackDamage)
 		} else {
-			var attack, entry = u.EnemyEntry()
+			var attack, entry = u.EnemyEntrance()
 			if attack && entry != nil {
 				entry.TakeDamage(u.Stats.AttackDamage)
 			}
 		}
-	case StateHurt, StateDead: // empty - just prevents running any other code, animations play once upon taking damage
+	case StateHurt:
+	case StateDead:
+		if u.hurtTimer < -DeathFadeOutTime {
+			Units = collection.Remove(Units, u)
+		} else if u.hurtTimer < 0 {
+			u.Effects.Tint = color.RGBA(255, 255, 255, byte(number.Map(u.hurtTimer, 0, -DeathFadeOutTime, 255, 0)))
+		}
 	}
 }
 
@@ -189,13 +199,13 @@ func (u *Unit) applyPhysics() {
 	if u.IsGrounded {
 		u.VelocityX *= 1.0 - (GroundFrictionPercent / 100.0)
 	}
-	var attack, entry = u.EnemyEntry()
+	var attack, entry = u.EnemyEntrance()
 	if attack && entry != nil {
 		u.VelocityX = 0
 	}
 
-	u.VelocityY += Gravity * time.Delta()
-	u.X, u.Y = u.X+u.VelocityX*time.Delta(), u.Y+u.VelocityY*time.Delta()
+	u.VelocityY += Gravity * DeltaTimeScaled()
+	u.X, u.Y = u.X+u.VelocityX*DeltaTimeScaled(), u.Y+u.VelocityY*DeltaTimeScaled()
 }
 func (u *Unit) applyCollisions() {
 	var hb = u.Hitbox()

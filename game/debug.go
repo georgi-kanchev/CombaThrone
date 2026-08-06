@@ -28,6 +28,12 @@ func UpdateDebug() {
 		DebugMode = number.Wrap(DebugMode+1, 0, 3)
 	}
 
+	for i := 0; i < 10; i++ {
+		if keyboard.IsKeyJustPressed(key.Number0 + i) {
+			TimeScale = float32(i)
+		}
+	}
+
 	switch DebugMode {
 	case DebugOff:
 		View.DrawDebugInfo(false)

@@ -9,9 +9,12 @@ import (
 	"pure-game-kit/packages/utility/collection"
 	"pure-game-kit/packages/utility/color"
 	"pure-game-kit/packages/utility/number"
+	"pure-game-kit/packages/utility/time"
 )
 
 const TileSize, MapCount = 32, 4
+
+var TimeScale float32 = 1
 
 var View graphics.View
 var Background graphics.Object
@@ -27,7 +30,7 @@ var Masks = [3]geometry.Area{
 	LaneMiddle: geometry.NewArea(0, 0, 492, 1000),
 	LaneUpper:  geometry.NewArea(0, 0, 428, 1000),
 }
-var Entrances [6]*EntryData // index is Ally[Lower, Middle, Upper], Enemy[Lower, Middle, Upper]
+var Entrances [6]*EntranceData // index is Ally[Lower, Middle, Upper], Enemy[Lower, Middle, Upper]
 var Units []*Unit
 
 func InitScene() {
@@ -58,13 +61,13 @@ func InitScene() {
 	Units = append(Units, NewUnit(CharacterWoman, TeamEnemy, LaneMiddle))
 	Units = append(Units, NewUnit(CharacterWoman, TeamEnemy, LaneLower))
 
-	Entrances = [6]*EntryData{
-		LaneLower:      NewEntry(EntryDoor, TeamAlly, LaneLower),
-		LaneMiddle:     NewEntry(EntryTallGate, TeamAlly, LaneMiddle),
-		LaneUpper:      NewEntry(EntryHole, TeamAlly, LaneUpper),
-		LaneLower + 3:  NewEntry(EntryDoor, TeamEnemy, LaneLower),
-		LaneMiddle + 3: NewEntry(EntryDoor, TeamEnemy, LaneMiddle),
-		LaneUpper + 3:  NewEntry(EntryDoor, TeamEnemy, LaneUpper),
+	Entrances = [6]*EntranceData{
+		LaneLower:      NewEntrance(EntranceDoor, TeamAlly, LaneLower),
+		LaneMiddle:     NewEntrance(EntranceTallGate, TeamAlly, LaneMiddle),
+		LaneUpper:      NewEntrance(EntranceHole, TeamAlly, LaneUpper),
+		LaneLower + 3:  NewEntrance(EntranceDoor, TeamEnemy, LaneLower),
+		LaneMiddle + 3: NewEntrance(EntranceDoor, TeamEnemy, LaneMiddle),
+		LaneUpper + 3:  NewEntrance(EntranceDoor, TeamEnemy, LaneUpper),
 	}
 }
 func UpdateScene() {
@@ -95,10 +98,12 @@ func UpdateScene() {
 		}
 		return u.Y // fall back to Y sort
 	})
-
 	for _, u := range Units {
-		u.Update()
+		if u != nil { // unit may have died and faded out - removed during an update
+			u.Update()
+		}
 	}
+
 	for _, g := range Entrances {
 		g.HealthBar.Update(g.Tiles[0].Shape, g.Health, g.MaxHealth, geometry.Area{})
 	}
@@ -106,15 +111,8 @@ func UpdateScene() {
 		u.HealthBar.Update(u.Shape, u.Stats.Health, Characters[u.Character].Stats.Health, u.Mask)
 	}
 
-	if keyboard.IsKeyJustPressed(key.A) {
-		Entrances[2].TakeDamage(110)
-	}
 	if keyboard.IsKeyJustPressed(key.S) {
 		Units = append(Units, NewUnit(CharacterWoman, TeamEnemy, LaneUpper))
-	}
-	if keyboard.IsKeyJustPressed(key.W) {
-		Units[0].VelocityY = -100
-		Units[0].Lane = LaneUpper
 	}
 	if keyboard.IsKeyJustPressed(key.E) {
 		Units = append(Units, NewUnit(CharacterWoman, TeamEnemy, LaneLower))
@@ -133,6 +131,10 @@ func CellAtPoint(x, y float32) (cellX, cellY float32) {
 }
 func TileAtCell(cellX, cellY int, layer assets.TileLayerId) assets.Tile {
 	return layer.TileAtCell(cellX, cellY)
+}
+
+func DeltaTimeScaled() float32 {
+	return time.Delta() * TimeScale
 }
 
 // private ========================================================

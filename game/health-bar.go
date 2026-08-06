@@ -7,7 +7,6 @@ import (
 	"pure-game-kit/packages/utility/color/palette"
 	"pure-game-kit/packages/utility/number"
 	"pure-game-kit/packages/utility/text"
-	"pure-game-kit/packages/utility/time"
 )
 
 var healthBarColors = [3]uint{TeamAlly: palette.Green, TeamEnemy: palette.Red, TeamNeutral: palette.Cyan}
@@ -16,6 +15,7 @@ type HealthBar struct {
 	background, fill, label graphics.Object
 
 	fadeOutTimer, fadeOutDuration float32
+	lastHealthValue               int
 }
 
 func NewHealthBar(width float32, team Team) HealthBar {
@@ -43,7 +43,7 @@ func (hb *HealthBar) FadeOut(duration float32) {
 func (hb *HealthBar) Update(target geometry.Shape, health, maxHealth int, mask geometry.Area) {
 	if hb.fadeOutTimer > 0 {
 		var alpha = uint8(number.Map(hb.fadeOutTimer, hb.fadeOutDuration, 0, 255, 0))
-		hb.fadeOutTimer -= time.Delta()
+		hb.fadeOutTimer -= DeltaTimeScaled()
 		hb.background.Effects.Tint = color.RGBA(255, 255, 255, alpha)
 		hb.fill.Effects.Tint = color.RGBA(255, 255, 255, alpha)
 		hb.label.Effects.Tint = color.RGBA(255, 255, 255, alpha)
@@ -57,8 +57,12 @@ func (hb *HealthBar) Update(target geometry.Shape, health, maxHealth int, mask g
 	hb.fill.Width = number.Map(float32(max(health, 0)), 0, float32(maxHealth), 0, hb.background.Width-border)
 	hb.fill.Height = hb.background.Height - border
 	hb.fill.X, hb.fill.Y = hb.background.X-hb.background.Width/2+hb.fill.Width/2+border/2, hb.background.Y
-	hb.label.Text = text.New(health)
 	hb.label.X, hb.label.Y = hb.background.X, hb.background.Y
+
+	if hb.lastHealthValue != health {
+		hb.label.Text = text.New(health)
+	}
+	hb.lastHealthValue = health
 
 	hb.background.Mask, hb.fill.Mask, hb.label.Mask = mask, mask, mask
 	View.DrawObject(&hb.background)
