@@ -41,12 +41,12 @@ func InitCharacters() {
 	var atlas = assets.LoadAtlas(assets.LoadImage("data/units.png"), "data/units.xml")
 
 	for i, c := range Characters {
-		c.Animations.Idle = atlas.Crops(c.AnimationPrefix + "-idle")
-		c.Animations.Walk = atlas.Crops(c.AnimationPrefix + "-walk")
-		c.Animations.AttackStart = atlas.Crops(c.AnimationPrefix + "-attack-start")
-		c.Animations.AttackEnd = atlas.Crops(c.AnimationPrefix + "-attack-end")
-		c.Animations.Hurt = atlas.Crops(c.AnimationPrefix + "-hurt")
-		c.Animations.Die = atlas.Crops(c.AnimationPrefix + "-death")
+		c.Animations.Idle = atlas.Crops(c.AnimationPrefix + "_idle")
+		c.Animations.Walk = atlas.Crops(c.AnimationPrefix + "_walk")
+		c.Animations.AttackStart = atlas.Crops(c.AnimationPrefix + "_attack_start")
+		c.Animations.AttackEnd = atlas.Crops(c.AnimationPrefix + "_attack_end")
+		c.Animations.Hurt = atlas.Crops(c.AnimationPrefix + "_hurt")
+		c.Animations.Die = atlas.Crops(c.AnimationPrefix + "_death")
 		Characters[i] = c
 	}
 }

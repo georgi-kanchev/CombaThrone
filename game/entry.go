@@ -146,14 +146,14 @@ func (e *EntranceData) TakeDamage(damage int) {
 	var breakIndex = number.Map(e.Health, 0, e.MaxHealth, 5, 1)
 	switch e.Entrance { // EntryDoor done in update
 	case EntranceShortGate:
-		e.Tiles[3].ImageId = TilesetCrops.Crops("gate-top")[breakIndex]
-		e.Tiles[4].ImageId = TilesetCrops.Crops("gate-middle")[breakIndex]
-		e.Tiles[5].ImageId = TilesetCrops.Crops("gate-bottom")[breakIndex]
+		e.Tiles[3].ImageId = TilesetCrops.Crops("gate_top")[breakIndex]
+		e.Tiles[4].ImageId = TilesetCrops.Crops("gate_middle")[breakIndex]
+		e.Tiles[5].ImageId = TilesetCrops.Crops("gate_bottom")[breakIndex]
 	case EntranceTallGate:
-		e.Tiles[4].ImageId = TilesetCrops.Crops("gate-top")[breakIndex]
-		e.Tiles[5].ImageId = TilesetCrops.Crops("gate-middle")[breakIndex]
-		e.Tiles[6].ImageId = TilesetCrops.Crops("gate-middle")[breakIndex]
-		e.Tiles[7].ImageId = TilesetCrops.Crops("gate-bottom")[breakIndex]
+		e.Tiles[4].ImageId = TilesetCrops.Crops("gate_top")[breakIndex]
+		e.Tiles[5].ImageId = TilesetCrops.Crops("gate_middle")[breakIndex]
+		e.Tiles[6].ImageId = TilesetCrops.Crops("gate_middle")[breakIndex]
+		e.Tiles[7].ImageId = TilesetCrops.Crops("gate_bottom")[breakIndex]
 	}
 }
 
