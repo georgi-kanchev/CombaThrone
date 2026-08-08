@@ -59,7 +59,7 @@ func InitScene() {
 	Units = append(Units, NewUnit(CharacterMan, TeamAlly, LaneUpper))
 	Units = append(Units, NewUnit(CharacterWoman, TeamEnemy, LaneUpper))
 	Units = append(Units, NewUnit(CharacterWoman, TeamEnemy, LaneMiddle))
-	Units = append(Units, NewUnit(CharacterWoman, TeamEnemy, LaneLower))
+	Units = append(Units, NewUnit(CharacterHunter, TeamEnemy, LaneLower))
 
 	Entrances = [6]*EntranceData{
 		LaneLower:      NewEntrance(EntranceDoor, TeamAlly, LaneLower),
@@ -109,13 +109,6 @@ func UpdateScene() {
 	}
 	for _, u := range Units { // health bars take the Z order of the units
 		u.HealthBar.Update(u.Shape, u.Stats.Health, Characters[u.Character].Stats.Health, u.Mask)
-	}
-
-	if keyboard.IsKeyJustPressed(key.S) {
-		Units = append(Units, NewUnit(CharacterWoman, TeamEnemy, LaneUpper))
-	}
-	if keyboard.IsKeyJustPressed(key.E) {
-		Units = append(Units, NewUnit(CharacterWoman, TeamEnemy, LaneLower))
 	}
 }
 

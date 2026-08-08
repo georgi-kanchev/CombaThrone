@@ -38,7 +38,25 @@ type Lane uint8
 type Character uint8
 type State uint8
 
-const StateIdle, StateWalk, StateAttackStart, StateAttacking, StateAttackEnd, StateHurt, StateDead = 0, 1, 2, 3, 4, 5, 6
+const (
+	StateIdling State = iota
+	StateWalking
+
+	StateHurtStart
+	StateHurting
+
+	StateDyingStart
+	StateDying
+	StateDyingEnd
+	StateDead
+
+	StateAttackStart
+	StateAttackCharging
+	StateAttackTrigger
+	StateAttackRecovering
+	StateAttackEnd
+)
+
 const TeamAlly, TeamEnemy, TeamNeutral Team = 0, 1, 2
 const LaneLower, LaneMiddle, LaneUpper, LaneBridge Lane = 0, 1, 2, 3
 const Gravity, GroundFrictionPercent, DeathFadeOutTime = 256, 10.0, 30.0
@@ -107,57 +125,66 @@ func (u *Unit) Update() {
 	u.lastX, u.lastY = u.X, u.Y
 }
 func (u *Unit) TakeDamage(damage int) {
-	if u.Stats.Health <= 0 {
-		return
-	}
-
-	u.Stats.Health -= damage
-	u.hurtTimer = u.Stats.HurtTime
-
-	u.Anim.Frames = Characters[u.Character].Animations.Hurt
-	u.Anim.IsLooping, u.Anim.FPS, u.Anim.Time = false, 4, 0
-
-	if u.Stats.Health <= 0 {
-		u.Anim.Frames = Characters[u.Character].Animations.Die
-		u.Anim.IsLooping, u.Anim.FPS = false, 8
-		u.HealthBar.FadeOut(1.5)
+	if u.Stats.Health > 0 {
+		u.Stats.Health -= damage
+		u.hurtTimer = u.Stats.HurtTime
 	}
 }
 
 //=================================================================
 
 func (u *Unit) applyState() {
-	var blocked, _ = u.EnemyEntrance()
-	var attack = blocked || (u.UnitFront != nil && u.Team != u.UnitFront.Team)
+	var facingEntrance, _ = u.EnemyEntrance()
+	var hasTarget = facingEntrance || (u.UnitFront != nil && u.Team != u.UnitFront.Team)
+	var canAttack = u.attackTimer < 0 || number.IsNaN(u.attackTimer)
 
-	if u.State == StateAttackEnd || (u.State == StateWalk && (!u.IsGrounded || u.moveSpeedX < 0.01)) {
-		u.State = StateIdle
+	if u.State == StateWalking && (!u.IsGrounded || u.moveSpeedX < 0.01) {
+		u.State = StateIdling
+	} else if u.State == StateIdling && u.UnitFront == nil && !facingEntrance && u.IsGrounded {
+		u.State = StateWalking
 	}
-	if u.UnitFront == nil && !blocked {
-		u.State = StateWalk
-	}
-	if u.State == StateAttacking && u.Anim.IsFinished() {
+
+	if u.State == StateAttackEnd {
+		u.State = StateIdling
+	} else if u.State == StateAttackRecovering && u.Anim.IsJustFinished() {
 		u.State = StateAttackEnd
-	}
-	if u.State == StateAttackStart {
-		u.State = StateAttacking
-	}
-	if attack && (u.attackTimer < 0 || number.IsNaN(u.attackTimer)) {
+	} else if u.State == StateAttackTrigger {
+		u.State = StateAttackRecovering
+	} else if u.State == StateAttackCharging && u.Anim.IsJustFinished() {
+		u.State = StateAttackTrigger
+	} else if u.State == StateAttackStart {
+		u.State = StateAttackCharging
+	} else if (u.State == StateIdling || u.State == StateWalking) && canAttack && hasTarget {
 		u.State = StateAttackStart
 	}
-	if u.hurtTimer > 0 {
-		u.State = StateHurt
+
+	if u.State == StateHurting && u.hurtTimer < 0 {
+		u.State = StateIdling
+	} else if u.State == StateHurtStart {
+		u.State = StateHurting
 	}
-	if u.Stats.Health <= 0 {
+	if u.State != StateDyingStart && u.State != StateDying && u.State != StateDead &&
+		u.State != StateHurting && u.hurtTimer > 0 {
+		u.State = StateHurtStart // can interupt other states
+	}
+
+	if u.State == StateDyingEnd {
 		u.State = StateDead
+	}
+	if u.State == StateDying && u.Anim.IsJustFinished() {
+		u.State = StateDyingEnd
+	} else if u.State == StateDyingStart {
+		u.State = StateDying
+	} else if u.State == StateHurtStart && u.Stats.Health <= 0 {
+		u.State = StateDyingStart
 	}
 }
 func (u *Unit) actUponState() {
 	switch u.State {
-	case StateIdle:
+	case StateIdling:
 		u.Anim.Frames = Characters[u.Character].Animations.Idle
 		u.Anim.IsLooping, u.Anim.FPS = true, 3
-	case StateWalk:
+	case StateWalking:
 		u.Anim.Frames = Characters[u.Character].Animations.Walk
 		u.Anim.IsLooping, u.Anim.FPS = true, u.moveSpeedX*0.25
 
@@ -171,12 +198,10 @@ func (u *Unit) actUponState() {
 		u.attackTimer = float32(u.Stats.AttackSpeed) / 10
 		u.Anim.Frames = Characters[u.Character].Animations.AttackStart
 		u.Anim.IsLooping, u.Anim.FPS, u.Anim.Time = false, 8, 0
-	case StateAttacking:
-		if u.Anim.IsFinished() {
-			u.Anim.Frames = Characters[u.Character].Animations.AttackEnd
-			u.Anim.IsLooping, u.Anim.FPS, u.Anim.Time = false, 8, 0
-		}
-	case StateAttackEnd:
+	case StateAttackTrigger:
+		u.Anim.Frames = Characters[u.Character].Animations.AttackEnd
+		u.Anim.IsLooping, u.Anim.FPS, u.Anim.Time = false, 8, 0
+
 		if u.UnitFront != nil {
 			u.UnitFront.TakeDamage(u.Stats.AttackDamage)
 		} else {
@@ -185,7 +210,16 @@ func (u *Unit) actUponState() {
 				entry.TakeDamage(u.Stats.AttackDamage)
 			}
 		}
-	case StateHurt:
+	case StateAttackCharging, StateAttackRecovering, StateAttackEnd: // empty
+	case StateHurtStart:
+		u.Anim.Frames = Characters[u.Character].Animations.Hurt
+		u.Anim.IsLooping, u.Anim.FPS, u.Anim.Time = false, 5, 0
+	case StateHurting: // empty
+	case StateDyingStart:
+		u.Anim.Frames = Characters[u.Character].Animations.Die
+		u.Anim.IsLooping, u.Anim.FPS, u.Anim.Time = false, 8, 0
+		u.HealthBar.FadeOut(1.5)
+	case StateDying, StateDyingEnd: // empty
 	case StateDead:
 		if u.hurtTimer < -DeathFadeOutTime {
 			Units = collection.Remove(Units, u)

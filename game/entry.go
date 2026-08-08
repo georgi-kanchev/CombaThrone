@@ -49,23 +49,23 @@ func NewEntrance(entry Entrance, team Team, lane Lane) *EntranceData {
 		var door = graphics.NewSprite(x, y, 1, TilesetCrops.Crops("door")[1])
 		data.Tiles = []*graphics.Object{&door}
 	case EntranceShortGate:
-		var top0 = graphics.NewSprite(x, y-TileSize, 1, TilesetCrops.Crops("gate-top")[0])
-		var mid0 = graphics.NewSprite(x, y, 1, TilesetCrops.Crops("gate-middle")[0])
-		var bot0 = graphics.NewSprite(x, y+TileSize, 1, TilesetCrops.Crops("gate-bottom")[0])
-		var top1 = graphics.NewSprite(x, y-TileSize, 1, TilesetCrops.Crops("gate-top")[1])
-		var mid1 = graphics.NewSprite(x, y, 1, TilesetCrops.Crops("gate-middle")[1])
-		var bot1 = graphics.NewSprite(x, y+TileSize, 1, TilesetCrops.Crops("gate-bottom")[1])
+		var top0 = graphics.NewSprite(x, y-TileSize, 1, TilesetCrops.Crops("gate_top")[0])
+		var mid0 = graphics.NewSprite(x, y, 1, TilesetCrops.Crops("gate_middle")[0])
+		var bot0 = graphics.NewSprite(x, y+TileSize, 1, TilesetCrops.Crops("gate_bottom")[0])
+		var top1 = graphics.NewSprite(x, y-TileSize, 1, TilesetCrops.Crops("gate_top")[1])
+		var mid1 = graphics.NewSprite(x, y, 1, TilesetCrops.Crops("gate_middle")[1])
+		var bot1 = graphics.NewSprite(x, y+TileSize, 1, TilesetCrops.Crops("gate_bottom")[1])
 		data.Tiles = []*graphics.Object{&top0, &mid0, &bot0, &top1, &mid1, &bot1}
 	case EntranceTallGate:
 		y -= TileSize / 2
-		var top0 = graphics.NewSprite(x, y-TileSize*1.5, 1, TilesetCrops.Crops("gate-top")[0])
-		var midU0 = graphics.NewSprite(x, y-TileSize*0.5, 1, TilesetCrops.Crops("gate-middle")[0])
-		var midD0 = graphics.NewSprite(x, y+TileSize*0.5, 1, TilesetCrops.Crops("gate-middle")[0])
-		var bot0 = graphics.NewSprite(x, y+TileSize*1.5, 1, TilesetCrops.Crops("gate-bottom")[0])
-		var top1 = graphics.NewSprite(x, y-TileSize*1.5, 1, TilesetCrops.Crops("gate-top")[1])
-		var midU1 = graphics.NewSprite(x, y-TileSize*0.5, 1, TilesetCrops.Crops("gate-middle")[1])
-		var midD1 = graphics.NewSprite(x, y+TileSize*0.5, 1, TilesetCrops.Crops("gate-middle")[1])
-		var bot1 = graphics.NewSprite(x, y+TileSize*1.5, 1, TilesetCrops.Crops("gate-bottom")[1])
+		var top0 = graphics.NewSprite(x, y-TileSize*1.5, 1, TilesetCrops.Crops("gate_top")[0])
+		var midU0 = graphics.NewSprite(x, y-TileSize*0.5, 1, TilesetCrops.Crops("gate_middle")[0])
+		var midD0 = graphics.NewSprite(x, y+TileSize*0.5, 1, TilesetCrops.Crops("gate_middle")[0])
+		var bot0 = graphics.NewSprite(x, y+TileSize*1.5, 1, TilesetCrops.Crops("gate_bottom")[0])
+		var top1 = graphics.NewSprite(x, y-TileSize*1.5, 1, TilesetCrops.Crops("gate_top")[1])
+		var midU1 = graphics.NewSprite(x, y-TileSize*0.5, 1, TilesetCrops.Crops("gate_middle")[1])
+		var midD1 = graphics.NewSprite(x, y+TileSize*0.5, 1, TilesetCrops.Crops("gate_middle")[1])
+		var bot1 = graphics.NewSprite(x, y+TileSize*1.5, 1, TilesetCrops.Crops("gate_bottom")[1])
 		data.Tiles = []*graphics.Object{&top0, &midU0, &midD0, &bot0, &top1, &midU1, &midD1, &bot1}
 	}
 

@@ -6,6 +6,7 @@ package game
 import (
 	"pure-game-kit/packages/assets"
 	"pure-game-kit/packages/geometry"
+	"pure-game-kit/packages/utility/text"
 )
 
 type Animations struct {
@@ -23,30 +24,30 @@ type Stats struct {
 }
 
 type CharacterData struct {
-	Stats           Stats
-	Animations      Animations
-	AnimationPrefix string
-	Hitbox          geometry.Shape
+	Stats      Stats
+	Animations Animations
+	Hitbox     geometry.Shape
 
 	Brain func(self *Unit)
 }
 
-const CharacterMan, CharacterWoman Character = 0, 1
+const CharacterMan, CharacterWoman, CharacterHunter Character = 0, 1, 2
 
-var Characters = [2]CharacterData{
-	CharacterDataMan(), CharacterDataWoman(),
+var Characters = [3]CharacterData{
+	CharacterDataMan(), CharacterDataWoman(), CharacterDataHunter(),
 }
 
 func InitCharacters() {
 	var atlas = assets.LoadAtlas(assets.LoadImage("data/units.png"), "data/units.xml")
 
 	for i, c := range Characters {
-		c.Animations.Idle = atlas.Crops(c.AnimationPrefix + "_idle")
-		c.Animations.Walk = atlas.Crops(c.AnimationPrefix + "_walk")
-		c.Animations.AttackStart = atlas.Crops(c.AnimationPrefix + "_attack_start")
-		c.Animations.AttackEnd = atlas.Crops(c.AnimationPrefix + "_attack_end")
-		c.Animations.Hurt = atlas.Crops(c.AnimationPrefix + "_hurt")
-		c.Animations.Die = atlas.Crops(c.AnimationPrefix + "_death")
+		var prefix = text.ToLowerCase(c.Stats.Name)
+		c.Animations.Idle = atlas.Crops(prefix + "_idle")
+		c.Animations.Walk = atlas.Crops(prefix + "_walk")
+		c.Animations.AttackStart = atlas.Crops(prefix + "_attack_start")
+		c.Animations.AttackEnd = atlas.Crops(prefix + "_attack_end")
+		c.Animations.Hurt = atlas.Crops(prefix + "_hurt")
+		c.Animations.Die = atlas.Crops(prefix + "_death")
 		Characters[i] = c
 	}
 }

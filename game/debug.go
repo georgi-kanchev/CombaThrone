@@ -28,9 +28,17 @@ func UpdateDebug() {
 		DebugMode = number.Wrap(DebugMode+1, 0, 3)
 	}
 
-	for i := 0; i < 10; i++ {
+	if keyboard.IsKeyJustPressed(key.S) {
+		Units[0].TakeDamage(12)
+	}
+
+	for i := range 10 {
 		if keyboard.IsKeyJustPressed(key.Number0 + i) {
-			TimeScale = float32(i)
+			if keyboard.IsKeyPressed(key.Dot) {
+				TimeScale = float32(i) / 10
+			} else {
+				TimeScale = float32(i)
+			}
 		}
 	}
 
@@ -53,7 +61,8 @@ func UpdateDebug() {
 		}
 		var hovered = DebugHoveredUnit
 		if hovered != nil {
-			var states = [7]string{"idling", "walking", "attacking", "attacking", "attacking", "hurting", "dead"}
+			var states = [13]string{"idle", "walk", "hurt", "hurt", "dying", "dying", "dying", "dead",
+				"attack charge", "attack charge", "attack charge", "attack recover", "attack recover"}
 			var info = text.New(states[hovered.State], "\n",
 				"attack timer: ", number.Round(hovered.attackTimer, 1), "\n",
 				"hurt timer: ", number.Round(hovered.hurtTimer, 1))
