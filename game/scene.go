@@ -99,7 +99,7 @@ func UpdateScene() {
 		return u.Y // fall back to Y sort
 	})
 	for _, u := range Units {
-		if u != nil { // unit may have died and faded out - removed during an update
+		if u != nil { // unit may have died, faded out & removed during an update
 			u.Update()
 		}
 	}
