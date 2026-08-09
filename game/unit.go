@@ -24,10 +24,10 @@ type Unit struct {
 	HealthBar HealthBar
 	State     State
 
-	VelocityX, VelocityY float32
-	IsGrounded           bool
+	VelocityX, VelocityY, Z float32
+	IsGrounded              bool
 
-	UnitFront, UnitBehind *Unit
+	UnitFront, UnitBehind, ClosestEnemyInRange *Unit
 
 	lastX, lastY, moveSpeedX float32
 	attackTimer, hurtTimer   float32 // negative values can be used for "time since last"
@@ -71,11 +71,11 @@ func NewUnit(character Character, team Team, lane Lane) *Unit {
 	var col = Collisions[lane]
 	switch lane {
 	case LaneLower:
-		unit.X, unit.Y = col[0].X+col[0].Width/2-52, col[0].Y-col[0].Height/2-unit.Height/2
+		unit.X, unit.Y = col[0].X+col[0].Width/2-40, col[0].Y-col[0].Height/2-unit.Height/2
 	case LaneMiddle:
-		unit.X, unit.Y = col[0].X+col[0].Width/2-84, col[0].Y-col[0].Height/2-unit.Height/2
+		unit.X, unit.Y = col[0].X+col[0].Width/2-72, col[0].Y-col[0].Height/2-unit.Height/2
 	case LaneUpper:
-		unit.X, unit.Y = col[0].X+col[0].Width/2-116, col[0].Y-col[0].Height/2-unit.Height/2
+		unit.X, unit.Y = col[0].X+col[0].Width/2-104, col[0].Y-col[0].Height/2-unit.Height/2
 	}
 	if team == TeamAlly {
 		unit.X = -unit.X
@@ -92,22 +92,25 @@ func (u *Unit) Hitbox() geometry.Shape {
 	hitbox.X, hitbox.Y = u.X+hitbox.X, u.Y+hitbox.Y
 	return hitbox
 }
-func (u *Unit) EnemyEntrance() (attack bool, entrance *EntranceData) {
+func (u *Unit) EnemyEntrance() (attackable bool, entrance *EntranceData) {
 	var e *EntranceData
 	if u.Team != TeamNeutral && (u.Lane == LaneUpper || u.Lane == LaneMiddle || u.Lane == LaneLower) {
 		e = Entrances[int(3*(1-u.Team))+int(u.Lane)]
+		var attackRange = float32(u.Stats.AttackRange) * TileSize
+		var melee = u.Stats.AttackRange == 1 && number.IsWithin(u.X, e.Tiles[0].X, TileSize/2)
+		var ranged = u.Stats.AttackRange > 1 && number.Absolute(u.X-e.Tiles[0].X) < attackRange
+		attackable = !e.IsOpen() && e.Health > 0 && (melee || ranged)
 	}
-	attack = e != nil && !e.IsOpen() && e.Health > 0 && number.IsWithin(u.X, e.Tiles[0].X, TileSize/2)
-	return attack, e
+	return attackable, e
 }
-
-//=================================================================
 
 func (u *Unit) Update() {
 	u.Anim.TimeScale = TimeScale
 	u.hurtTimer -= DeltaTimeScaled()
 	u.attackTimer -= DeltaTimeScaled()
 	u.Mask = Masks[u.Lane] // applied every frame to account for any changes in lane
+
+	u.Z = map[Lane]float32{LaneUpper: 2, LaneMiddle: 1, LaneLower: 0}[u.Lane]
 
 	u.applyState()
 	u.actUponState()
@@ -130,16 +133,35 @@ func (u *Unit) TakeDamage(damage int) {
 	}
 }
 
-//=================================================================
-
 func (u *Unit) applyState() {
-	var facingEntrance, _ = u.EnemyEntrance()
-	var hasTarget = facingEntrance || (u.UnitFront != nil && u.Team != u.UnitFront.Team)
+	var attackable, entrance = u.EnemyEntrance()
 	var canAttack = u.attackTimer < 0 || number.IsNaN(u.attackTimer)
+	var enemyEntranceInRange = attackable && entrance != nil
+	var hasMeleeTarget = u.UnitFront != nil && u.Team != u.UnitFront.Team
+	var melee = canAttack && (hasMeleeTarget || enemyEntranceInRange) && u.Stats.AttackRange == 1
+
+	var closestDistX = number.ValueBiggest[float32]()
+	var attackRange = float32(u.Stats.AttackRange) * TileSize
+	u.ClosestEnemyInRange = nil
+	for _, t := range Units {
+		if u == t || t.Stats.Health <= 0 {
+			continue
+		}
+		var distX = number.Absolute(t.X - u.X)
+		var allyEnemy, enemyAlly = u.Team == TeamAlly && t.Team == TeamEnemy, u.Team == TeamEnemy && t.Team == TeamAlly
+		var isEnemy = allyEnemy || enemyAlly
+		var isInFront = (allyEnemy && u.X < t.X) || (enemyAlly && u.X > t.X)
+		var closeEnough = distX < attackRange
+		if isInFront && isEnemy && distX < closestDistX && closeEnough {
+			closestDistX = distX
+			u.ClosestEnemyInRange = t
+		}
+	}
+	var ranged = u.Stats.AttackRange > 1 && (u.ClosestEnemyInRange != nil || enemyEntranceInRange)
 
 	if u.State == StateWalking && (!u.IsGrounded || u.moveSpeedX < 0.01) {
 		u.State = StateIdling
-	} else if u.State == StateIdling && u.UnitFront == nil && !facingEntrance && u.IsGrounded {
+	} else if u.State == StateIdling && u.UnitFront == nil && !attackable && u.IsGrounded {
 		u.State = StateWalking
 	}
 
@@ -153,8 +175,14 @@ func (u *Unit) applyState() {
 		u.State = StateAttackTrigger
 	} else if u.State == StateAttackStart {
 		u.State = StateAttackCharging
-	} else if (u.State == StateIdling || u.State == StateWalking) && canAttack && hasTarget {
+	} else if (u.State == StateIdling || u.State == StateWalking) && melee {
 		u.State = StateAttackStart
+	} else if (u.State == StateIdling || u.State == StateWalking) && ranged {
+		if canAttack {
+			u.State = StateAttackStart
+		} else {
+			u.State = StateIdling // enemy in range but waiting for attack timer (stay in one place, don't keep walking)
+		}
 	}
 
 	if u.State == StateHurting && u.hurtTimer < 0 {
@@ -201,13 +229,23 @@ func (u *Unit) actUponState() {
 		u.Anim.Frames = Characters[u.Character].Animations.AttackEnd
 		u.Anim.IsLooping, u.Anim.FPS, u.Anim.Time = false, 8, 0
 
-		if u.UnitFront != nil {
-			u.UnitFront.TakeDamage(u.Stats.AttackDamage)
-		} else {
-			var attack, entry = u.EnemyEntrance()
-			if attack && entry != nil {
-				entry.TakeDamage(u.Stats.AttackDamage)
+		var dmg = u.Stats.AttackDamage
+		var attackable, entrance = u.EnemyEntrance()
+		if u.Stats.AttackRange == 1 {
+			if u.UnitFront != nil {
+				u.UnitFront.TakeDamage(dmg)
+			} else if attackable && entrance != nil {
+				entrance.TakeDamage(dmg)
 			}
+			break
+		}
+		var t = u.ClosestEnemyInRange
+		if t != nil {
+			Projectiles = append(Projectiles, NewProjectile(u.X, u.Y, u.Z, t.X, t.Y+t.Height/2-8, t.Z, dmg, entrance))
+		} else if attackable && entrance != nil {
+			var x, y = entrance.Tiles[0].X, entrance.Tiles[0].Y
+			var z = map[Lane]float32{LaneLower: 0, LaneMiddle: 1, LaneUpper: 2}[entrance.Lane]
+			Projectiles = append(Projectiles, NewProjectile(u.X, u.Y, u.Z, x, y, z, dmg, entrance))
 		}
 	case StateAttackCharging, StateAttackRecovering, StateAttackEnd: // empty
 	case StateHurtStart:
@@ -277,6 +315,11 @@ func (u *Unit) draw() {
 	var crop = frame.CropArea()
 
 	u.ImageId, u.Width, u.Height = frame, crop.Width, crop.Height
+
+	if u.Stats.Health > 0 {
+		DrawShadow(u.X, u.Z, u.Width*0.6, u.Height*0.1, 0, u.Mask)
+	}
+
 	if u.Team == TeamEnemy {
 		u.Width = -crop.Width
 	}

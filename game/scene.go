@@ -36,6 +36,7 @@ var Masks = [3]geometry.Area{
 }
 var Entrances [6]*EntranceData // index is Ally[Lower, Middle, Upper], Enemy[Lower, Middle, Upper]
 var Units []*Unit
+var Projectiles []*Projectile
 
 func InitScene() {
 	View = graphics.NewView(5.68)
@@ -112,6 +113,12 @@ func UpdateScene() {
 	for _, u := range Units { // health bars take the Z order of the units
 		u.HealthBar.Update(u.Shape, u.Stats.Health, Characters[u.Character].Stats.Health, u.Mask)
 	}
+
+	for _, p := range Projectiles {
+		if p != nil { // projectile may have been destroyed, faded out & removed during an update
+			p.Update()
+		}
+	}
 }
 
 func PointAtCell(cellX, cellY float32) (x, y float32) {
@@ -130,6 +137,12 @@ func TileAtCell(cellX, cellY int, layer assets.TileLayerId) assets.Tile {
 
 func DeltaTimeScaled() float32 {
 	return time.Delta() * TimeScale
+}
+
+func DrawShadow(x, z, width, height, angle float32, mask geometry.Area) {
+	var lower, upper = Collisions[LaneLower][0], Collisions[LaneUpper][0]
+	var y = number.Map(z, 0, 2, lower.Y-lower.Height/2, upper.Y-upper.Height/2)
+	View.DrawShape(x, y, width, height, angle, 1, color.RGBA(0, 0, 0, 100), mask)
 }
 
 // private ========================================================
