@@ -35,10 +35,6 @@ func NewProjectile(x, y, z, targetX, targetY, targetZ float32, damage int, targe
 		TargetX: targetX, TargetY: targetY + random.Range[float32](-6, 6), TargetZ: targetZ,
 		TravelTime: totalTime, ArcHeight: 40.0, Damage: damage, enemyEntrance: targetEntrance,
 	}
-
-	if targetX < x {
-		proj.Width *= -1
-	}
 	return proj
 }
 
@@ -57,7 +53,23 @@ func (p *Projectile) Update() {
 	var velX = p.TargetX - p.StartX
 	var velY = (p.TargetY - p.StartY) - 4*p.ArcHeight*(1-2*progress)
 
-	p.Angle = angle.BetweenPoints(0, 0, velX, velY) + 180
+	p.Angle = angle.BetweenPoints(0, 0, velX, velY)
+
+	if progress > 0.2 && progress < 1.0 {
+		for _, u := range Units {
+			if u.Stats.Health <= 0 {
+				continue
+			}
+
+			var hb = u.Hitbox()
+			if p.Shape.Overlaps(hb) && number.IsWithin(p.Z, u.Z, 0.2) {
+				p.trigger = true
+				u.TakeDamage(p.Damage)
+				Projectiles = collection.Remove(Projectiles, p)
+				return
+			}
+		}
+	}
 
 	if progress < 1.0 {
 		var shadowAngle = p.Angle
@@ -67,21 +79,9 @@ func (p *Projectile) Update() {
 		DrawShadow(groundX, p.Z, number.Absolute(p.Width), p.Height*0.25, shadowAngle, p.Mask)
 	} else {
 		var e = p.enemyEntrance
-		if !p.trigger {
+		if !p.trigger && e != nil && !e.IsOpen() && e.Health > 0 && number.IsWithin(p.X, e.Tiles[0].X, TileSize/2) {
 			p.trigger = true
-
-			if e != nil && !e.IsOpen() && e.Health > 0 && number.IsWithin(p.X, e.Tiles[0].X, TileSize/2) {
-				e.TakeDamage(p.Damage)
-			} else {
-				for _, u := range Units {
-					var hb = u.Hitbox()
-					if number.IsWithin(p.X, u.X, hb.Width/2) && number.IsWithin(p.Z, u.Z, 0.2) {
-						u.TakeDamage(p.Damage)
-						Projectiles = collection.Remove(Projectiles, p)
-						break
-					}
-				}
-			}
+			e.TakeDamage(p.Damage)
 		}
 
 		var alpha = min(255, number.Map(p.Age, p.TravelTime, p.TravelTime+ProjectileFadeOutTime, 255, 0))

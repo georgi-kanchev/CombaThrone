@@ -63,6 +63,7 @@ func InitScene() {
 	Units = append(Units, NewUnit(CharacterWoman, TeamEnemy, LaneUpper))
 	Units = append(Units, NewUnit(CharacterWoman, TeamEnemy, LaneMiddle))
 	Units = append(Units, NewUnit(CharacterHunter, TeamEnemy, LaneLower))
+	Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneMiddle))
 
 	Entrances = [6]*EntranceData{
 		LaneLower:      NewEntrance(EntranceDoor, TeamAlly, LaneLower),
@@ -107,6 +108,12 @@ func UpdateScene() {
 		}
 	}
 
+	for _, p := range Projectiles {
+		if p != nil { // projectile may have been destroyed, faded out & removed during an update
+			p.Update()
+		}
+	}
+
 	for _, g := range Entrances {
 		g.HealthBar.Update(g.Tiles[0].Shape, g.Health, g.MaxHealth, geometry.Area{})
 	}
@@ -114,11 +121,6 @@ func UpdateScene() {
 		u.HealthBar.Update(u.Shape, u.Stats.Health, Characters[u.Character].Stats.Health, u.Mask)
 	}
 
-	for _, p := range Projectiles {
-		if p != nil { // projectile may have been destroyed, faded out & removed during an update
-			p.Update()
-		}
-	}
 }
 
 func PointAtCell(cellX, cellY float32) (x, y float32) {

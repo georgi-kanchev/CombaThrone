@@ -159,13 +159,13 @@ func (u *Unit) applyState() {
 	}
 	var ranged = u.Stats.AttackRange > 1 && (u.ClosestEnemyInRange != nil || enemyEntranceInRange)
 
-	if u.State == StateWalking && (!u.IsGrounded || u.moveSpeedX < 0.01) {
+	if u.State == StateWalking && u.Stats.Health > 0 && (!u.IsGrounded || u.moveSpeedX < 0.01) {
 		u.State = StateIdling
-	} else if u.State == StateIdling && u.UnitFront == nil && !attackable && u.IsGrounded {
+	} else if u.State == StateIdling && u.UnitFront == nil && !attackable && u.IsGrounded && u.Stats.Health > 0 {
 		u.State = StateWalking
 	}
 
-	if u.State == StateAttackEnd {
+	if u.State == StateAttackEnd && u.Stats.Health > 0 {
 		u.State = StateIdling
 	} else if u.State == StateAttackRecovering && u.Anim.IsJustFinished() {
 		u.State = StateAttackEnd
@@ -180,12 +180,14 @@ func (u *Unit) applyState() {
 	} else if (u.State == StateIdling || u.State == StateWalking) && ranged {
 		if canAttack {
 			u.State = StateAttackStart
-		} else {
+		} else if u.Stats.Health > 0 {
 			u.State = StateIdling // enemy in range but waiting for attack timer (stay in one place, don't keep walking)
 		}
 	}
 
-	if u.State == StateHurting && u.hurtTimer < 0 {
+	if u.State == StateHurting && u.Stats.Health <= 0 {
+		u.State = StateDyingStart // bug fix for units sometimes staying alive
+	} else if u.State == StateHurting && u.hurtTimer < 0 && u.Stats.Health > 0 {
 		u.State = StateIdling
 	} else if u.State == StateHurtStart {
 		u.State = StateHurting
