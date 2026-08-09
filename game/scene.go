@@ -14,6 +14,10 @@ import (
 
 const TileSize, MapCount = 32, 4
 
+const LaneLower, LaneMiddle, LaneUpper Lane = 0, 1, 2
+const LaneLowerGarrison, LaneMiddleGarrison, LaneUpperGarrison Lane = 3, 4, 5
+const LaneGarrison1, LaneGarrison2, LaneGarrison3 Lane = 6, 7, 8
+
 var TimeScale float32 = 1
 
 var View graphics.View
@@ -40,7 +44,6 @@ func InitScene() {
 	UserInterfaceCrops = assets.LoadAtlas(UserInterfaceImg, "data/user-interface.xml")
 
 	var layers, tileset = assets.LoadTileLayersFromTiled("data/map.tmx")
-	var bridge = graphics.NewTilemap(layers[15])
 	var upper = graphics.NewTilemap(layers[14])
 	var middle = graphics.NewTilemap(layers[13])
 	var lower = graphics.NewTilemap(layers[12])
@@ -49,7 +52,6 @@ func InitScene() {
 	Collisions[LaneLower] = lower.TilemapShapes()
 	Collisions[LaneMiddle] = middle.TilemapShapes()
 	Collisions[LaneUpper] = upper.TilemapShapes()
-	Collisions[LaneBridge] = bridge.TilemapShapes()
 	MapLayer, Map = layers[9], graphics.NewTilemap(layers[9])
 	Flags, Grid = graphics.NewTilemap(layers[10]), graphics.NewTilemap(layers[11])
 	AllyBase = graphics.NewTilemap(layers[1])

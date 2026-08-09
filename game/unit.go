@@ -38,7 +38,7 @@ type Lane uint8
 type Character uint8
 type State uint8
 
-const (
+const ( // states that end on 'ing' are continuous, single frame otherwise
 	StateIdling State = iota
 	StateWalking
 
@@ -48,7 +48,7 @@ const (
 	StateDyingStart
 	StateDying
 	StateDyingEnd
-	StateDead
+	StateDecaying
 
 	StateAttackStart
 	StateAttackCharging
@@ -58,7 +58,6 @@ const (
 )
 
 const TeamAlly, TeamEnemy, TeamNeutral Team = 0, 1, 2
-const LaneLower, LaneMiddle, LaneUpper, LaneBridge Lane = 0, 1, 2, 3
 const Gravity, GroundFrictionPercent, DeathFadeOutTime = 256, 10.0, 30.0
 
 func NewUnit(character Character, team Team, lane Lane) *Unit {
@@ -163,13 +162,13 @@ func (u *Unit) applyState() {
 	} else if u.State == StateHurtStart {
 		u.State = StateHurting
 	}
-	if u.State != StateDyingStart && u.State != StateDying && u.State != StateDead &&
+	if u.State != StateDyingStart && u.State != StateDying && u.State != StateDecaying &&
 		u.State != StateHurting && u.hurtTimer > 0 {
 		u.State = StateHurtStart // can interupt other states
 	}
 
 	if u.State == StateDyingEnd {
-		u.State = StateDead
+		u.State = StateDecaying
 	}
 	if u.State == StateDying && u.Anim.IsJustFinished() {
 		u.State = StateDyingEnd
@@ -220,7 +219,7 @@ func (u *Unit) actUponState() {
 		u.Anim.IsLooping, u.Anim.FPS, u.Anim.Time = false, 8, 0
 		u.HealthBar.FadeOut(1.5)
 	case StateDying, StateDyingEnd: // empty
-	case StateDead:
+	case StateDecaying:
 		if u.hurtTimer < -DeathFadeOutTime {
 			Units = collection.Remove(Units, u)
 		} else if u.hurtTimer < 0 {
