@@ -11,6 +11,7 @@ import (
 	"pure-game-kit/packages/utility/collection"
 	"pure-game-kit/packages/utility/color"
 	"pure-game-kit/packages/utility/number"
+	"pure-game-kit/packages/utility/random"
 )
 
 type Unit struct {
@@ -23,6 +24,8 @@ type Unit struct {
 	Anim      *motion.Animation[assets.ImageId]
 	HealthBar HealthBar
 	State     State
+
+	Blood *motion.ParticleSystem
 
 	VelocityX, VelocityY, Z float32
 
@@ -67,6 +70,36 @@ func NewUnit(character Character, team Team, lane Lane) *Unit {
 	var anim = motion.NewAnimation(0, false, char.Animations.Idle...)
 	var unit = Unit{Object: graphics.NewSprite(-2000, -2000, 1, 0), Character: character, Team: team, Lane: lane,
 		Behavior: char.Brain, Stats: char.Stats, Anim: &anim, attackTimer: number.NaN(), hurtTimer: number.NaN()}
+
+	unit.Blood = motion.NewParticleSystem(func(p *motion.Particle) (alive bool) {
+		if p.Age == 0 {
+			p.Scale = random.Range[float32](0.2, 3)
+			p.VelocityX = random.Range[float32](30, 50)
+			p.VelocityY = random.Range[float32](-20, 20)
+			p.Color = random.Range[uint](128, 255) // only red
+
+			if team == TeamAlly {
+				p.VelocityX *= -1
+			}
+		}
+
+		var dt = DeltaTimeScaled()
+		p.Age += dt
+		p.VelocityY += Gravity / 2 * dt
+
+		p.X += p.VelocityX * dt
+		p.Y += p.VelocityY * dt
+
+		if p.Y > unit.Y+unit.Height/2 {
+			p.Y = unit.Y + unit.Height/2
+			p.VelocityX, p.VelocityY = 0, 0
+		}
+
+		var alpha = number.Map(p.Age, 0, 1.5, 255, 0)
+		var col = color.RGBA(byte(p.Color), 0, 0, byte(number.Limit(alpha, 0, 255)))
+		View.DrawShape(p.X, p.Y, p.Scale, p.Scale, 0, 1, col, unit.Mask)
+		return p.Age < 1.5
+	})
 
 	unit.draw() // update frame size
 
@@ -128,6 +161,7 @@ func (u *Unit) Update() {
 	u.applyCollisions()
 	u.Behavior(u)
 	u.draw()
+	u.Blood.Update()
 
 	var speedX = number.Absolute(u.X-u.lastX) / DeltaTimeScaled() // smooth out for FPS dips
 	u.moveSpeedX = u.moveSpeedX + (speedX-u.moveSpeedX)*0.15      // 0.15 = how fast it catches up
@@ -226,6 +260,7 @@ func (u *Unit) actUponState() {
 	case StateIdling:
 		u.Anim.Frames = Characters[u.Character].Animations.Idle
 		u.Anim.IsLooping, u.Anim.FPS = true, 3
+		u.VelocityX = 0
 
 		var arrived = u.moveSpeedX != 0 && u.moveSpeedX < 0.01
 		if arrived && (u.Lane == LaneLowerGarrison || u.Lane == LaneMiddleGarrison || u.Lane == LaneUpperGarrison) {
@@ -273,12 +308,14 @@ func (u *Unit) actUponState() {
 		u.Anim.Frames = Characters[u.Character].Animations.Hurt
 		u.Anim.IsLooping, u.Anim.FPS, u.Anim.Time = false, 5, 0
 		u.VelocityX = 0
+		u.Blood.EmitFromLine(30, u.X, u.Y-6, u.X, u.Y+6)
 	case StateHurting: // empty
 	case StateDyingStart:
 		u.Anim.Frames = Characters[u.Character].Animations.Die
 		u.Anim.IsLooping, u.Anim.FPS, u.Anim.Time = false, 8, 0
 		u.HealthBar.FadeOut(1.5)
 		u.VelocityX = 0
+		u.Blood.EmitFromLine(30, u.X, u.Y-6, u.X, u.Y+6)
 	case StateDying, StateDyingEnd: // empty
 	case StateDecaying:
 		if u.hurtTimer < -DeathFadeOutTime {

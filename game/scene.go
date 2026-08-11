@@ -74,7 +74,7 @@ func InitScene() {
 	EnemyBase = graphics.NewTilemap(layers[1])
 	EnemyBase.Width *= -1
 
-	// Units = append(Units, NewUnit(CharacterMan, TeamAlly, LaneUpper))
+	Units = append(Units, NewUnit(CharacterMan, TeamAlly, LaneUpper))
 	Units = append(Units, NewUnit(CharacterWoman, TeamEnemy, LaneUpper))
 	Units = append(Units, NewUnit(CharacterWoman, TeamEnemy, LaneMiddle))
 	Units = append(Units, NewUnit(CharacterHunter, TeamEnemy, LaneLower))
