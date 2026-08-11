@@ -25,7 +25,9 @@ type Unit struct {
 	State     State
 
 	VelocityX, VelocityY, Z float32
-	IsGrounded              bool
+
+	IsGrounded   bool
+	IsAtGarrison bool // cannot attack before garrison position - once there, can never move again (only attack)
 
 	UnitFront, UnitBehind, ClosestEnemyInRange *Unit
 
@@ -58,7 +60,7 @@ const ( // states that end on 'ing' are continuous, single frame otherwise
 )
 
 const TeamAlly, TeamEnemy, TeamNeutral Team = 0, 1, 2
-const Gravity, GroundFrictionPercent, DeathFadeOutTime = 256, 10.0, 30.0
+const Gravity, GroundFrictionPercent, DeathFadeOutTime = 256, 15.0, 30.0
 
 func NewUnit(character Character, team Team, lane Lane) *Unit {
 	var char = Characters[character]
@@ -76,6 +78,9 @@ func NewUnit(character Character, team Team, lane Lane) *Unit {
 		unit.X, unit.Y = col[0].X+col[0].Width/2-72, col[0].Y-col[0].Height/2-unit.Height/2
 	case LaneUpper:
 		unit.X, unit.Y = col[0].X+col[0].Width/2-104, col[0].Y-col[0].Height/2-unit.Height/2
+	case LaneLowerGarrison, LaneMiddleGarrison, LaneUpperGarrison:
+		var upper = Collisions[LaneUpper]
+		unit.X, unit.Y = upper[0].X+upper[0].Width/2-40, upper[0].Y-upper[0].Height/2-unit.Height/2
 	}
 	if team == TeamAlly {
 		unit.X = -unit.X
@@ -110,7 +115,12 @@ func (u *Unit) Update() {
 	u.attackTimer -= DeltaTimeScaled()
 	u.Mask = Masks[u.Lane] // applied every frame to account for any changes in lane
 
-	u.Z = map[Lane]float32{LaneUpper: 2, LaneMiddle: 1, LaneLower: 0}[u.Lane]
+	if u.Lane == LaneLowerGarrison || u.Lane == LaneMiddleGarrison || u.Lane == LaneUpperGarrison {
+		u.Mask = geometry.NewArea(u.X, u.Y-u.Height/2, u.Width, u.Height*1.7)
+	}
+
+	u.Z = map[Lane]float32{LaneLower: 0, LaneMiddle: 1, LaneUpper: 2,
+		LaneLowerGarrison: 0, LaneMiddleGarrison: 1, LaneUpperGarrison: 3}[u.Lane]
 
 	u.applyState()
 	u.actUponState()
@@ -158,10 +168,13 @@ func (u *Unit) applyState() {
 		}
 	}
 	var ranged = u.Stats.AttackRange > 1 && (u.ClosestEnemyInRange != nil || enemyEntranceInRange)
+	var isGarrison = u.Lane == LaneLowerGarrison || u.Lane == LaneMiddleGarrison || u.Lane == LaneUpperGarrison
+	var garrisonOrNot = !isGarrison || (isGarrison && u.IsAtGarrison)
 
 	if u.State == StateWalking && u.Stats.Health > 0 && (!u.IsGrounded || u.moveSpeedX < 0.01) {
 		u.State = StateIdling
-	} else if u.State == StateIdling && u.UnitFront == nil && !attackable && u.IsGrounded && u.Stats.Health > 0 {
+	} else if u.State == StateIdling && u.UnitFront == nil && !attackable &&
+		u.IsGrounded && u.Stats.Health > 0 && !u.IsAtGarrison {
 		u.State = StateWalking
 	}
 
@@ -177,7 +190,7 @@ func (u *Unit) applyState() {
 		u.State = StateAttackCharging
 	} else if (u.State == StateIdling || u.State == StateWalking) && melee {
 		u.State = StateAttackStart
-	} else if (u.State == StateIdling || u.State == StateWalking) && ranged {
+	} else if (u.State == StateIdling || u.State == StateWalking) && ranged && garrisonOrNot {
 		if canAttack {
 			u.State = StateAttackStart
 		} else if u.Stats.Health > 0 {
@@ -213,6 +226,11 @@ func (u *Unit) actUponState() {
 	case StateIdling:
 		u.Anim.Frames = Characters[u.Character].Animations.Idle
 		u.Anim.IsLooping, u.Anim.FPS = true, 3
+
+		var arrived = u.moveSpeedX != 0 && u.moveSpeedX < 0.01
+		if arrived && (u.Lane == LaneLowerGarrison || u.Lane == LaneMiddleGarrison || u.Lane == LaneUpperGarrison) {
+			u.IsAtGarrison = true
+		}
 	case StateWalking:
 		u.Anim.Frames = Characters[u.Character].Animations.Walk
 		u.Anim.IsLooping, u.Anim.FPS = true, u.moveSpeedX*0.25
@@ -227,6 +245,7 @@ func (u *Unit) actUponState() {
 		u.attackTimer = float32(u.Stats.AttackSpeed) / 10
 		u.Anim.Frames = Characters[u.Character].Animations.AttackStart
 		u.Anim.IsLooping, u.Anim.FPS, u.Anim.Time = false, 8, 0
+		u.VelocityX = 0
 	case StateAttackTrigger:
 		u.Anim.Frames = Characters[u.Character].Animations.AttackEnd
 		u.Anim.IsLooping, u.Anim.FPS, u.Anim.Time = false, 8, 0
@@ -253,11 +272,13 @@ func (u *Unit) actUponState() {
 	case StateHurtStart:
 		u.Anim.Frames = Characters[u.Character].Animations.Hurt
 		u.Anim.IsLooping, u.Anim.FPS, u.Anim.Time = false, 5, 0
+		u.VelocityX = 0
 	case StateHurting: // empty
 	case StateDyingStart:
 		u.Anim.Frames = Characters[u.Character].Animations.Die
 		u.Anim.IsLooping, u.Anim.FPS, u.Anim.Time = false, 8, 0
 		u.HealthBar.FadeOut(1.5)
+		u.VelocityX = 0
 	case StateDying, StateDyingEnd: // empty
 	case StateDecaying:
 		if u.hurtTimer < -DeathFadeOutTime {
@@ -269,8 +290,12 @@ func (u *Unit) actUponState() {
 }
 
 func (u *Unit) applyPhysics() {
+	if u.IsAtGarrison {
+		return // no physics for garrison position - once there, the unit is locked
+	}
+
 	if u.IsGrounded {
-		u.VelocityX *= 1.0 - (GroundFrictionPercent / 100.0)
+		u.VelocityX *= 1.0 - (GroundFrictionPercent/100)*DeltaTimeScaled()
 	}
 	var attack, entry = u.EnemyEntrance()
 	if attack && entry != nil {
@@ -315,10 +340,12 @@ func (u *Unit) applyCollisions() {
 func (u *Unit) draw() {
 	var frame = u.Anim.Frame()
 	var crop = frame.CropArea()
+	var garrison = u.Lane == LaneLowerGarrison || u.Lane == LaneMiddleGarrison || u.Lane == LaneUpperGarrison
+	var garrisonExtra = u.Lane == LaneGarrison1 || u.Lane == LaneGarrison2 || u.Lane == LaneGarrison3
 
 	u.ImageId, u.Width, u.Height = frame, crop.Width, crop.Height
 
-	if u.Stats.Health > 0 {
+	if u.Stats.Health > 0 && !garrison && !garrisonExtra {
 		DrawShadow(u.X, u.Z, u.Width*0.6, u.Height*0.1, 0, u.Mask)
 	}
 

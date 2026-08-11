@@ -28,8 +28,8 @@ var Map, Grid, AllyBase, EnemyBase, Flags graphics.Object
 var TilesetCrops, UserInterfaceCrops assets.AtlasId
 var UserInterfaceImg assets.ImageId
 
-var Collisions = make([][]geometry.Shape, 4)
-var Masks = [3]geometry.Area{
+var Collisions = make([][]geometry.Shape, 10)
+var Masks = [9]geometry.Area{
 	LaneLower:  geometry.NewArea(0, 0, 556, 1000),
 	LaneMiddle: geometry.NewArea(0, 0, 492, 1000),
 	LaneUpper:  geometry.NewArea(0, 0, 428, 1000),
@@ -45,25 +45,42 @@ func InitScene() {
 	UserInterfaceCrops = assets.LoadAtlas(UserInterfaceImg, "data/user-interface.xml")
 
 	var layers, tileset = assets.LoadTileLayersFromTiled("data/map.tmx")
-	var upper = graphics.NewTilemap(layers[14])
-	var middle = graphics.NewTilemap(layers[13])
-	var lower = graphics.NewTilemap(layers[12])
+	var low, mid, up = graphics.NewTilemap(layers[12]), graphics.NewTilemap(layers[13]), graphics.NewTilemap(layers[14])
+	var lowG, midG, upG = graphics.NewTilemap(layers[15]), graphics.NewTilemap(layers[16]), graphics.NewTilemap(layers[17])
+	var g1, g2, g3 = graphics.NewTilemap(layers[18]), graphics.NewTilemap(layers[19]), graphics.NewTilemap(layers[20])
+
 	TilesetCrops = assets.LoadAtlas(tileset, "data/tileset.xml")
 	TilesetCrops = assets.LoadAtlas(tileset, "data/tileset.xml")
-	Collisions[LaneLower] = lower.TilemapShapes()
-	Collisions[LaneMiddle] = middle.TilemapShapes()
-	Collisions[LaneUpper] = upper.TilemapShapes()
+	Collisions[LaneLower] = low.TilemapShapes()
+	Collisions[LaneMiddle] = mid.TilemapShapes()
+	Collisions[LaneUpper] = up.TilemapShapes()
+	Collisions[LaneLowerGarrison] = lowG.TilemapShapes()
+	Collisions[LaneMiddleGarrison] = midG.TilemapShapes()
+	Collisions[LaneUpperGarrison] = upG.TilemapShapes()
+	Collisions[LaneGarrison1] = g1.TilemapShapes()
+	Collisions[LaneGarrison2] = g2.TilemapShapes()
+	Collisions[LaneGarrison3] = g3.TilemapShapes()
+
+	mirrorCollisionLane(LaneLowerGarrison)
+	mirrorCollisionLane(LaneMiddleGarrison)
+	mirrorCollisionLane(LaneUpperGarrison)
+	mirrorCollisionLane(LaneGarrison1)
+	mirrorCollisionLane(LaneGarrison2)
+	mirrorCollisionLane(LaneGarrison3)
+
 	MapLayer, Map = layers[9], graphics.NewTilemap(layers[9])
 	Flags, Grid = graphics.NewTilemap(layers[10]), graphics.NewTilemap(layers[11])
-	AllyBase = graphics.NewTilemap(layers[1])
+	AllyBase = graphics.NewTilemap(layers[5])
 	EnemyBase = graphics.NewTilemap(layers[1])
 	EnemyBase.Width *= -1
 
-	Units = append(Units, NewUnit(CharacterMan, TeamAlly, LaneUpper))
+	// Units = append(Units, NewUnit(CharacterMan, TeamAlly, LaneUpper))
 	Units = append(Units, NewUnit(CharacterWoman, TeamEnemy, LaneUpper))
 	Units = append(Units, NewUnit(CharacterWoman, TeamEnemy, LaneMiddle))
 	Units = append(Units, NewUnit(CharacterHunter, TeamEnemy, LaneLower))
-	Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneMiddle))
+	Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneUpperGarrison))
+	Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneMiddleGarrison))
+	Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneLowerGarrison))
 
 	Entrances = [6]*EntranceData{
 		LaneLower:      NewEntrance(EntranceDoor, TeamAlly, LaneLower),
@@ -150,3 +167,17 @@ func DrawShadow(x, z, width, height, angle float32, mask geometry.Area) {
 // private ========================================================
 
 var skyColor = color.TagRGBA("rgb(98, 171, 212)")
+
+func mirrorCollisionLane(lane Lane) {
+	var length = len(Collisions[lane])
+	for i := range length {
+		var shape = Collisions[lane][i]
+		shape.Y -= TileSize
+		Collisions[lane][i] = shape
+		shape.X *= -1
+		if shape.Angle != 0 {
+			shape.Angle += 90
+		}
+		Collisions[lane] = append(Collisions[lane], shape)
+	}
+}

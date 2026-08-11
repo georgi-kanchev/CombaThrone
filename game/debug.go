@@ -63,9 +63,13 @@ func UpdateDebug() {
 		if hovered != nil {
 			var states = [13]string{"idle", "walk", "hurt", "hurt", "dying", "dying", "dying", "dead",
 				"attack charge", "attack charge", "attack charge", "attack recover", "attack recover"}
-			var info = text.New(states[hovered.State], "\n",
+			var info = text.New("state: ", states[hovered.State], "\n",
 				"attack timer: ", number.Round(hovered.attackTimer, 1), "\n",
-				"hurt timer: ", number.Round(hovered.hurtTimer, 1))
+				"hurt timer: ", number.Round(hovered.hurtTimer, 1), "\n",
+				"at garrison: ", hovered.IsAtGarrison, "\n",
+				"velocity: ", number.Round(hovered.VelocityX, 1), " | ", number.Round(hovered.VelocityY, 1), "\n",
+				"move speed x: ", number.Round(hovered.moveSpeedX, 1), "\n",
+			)
 			View.DrawText(info, hovered.X-hovered.Width/2, hovered.Y-100, 50, 0, palette.White, geometry.Area{})
 		}
 		for _, cols := range Collisions {
