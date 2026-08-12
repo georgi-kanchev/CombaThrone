@@ -30,7 +30,7 @@ const ProjectileFadeOutTime float32 = 10
 func NewProjectile(x, y, z, targetX, targetY, targetZ float32, dmg int, enemy Team, enemyEntrance *EntranceData) *Projectile {
 	const speed float32 = 100
 	var accuracyMultiplier float32 = 1
-	if enemyEntrance != nil {
+	if enemyEntrance != nil { // cannot and should not miss the entrances
 		accuracyMultiplier = 0
 		targetY += TileSize
 	}
@@ -41,7 +41,7 @@ func NewProjectile(x, y, z, targetX, targetY, targetZ float32, dmg int, enemy Te
 		StartX: x, StartY: y, StartZ: z, Z: z,
 		TargetX:    targetX + random.Range[float32](-12, 12)*accuracyMultiplier,
 		TargetY:    targetY + random.Range[float32](-12, 12),
-		TargetZ:    targetZ + random.Range[float32](-0.4, 0.4)*accuracyMultiplier,
+		TargetZ:    targetZ + random.Range[float32](-0.35, 0.35)*accuracyMultiplier,
 		TravelTime: totalTime, ArcHeight: dist / 3, Damage: dmg, enemyEntrance: enemyEntrance,
 	}
 	return proj

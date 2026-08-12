@@ -195,6 +195,13 @@ func (u *Unit) applyState() {
 		if u == t || t.Stats.Health <= 0 {
 			continue
 		}
+		var _, myEntrance = t.EnemyEntrance()
+		if myEntrance != nil && t.Team == TeamEnemy && myEntrance.Tiles[0].X > t.X {
+			continue // enemy is already inside my base - can't shoot through the wall
+		} else if myEntrance != nil && t.Team == TeamAlly && myEntrance.Tiles[0].X < t.X {
+			continue // enemy is already inside my base - can't shoot through the wall
+		}
+
 		var distX = number.Absolute(t.X - u.X)
 		var allyEnemy, enemyAlly = u.Team == TeamAlly && t.Team == TeamEnemy, u.Team == TeamEnemy && t.Team == TeamAlly
 		var isEnemy = allyEnemy || enemyAlly

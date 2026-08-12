@@ -71,9 +71,9 @@ func InitScene() {
 	EnemyBase.Width *= -1
 
 	Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneUpper))
-	// Units = append(Units, NewUnit(CharacterMan, TeamEnemy, LaneUpper))
-	// Units = append(Units, NewUnit(CharacterWoman, TeamEnemy, LaneMiddle))
-	// Units = append(Units, NewUnit(CharacterHunter, TeamEnemy, LaneLower))
+	Units = append(Units, NewUnit(CharacterMan, TeamEnemy, LaneUpper))
+	Units = append(Units, NewUnit(CharacterWoman, TeamEnemy, LaneMiddle))
+	Units = append(Units, NewUnit(CharacterHunter, TeamEnemy, LaneLower))
 	Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneUpperGarrison))
 	Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneMiddleGarrison))
 	Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneLowerGarrison))
