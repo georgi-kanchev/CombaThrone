@@ -21,13 +21,13 @@ type Projectile struct {
 
 	EnemyTeam Team
 
-	enemyEntrance *EntranceData
+	enemyEntrance *Entrance
 	trigger       bool
 }
 
 const ProjectileFadeOutTime float32 = 10
 
-func NewProjectile(x, y, z, targetX, targetY, targetZ float32, dmg int, enemy Team, enemyEntrance *EntranceData) *Projectile {
+func NewProjectile(x, y, z, targetX, targetY, targetZ float32, dmg int, enemy Team, enemyEntrance *Entrance) *Projectile {
 	const speed float32 = 100
 	var accuracyMultiplier float32 = 1
 	if enemyEntrance != nil { // cannot and should not miss the entrances

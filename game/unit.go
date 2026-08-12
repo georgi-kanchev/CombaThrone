@@ -73,6 +73,7 @@ func NewUnit(character Character, team Team, lane Lane) *Unit {
 
 	unit.Blood = motion.NewParticleSystem(func(p *motion.Particle) (alive bool) {
 		if p.Age == 0 {
+			p.CustomData["offsetY"] = random.Range[float32](-4, 4)
 			p.Scale = random.Range[float32](0.2, 3)
 			p.VelocityX = random.Range[float32](30, 50)
 			p.VelocityY = random.Range[float32](-20, 20)
@@ -90,12 +91,12 @@ func NewUnit(character Character, team Team, lane Lane) *Unit {
 		p.X += p.VelocityX * dt
 		p.Y += p.VelocityY * dt
 
-		if p.Y > unit.Y+unit.Height/2 {
-			p.Y = unit.Y + unit.Height/2
+		if p.Y > unit.Y+unit.Height/2+p.CustomData["offsetY"].(float32) {
+			p.Y = unit.Y + unit.Height/2 + p.CustomData["offsetY"].(float32)
 			p.VelocityX, p.VelocityY = 0, 0
 		}
 
-		var alpha = number.Map(p.Age, 0, 1.5, 255, 0)
+		var alpha = number.Map(p.Age, 1.0, 1.5, 255, 0)
 		var col = color.RGBA(byte(p.Color), 0, 0, byte(number.Limit(alpha, 0, 255)))
 		View.DrawShape(p.X, p.Y, p.Scale, p.Scale, 0, 1, col, unit.Mask)
 		return p.Age < 1.5
@@ -132,8 +133,8 @@ func (u *Unit) Hitbox() geometry.Shape {
 	hitbox.X, hitbox.Y = u.X+hitbox.X, u.Y+hitbox.Y
 	return hitbox
 }
-func (u *Unit) EnemyEntrance() (attackable bool, entrance *EntranceData) {
-	var e *EntranceData
+func (u *Unit) EnemyEntrance() (attackable bool, entrance *Entrance) {
+	var e *Entrance
 	if u.Team != TeamNeutral && (u.Lane == LaneUpper || u.Lane == LaneMiddle || u.Lane == LaneLower) {
 		e = Entrances[int(3*(1-u.Team))+int(u.Lane)]
 		var attackRange = float32(u.Stats.AttackRange) * TileSize
@@ -151,7 +152,7 @@ func (u *Unit) Update() {
 	u.Mask = Masks[u.Lane] // applied every frame to account for any changes in lane
 
 	if u.Lane == LaneLowerGarrison || u.Lane == LaneMiddleGarrison || u.Lane == LaneUpperGarrison {
-		u.Mask = geometry.NewArea(u.X, u.Y-u.Height/2, u.Width, u.Height*1.7)
+		u.Mask = geometry.NewArea(u.X, u.Y-u.Height/2, u.Width*4, u.Height*1.7)
 	}
 
 	u.Z = map[Lane]float32{LaneLower: 0, LaneMiddle: 1, LaneUpper: 2,

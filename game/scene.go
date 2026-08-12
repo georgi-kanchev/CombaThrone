@@ -34,7 +34,7 @@ var Masks = [9]geometry.Area{
 	LaneMiddle: geometry.NewArea(0, 0, 492, 1000),
 	LaneUpper:  geometry.NewArea(0, 0, 428, 1000),
 }
-var Entrances [6]*EntranceData // index is Ally[Lower, Middle, Upper], Enemy[Lower, Middle, Upper]
+var Entrances [6]*Entrance // index is Ally[Lower, Middle, Upper], Enemy[Lower, Middle, Upper]
 var Units []*Unit
 var Projectiles []*Projectile
 
@@ -78,7 +78,7 @@ func InitScene() {
 	Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneMiddleGarrison))
 	Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneLowerGarrison))
 
-	Entrances = [6]*EntranceData{
+	Entrances = [6]*Entrance{
 		LaneLower:      NewEntrance(EntranceDoor, TeamAlly, LaneLower),
 		LaneMiddle:     NewEntrance(EntranceTallGate, TeamAlly, LaneMiddle),
 		LaneUpper:      NewEntrance(EntranceHole, TeamAlly, LaneUpper),

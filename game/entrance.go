@@ -6,13 +6,13 @@ import (
 	"pure-game-kit/packages/utility/random"
 )
 
-type Entrance uint8
+type EntranceType uint8
 
-const EntranceHole, EntranceDoor, EntranceShortGate, EntranceTallGate Entrance = 0, 1, 2, 3
+const EntranceHole, EntranceDoor, EntranceShortGate, EntranceTallGate EntranceType = 0, 1, 2, 3
 
-type EntranceData struct {
+type Entrance struct {
 	Tiles     []*graphics.Object
-	Entrance  Entrance
+	Entrance  EntranceType
 	Lane      Lane
 	Team      Team
 	HealthBar HealthBar
@@ -23,8 +23,8 @@ type EntranceData struct {
 	openY, maxOpenY, shakeTimer float32
 }
 
-func NewEntrance(entry Entrance, team Team, lane Lane) *EntranceData {
-	var data = EntranceData{Entrance: entry, Team: team, Lane: lane, maxOpenY: TileSize + (TileSize * (float32(entry) - 1))}
+func NewEntrance(entry EntranceType, team Team, lane Lane) *Entrance {
+	var data = Entrance{Entrance: entry, Team: team, Lane: lane, maxOpenY: TileSize + (TileSize * (float32(entry) - 1))}
 	var x, y float32 = -208, 48 // ally upper lane by default
 
 	if entry != EntranceHole {
@@ -79,13 +79,13 @@ func NewEntrance(entry Entrance, team Team, lane Lane) *EntranceData {
 	return &data
 }
 
-func (e *EntranceData) IsOpen() bool {
+func (e *Entrance) IsOpen() bool {
 	return number.IsWithin(e.openY, e.maxOpenY, 0.1)
 }
 
 //=================================================================
 
-func (e *EntranceData) Update() {
+func (e *Entrance) Update() {
 	e.shakeTimer -= DeltaTimeScaled()
 
 	var sensorDistance = float32(TileSize) * 0.75
@@ -131,7 +131,7 @@ func (e *EntranceData) Update() {
 		t.X, t.Y = prevX, prevY
 	}
 }
-func (e *EntranceData) TakeDamage(damage int) {
+func (e *Entrance) TakeDamage(damage int) {
 	if e.Health <= 0 {
 		return
 	}
