@@ -61,12 +61,8 @@ func InitScene() {
 	Collisions[LaneGarrison2] = g2.TilemapShapes()
 	Collisions[LaneGarrison3] = g3.TilemapShapes()
 
-	mirrorCollisionLane(LaneLowerGarrison)
-	mirrorCollisionLane(LaneMiddleGarrison)
-	mirrorCollisionLane(LaneUpperGarrison)
-	mirrorCollisionLane(LaneGarrison1)
-	mirrorCollisionLane(LaneGarrison2)
-	mirrorCollisionLane(LaneGarrison3)
+	mirrorGarrisonLanes()
+	liftGarrisonLanesUp(true)
 
 	MapLayer, Map = layers[9], graphics.NewTilemap(layers[9])
 	Flags, Grid = graphics.NewTilemap(layers[10]), graphics.NewTilemap(layers[11])
@@ -74,10 +70,10 @@ func InitScene() {
 	EnemyBase = graphics.NewTilemap(layers[1])
 	EnemyBase.Width *= -1
 
-	Units = append(Units, NewUnit(CharacterMan, TeamAlly, LaneUpper))
-	Units = append(Units, NewUnit(CharacterWoman, TeamEnemy, LaneUpper))
-	Units = append(Units, NewUnit(CharacterWoman, TeamEnemy, LaneMiddle))
-	Units = append(Units, NewUnit(CharacterHunter, TeamEnemy, LaneLower))
+	Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneUpper))
+	// Units = append(Units, NewUnit(CharacterMan, TeamEnemy, LaneUpper))
+	// Units = append(Units, NewUnit(CharacterWoman, TeamEnemy, LaneMiddle))
+	// Units = append(Units, NewUnit(CharacterHunter, TeamEnemy, LaneLower))
 	Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneUpperGarrison))
 	Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneMiddleGarrison))
 	Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneLowerGarrison))
@@ -88,7 +84,7 @@ func InitScene() {
 		LaneUpper:      NewEntrance(EntranceHole, TeamAlly, LaneUpper),
 		LaneLower + 3:  NewEntrance(EntranceDoor, TeamEnemy, LaneLower),
 		LaneMiddle + 3: NewEntrance(EntranceDoor, TeamEnemy, LaneMiddle),
-		LaneUpper + 3:  NewEntrance(EntranceDoor, TeamEnemy, LaneUpper),
+		LaneUpper + 3:  NewEntrance(EntranceShortGate, TeamEnemy, LaneUpper),
 	}
 }
 func UpdateScene() {
@@ -168,16 +164,32 @@ func DrawShadow(x, z, width, height, angle float32, mask geometry.Area) {
 
 var skyColor = color.TagRGBA("rgb(98, 171, 212)")
 
-func mirrorCollisionLane(lane Lane) {
-	var length = len(Collisions[lane])
-	for i := range length {
-		var shape = Collisions[lane][i]
-		shape.Y -= TileSize
-		Collisions[lane][i] = shape
-		shape.X *= -1
-		if shape.Angle != 0 {
-			shape.Angle += 90
+func mirrorGarrisonLanes() {
+	var l = []Lane{LaneLowerGarrison, LaneMiddleGarrison, LaneUpperGarrison, LaneGarrison1, LaneGarrison2, LaneGarrison3}
+	for _, lane := range l {
+		var length = len(Collisions[lane])
+		for i := range length {
+			var shape = Collisions[lane][i]
+			shape.X *= -1
+			if shape.Angle != 0 {
+				shape.Angle += 90
+			}
+			Collisions[lane] = append(Collisions[lane], shape)
 		}
-		Collisions[lane] = append(Collisions[lane], shape)
+	}
+}
+func liftGarrisonLanesUp(ally bool) {
+	var l = []Lane{LaneLowerGarrison, LaneMiddleGarrison, LaneUpperGarrison, LaneGarrison1, LaneGarrison2, LaneGarrison3}
+	for _, lane := range l {
+		var length = len(Collisions[lane])
+		var i = length / 2
+		if ally {
+			i, length = 0, length/2
+		}
+		for ; i < length; i++ {
+			var shape = Collisions[lane][i]
+			shape.Y -= TileSize
+			Collisions[lane][i] = shape
+		}
 	}
 }

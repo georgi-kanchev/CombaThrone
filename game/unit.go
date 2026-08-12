@@ -124,6 +124,8 @@ func NewUnit(character Character, team Team, lane Lane) *Unit {
 	return &unit
 }
 
+//=================================================================
+
 func (u *Unit) Hitbox() geometry.Shape {
 	var char = Characters[u.Character]
 	var hitbox = char.Hitbox
@@ -176,6 +178,8 @@ func (u *Unit) TakeDamage(damage int) {
 		u.hurtTimer = u.Stats.HurtTime
 	}
 }
+
+// private ========================================================
 
 func (u *Unit) applyState() {
 	var attackable, entrance = u.EnemyEntrance()
@@ -297,11 +301,14 @@ func (u *Unit) actUponState() {
 		}
 		var t = u.ClosestEnemyInRange
 		if t != nil {
-			Projectiles = append(Projectiles, NewProjectile(u.X, u.Y, u.Z, t.X, t.Y+t.Height/2-8, t.Z, dmg, entrance))
+			var distance = number.Absolute(t.X-u.X) / 3
+			var prediction = t.VelocityX * distance * DeltaTimeScaled()
+			var proj = NewProjectile(u.X, u.Y, u.Z, t.X+prediction, t.Y+t.Height/2-8, t.Z, dmg, t.Team, nil)
+			Projectiles = append(Projectiles, proj)
 		} else if attackable && entrance != nil {
 			var x, y = entrance.Tiles[0].X, entrance.Tiles[0].Y
 			var z = map[Lane]float32{LaneLower: 0, LaneMiddle: 1, LaneUpper: 2}[entrance.Lane]
-			Projectiles = append(Projectiles, NewProjectile(u.X, u.Y, u.Z, x, y, z, dmg, entrance))
+			Projectiles = append(Projectiles, NewProjectile(u.X, u.Y, u.Z, x, y, z, dmg, entrance.Team, entrance))
 		}
 	case StateAttackCharging, StateAttackRecovering, StateAttackEnd: // empty
 	case StateHurtStart:

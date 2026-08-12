@@ -124,7 +124,7 @@ func (e *EntranceData) Update() {
 
 	for i, t := range e.Tiles {
 		var prevX, prevY = t.X, t.Y
-		if !gate || (gate && i > len(e.Tiles)/2) {
+		if !gate || (gate && i >= len(e.Tiles)/2) {
 			t.X, t.Y = t.X+float32(shakeOffsetX), t.Y+float32(shakeOffsetY)
 		}
 		View.DrawObject(t)
@@ -156,5 +156,3 @@ func (e *EntranceData) TakeDamage(damage int) {
 		e.Tiles[7].ImageId = TilesetCrops.Crops("gate_bottom")[breakIndex]
 	}
 }
-
-//=================================================================

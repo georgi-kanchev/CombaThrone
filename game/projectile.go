@@ -19,21 +19,30 @@ type Projectile struct {
 
 	Z, Age, TravelTime, ArcHeight float32
 
+	EnemyTeam Team
+
 	enemyEntrance *EntranceData
 	trigger       bool
 }
 
 const ProjectileFadeOutTime float32 = 10
 
-func NewProjectile(x, y, z, targetX, targetY, targetZ float32, damage int, targetEntrance *EntranceData) *Projectile {
+func NewProjectile(x, y, z, targetX, targetY, targetZ float32, dmg int, enemy Team, enemyEntrance *EntranceData) *Projectile {
 	const speed float32 = 100
+	var accuracyMultiplier float32 = 1
+	if enemyEntrance != nil {
+		accuracyMultiplier = 0
+		targetY += TileSize
+	}
 	var dist = point.DistanceToPoint(x, y, targetX, targetY)
 	var totalTime = max(dist/speed, 0.01) // prevent division by zero
-	var proj = &Projectile{
+	var proj = &Projectile{EnemyTeam: enemy,
 		Object: graphics.NewSprite(x, y, 1, TilesetCrops.Crops("projectiles")[0]),
 		StartX: x, StartY: y, StartZ: z, Z: z,
-		TargetX: targetX, TargetY: targetY + random.Range[float32](-6, 6), TargetZ: targetZ,
-		TravelTime: totalTime, ArcHeight: 40.0, Damage: damage, enemyEntrance: targetEntrance,
+		TargetX:    targetX + random.Range[float32](-12, 12)*accuracyMultiplier,
+		TargetY:    targetY + random.Range[float32](-12, 12),
+		TargetZ:    targetZ + random.Range[float32](-0.4, 0.4)*accuracyMultiplier,
+		TravelTime: totalTime, ArcHeight: dist / 3, Damage: dmg, enemyEntrance: enemyEntrance,
 	}
 	return proj
 }
@@ -55,29 +64,7 @@ func (p *Projectile) Update() {
 
 	p.Angle = angle.BetweenPoints(0, 0, velX, velY)
 
-	if progress > 0.2 && progress < 1.0 {
-		for _, u := range Units {
-			if u.Stats.Health <= 0 {
-				continue
-			}
-
-			var hb = u.Hitbox()
-			if p.Shape.Overlaps(hb) && number.IsWithin(p.Z, u.Z, 0.2) {
-				p.trigger = true
-				u.TakeDamage(p.Damage)
-				Projectiles = collection.Remove(Projectiles, p)
-				return
-			}
-		}
-	}
-
-	if progress < 1.0 {
-		var shadowAngle = p.Angle
-		if p.TargetZ == p.Z { // same lane path shouldn't bend the shadow angle
-			shadowAngle = 0
-		}
-		DrawShadow(groundX, p.Z, number.Absolute(p.Width), p.Height*0.25, shadowAngle, p.Mask)
-	} else {
+	if progress >= 1.0 {
 		var e = p.enemyEntrance
 		if !p.trigger && e != nil && !e.IsOpen() && e.Health > 0 && number.IsWithin(p.X, e.Tiles[0].X, TileSize/2) {
 			p.trigger = true
@@ -91,6 +78,28 @@ func (p *Projectile) Update() {
 		if p.Age > p.TravelTime+ProjectileFadeOutTime || entranceDestroyed {
 			Projectiles = collection.Remove(Projectiles, p)
 		}
+		View.DrawObject(&p.Object)
+		return
 	}
+
+	for _, u := range Units {
+		if u.Stats.Health <= 0 || p.EnemyTeam != u.Team {
+			continue
+		}
+
+		var hb = u.Hitbox()
+		if p.Shape.Overlaps(hb) && number.IsWithin(p.Z, u.Z, 0.2) {
+			p.trigger = true
+			u.TakeDamage(p.Damage)
+			Projectiles = collection.Remove(Projectiles, p)
+			return
+		}
+	}
+
+	var shadowAngle = angle.BetweenPoints(p.StartX, p.StartY, p.TargetX, p.TargetY)
+	if p.TargetZ == p.Z { // same lane path shouldn't bend the shadow angle
+		shadowAngle = 0
+	}
+	DrawShadow(groundX, p.Z, number.Absolute(p.Width), p.Height*0.25, shadowAngle, p.Mask)
 	View.DrawObject(&p.Object)
 }
