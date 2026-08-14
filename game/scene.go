@@ -2,6 +2,7 @@ package game
 
 import (
 	"pure-game-kit/packages/assets"
+	"pure-game-kit/packages/audio"
 	"pure-game-kit/packages/geometry"
 	"pure-game-kit/packages/graphics"
 	"pure-game-kit/packages/input/keyboard"
@@ -39,6 +40,8 @@ var Masks = [11]geometry.Area{
 var Entrances [6]*Entrance // index is Ally[Lower, Middle, Upper], Enemy[Lower, Middle, Upper]
 var Units []*Unit
 var Projectiles []*Projectile
+
+var Ambience audio.Audio
 
 func InitScene() {
 	View = graphics.NewView(5.68)
@@ -93,6 +96,10 @@ func InitScene() {
 		LaneMiddle + 3: NewEntrance(EntranceDoor, TeamEnemy, LaneMiddle),
 		LaneUpper + 3:  NewEntrance(EntranceShortGate, TeamEnemy, LaneUpper),
 	}
+
+	var plains = assets.LoadMusic("data/audio/ambience-plains.mp3")
+	Ambience = audio.New(plains)
+	Ambience.Play()
 }
 func UpdateScene() {
 	var _, bly = Background.PointFromEdge(0.5, 1)
@@ -150,6 +157,9 @@ func UpdateScene() {
 		u.HealthBar.Update(hb, u.Stats.Health, Characters[u.Character].Stats.Health, u.Mask)
 	}
 
+	if Ambience.IsJustFinished() {
+		Ambience.Play()
+	}
 }
 
 func PointAtCell(cellX, cellY float32) (x, y float32) {

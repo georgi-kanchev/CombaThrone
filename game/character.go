@@ -5,13 +5,10 @@ package game
 
 import (
 	"pure-game-kit/packages/assets"
+	"pure-game-kit/packages/audio"
 	"pure-game-kit/packages/geometry"
 	"pure-game-kit/packages/utility/text"
 )
-
-type Animations struct {
-	Idle, Walk, AttackStart, AttackEnd, Hurt, Die []assets.ImageId
-}
 
 type Stats struct {
 	Name string
@@ -25,20 +22,26 @@ type Stats struct {
 
 type CharacterData struct {
 	Stats      Stats
-	Animations Animations
 	Hitbox     geometry.Shape
+	Animations struct {
+		Idle, Walk, AttackStart, AttackEnd, Hurt, Die []assets.ImageId
+	}
+	Sounds struct {
+		AttackTrigger, HitFlesh, HitWood, HitMetal, HitGround []audio.Audio
+	}
 
-	Brain func(self *Unit)
+	Behavior func(self *Unit)
 }
 
 const CharacterMan, CharacterWoman, CharacterHunter Character = 0, 1, 2
 
-var Characters = [3]CharacterData{
-	CharacterDataMan(), CharacterDataWoman(), CharacterDataHunter(),
-}
+var Characters [3]CharacterData
 
 func InitCharacters() {
 	var atlas = assets.LoadAtlas(assets.LoadImage("data/units.png"), "data/units.xml")
+	Characters[CharacterMan] = CharacterDataMan()
+	Characters[CharacterWoman] = CharacterDataWoman()
+	Characters[CharacterHunter] = CharacterDataHunter()
 
 	for i, c := range Characters {
 		var prefix = text.ToLowerCase(c.Stats.Name)

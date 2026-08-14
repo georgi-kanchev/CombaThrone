@@ -69,7 +69,7 @@ func NewUnit(character Character, team Team, lane Lane) *Unit {
 	var char = Characters[character]
 	var anim = motion.NewAnimation(0, false, char.Animations.Idle...)
 	var unit = Unit{Object: graphics.NewSprite(-2000, -2000, 1, 0), Character: character, Team: team, Lane: lane,
-		Behavior: char.Brain, Stats: char.Stats, Anim: &anim, attackTimer: number.NaN(), hurtTimer: number.NaN()}
+		Behavior: char.Behavior, Stats: char.Stats, Anim: &anim, attackTimer: number.NaN(), hurtTimer: number.NaN()}
 
 	unit.Blood = motion.NewParticleSystem(unit.particlesBlood)
 
@@ -310,16 +310,20 @@ func (u *Unit) actUponState() {
 			}
 			break
 		}
+
 		var t = u.ClosestEnemyInRange
+		var sound = random.PickFrom(Characters[u.Character].Sounds.AttackTrigger)
 		if t != nil {
 			var distance = number.Absolute(t.X-u.X) / 200
 			var prediction = t.VelocityX * distance
-			var proj = NewProjectile(u.X, u.Y, u.Z, t.X+prediction, t.Y+t.Height/2-8, t.Z, dmg, t.Team, nil)
+			var proj = u.NewProjectile(u.X, u.Y, u.Z, t.X+prediction, t.Y+t.Height/2-8, t.Z, dmg, nil)
 			Projectiles = append(Projectiles, proj)
+			sound.Play()
 		} else if attackable && entrance != nil {
 			var x, y = entrance.Tiles[0].X, entrance.Tiles[0].Y
 			var z = map[Lane]float32{LaneLower: 0, LaneMiddle: 1, LaneUpper: 2}[entrance.Lane]
-			Projectiles = append(Projectiles, NewProjectile(u.X, u.Y, u.Z, x, y, z, dmg, entrance.Team, entrance))
+			Projectiles = append(Projectiles, u.NewProjectile(u.X, u.Y, u.Z, x, y, z, dmg, entrance))
+			sound.Play()
 		}
 	case StateAttackCharging, StateAttackRecovering, StateAttackEnd: // empty
 	case StateHurtStart:

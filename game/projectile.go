@@ -19,15 +19,14 @@ type Projectile struct {
 
 	Z, Age, TravelTime, ArcHeight float32
 
-	EnemyTeam Team
-
+	owner         *Unit
 	enemyEntrance *Entrance
 	trigger       bool
 }
 
 const ProjectileFadeOutTime float32 = 10
 
-func NewProjectile(x, y, z, targetX, targetY, targetZ float32, dmg int, enemy Team, enemyEntrance *Entrance) *Projectile {
+func (u *Unit) NewProjectile(x, y, z, targetX, targetY, targetZ float32, dmg int, enemyEntrance *Entrance) *Projectile {
 	const speed float32 = 100
 	var accuracyMultiplier float32 = 1
 	if enemyEntrance != nil { // cannot and should not miss the entrances
@@ -36,7 +35,7 @@ func NewProjectile(x, y, z, targetX, targetY, targetZ float32, dmg int, enemy Te
 	}
 	var dist = point.DistanceToPoint(x, y, targetX, targetY)
 	var totalTime = max(dist/speed, 0.01) // prevent division by zero
-	var proj = &Projectile{EnemyTeam: enemy,
+	var proj = &Projectile{owner: u,
 		Object: graphics.NewSprite(x, y, 1, TilesetCrops.Crops("projectiles")[0]),
 		StartX: x, StartY: y, StartZ: z, Z: z,
 		TargetX:    targetX + random.Range[float32](-12, 12)*accuracyMultiplier,
@@ -50,6 +49,7 @@ func NewProjectile(x, y, z, targetX, targetY, targetZ float32, dmg int, enemy Te
 func (p *Projectile) Update() {
 	p.Age += DeltaTimeScaled()
 
+	var enemyTeam = 1 - p.owner.Team
 	var progress = min(1.0, p.Age/p.TravelTime)
 	var groundX = p.StartX + (p.TargetX-p.StartX)*progress
 	var groundY = p.StartY + (p.TargetY-p.StartY)*progress
@@ -64,11 +64,14 @@ func (p *Projectile) Update() {
 
 	p.Angle = angle.BetweenPoints(0, 0, velX, velY)
 
-	if progress >= 1.0 {
+	if progress >= 1.0 && !p.trigger {
+		p.trigger = true
 		var e = p.enemyEntrance
-		if !p.trigger && e != nil && !e.IsOpen() && e.Health > 0 && number.IsWithin(p.X, e.Tiles[0].X, TileSize/2) {
-			p.trigger = true
+		if e != nil && !e.IsOpen() && e.Health > 0 && number.IsWithin(p.X, e.Tiles[0].X, TileSize/2) {
 			e.TakeDamage(p.Damage)
+		} else {
+			var sound = random.PickFrom(Characters[p.owner.Character].Sounds.HitGround)
+			sound.Play()
 		}
 
 		var alpha = min(255, number.Map(p.Age, p.TravelTime, p.TravelTime+ProjectileFadeOutTime, 255, 0))
@@ -83,7 +86,7 @@ func (p *Projectile) Update() {
 	}
 
 	for _, u := range Units {
-		if u.Stats.Health <= 0 || p.EnemyTeam != u.Team {
+		if u.Stats.Health <= 0 || enemyTeam != u.Team {
 			continue
 		}
 
@@ -97,6 +100,8 @@ func (p *Projectile) Update() {
 			p.trigger = true
 			u.TakeDamage(p.Damage)
 			Projectiles = collection.Remove(Projectiles, p)
+			var sound = random.PickFrom(Characters[p.owner.Character].Sounds.HitFlesh)
+			sound.Play()
 			return
 		}
 	}
