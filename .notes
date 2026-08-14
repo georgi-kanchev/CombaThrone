@@ -15,3 +15,13 @@ upgrades:
     - two   (low 2, mid 1, high 0)
     - three (low 3, mid 2, high 1)
 
+characters:
+- village:
+    - girl      bring more gold, slower
+    - boy       bring less gold, faster
+    - woman     heal unit in front
+    - man       cheap but weak brawler
+    - grandma   healing buff radius
+    - grandpa   damage buff radius
+    - hunter    ???
+    - fisherman ??? hook someone up a lane
