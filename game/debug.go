@@ -66,7 +66,6 @@ func UpdateDebug() {
 			var info = text.New("state: ", states[hovered.State], "\n",
 				"attack timer: ", number.Round(hovered.attackTimer, 1), "\n",
 				"hurt timer: ", number.Round(hovered.hurtTimer, 1), "\n",
-				"at garrison: ", hovered.IsAtGarrison, "\n",
 				"velocity: ", number.Round(hovered.VelocityX, 1), " | ", number.Round(hovered.VelocityY, 1), "\n",
 				"move speed x: ", number.Round(hovered.moveSpeedX, 1), "\n",
 			)

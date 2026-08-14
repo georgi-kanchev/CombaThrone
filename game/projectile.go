@@ -32,7 +32,7 @@ func NewProjectile(x, y, z, targetX, targetY, targetZ float32, dmg int, enemy Te
 	var accuracyMultiplier float32 = 1
 	if enemyEntrance != nil { // cannot and should not miss the entrances
 		accuracyMultiplier = 0
-		targetY += TileSize
+		targetY += TileSize / 2
 	}
 	var dist = point.DistanceToPoint(x, y, targetX, targetY)
 	var totalTime = max(dist/speed, 0.01) // prevent division by zero
@@ -88,6 +88,11 @@ func (p *Projectile) Update() {
 		}
 
 		var hb = u.Hitbox()
+		if u.Lane > LaneUpper { // is garrison - hide behind wall (shrink hitbox & move up)
+			hb.Height /= 2
+			hb.Y -= hb.Height / 2
+		}
+
 		if p.Shape.Overlaps(hb) && number.IsWithin(p.Z, u.Z, 0.2) {
 			p.trigger = true
 			u.TakeDamage(p.Damage)

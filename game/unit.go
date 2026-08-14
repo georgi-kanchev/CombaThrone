@@ -71,36 +71,7 @@ func NewUnit(character Character, team Team, lane Lane) *Unit {
 	var unit = Unit{Object: graphics.NewSprite(-2000, -2000, 1, 0), Character: character, Team: team, Lane: lane,
 		Behavior: char.Brain, Stats: char.Stats, Anim: &anim, attackTimer: number.NaN(), hurtTimer: number.NaN()}
 
-	unit.Blood = motion.NewParticleSystem(func(p *motion.Particle) (alive bool) {
-		if p.Age == 0 {
-			p.CustomData["offsetY"] = random.Range[float32](-4, 4)
-			p.Scale = random.Range[float32](0.2, 3)
-			p.VelocityX = random.Range[float32](30, 50)
-			p.VelocityY = random.Range[float32](-20, 20)
-			p.Color = random.Range[uint](128, 255) // only red
-
-			if team == TeamAlly {
-				p.VelocityX *= -1
-			}
-		}
-
-		var dt = DeltaTimeScaled()
-		p.Age += dt
-		p.VelocityY += Gravity / 2 * dt
-
-		p.X += p.VelocityX * dt
-		p.Y += p.VelocityY * dt
-
-		if p.Y > unit.Y+unit.Height/2+p.CustomData["offsetY"].(float32) {
-			p.Y = unit.Y + unit.Height/2 + p.CustomData["offsetY"].(float32)
-			p.VelocityX, p.VelocityY = 0, 0
-		}
-
-		var alpha = number.Map(p.Age, 1.0, 1.5, 255, 0)
-		var col = color.RGBA(byte(p.Color), 0, 0, byte(number.Limit(alpha, 0, 255)))
-		View.DrawShape(p.X, p.Y, p.Scale, p.Scale, 0, 1, col, unit.Mask)
-		return p.Age < 1.5
-	})
+	unit.Blood = motion.NewParticleSystem(unit.particlesBlood)
 
 	unit.draw() // update frame size
 
@@ -112,7 +83,7 @@ func NewUnit(character Character, team Team, lane Lane) *Unit {
 		unit.X, unit.Y = col[0].X+col[0].Width/2-72, col[0].Y-col[0].Height/2-unit.Height/2
 	case LaneUpper:
 		unit.X, unit.Y = col[0].X+col[0].Width/2-104, col[0].Y-col[0].Height/2-unit.Height/2
-	case LaneLowerGarrison, LaneMiddleGarrison, LaneUpperGarrison:
+	case LaneGarrison1, LaneGarrison2, LaneGarrison3, LaneGarrison4, LaneGarrison5:
 		var upper = Collisions[LaneUpper]
 		unit.X, unit.Y = upper[0].X+upper[0].Width/2-40, upper[0].Y-upper[0].Height/2-unit.Height/2
 	}
@@ -151,27 +122,28 @@ func (u *Unit) Update() {
 	u.attackTimer -= DeltaTimeScaled()
 	u.Mask = Masks[u.Lane] // applied every frame to account for any changes in lane
 
-	if u.Lane == LaneLowerGarrison || u.Lane == LaneMiddleGarrison || u.Lane == LaneUpperGarrison {
-		u.Mask = geometry.NewArea(u.X, u.Y-u.Height/2, u.Width*4, u.Height*1.7)
-	}
-
 	u.Z = map[Lane]float32{LaneLower: 0, LaneMiddle: 1, LaneUpper: 2,
-		LaneLowerGarrison: 0, LaneMiddleGarrison: 1, LaneUpperGarrison: 3}[u.Lane]
+		LaneGarrison1: 0, LaneGarrison2: 0.5, LaneGarrison3: 1, LaneGarrison4: 1.5, LaneGarrison5: 2}[u.Lane]
 
-	u.applyState()
-	u.actUponState()
-	u.applyPhysics()
-	u.applyCollisions()
-	u.Behavior(u)
-	u.draw()
-	u.Blood.Update()
-
-	var speedX = number.Absolute(u.X-u.lastX) / DeltaTimeScaled() // smooth out for FPS dips
-	u.moveSpeedX = u.moveSpeedX + (speedX-u.moveSpeedX)*0.15      // 0.15 = how fast it catches up
-	if number.IsNaN(u.moveSpeedX) {
-		u.moveSpeedX = 0
+	if TimeScale > 0 {
+		u.applyState()
+		u.actUponState()
+		u.applyPhysics()
+		u.applyCollisions()
+		u.Behavior(u)
 	}
-	u.lastX, u.lastY = u.X, u.Y
+	u.draw()
+
+	if TimeScale > 0 {
+		u.Blood.Update()
+
+		var speedX = number.Absolute(u.X-u.lastX) / DeltaTimeScaled() // smooth out for FPS dips
+		u.moveSpeedX = u.moveSpeedX + (speedX-u.moveSpeedX)*0.15      // 0.15 = how fast it catches up
+		if number.IsNaN(u.moveSpeedX) {
+			u.moveSpeedX = 0
+		}
+		u.lastX, u.lastY = u.X, u.Y
+	}
 }
 func (u *Unit) TakeDamage(damage int) {
 	if u.Stats.Health > 0 {
@@ -181,6 +153,37 @@ func (u *Unit) TakeDamage(damage int) {
 }
 
 // private ========================================================
+
+func (u *Unit) particlesBlood(p *motion.Particle) (alive bool) {
+	if p.Age == 0 {
+		p.CustomData["offsetY"] = random.Range[float32](-4, 4)
+		p.Scale = random.Range[float32](0.2, 3)
+		p.VelocityX = random.Range[float32](30, 50)
+		p.VelocityY = random.Range[float32](-20, 20)
+		p.Color = random.Range[uint](128, 255) // only red
+
+		if u.Team == TeamAlly {
+			p.VelocityX *= -1
+		}
+	}
+
+	var dt = DeltaTimeScaled()
+	p.Age += dt
+	p.VelocityY += Gravity / 2 * dt
+
+	p.X += p.VelocityX * dt
+	p.Y += p.VelocityY * dt
+
+	if p.Y > u.Y+u.Height/2+p.CustomData["offsetY"].(float32) {
+		p.Y = u.Y + u.Height/2 + p.CustomData["offsetY"].(float32)
+		p.VelocityX, p.VelocityY = 0, 0
+	}
+
+	var alpha = number.Map(p.Age, 1.0, 1.5, 255, 0)
+	var col = color.RGBA(byte(p.Color), 0, 0, byte(number.Limit(alpha, 0, 255)))
+	View.DrawShape(p.X, p.Y, p.Scale, p.Scale, 0, 1, col, u.Mask)
+	return p.Age < 1.5
+}
 
 func (u *Unit) applyState() {
 	var attackable, entrance = u.EnemyEntrance()
@@ -214,7 +217,7 @@ func (u *Unit) applyState() {
 		}
 	}
 	var ranged = u.Stats.AttackRange > 1 && (u.ClosestEnemyInRange != nil || enemyEntranceInRange)
-	var isGarrison = u.Lane == LaneLowerGarrison || u.Lane == LaneMiddleGarrison || u.Lane == LaneUpperGarrison
+	var isGarrison = u.Lane > LaneUpper
 	var garrisonOrNot = !isGarrison || (isGarrison && u.IsAtGarrison)
 
 	if u.State == StateWalking && u.Stats.Health > 0 && (!u.IsGrounded || u.moveSpeedX < 0.01) {
@@ -275,7 +278,7 @@ func (u *Unit) actUponState() {
 		u.VelocityX = 0
 
 		var arrived = u.moveSpeedX != 0 && u.moveSpeedX < 0.01
-		if arrived && (u.Lane == LaneLowerGarrison || u.Lane == LaneMiddleGarrison || u.Lane == LaneUpperGarrison) {
+		if arrived && u.Lane > LaneUpper {
 			u.IsAtGarrison = true
 		}
 	case StateWalking:
@@ -309,8 +312,8 @@ func (u *Unit) actUponState() {
 		}
 		var t = u.ClosestEnemyInRange
 		if t != nil {
-			var distance = number.Absolute(t.X-u.X) / 3
-			var prediction = t.VelocityX * distance * DeltaTimeScaled()
+			var distance = number.Absolute(t.X-u.X) / 200
+			var prediction = t.VelocityX * distance
 			var proj = NewProjectile(u.X, u.Y, u.Z, t.X+prediction, t.Y+t.Height/2-8, t.Z, dmg, t.Team, nil)
 			Projectiles = append(Projectiles, proj)
 		} else if attackable && entrance != nil {
@@ -333,7 +336,7 @@ func (u *Unit) actUponState() {
 		u.Blood.EmitFromLine(30, u.X, u.Y-6, u.X, u.Y+6)
 	case StateDying, StateDyingEnd: // empty
 	case StateDecaying:
-		if u.hurtTimer < -DeathFadeOutTime {
+		if u.hurtTimer < -DeathFadeOutTime || u.Lane > LaneUpper { // is garrison
 			Units = collection.Remove(Units, u)
 		} else if u.hurtTimer < 0 {
 			u.Effects.Tint = color.RGBA(255, 255, 255, byte(number.Map(u.hurtTimer, 0, -DeathFadeOutTime, 255, 0)))
@@ -377,7 +380,8 @@ func (u *Unit) applyCollisions() {
 	for _, other := range Units {
 		var ohb = other.Hitbox()
 		var anyoneDead = u.Stats.Health <= 0 || other.Stats.Health <= 0
-		if other == u || u.Lane != other.Lane || anyoneDead || !hb.Overlaps(ohb) {
+		var isGarrison = other.Lane > LaneUpper || u.Lane > LaneUpper
+		if other == u || u.Lane != other.Lane || anyoneDead || !hb.Overlaps(ohb) || isGarrison {
 			continue
 		}
 		hb = hb.Collide(ohb)
@@ -392,12 +396,11 @@ func (u *Unit) applyCollisions() {
 func (u *Unit) draw() {
 	var frame = u.Anim.Frame()
 	var crop = frame.CropArea()
-	var garrison = u.Lane == LaneLowerGarrison || u.Lane == LaneMiddleGarrison || u.Lane == LaneUpperGarrison
-	var garrisonExtra = u.Lane == LaneGarrison1 || u.Lane == LaneGarrison2 || u.Lane == LaneGarrison3
+	var garrison = u.Lane > LaneUpper
 
 	u.ImageId, u.Width, u.Height = frame, crop.Width, crop.Height
 
-	if u.Stats.Health > 0 && !garrison && !garrisonExtra {
+	if u.Stats.Health > 0 && !garrison {
 		DrawShadow(u.X, u.Z, u.Width*0.6, u.Height*0.1, 0, u.Mask)
 	}
 
