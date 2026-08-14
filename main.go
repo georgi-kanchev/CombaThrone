@@ -11,9 +11,11 @@ func main() {
 	// window.SetMode(window.ModeFullscreenBorderless)
 	window.SetTargetFPS(0)
 
+	game.LoadAudio()
 	game.InitCharacters()
 	game.InitScene()
 	for window.KeepOpen() {
+		game.UpdateAudio()
 		game.UpdateScene()
 		game.UpdateDebug()
 	}

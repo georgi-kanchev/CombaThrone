@@ -301,29 +301,34 @@ func (u *Unit) actUponState() {
 		u.Anim.IsLooping, u.Anim.FPS, u.Anim.Time = false, 8, 0
 
 		var dmg = u.Stats.AttackDamage
-		var attackable, entrance = u.EnemyEntrance()
+		var attackable, e = u.EnemyEntrance()
 		if u.Stats.AttackRange == 1 {
 			if u.UnitFront != nil {
 				u.UnitFront.TakeDamage(dmg)
-			} else if attackable && entrance != nil {
-				entrance.TakeDamage(dmg)
+				PlaySound(AudioHitFlesh)
+			} else if attackable && e != nil {
+				e.TakeDamage(dmg)
+				if e.Health > 0 && e.Entrance == EntranceDoor {
+					PlaySound(AudioHitWood)
+				} else if e.Health > 0 && (e.Entrance == EntranceShortGate || e.Entrance == EntranceTallGate) {
+					PlaySound(AudioHitMetal)
+				}
 			}
 			break
 		}
 
 		var t = u.ClosestEnemyInRange
-		var sound = random.PickFrom(Characters[u.Character].Sounds.AttackTrigger)
 		if t != nil {
 			var distance = number.Absolute(t.X-u.X) / 200
 			var prediction = t.VelocityX * distance
 			var proj = u.NewProjectile(u.X, u.Y, u.Z, t.X+prediction, t.Y+t.Height/2-8, t.Z, dmg, nil)
 			Projectiles = append(Projectiles, proj)
-			sound.Play()
-		} else if attackable && entrance != nil {
-			var x, y = entrance.Tiles[0].X, entrance.Tiles[0].Y
-			var z = map[Lane]float32{LaneLower: 0, LaneMiddle: 1, LaneUpper: 2}[entrance.Lane]
-			Projectiles = append(Projectiles, u.NewProjectile(u.X, u.Y, u.Z, x, y, z, dmg, entrance))
-			sound.Play()
+			PlaySound(Characters[u.Character].Sounds.AttackTrigger)
+		} else if attackable && e != nil {
+			var x, y = e.Tiles[0].X, e.Tiles[0].Y
+			var z = map[Lane]float32{LaneLower: 0, LaneMiddle: 1, LaneUpper: 2}[e.Lane]
+			Projectiles = append(Projectiles, u.NewProjectile(u.X, u.Y, u.Z, x, y, z, dmg, e))
+			PlaySound(Characters[u.Character].Sounds.AttackTrigger)
 		}
 	case StateAttackCharging, StateAttackRecovering, StateAttackEnd: // empty
 	case StateHurtStart:

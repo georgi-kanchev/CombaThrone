@@ -1,9 +1,11 @@
 package game
 
 import (
+	"pure-game-kit/packages/execution/condition"
 	"pure-game-kit/packages/graphics"
 	"pure-game-kit/packages/utility/number"
 	"pure-game-kit/packages/utility/random"
+	"pure-game-kit/packages/utility/time"
 )
 
 type EntranceType uint8
@@ -112,11 +114,27 @@ func (e *Entrance) Update() {
 	switch e.Entrance {
 	case EntranceDoor:
 		var breakIndex = number.Map(e.Health, 0, e.MaxHealth, 5, 1)
-		if e.IsOpen() {
+		var isOpen = e.IsOpen()
+		if isOpen {
 			breakIndex = 0
 		}
+
+		if condition.JustTurnedTrue(isOpen, e.Tiles[0].X) {
+			PlaySound(AudioDoorOpen)
+		}
+		if condition.JustTurnedTrue(!isOpen, e.Tiles[0].X*30) && time.Frame() > 1 {
+			PlaySound(AudioDoorClose)
+		}
+
 		e.Tiles[0].ImageId = TilesetCrops.Crops("door")[breakIndex]
 	case EntranceShortGate, EntranceTallGate:
+		if condition.JustTurnedTrue(e.openY > 0, e.Tiles[0].X) {
+			PlaySound(AudioGateOpen)
+		}
+		if condition.JustTurnedTrue(e.openY == 0, e.Tiles[0].X*30) && time.Frame() > 1 {
+			PlaySound(AudioGateClose)
+		}
+
 		for i := len(e.Tiles) / 2; i < len(e.Tiles); i++ {
 			e.Tiles[i].Y = e.originalTileYs[i] + e.openY
 		}
@@ -141,6 +159,13 @@ func (e *Entrance) TakeDamage(damage int) {
 
 	if e.Health <= 0 {
 		e.HealthBar.FadeOut(1.5)
+
+		switch e.Entrance {
+		case EntranceDoor:
+			PlaySound(AudioDoorCrumble)
+		case EntranceShortGate, EntranceTallGate:
+			PlaySound(AudioGateCrumble)
+		}
 	}
 
 	var breakIndex = number.Map(e.Health, 0, e.MaxHealth, 5, 1)

@@ -64,14 +64,22 @@ func (p *Projectile) Update() {
 
 	p.Angle = angle.BetweenPoints(0, 0, velX, velY)
 
-	if progress >= 1.0 && !p.trigger {
-		p.trigger = true
+	if progress >= 1.0 {
 		var e = p.enemyEntrance
-		if e != nil && !e.IsOpen() && e.Health > 0 && number.IsWithin(p.X, e.Tiles[0].X, TileSize/2) {
-			e.TakeDamage(p.Damage)
-		} else {
-			var sound = random.PickFrom(Characters[p.owner.Character].Sounds.HitGround)
-			sound.Play()
+		if !p.trigger {
+			p.trigger = true
+			if e != nil && !e.IsOpen() && e.Health > 0 && number.IsWithin(p.X, e.Tiles[0].X, TileSize/2) {
+				e.TakeDamage(p.Damage)
+				if e.Health > 0 { // crumble sound played by entrance itself
+					var sounds = Characters[p.owner.Character].Sounds.HitWood
+					if e.Entrance == EntranceShortGate || e.Entrance == EntranceTallGate {
+						sounds = Characters[p.owner.Character].Sounds.HitMetal
+					}
+					PlaySound(sounds)
+				}
+			} else {
+				PlaySound(Characters[p.owner.Character].Sounds.HitGround)
+			}
 		}
 
 		var alpha = min(255, number.Map(p.Age, p.TravelTime, p.TravelTime+ProjectileFadeOutTime, 255, 0))
@@ -100,8 +108,7 @@ func (p *Projectile) Update() {
 			p.trigger = true
 			u.TakeDamage(p.Damage)
 			Projectiles = collection.Remove(Projectiles, p)
-			var sound = random.PickFrom(Characters[p.owner.Character].Sounds.HitFlesh)
-			sound.Play()
+			PlaySound(Characters[p.owner.Character].Sounds.HitFlesh)
 			return
 		}
 	}

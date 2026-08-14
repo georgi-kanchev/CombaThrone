@@ -2,7 +2,6 @@ package game
 
 import (
 	"pure-game-kit/packages/assets"
-	"pure-game-kit/packages/audio"
 	"pure-game-kit/packages/geometry"
 	"pure-game-kit/packages/graphics"
 	"pure-game-kit/packages/input/keyboard"
@@ -13,11 +12,14 @@ import (
 	"pure-game-kit/packages/utility/time"
 )
 
+type Environment uint8
+
 const TileSize, MapCount = 32, 4
 
 const LaneLower, LaneMiddle, LaneUpper Lane = 0, 1, 2
 const LaneGarrison1, LaneGarrison2, LaneGarrison3, LaneGarrison4, LaneGarrison5 Lane = 3, 4, 5, 6, 7
 const LaneGarrisonExtra1, LaneGarrisonExtra2, LaneGarrisonExtra3 Lane = 8, 9, 10
+const EnvironmentPlains Environment = 0
 
 var TimeScale float32 = 1
 
@@ -40,8 +42,6 @@ var Masks = [11]geometry.Area{
 var Entrances [6]*Entrance // index is Ally[Lower, Middle, Upper], Enemy[Lower, Middle, Upper]
 var Units []*Unit
 var Projectiles []*Projectile
-
-var Ambience audio.Audio
 
 func InitScene() {
 	View = graphics.NewView(5.68)
@@ -78,15 +78,15 @@ func InitScene() {
 	AllyBase = NewBase(BaseFortress, Garrison0, true)
 	EnemyBase = NewBase(BaseFort, Garrison0, false)
 
-	Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneUpper))
+	Units = append(Units, NewUnit(CharacterMan, TeamAlly, LaneUpper))
 	Units = append(Units, NewUnit(CharacterMan, TeamEnemy, LaneUpper))
 	Units = append(Units, NewUnit(CharacterWoman, TeamEnemy, LaneMiddle))
-	Units = append(Units, NewUnit(CharacterHunter, TeamEnemy, LaneLower))
-	Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneGarrison1))
-	Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneGarrison2))
-	Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneGarrison3))
-	Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneGarrison4))
-	Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneGarrison5))
+	// Units = append(Units, NewUnit(CharacterHunter, TeamEnemy, LaneLower))
+	// Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneGarrison1))
+	// Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneGarrison2))
+	// Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneGarrison3))
+	// Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneGarrison4))
+	// Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneGarrison5))
 
 	Entrances = [6]*Entrance{
 		LaneLower:      NewEntrance(EntranceTallGate, TeamAlly, LaneLower),
@@ -94,12 +94,10 @@ func InitScene() {
 		LaneUpper:      NewEntrance(EntranceTallGate, TeamAlly, LaneUpper),
 		LaneLower + 3:  NewEntrance(EntranceDoor, TeamEnemy, LaneLower),
 		LaneMiddle + 3: NewEntrance(EntranceDoor, TeamEnemy, LaneMiddle),
-		LaneUpper + 3:  NewEntrance(EntranceShortGate, TeamEnemy, LaneUpper),
+		LaneUpper + 3:  NewEntrance(EntranceDoor, TeamEnemy, LaneUpper),
 	}
 
-	var plains = assets.LoadMusic("data/audio/ambience-plains.mp3")
-	Ambience = audio.New(plains)
-	Ambience.Play()
+	PlayAmbience(EnvironmentPlains)
 }
 func UpdateScene() {
 	var _, bly = Background.PointFromEdge(0.5, 1)
@@ -155,10 +153,6 @@ func UpdateScene() {
 		var hb = u.Hitbox()
 		hb.Height += 8
 		u.HealthBar.Update(hb, u.Stats.Health, Characters[u.Character].Stats.Health, u.Mask)
-	}
-
-	if Ambience.IsJustFinished() {
-		Ambience.Play()
 	}
 }
 

@@ -1,10 +1,7 @@
 package game
 
 import (
-	"pure-game-kit/packages/assets"
-	"pure-game-kit/packages/audio"
 	"pure-game-kit/packages/geometry"
-	"pure-game-kit/packages/utility/text"
 )
 
 func CharacterDataHunter() CharacterData {
@@ -15,12 +12,11 @@ func CharacterDataHunter() CharacterData {
 			AttackDamage: 6, AttackSpeed: 20, AttackRange: 6,
 		},
 	}
-	data.Sounds.AttackTrigger = append(data.Sounds.AttackTrigger, audio.New(assets.LoadSound("data/audio/bow.mp3", 4)))
-	for i := 1; i <= 6; i++ {
-		var asset = assets.LoadSound(text.New("data/audio/projectile-flesh", i, ".mp3"), 4)
-		data.Sounds.HitFlesh = append(data.Sounds.HitFlesh, audio.New(asset))
-	}
-	data.Sounds.HitGround = append(data.Sounds.HitGround, audio.New(assets.LoadSound("data/audio/projectile-ground.mp3", 4)))
+	data.Sounds.AttackTrigger = AudioBow
+	data.Sounds.HitGround = AudioProjectileGround
+	data.Sounds.HitWood = AudioProjectileWood
+	data.Sounds.HitMetal = AudioProjectileMetal
+	data.Sounds.HitFlesh = AudioProjectileFlesh
 	return data
 }
 func BehaviorHunter(self *Unit) {
