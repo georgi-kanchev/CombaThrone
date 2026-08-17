@@ -84,8 +84,9 @@ func NewUnit(character Character, team Team, lane Lane) *Unit {
 	case LaneUpper:
 		unit.X, unit.Y = col[0].X+col[0].Width/2-104, col[0].Y-col[0].Height/2-unit.Height/2
 	case LaneGarrison1, LaneGarrison2, LaneGarrison3, LaneGarrison4, LaneGarrison5:
-		var upper = Collisions[LaneUpper]
-		unit.X, unit.Y = upper[0].X+upper[0].Width/2-40, upper[0].Y-upper[0].Height/2-unit.Height/2
+		unit.X, unit.Y = PointAtCell(18, 6)
+	case LaneGarrisonPlus1, LaneGarrisonPlus2, LaneGarrisonPlus3, LaneGarrisonPlus4, LaneGarrisonPlus5:
+		unit.X, unit.Y = PointAtCell(18, 3)
 	}
 	if team == TeamAlly {
 		unit.X = -unit.X
@@ -122,8 +123,9 @@ func (u *Unit) Update() {
 	u.attackTimer -= DeltaTimeScaled()
 	u.Mask = Masks[u.Lane] // applied every frame to account for any changes in lane
 
-	u.Z = map[Lane]float32{LaneLower: 0, LaneMiddle: 1, LaneUpper: 2,
-		LaneGarrison1: 0, LaneGarrison2: 0.5, LaneGarrison3: 1, LaneGarrison4: 1.5, LaneGarrison5: 2}[u.Lane]
+	u.Z = map[Lane]float32{LaneLower: 0, LaneMiddle: 1, LaneUpper: 2, LaneGarrison1: 0, LaneGarrison2: 0.5,
+		LaneGarrison3: 1, LaneGarrison4: 1.5, LaneGarrison5: 2, LaneGarrisonPlus1: 2.5, LaneGarrisonPlus2: 2.5,
+		LaneGarrisonPlus3: 2.5, LaneGarrisonPlus4: 2.5, LaneGarrisonPlus5: 2.5}[u.Lane]
 
 	if TimeScale > 0 {
 		u.applyState()
@@ -319,9 +321,7 @@ func (u *Unit) actUponState() {
 
 		var t = u.ClosestEnemyInRange
 		if t != nil {
-			var distance = number.Absolute(t.X-u.X) / 200
-			var prediction = t.VelocityX * distance
-			var proj = u.NewProjectile(u.X, u.Y, u.Z, t.X+prediction, t.Y+t.Height/2-8, t.Z, dmg, nil)
+			var proj = u.NewProjectile(u.X, u.Y, u.Z, t.X+t.VelocityX, t.Y+t.Height/2-8, t.Z, dmg, nil)
 			Projectiles = append(Projectiles, proj)
 			PlaySound(Characters[u.Character].Sounds.AttackTrigger)
 		} else if attackable && e != nil {

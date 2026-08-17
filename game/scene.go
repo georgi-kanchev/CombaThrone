@@ -18,7 +18,7 @@ const TileSize, MapCount = 32, 4
 
 const LaneLower, LaneMiddle, LaneUpper Lane = 0, 1, 2
 const LaneGarrison1, LaneGarrison2, LaneGarrison3, LaneGarrison4, LaneGarrison5 Lane = 3, 4, 5, 6, 7
-const LaneGarrisonExtra1, LaneGarrisonExtra2, LaneGarrisonExtra3 Lane = 8, 9, 10
+const LaneGarrisonPlus1, LaneGarrisonPlus2, LaneGarrisonPlus3, LaneGarrisonPlus4, LaneGarrisonPlus5 Lane = 8, 9, 10, 11, 12
 const EnvironmentPlains Environment = 0
 
 var TimeScale float32 = 1
@@ -33,8 +33,8 @@ var UserInterfaceImg assets.ImageId
 
 var AllyBase, EnemyBase BaseData
 var Layers []assets.TileLayerId
-var Collisions = make([][]geometry.Shape, 11)
-var Masks = [11]geometry.Area{
+var Collisions = make([][]geometry.Shape, 13)
+var Masks = [13]geometry.Area{
 	LaneLower:  geometry.NewArea(0, 0, 556, 1000),
 	LaneMiddle: geometry.NewArea(0, 0, 492, 1000),
 	LaneUpper:  geometry.NewArea(0, 0, 428, 1000),
@@ -44,7 +44,7 @@ var Units []*Unit
 var Projectiles []*Projectile
 
 func InitScene() {
-	View = graphics.NewView(5.68)
+	View = graphics.NewView(1)
 	Background = graphics.NewSprite(0, 0, 1, assets.LoadImage("data/bgr-field.png"))
 	UserInterfaceImg = assets.LoadImage("data/user-interface.png")
 	UserInterfaceCrops = assets.LoadAtlas(UserInterfaceImg, "data/user-interface.xml")
@@ -53,7 +53,8 @@ func InitScene() {
 	var low, mid, up = graphics.NewTilemap(layers[12]), graphics.NewTilemap(layers[13]), graphics.NewTilemap(layers[14])
 	var g1, g2, g3 = graphics.NewTilemap(layers[15]), graphics.NewTilemap(layers[16]), graphics.NewTilemap(layers[17])
 	var g4, g5 = graphics.NewTilemap(layers[18]), graphics.NewTilemap(layers[19])
-	var e1, e2, e3 = graphics.NewTilemap(layers[20]), graphics.NewTilemap(layers[21]), graphics.NewTilemap(layers[22])
+	var p1, p2, p3 = graphics.NewTilemap(layers[20]), graphics.NewTilemap(layers[21]), graphics.NewTilemap(layers[22])
+	var p4, p5 = graphics.NewTilemap(layers[23]), graphics.NewTilemap(layers[24])
 
 	Layers = layers
 	TilesetCrops = assets.LoadAtlas(tileset, "data/tileset.xml")
@@ -66,27 +67,33 @@ func InitScene() {
 	Collisions[LaneGarrison3] = g3.TilemapShapes()
 	Collisions[LaneGarrison4] = g4.TilemapShapes()
 	Collisions[LaneGarrison5] = g5.TilemapShapes()
-	Collisions[LaneGarrisonExtra1] = e1.TilemapShapes()
-	Collisions[LaneGarrisonExtra2] = e2.TilemapShapes()
-	Collisions[LaneGarrisonExtra3] = e3.TilemapShapes()
+	Collisions[LaneGarrisonPlus1] = p1.TilemapShapes()
+	Collisions[LaneGarrisonPlus2] = p2.TilemapShapes()
+	Collisions[LaneGarrisonPlus3] = p3.TilemapShapes()
+	Collisions[LaneGarrisonPlus4] = p4.TilemapShapes()
+	Collisions[LaneGarrisonPlus5] = p5.TilemapShapes()
 
 	mirrorGarrisonLanes()
 
 	MapLayer, Map = layers[9], graphics.NewTilemap(layers[9])
 	Flags, Grid = graphics.NewTilemap(layers[10]), graphics.NewTilemap(layers[11])
 
-	AllyBase = NewBase(BaseFortress, Garrison0, true)
+	AllyBase = NewBase(BaseFortress, Garrison3, true)
 	EnemyBase = NewBase(BaseFort, Garrison0, false)
 
 	Units = append(Units, NewUnit(CharacterMan, TeamAlly, LaneUpper))
 	Units = append(Units, NewUnit(CharacterMan, TeamEnemy, LaneUpper))
 	Units = append(Units, NewUnit(CharacterWoman, TeamEnemy, LaneMiddle))
-	// Units = append(Units, NewUnit(CharacterHunter, TeamEnemy, LaneLower))
-	// Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneGarrison1))
-	// Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneGarrison2))
-	// Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneGarrison3))
-	// Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneGarrison4))
-	// Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneGarrison5))
+	Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneGarrisonPlus1))
+	Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneGarrisonPlus2))
+	Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneGarrisonPlus3))
+	Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneGarrisonPlus4))
+	Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneGarrisonPlus5))
+	Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneGarrison1))
+	Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneGarrison2))
+	Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneGarrison3))
+	Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneGarrison4))
+	Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneGarrison5))
 
 	Entrances = [6]*Entrance{
 		LaneLower:      NewEntrance(EntranceTallGate, TeamAlly, LaneLower),
@@ -185,7 +192,7 @@ func DrawShadow(x, z, width, height, angle float32, mask geometry.Area) {
 var skyColor = color.TagRGBA("rgb(98, 171, 212)")
 
 func mirrorGarrisonLanes() {
-	for i := LaneGarrison1; i < LaneGarrisonExtra3+1; i++ {
+	for i := LaneGarrison1; i < LaneGarrisonPlus5+1; i++ {
 		var length = len(Collisions[i])
 		for j := range length {
 			var shape = Collisions[i][j]
@@ -198,7 +205,7 @@ func mirrorGarrisonLanes() {
 	}
 }
 func bringGarrisonLanesDown(ally bool) {
-	for i := LaneGarrison1; i < LaneGarrisonExtra3+1; i++ {
+	for i := LaneGarrison1; i < LaneGarrisonPlus5+1; i++ {
 		var length = len(Collisions[i])
 		var j = length / 2
 		if ally {

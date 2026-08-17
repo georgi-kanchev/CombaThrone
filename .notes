@@ -2,8 +2,8 @@ upgrades:
 - building:
     - none     (default)
     - barrack  (health, unlocks gates)
-    - fort     (+health, unlocks garrisons)
-    - fortress (++health, unlocks steel gate, requires iron gate)
+    - fort     (+health, unlocks +1 garrison)
+    - fortress (++health, unlocks tall gate, unlocks both +2 garrisons, requires iron gate)
 - entry:
     - hole       (default)
     - door       (defence)
@@ -11,9 +11,9 @@ upgrades:
     - tall gate  (++defence, unlocks giant characters)
 - garrisons:
     - none  (default)
-    - one   (low 1, mid 0, high 0)
-    - two   (low 2, mid 1, high 0)
-    - three (low 3, mid 2, high 1)
+    - one   (+1 garrison, requires fort)
+    - two   (+2 garrisons, requires fortress)
+    - three (+2 garrisons, requires fortress)
 
 characters:
 - village:

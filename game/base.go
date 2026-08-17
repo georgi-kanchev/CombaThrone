@@ -8,7 +8,7 @@ type Base uint8
 type Garrison uint8
 
 type BaseData struct {
-	Health int
+	Glory int
 
 	Back, Front, GarrisonBack, GarrisonFront *graphics.Object
 
@@ -20,8 +20,8 @@ const BaseBarrack, BaseFort, BaseFortress Base = 0, 1, 2
 const Garrison0, Garrison1, Garrison2, Garrison3 Garrison = 0, 1, 2, 3
 
 func NewBase(base Base, garrison Garrison, ally bool) BaseData {
-	var health = map[Base]int{BaseBarrack: 50, BaseFort: 100, BaseFortress: 200}[base]
-	var b = BaseData{base: base, garrison: garrison, Health: health}
+	var glory = map[Base]int{BaseBarrack: 40, BaseFort: 100, BaseFortress: 350}[base]
+	var b = BaseData{base: base, garrison: garrison, Glory: glory}
 
 	if base == BaseBarrack {
 		var barrack = graphics.NewTilemap(Layers[0])
