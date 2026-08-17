@@ -10,7 +10,7 @@ import (
 
 type EntranceType uint8
 
-const EntranceHole, EntranceDoor, EntranceShortGate, EntranceTallGate EntranceType = 0, 1, 2, 3
+const EntranceNone, EntranceDoor, EntranceShortGate, EntranceTallGate EntranceType = 0, 1, 2, 3
 
 type Entrance struct {
 	Tiles     []*graphics.Object
@@ -29,7 +29,7 @@ func NewEntrance(entry EntranceType, team Team, lane Lane) *Entrance {
 	var data = Entrance{Entrance: entry, Team: team, Lane: lane, maxOpenY: TileSize + (TileSize * (float32(entry) - 1))}
 	var x, y float32 = -208, 48 // ally upper lane by default
 
-	if entry != EntranceHole {
+	if entry != EntranceNone {
 		var hb = NewHealthBar(TileSize-2, team)
 		data.HealthBar = &hb
 		data.MaxHealth, data.Health = 100, 100
@@ -45,8 +45,12 @@ func NewEntrance(entry EntranceType, team Team, lane Lane) *Entrance {
 	}
 
 	switch entry {
-	case EntranceHole:
+	case EntranceNone:
 		var hole = graphics.NewSprite(x, y, 1, DecorCrops.Crops("hole")[0])
+		if (team == TeamAlly && AllyBase.Base == BaseCamp) || (team == TeamEnemy && EnemyBase.Base == BaseCamp) {
+			hole.Effects.Tint = 0
+		}
+
 		data.Tiles = []*graphics.Object{&hole}
 	case EntranceDoor:
 		var door = graphics.NewSprite(x, y, 1, DecorCrops.Crops("door")[1])

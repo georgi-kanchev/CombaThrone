@@ -89,7 +89,13 @@ func NewUnit(character Character, team Team, lane Lane) *Unit {
 		unit.X, unit.Y = PointAtCell(18, 3)
 	}
 	if team == TeamAlly {
+		if AllyBase.Base == BaseCamp {
+			unit.X = Background.Width/2 + unit.Width/2
+		}
+
 		unit.X = -unit.X
+	} else if EnemyBase.Base == BaseCamp {
+		unit.X = Background.Width / 2
 	}
 
 	var hb = unit.Hitbox()
@@ -294,13 +300,25 @@ func (u *Unit) actUponState() {
 		switch u.Team {
 		case TeamAlly:
 			u.VelocityX = float32(u.Stats.MoveSpeed)
+			if (u.X < 0 && AllyBase.Base == BaseCamp) || (u.X > 0 && EnemyBase.Base == BaseCamp) {
+				u.Mask = geometry.Area{}
+			}
 			if e != nil && u.X > e.Tiles[0].X {
 				u.HealthBar.MoveToGlory(2.0)
 			}
+			if u.X > Background.Width/2+u.Width/2 {
+				Units = collection.Remove(Units, u)
+			}
 		case TeamEnemy:
 			u.VelocityX = -float32(u.Stats.MoveSpeed)
+			if u.X < 0 && AllyBase.Base == BaseCamp {
+				u.Mask = geometry.Area{}
+			}
 			if e != nil && u.X < e.Tiles[0].X {
 				u.HealthBar.MoveToGlory(2.0)
+			}
+			if u.X < -Background.Width/2-u.Width/2 {
+				Units = collection.Remove(Units, u)
 			}
 		}
 	case StateActionStart:
@@ -336,8 +354,10 @@ func (u *Unit) actUponState() {
 			PlaySound(Characters[u.Character].Sounds.ActionTrigger)
 		} else if canBeActedUpon && e != nil {
 			var x, y = e.Tiles[0].X, e.Tiles[0].Y
-			var z = map[Lane]float32{LaneLower: 0, LaneMiddle: 1, LaneUpper: 2}[e.Lane]
-			Projectiles = append(Projectiles, u.NewProjectile(u.X, u.Y, u.Z, x, y, z, dmg, e))
+			if e.Entrance == EntranceTallGate {
+				y += TileSize
+			}
+			Projectiles = append(Projectiles, u.NewProjectile(u.X, u.Y, u.Z, x, y, zs[e.Lane], dmg, e))
 			PlaySound(Characters[u.Character].Sounds.ActionTrigger)
 		}
 	case StateActionCharging, StateActionRecovering, StateActionEnd: // empty

@@ -1,11 +1,11 @@
 upgrades:
 - building:
-    - none     (default)
-    - barrack  (health, unlocks gates)
-    - fort     (+health, unlocks +1 garrison)
-    - fortress (++health, unlocks tall gate, unlocks both +2 garrisons, requires iron gate)
+    - camp     (default)
+    - barrack  (glory, unlocks gates)
+    - fort     (+glory, unlocks +1 garrison)
+    - fortress (++glory, unlocks tall gate, unlocks both +2 garrisons, requires iron gate)
 - entry:
-    - hole       (default)
+    - none       (default)
     - door       (defence)
     - short gate (+defence, unlocks tall characters, unlocks fort)
     - tall gate  (++defence, unlocks giant characters)
@@ -17,8 +17,8 @@ upgrades:
 
 characters:
 - village:
-    - girl      bring more gold, slower
-    - boy       bring less gold, faster
+    - girl      bring more coins, slower
+    - boy       bring less coins, faster
     - woman     heal unit in front
     - man       cheap but weak brawler
     - grandma   healing buff radius

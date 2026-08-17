@@ -8,23 +8,27 @@ import (
 
 type Base uint8
 type Garrison uint8
-
+type SaveState struct {
+	Base     Base
+	Garrison Garrison
+	Coins    int
+}
 type BaseData struct {
+	SaveState
+
 	Glory int
 
 	Back, Front, GarrisonBack, GarrisonFront, GloryLabel *graphics.Object
 
 	lastGlory int
-	base      Base
-	garrison  Garrison
 }
 
-const BaseBarrack, BaseFort, BaseFortress Base = 0, 1, 2
+const BaseCamp, BaseBarrack, BaseFort, BaseFortress Base = 0, 1, 2, 3
 const Garrison0, Garrison1, Garrison2, Garrison3 Garrison = 0, 1, 2, 3
 
-func NewBase(base Base, garrison Garrison, ally bool) BaseData {
-	var glory = map[Base]int{BaseBarrack: 40, BaseFort: 100, BaseFortress: 350}[base]
-	var b = BaseData{base: base, garrison: garrison, Glory: glory}
+func NewBase(saveState SaveState, ally bool) BaseData {
+	var glory = map[Base]int{BaseCamp: 15, BaseBarrack: 30, BaseFort: 90, BaseFortress: 360}[saveState.Base]
+	var b = BaseData{SaveState: saveState, Glory: glory}
 
 	var ptsX, ptsY = PointAtCell(14, 5.5)
 	if ally {
@@ -37,27 +41,32 @@ func NewBase(base Base, garrison Garrison, ally bool) BaseData {
 	label.Effects.OutlineSize, label.Effects.OutlineColor = 0.4, palette.Black
 	b.GloryLabel = &label
 
-	if base == BaseBarrack {
-		var barrack = graphics.NewTilemap(Layers[0])
-		b.Front = &barrack
+	switch b.Base {
+	case BaseCamp:
+		var back = graphics.NewTilemap(Layers[0])
+		b.Back = &back
+		return b
+	case BaseBarrack:
+		var barrack = graphics.NewTilemap(Layers[1])
+		b.Back = &barrack
 		return b
 	}
 
-	var back, front = graphics.NewTilemap(Layers[1]), graphics.NewTilemap(Layers[2])
+	var back, front = graphics.NewTilemap(Layers[2]), graphics.NewTilemap(Layers[3])
 	b.Back, b.Front = &back, &front
 
-	if garrison != Garrison0 {
-		var indexes = map[Garrison][2]int{Garrison1: {3, 4}, Garrison2: {5, 6}, Garrison3: {7, 8}}[garrison]
+	if b.Garrison != Garrison0 {
+		var indexes = map[Garrison][2]int{Garrison1: {4, 5}, Garrison2: {6, 7}, Garrison3: {8, 9}}[b.Garrison]
 		var garBack, garFront = graphics.NewTilemap(Layers[indexes[0]]), graphics.NewTilemap(Layers[indexes[1]])
 		b.GarrisonBack, b.GarrisonFront = &garBack, &garFront
 
-		if base == BaseFort {
+		if b.Base == BaseFort {
 			b.GarrisonBack.Y += TileSize
 			b.GarrisonFront.Y += TileSize
 		}
 	}
 
-	if base == BaseFort {
+	if b.Base == BaseFort {
 		b.Back.Y += TileSize
 		b.Front.Y += TileSize
 
@@ -70,11 +79,15 @@ func NewBase(base Base, garrison Garrison, ally bool) BaseData {
 	return b
 }
 
-func (b *BaseData) Update() {
+func (b *BaseData) UpdateBack() {
+	View.DrawObject(b.Back)
+	View.DrawObject(b.GarrisonBack)
+}
+func (b *BaseData) UpdateFront() {
 	b.Glory = max(b.Glory, 0)
 
 	if b.Glory == 0 {
-		TimeScale = 0 // game over
+		//TimeScale = 0 // game over
 	}
 
 	if b.Glory != b.lastGlory {

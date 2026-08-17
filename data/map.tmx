@@ -1,19 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="18" height="10" tilewidth="32" tileheight="32" infinite="0" nextlayerid="83" nextobjectid="47">
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="18" height="10" tilewidth="32" tileheight="32" infinite="0" nextlayerid="85" nextobjectid="47">
  <tileset firstgid="1" name="decor" tilewidth="32" tileheight="32" tilecount="240" columns="16">
   <image source="decor.png" width="512" height="480"/>
  </tileset>
+ <layer id="84" name="Camp" width="18" height="10">
+  <data encoding="base64" compression="zlib">
+   eJxjYBgF9AAhQBwKxGFAHE6BOSlAnArEaUCcToE5EVCcQYEZMHMoNYOBSmaAAAAKWwUt
+  </data>
+ </layer>
  <layer id="17" name="Barrack" width="18" height="10" visible="0">
   <data encoding="base64" compression="zlib">
    eJxjYBgF+IAiECsBsTKF5hgCsREQGwNxEgXmOAKxExA7U+ieQKg5wRSakwjEQRSaAQKFVDADBAAglAQv
   </data>
  </layer>
- <layer id="72" name="FortBack0" width="18" height="10">
+ <layer id="72" name="FortBack0" width="18" height="10" visible="0">
   <data encoding="base64" compression="zlib">
    eJxjYBiegBkJc1BgjjAUswCxBIXmsFDBHBaGUXPwAQA4DwEX
   </data>
  </layer>
- <layer id="7" name="FortFront0" width="18" height="10">
+ <layer id="7" name="FortFront0" width="18" height="10" visible="0">
   <data encoding="base64" compression="zlib">
    eJxjYBjegJUKZogAseggMIOBSmYMZwAAoawAbQ==
   </data>
@@ -38,12 +43,12 @@
    eJxjYBj+gA2I2QfaEaOALgAAG7AADg==
   </data>
  </layer>
- <layer id="75" name="FortBack3" width="18" height="10">
+ <layer id="75" name="FortBack3" width="18" height="10" visible="0">
   <data encoding="base64" compression="zlib">
    eJxjYBj+gBkJUwLEoFh81JxBaw4AhocBnA==
   </data>
  </layer>
- <layer id="23" name="FortFront3" width="18" height="10">
+ <layer id="23" name="FortFront3" width="18" height="10" visible="0">
   <data encoding="base64" compression="zlib">
    eJxjYBj+gA2K2QfaIaOA5gAAJwQAFA==
   </data>
@@ -72,43 +77,43 @@
  <objectgroup id="63" name="Upper" visible="0">
   <object id="1" x="-62" y="245" width="700" height="15"/>
  </objectgroup>
- <objectgroup id="65" name="Garrison1">
+ <objectgroup id="65" name="Garrison1" visible="0">
   <object id="7" x="-81.5" y="290.5" width="144.957" height="4" rotation="315"/>
   <object id="12" x="20" y="152" width="4" height="37"/>
  </objectgroup>
- <objectgroup id="68" name="Garrison2">
+ <objectgroup id="68" name="Garrison2" visible="0">
   <object id="18" x="-81.5" y="290.5" width="190.212" height="4" rotation="315"/>
   <object id="20" x="36" y="136" width="4" height="37"/>
  </objectgroup>
- <objectgroup id="78" name="Garrison3">
+ <objectgroup id="78" name="Garrison3" visible="0">
   <object id="35" x="-81.5" y="290.5" width="190.212" height="4" rotation="315"/>
   <object id="36" x="52" y="120" width="4" height="37"/>
  </objectgroup>
- <objectgroup id="77" name="Garrison4">
+ <objectgroup id="77" name="Garrison4" visible="0">
   <object id="33" x="-81.5" y="290.5" width="212.839" height="4" rotation="315"/>
   <object id="34" x="68" y="104" width="4" height="37"/>
  </objectgroup>
- <objectgroup id="67" name="Garrison5">
+ <objectgroup id="67" name="Garrison5" visible="0">
   <object id="14" x="-81.5" y="290.5" width="251.73" height="4" rotation="315"/>
   <object id="16" x="84" y="88" width="4" height="37"/>
  </objectgroup>
- <objectgroup id="69" name="GarrisonPlus1">
+ <objectgroup id="69" name="GarrisonPlus1" visible="0">
   <object id="22" x="-40" y="126" width="168" height="4"/>
   <object id="23" x="108" y="96" width="4" height="30"/>
  </objectgroup>
- <objectgroup id="70" name="GarrisonPlus2">
+ <objectgroup id="70" name="GarrisonPlus2" visible="0">
   <object id="24" x="-40" y="126" width="200" height="4"/>
   <object id="25" x="128" y="96" width="4" height="30"/>
  </objectgroup>
- <objectgroup id="71" name="GarrisonPlus3">
+ <objectgroup id="71" name="GarrisonPlus3" visible="0">
   <object id="26" x="-40" y="126" width="232" height="4"/>
   <object id="27" x="148" y="96" width="4" height="30"/>
  </objectgroup>
- <objectgroup id="80" name="GarrisonPlus4">
+ <objectgroup id="80" name="GarrisonPlus4" visible="0">
   <object id="40" x="-40" y="126" width="232" height="4"/>
   <object id="41" x="168" y="96" width="4" height="30"/>
  </objectgroup>
- <objectgroup id="81" name="GarrisonPlus5">
+ <objectgroup id="81" name="GarrisonPlus5" visible="0">
   <object id="42" x="-40" y="126" width="232" height="4"/>
   <object id="43" x="188" y="96" width="4" height="30"/>
  </objectgroup>
