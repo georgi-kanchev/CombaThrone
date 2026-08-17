@@ -13,7 +13,7 @@ import (
 var healthBarColors = [3]uint{TeamAlly: palette.Green, TeamEnemy: palette.Red, TeamNeutral: palette.Azure}
 
 type HealthBar struct {
-	background, fill, label, glory *graphics.Object
+	background, fill, damage, label, glory *graphics.Object
 
 	timer, duration          float32
 	lastValue                int
@@ -35,10 +35,10 @@ func NewHealthBar(width float32, team Team) HealthBar {
 	label.Effects.TextShadowColor, label.Effects.TextShadowWeight = 0, 0
 	label.Effects.OutlineSize, label.Effects.OutlineColor = 0.65, palette.Black
 	label.Effects.TextAlignX, label.Effects.TextAlignY = 0.5, 0.5
-	var copy = label
-	copy.Effects.TextLineHeight, copy.Effects.OutlineSize = 10, 0.45
-	copy.Height = 20
-	return HealthBar{background: &bgr, fill: &fill, label: &label, glory: &copy}
+	var glory, dmg = label, fill // copy
+	glory.Effects.TextLineHeight, glory.Effects.OutlineSize = 10, 0.45
+	glory.Height = 20
+	return HealthBar{team: team, background: &bgr, fill: &fill, damage: &dmg, label: &label, glory: &glory}
 }
 func (hb *HealthBar) FadeOut(duration float32) {
 	hb.duration, hb.timer = duration, duration
@@ -85,13 +85,28 @@ func (hb *HealthBar) Update(target geometry.Shape, health, maxHealth int, mask g
 	hb.fill.X, hb.fill.Y = hb.background.X-hb.background.Width/2+hb.fill.Width/2+border/2, hb.background.Y
 	hb.label.X, hb.label.Y = hb.background.X, hb.background.Y
 
+	const dmgSpeed = 0.4
+	hb.damage.Width += (hb.fill.Width - hb.damage.Width) * float32(1.0-number.Power(0.01, dmgSpeed*DeltaTimeScaled()))
+	if number.Absolute(hb.fill.Width-hb.damage.Width) < 0.1 {
+		hb.damage.Width = hb.fill.Width
+	}
+	hb.damage.Height = hb.fill.Height
+	hb.damage.X, hb.damage.Y = hb.background.X-hb.background.Width/2+hb.damage.Width/2+border/2, hb.background.Y
+
+	if hb.team == TeamAlly {
+		hb.damage.Effects.FillColor = palette.Red
+	} else {
+		hb.damage.Effects.FillColor = palette.Orange
+	}
+
 	if hb.lastValue != health {
 		hb.label.Text = text.New(health)
 	}
 	hb.lastValue = health
 
-	hb.background.Mask, hb.fill.Mask, hb.label.Mask = mask, mask, mask
+	hb.background.Mask, hb.fill.Mask, hb.damage.Mask, hb.label.Mask = mask, mask, mask, mask
 	View.DrawObject(hb.background)
+	View.DrawObject(hb.damage)
 	View.DrawObject(hb.fill)
 	View.DrawObject(hb.label)
 

@@ -4,6 +4,8 @@ import (
 	"pure-game-kit/packages/assets"
 	"pure-game-kit/packages/geometry"
 	"pure-game-kit/packages/graphics"
+	"pure-game-kit/packages/input/keyboard"
+	"pure-game-kit/packages/input/keyboard/key"
 	"pure-game-kit/packages/utility/collection"
 	"pure-game-kit/packages/utility/color"
 	"pure-game-kit/packages/utility/number"
@@ -81,8 +83,8 @@ func InitScene() {
 	AllyBase = NewBase(BaseFortress, Garrison3, true)
 	EnemyBase = NewBase(BaseFort, Garrison0, false)
 
-	Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneLower))
-	Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneUpper))
+	Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneMiddle))
+	// Units = append(Units, NewUnit(CharacterHunter, TeamEnemy, LaneUpper))
 	// Units = append(Units, NewUnit(CharacterMan, TeamEnemy, LaneUpper))
 	// Units = append(Units, NewUnit(CharacterWoman, TeamEnemy, LaneMiddle))
 	// Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneGarrisonPlus1))
@@ -120,6 +122,10 @@ func UpdateScene() {
 	View.DrawObject(AllyBase.GarrisonBack)
 	View.DrawObject(EnemyBase.Back)
 	View.DrawObject(EnemyBase.GarrisonBack)
+
+	if keyboard.IsKeyJustPressed(key.A) {
+		Entrances[4].TakeDamage(30)
+	}
 
 	for _, g := range Entrances {
 		g.Update()
