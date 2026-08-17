@@ -17,7 +17,7 @@ type Entrance struct {
 	Entrance  EntranceType
 	Lane      Lane
 	Team      Team
-	HealthBar HealthBar
+	HealthBar *HealthBar
 
 	MaxHealth, Health int
 
@@ -30,7 +30,8 @@ func NewEntrance(entry EntranceType, team Team, lane Lane) *Entrance {
 	var x, y float32 = -208, 48 // ally upper lane by default
 
 	if entry != EntranceHole {
-		data.HealthBar = NewHealthBar(TileSize-2, team)
+		var hb = NewHealthBar(TileSize-2, team)
+		data.HealthBar = &hb
 		data.MaxHealth, data.Health = 100, 100
 	}
 
@@ -45,29 +46,29 @@ func NewEntrance(entry EntranceType, team Team, lane Lane) *Entrance {
 
 	switch entry {
 	case EntranceHole:
-		var hole = graphics.NewSprite(x, y, 1, TilesetCrops.Crops("hole")[0])
+		var hole = graphics.NewSprite(x, y, 1, DecorCrops.Crops("hole")[0])
 		data.Tiles = []*graphics.Object{&hole}
 	case EntranceDoor:
-		var door = graphics.NewSprite(x, y, 1, TilesetCrops.Crops("door")[1])
+		var door = graphics.NewSprite(x, y, 1, DecorCrops.Crops("door")[1])
 		data.Tiles = []*graphics.Object{&door}
 	case EntranceShortGate:
-		var top0 = graphics.NewSprite(x, y-TileSize, 1, TilesetCrops.Crops("gate_top")[0])
-		var mid0 = graphics.NewSprite(x, y, 1, TilesetCrops.Crops("gate_middle")[0])
-		var bot0 = graphics.NewSprite(x, y+TileSize, 1, TilesetCrops.Crops("gate_bottom")[0])
-		var top1 = graphics.NewSprite(x, y-TileSize, 1, TilesetCrops.Crops("gate_top")[1])
-		var mid1 = graphics.NewSprite(x, y, 1, TilesetCrops.Crops("gate_middle")[1])
-		var bot1 = graphics.NewSprite(x, y+TileSize, 1, TilesetCrops.Crops("gate_bottom")[1])
+		var top0 = graphics.NewSprite(x, y-TileSize, 1, DecorCrops.Crops("gate_top")[0])
+		var mid0 = graphics.NewSprite(x, y, 1, DecorCrops.Crops("gate_middle")[0])
+		var bot0 = graphics.NewSprite(x, y+TileSize, 1, DecorCrops.Crops("gate_bottom")[0])
+		var top1 = graphics.NewSprite(x, y-TileSize, 1, DecorCrops.Crops("gate_top")[1])
+		var mid1 = graphics.NewSprite(x, y, 1, DecorCrops.Crops("gate_middle")[1])
+		var bot1 = graphics.NewSprite(x, y+TileSize, 1, DecorCrops.Crops("gate_bottom")[1])
 		data.Tiles = []*graphics.Object{&top0, &mid0, &bot0, &top1, &mid1, &bot1}
 	case EntranceTallGate:
 		y -= TileSize / 2
-		var top0 = graphics.NewSprite(x, y-TileSize*1.5, 1, TilesetCrops.Crops("gate_top")[0])
-		var midU0 = graphics.NewSprite(x, y-TileSize*0.5, 1, TilesetCrops.Crops("gate_middle")[0])
-		var midD0 = graphics.NewSprite(x, y+TileSize*0.5, 1, TilesetCrops.Crops("gate_middle")[0])
-		var bot0 = graphics.NewSprite(x, y+TileSize*1.5, 1, TilesetCrops.Crops("gate_bottom")[0])
-		var top1 = graphics.NewSprite(x, y-TileSize*1.5, 1, TilesetCrops.Crops("gate_top")[1])
-		var midU1 = graphics.NewSprite(x, y-TileSize*0.5, 1, TilesetCrops.Crops("gate_middle")[1])
-		var midD1 = graphics.NewSprite(x, y+TileSize*0.5, 1, TilesetCrops.Crops("gate_middle")[1])
-		var bot1 = graphics.NewSprite(x, y+TileSize*1.5, 1, TilesetCrops.Crops("gate_bottom")[1])
+		var top0 = graphics.NewSprite(x, y-TileSize*1.5, 1, DecorCrops.Crops("gate_top")[0])
+		var midU0 = graphics.NewSprite(x, y-TileSize*0.5, 1, DecorCrops.Crops("gate_middle")[0])
+		var midD0 = graphics.NewSprite(x, y+TileSize*0.5, 1, DecorCrops.Crops("gate_middle")[0])
+		var bot0 = graphics.NewSprite(x, y+TileSize*1.5, 1, DecorCrops.Crops("gate_bottom")[0])
+		var top1 = graphics.NewSprite(x, y-TileSize*1.5, 1, DecorCrops.Crops("gate_top")[1])
+		var midU1 = graphics.NewSprite(x, y-TileSize*0.5, 1, DecorCrops.Crops("gate_middle")[1])
+		var midD1 = graphics.NewSprite(x, y+TileSize*0.5, 1, DecorCrops.Crops("gate_middle")[1])
+		var bot1 = graphics.NewSprite(x, y+TileSize*1.5, 1, DecorCrops.Crops("gate_bottom")[1])
 		data.Tiles = []*graphics.Object{&top0, &midU0, &midD0, &bot0, &top1, &midU1, &midD1, &bot1}
 	}
 
@@ -119,19 +120,19 @@ func (e *Entrance) Update() {
 			breakIndex = 0
 		}
 
-		if condition.JustTurnedTrue(isOpen, e.Tiles[0].X) {
+		if condition.JustTurnedTrue(isOpen, int(e.Tiles[0].X)) {
 			PlaySound(AudioDoorOpen)
 		}
-		if condition.JustTurnedTrue(!isOpen, e.Tiles[0].X*30) && time.Frame() > 1 {
+		if condition.JustTurnedTrue(!isOpen, int(e.Tiles[0].X)*30) && time.Frame() > 1 {
 			PlaySound(AudioDoorClose)
 		}
 
-		e.Tiles[0].ImageId = TilesetCrops.Crops("door")[breakIndex]
+		e.Tiles[0].ImageId = DecorCrops.Crops("door")[breakIndex]
 	case EntranceShortGate, EntranceTallGate:
-		if condition.JustTurnedTrue(e.openY > 0, e.Tiles[0].X) {
+		if condition.JustTurnedTrue(e.openY > 0, int(e.Tiles[0].X)) {
 			PlaySound(AudioGateOpen)
 		}
-		if condition.JustTurnedTrue(e.openY == 0, e.Tiles[0].X*30) && time.Frame() > 1 {
+		if condition.JustTurnedTrue(e.openY == 0, int(e.Tiles[0].X*30)) && time.Frame() > 1 {
 			PlaySound(AudioGateClose)
 		}
 
@@ -141,12 +142,12 @@ func (e *Entrance) Update() {
 	}
 
 	for i, t := range e.Tiles {
-		var prevX, prevY = t.X, t.Y
+		var lastX, lastY = t.X, t.Y
 		if !gate || (gate && i >= len(e.Tiles)/2) {
 			t.X, t.Y = t.X+float32(shakeOffsetX), t.Y+float32(shakeOffsetY)
 		}
 		View.DrawObject(t)
-		t.X, t.Y = prevX, prevY
+		t.X, t.Y = lastX, lastY
 	}
 }
 func (e *Entrance) TakeDamage(damage int) {
@@ -171,13 +172,13 @@ func (e *Entrance) TakeDamage(damage int) {
 	var breakIndex = number.Map(e.Health, 0, e.MaxHealth, 5, 1)
 	switch e.Entrance { // EntryDoor done in update
 	case EntranceShortGate:
-		e.Tiles[3].ImageId = TilesetCrops.Crops("gate_top")[breakIndex]
-		e.Tiles[4].ImageId = TilesetCrops.Crops("gate_middle")[breakIndex]
-		e.Tiles[5].ImageId = TilesetCrops.Crops("gate_bottom")[breakIndex]
+		e.Tiles[3].ImageId = DecorCrops.Crops("gate_top")[breakIndex]
+		e.Tiles[4].ImageId = DecorCrops.Crops("gate_middle")[breakIndex]
+		e.Tiles[5].ImageId = DecorCrops.Crops("gate_bottom")[breakIndex]
 	case EntranceTallGate:
-		e.Tiles[4].ImageId = TilesetCrops.Crops("gate_top")[breakIndex]
-		e.Tiles[5].ImageId = TilesetCrops.Crops("gate_middle")[breakIndex]
-		e.Tiles[6].ImageId = TilesetCrops.Crops("gate_middle")[breakIndex]
-		e.Tiles[7].ImageId = TilesetCrops.Crops("gate_bottom")[breakIndex]
+		e.Tiles[4].ImageId = DecorCrops.Crops("gate_top")[breakIndex]
+		e.Tiles[5].ImageId = DecorCrops.Crops("gate_middle")[breakIndex]
+		e.Tiles[6].ImageId = DecorCrops.Crops("gate_middle")[breakIndex]
+		e.Tiles[7].ImageId = DecorCrops.Crops("gate_bottom")[breakIndex]
 	}
 }

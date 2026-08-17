@@ -4,11 +4,10 @@ import (
 	"pure-game-kit/packages/assets"
 	"pure-game-kit/packages/geometry"
 	"pure-game-kit/packages/graphics"
-	"pure-game-kit/packages/input/keyboard"
-	"pure-game-kit/packages/input/keyboard/key"
 	"pure-game-kit/packages/utility/collection"
 	"pure-game-kit/packages/utility/color"
 	"pure-game-kit/packages/utility/number"
+	"pure-game-kit/packages/utility/text"
 	"pure-game-kit/packages/utility/time"
 )
 
@@ -28,8 +27,7 @@ var Background graphics.Object
 
 var MapLayer assets.TileLayerId
 var Map, Grid, Flags graphics.Object
-var TilesetCrops, UserInterfaceCrops assets.AtlasId
-var UserInterfaceImg assets.ImageId
+var DecorCrops, UserInterfaceCrops assets.AtlasId
 
 var AllyBase, EnemyBase BaseData
 var Layers []assets.TileLayerId
@@ -41,15 +39,17 @@ var Masks = [13]geometry.Area{
 }
 var Entrances [6]*Entrance // index is Ally[Lower, Middle, Upper], Enemy[Lower, Middle, Upper]
 var Units []*Unit
-var Projectiles []*Projectile
+var Projectiles, ProjectilesBehind []*Projectile
 
 func InitScene() {
 	View = graphics.NewView(1)
 	Background = graphics.NewSprite(0, 0, 1, assets.LoadImage("data/bgr-field.png"))
-	UserInterfaceImg = assets.LoadImage("data/user-interface.png")
-	UserInterfaceCrops = assets.LoadAtlas(UserInterfaceImg, "data/user-interface.xml")
+	UserInterfaceCrops = assets.LoadAtlas(assets.LoadImage("data/user-interface.png"), "data/user-interface.xml")
 
-	var layers, tileset = assets.LoadTileLayersFromTiled("data/map.tmx")
+	assets.FontId(0).EmbedImage(text.At(Tags[IconGlory], 0), UserInterfaceCrops.Crops("icons")[IconGlory])
+	assets.FontId(0).EmbedImage(text.At(Tags[IconHealth], 0), UserInterfaceCrops.Crops("icons")[IconHealth])
+
+	var layers, decor = assets.LoadTileLayersFromTiled("data/map.tmx")
 	var low, mid, up = graphics.NewTilemap(layers[12]), graphics.NewTilemap(layers[13]), graphics.NewTilemap(layers[14])
 	var g1, g2, g3 = graphics.NewTilemap(layers[15]), graphics.NewTilemap(layers[16]), graphics.NewTilemap(layers[17])
 	var g4, g5 = graphics.NewTilemap(layers[18]), graphics.NewTilemap(layers[19])
@@ -57,8 +57,8 @@ func InitScene() {
 	var p4, p5 = graphics.NewTilemap(layers[23]), graphics.NewTilemap(layers[24])
 
 	Layers = layers
-	TilesetCrops = assets.LoadAtlas(tileset, "data/tileset.xml")
-	TilesetCrops = assets.LoadAtlas(tileset, "data/tileset.xml")
+	DecorCrops = assets.LoadAtlas(decor, "data/decor.xml")
+	DecorCrops = assets.LoadAtlas(decor, "data/decor.xml")
 	Collisions[LaneLower] = low.TilemapShapes()
 	Collisions[LaneMiddle] = mid.TilemapShapes()
 	Collisions[LaneUpper] = up.TilemapShapes()
@@ -81,27 +81,28 @@ func InitScene() {
 	AllyBase = NewBase(BaseFortress, Garrison3, true)
 	EnemyBase = NewBase(BaseFort, Garrison0, false)
 
-	Units = append(Units, NewUnit(CharacterMan, TeamAlly, LaneUpper))
-	Units = append(Units, NewUnit(CharacterMan, TeamEnemy, LaneUpper))
-	Units = append(Units, NewUnit(CharacterWoman, TeamEnemy, LaneMiddle))
-	Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneGarrisonPlus1))
-	Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneGarrisonPlus2))
-	Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneGarrisonPlus3))
-	Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneGarrisonPlus4))
-	Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneGarrisonPlus5))
-	Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneGarrison1))
-	Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneGarrison2))
-	Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneGarrison3))
-	Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneGarrison4))
-	Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneGarrison5))
+	Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneLower))
+	Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneUpper))
+	// Units = append(Units, NewUnit(CharacterMan, TeamEnemy, LaneUpper))
+	// Units = append(Units, NewUnit(CharacterWoman, TeamEnemy, LaneMiddle))
+	// Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneGarrisonPlus1))
+	// Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneGarrisonPlus2))
+	// Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneGarrisonPlus3))
+	// Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneGarrisonPlus4))
+	// Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneGarrisonPlus5))
+	// Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneGarrison1))
+	// Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneGarrison2))
+	// Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneGarrison3))
+	// Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneGarrison4))
+	// Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneGarrison5))
 
 	Entrances = [6]*Entrance{
 		LaneLower:      NewEntrance(EntranceTallGate, TeamAlly, LaneLower),
 		LaneMiddle:     NewEntrance(EntranceTallGate, TeamAlly, LaneMiddle),
 		LaneUpper:      NewEntrance(EntranceTallGate, TeamAlly, LaneUpper),
-		LaneLower + 3:  NewEntrance(EntranceDoor, TeamEnemy, LaneLower),
+		LaneLower + 3:  NewEntrance(EntranceHole, TeamEnemy, LaneLower),
 		LaneMiddle + 3: NewEntrance(EntranceDoor, TeamEnemy, LaneMiddle),
-		LaneUpper + 3:  NewEntrance(EntranceDoor, TeamEnemy, LaneUpper),
+		LaneUpper + 3:  NewEntrance(EntranceHole, TeamEnemy, LaneUpper),
 	}
 
 	PlayAmbience(EnvironmentPlains)
@@ -111,10 +112,6 @@ func UpdateScene() {
 	View.FitSize(Background.Width, 0)
 	var _, h = View.Size()
 	View.Y = (bly - h/2) - 2
-
-	if keyboard.IsKeyJustPressed(key.A) {
-		NewUnit(CharacterWoman, TeamEnemy, LaneUpper)
-	}
 
 	View.DrawColor(skyColor)
 	View.DrawObject(&Background)
@@ -130,6 +127,12 @@ func UpdateScene() {
 	View.DrawObject(&Map)
 	View.DrawObject(&Flags)
 
+	for _, p := range ProjectilesBehind {
+		if p != nil { // may have been destroyed, faded out & removed during an update
+			p.Update()
+		}
+	}
+
 	collection.SortByField(Units, func(u *Unit) float32 {
 		if u.Stats.Health <= 0 { // dead units go behind all alive units
 			return number.NegativeInfinity()
@@ -137,18 +140,16 @@ func UpdateScene() {
 		return u.Y // fall back to Y sort
 	})
 	for _, u := range Units {
-		if u != nil { // unit may have died, faded out & removed during an update
+		if u != nil { // may have died, faded out & removed during an update
 			u.Update()
 		}
 	}
 
-	View.DrawObject(AllyBase.Front)
-	View.DrawObject(AllyBase.GarrisonFront)
-	View.DrawObject(EnemyBase.Front)
-	View.DrawObject(EnemyBase.GarrisonFront)
+	AllyBase.Update()
+	EnemyBase.Update()
 
 	for _, p := range Projectiles {
-		if p != nil { // projectile may have been destroyed, faded out & removed during an update
+		if p != nil { // may have been destroyed, faded out & removed during an update
 			p.Update()
 		}
 	}

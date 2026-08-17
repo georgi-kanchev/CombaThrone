@@ -1,21 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<data grid="1">
-  <frames>
-    <frame x="1" y="1" w="16" h="20"/>
-    <frame x="18" y="1" w="9" h="12"/>
-    <frame x="28" y="1" w="15" h="16"/>
-    <frame x="44" y="1" w="15" h="15"/>
-    <frame x="60" y="1" w="5" h="14"/>
-    <frame x="66" y="1" w="5" h="14"/>
-    <frame x="1" y="22" w="103" h="28"/>
-  </frames>
-  <animations>
-    <animation name="bar-small-back" frames="0"/>
-    <animation name="bar-small-fill" frames="1"/>
-    <animation name="bar-big-back" frames="6"/>
-    <animation name="bar-big-fill" frames="2"/>
-    <animation name="panel" frames="3"/>
-    <animation name="button-down" frames="4"/>
-    <animation name="button-up" frames="5"/>
-  </animations>
+<data grid="20">
+  <crops>
+    1,1,15,15|17,1,16,20|34,1,9,12|44,1,5,14|50,1,5,14|0,40,20,20|20,40,20,20
+  </crops>
+  <groups>
+    <group name="panel" cropIndexes="0"/>
+    <group name="bar-background" cropIndexes="1"/>
+    <group name="bar-fill" cropIndexes="2"/>
+    <group name="button-down" cropIndexes="3"/>
+    <group name="button-up" cropIndexes="4"/>
+    <group name="icons" cropIndexes="5 6"/>
+  </groups>
 </data>

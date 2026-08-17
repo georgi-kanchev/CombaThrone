@@ -30,12 +30,12 @@ type Unit struct {
 	VelocityX, VelocityY, Z float32
 
 	IsGrounded   bool
-	IsAtGarrison bool // cannot attack before garrison position - once there, can never move again (only attack)
+	IsAtGarrison bool // cannot act before garrison position - once there, can never move again (only act)
 
 	UnitFront, UnitBehind, ClosestEnemyInRange *Unit
 
 	lastX, lastY, moveSpeedX float32
-	attackTimer, hurtTimer   float32 // negative values can be used for "time since last"
+	actionTimer, hurtTimer   float32 // negative values can be used for "time since last"
 }
 
 type Team uint8
@@ -55,11 +55,11 @@ const ( // states that end on 'ing' are continuous, single frame otherwise
 	StateDyingEnd
 	StateDecaying
 
-	StateAttackStart
-	StateAttackCharging
-	StateAttackTrigger
-	StateAttackRecovering
-	StateAttackEnd
+	StateActionStart
+	StateActionCharging
+	StateActionTrigger
+	StateActionRecovering
+	StateActionEnd
 )
 
 const TeamAlly, TeamEnemy, TeamNeutral Team = 0, 1, 2
@@ -69,7 +69,7 @@ func NewUnit(character Character, team Team, lane Lane) *Unit {
 	var char = Characters[character]
 	var anim = motion.NewAnimation(0, false, char.Animations.Idle...)
 	var unit = Unit{Object: graphics.NewSprite(-2000, -2000, 1, 0), Character: character, Team: team, Lane: lane,
-		Behavior: char.Behavior, Stats: char.Stats, Anim: &anim, attackTimer: number.NaN(), hurtTimer: number.NaN()}
+		Behavior: char.Behavior, Stats: char.Stats, Anim: &anim, actionTimer: number.NaN(), hurtTimer: number.NaN()}
 
 	unit.Blood = motion.NewParticleSystem(unit.particlesBlood)
 
@@ -105,27 +105,24 @@ func (u *Unit) Hitbox() geometry.Shape {
 	hitbox.X, hitbox.Y = u.X+hitbox.X, u.Y+hitbox.Y
 	return hitbox
 }
-func (u *Unit) EnemyEntrance() (attackable bool, entrance *Entrance) {
+func (u *Unit) EnemyEntrance() (canBeActedUpon bool, entrance *Entrance) {
 	var e *Entrance
 	if u.Team != TeamNeutral && (u.Lane == LaneUpper || u.Lane == LaneMiddle || u.Lane == LaneLower) {
 		e = Entrances[int(3*(1-u.Team))+int(u.Lane)]
-		var attackRange = float32(u.Stats.AttackRange) * TileSize
-		var melee = u.Stats.AttackRange == 1 && number.IsWithin(u.X, e.Tiles[0].X, TileSize/2)
-		var ranged = u.Stats.AttackRange > 1 && number.Absolute(u.X-e.Tiles[0].X) < attackRange
-		attackable = !e.IsOpen() && e.Health > 0 && (melee || ranged)
+		var actionRange = float32(u.Stats.ActionRange) * TileSize
+		var melee = u.Stats.ActionRange == 1 && number.IsWithin(u.X, e.Tiles[0].X, TileSize/2)
+		var ranged = u.Stats.ActionRange > 1 && number.Absolute(u.X-e.Tiles[0].X) < actionRange
+		canBeActedUpon = !e.IsOpen() && e.Health > 0 && (melee || ranged)
 	}
-	return attackable, e
+	return canBeActedUpon, e
 }
 
 func (u *Unit) Update() {
 	u.Anim.TimeScale = TimeScale
 	u.hurtTimer -= DeltaTimeScaled()
-	u.attackTimer -= DeltaTimeScaled()
+	u.actionTimer -= DeltaTimeScaled()
 	u.Mask = Masks[u.Lane] // applied every frame to account for any changes in lane
-
-	u.Z = map[Lane]float32{LaneLower: 0, LaneMiddle: 1, LaneUpper: 2, LaneGarrison1: 0, LaneGarrison2: 0.5,
-		LaneGarrison3: 1, LaneGarrison4: 1.5, LaneGarrison5: 2, LaneGarrisonPlus1: 2.5, LaneGarrisonPlus2: 2.5,
-		LaneGarrisonPlus3: 2.5, LaneGarrisonPlus4: 2.5, LaneGarrisonPlus5: 2.5}[u.Lane]
+	u.Z = zs[u.Lane]
 
 	if TimeScale > 0 {
 		u.applyState()
@@ -155,6 +152,12 @@ func (u *Unit) TakeDamage(damage int) {
 }
 
 // private ========================================================
+
+var zs = map[Lane]float32{
+	LaneLower: 0, LaneMiddle: 1, LaneUpper: 2, LaneGarrison1: 0, LaneGarrison2: 0.5,
+	LaneGarrison3: 1, LaneGarrison4: 1.5, LaneGarrison5: 2, LaneGarrisonPlus1: 2.5, LaneGarrisonPlus2: 2.5,
+	LaneGarrisonPlus3: 2.5, LaneGarrisonPlus4: 2.5, LaneGarrisonPlus5: 2.5,
+}
 
 func (u *Unit) particlesBlood(p *motion.Particle) (alive bool) {
 	if p.Age == 0 {
@@ -188,14 +191,14 @@ func (u *Unit) particlesBlood(p *motion.Particle) (alive bool) {
 }
 
 func (u *Unit) applyState() {
-	var attackable, entrance = u.EnemyEntrance()
-	var canAttack = u.attackTimer < 0 || number.IsNaN(u.attackTimer)
-	var enemyEntranceInRange = attackable && entrance != nil
+	var canBeActedUpon, entrance = u.EnemyEntrance()
+	var canAct = u.actionTimer < 0 || number.IsNaN(u.actionTimer)
+	var enemyEntranceInRange = canBeActedUpon && entrance != nil
 	var hasMeleeTarget = u.UnitFront != nil && u.Team != u.UnitFront.Team
-	var melee = canAttack && (hasMeleeTarget || enemyEntranceInRange) && u.Stats.AttackRange == 1
+	var melee = canAct && (hasMeleeTarget || enemyEntranceInRange) && u.Stats.ActionRange == 1
 
 	var closestDistX = number.ValueBiggest[float32]()
-	var attackRange = float32(u.Stats.AttackRange) * TileSize
+	var actionRange = float32(u.Stats.ActionRange) * TileSize
 	u.ClosestEnemyInRange = nil
 	for _, t := range Units {
 		if u == t || t.Stats.Health <= 0 {
@@ -212,40 +215,40 @@ func (u *Unit) applyState() {
 		var allyEnemy, enemyAlly = u.Team == TeamAlly && t.Team == TeamEnemy, u.Team == TeamEnemy && t.Team == TeamAlly
 		var isEnemy = allyEnemy || enemyAlly
 		var isInFront = (allyEnemy && u.X < t.X) || (enemyAlly && u.X > t.X)
-		var closeEnough = distX < attackRange
+		var closeEnough = distX < actionRange
 		if isInFront && isEnemy && distX < closestDistX && closeEnough {
 			closestDistX = distX
 			u.ClosestEnemyInRange = t
 		}
 	}
-	var ranged = u.Stats.AttackRange > 1 && (u.ClosestEnemyInRange != nil || enemyEntranceInRange)
+	var ranged = u.Stats.ActionRange > 1 && (u.ClosestEnemyInRange != nil || enemyEntranceInRange)
 	var isGarrison = u.Lane > LaneUpper
 	var garrisonOrNot = !isGarrison || (isGarrison && u.IsAtGarrison)
 
 	if u.State == StateWalking && u.Stats.Health > 0 && (!u.IsGrounded || u.moveSpeedX < 0.01) {
 		u.State = StateIdling
-	} else if u.State == StateIdling && u.UnitFront == nil && !attackable &&
+	} else if u.State == StateIdling && u.UnitFront == nil && !canBeActedUpon &&
 		u.IsGrounded && u.Stats.Health > 0 && !u.IsAtGarrison {
 		u.State = StateWalking
 	}
 
-	if u.State == StateAttackEnd && u.Stats.Health > 0 {
+	if u.State == StateActionEnd && u.Stats.Health > 0 {
 		u.State = StateIdling
-	} else if u.State == StateAttackRecovering && u.Anim.IsJustFinished() {
-		u.State = StateAttackEnd
-	} else if u.State == StateAttackTrigger {
-		u.State = StateAttackRecovering
-	} else if u.State == StateAttackCharging && u.Anim.IsJustFinished() {
-		u.State = StateAttackTrigger
-	} else if u.State == StateAttackStart {
-		u.State = StateAttackCharging
+	} else if u.State == StateActionRecovering && u.Anim.IsJustFinished() {
+		u.State = StateActionEnd
+	} else if u.State == StateActionTrigger {
+		u.State = StateActionRecovering
+	} else if u.State == StateActionCharging && u.Anim.IsJustFinished() {
+		u.State = StateActionTrigger
+	} else if u.State == StateActionStart {
+		u.State = StateActionCharging
 	} else if (u.State == StateIdling || u.State == StateWalking) && melee {
-		u.State = StateAttackStart
+		u.State = StateActionStart
 	} else if (u.State == StateIdling || u.State == StateWalking) && ranged && garrisonOrNot {
-		if canAttack {
-			u.State = StateAttackStart
+		if canAct {
+			u.State = StateActionStart
 		} else if u.Stats.Health > 0 {
-			u.State = StateIdling // enemy in range but waiting for attack timer (stay in one place, don't keep walking)
+			u.State = StateIdling // enemy in range but waiting for action timer (stay in one place, don't keep walking)
 		}
 	}
 
@@ -287,28 +290,35 @@ func (u *Unit) actUponState() {
 		u.Anim.Frames = Characters[u.Character].Animations.Walk
 		u.Anim.IsLooping, u.Anim.FPS = true, u.moveSpeedX*0.25
 
+		var _, e = u.EnemyEntrance()
 		switch u.Team {
 		case TeamAlly:
 			u.VelocityX = float32(u.Stats.MoveSpeed)
+			if e != nil && u.X > e.Tiles[0].X {
+				u.HealthBar.MoveToGlory(2.0)
+			}
 		case TeamEnemy:
 			u.VelocityX = -float32(u.Stats.MoveSpeed)
+			if e != nil && u.X < e.Tiles[0].X {
+				u.HealthBar.MoveToGlory(2.0)
+			}
 		}
-	case StateAttackStart:
-		u.attackTimer = float32(u.Stats.AttackSpeed) / 10
-		u.Anim.Frames = Characters[u.Character].Animations.AttackStart
+	case StateActionStart:
+		u.actionTimer = float32(u.Stats.ActionSpeed) / 10
+		u.Anim.Frames = Characters[u.Character].Animations.ActionStart
 		u.Anim.IsLooping, u.Anim.FPS, u.Anim.Time = false, 8, 0
 		u.VelocityX = 0
-	case StateAttackTrigger:
-		u.Anim.Frames = Characters[u.Character].Animations.AttackEnd
+	case StateActionTrigger:
+		u.Anim.Frames = Characters[u.Character].Animations.ActionEnd
 		u.Anim.IsLooping, u.Anim.FPS, u.Anim.Time = false, 8, 0
 
-		var dmg = u.Stats.AttackDamage
-		var attackable, e = u.EnemyEntrance()
-		if u.Stats.AttackRange == 1 {
+		var dmg = u.Stats.ActionValue
+		var canBeActedUpon, e = u.EnemyEntrance()
+		if u.Stats.ActionRange == 1 {
 			if u.UnitFront != nil {
 				u.UnitFront.TakeDamage(dmg)
 				PlaySound(AudioHitFlesh)
-			} else if attackable && e != nil {
+			} else if canBeActedUpon && e != nil {
 				e.TakeDamage(dmg)
 				if e.Health > 0 && e.Entrance == EntranceDoor {
 					PlaySound(AudioHitWood)
@@ -323,14 +333,14 @@ func (u *Unit) actUponState() {
 		if t != nil {
 			var proj = u.NewProjectile(u.X, u.Y, u.Z, t.X+t.VelocityX, t.Y+t.Height/2-8, t.Z, dmg, nil)
 			Projectiles = append(Projectiles, proj)
-			PlaySound(Characters[u.Character].Sounds.AttackTrigger)
-		} else if attackable && e != nil {
+			PlaySound(Characters[u.Character].Sounds.ActionTrigger)
+		} else if canBeActedUpon && e != nil {
 			var x, y = e.Tiles[0].X, e.Tiles[0].Y
 			var z = map[Lane]float32{LaneLower: 0, LaneMiddle: 1, LaneUpper: 2}[e.Lane]
 			Projectiles = append(Projectiles, u.NewProjectile(u.X, u.Y, u.Z, x, y, z, dmg, e))
-			PlaySound(Characters[u.Character].Sounds.AttackTrigger)
+			PlaySound(Characters[u.Character].Sounds.ActionTrigger)
 		}
-	case StateAttackCharging, StateAttackRecovering, StateAttackEnd: // empty
+	case StateActionCharging, StateActionRecovering, StateActionEnd: // empty
 	case StateHurtStart:
 		u.Anim.Frames = Characters[u.Character].Animations.Hurt
 		u.Anim.IsLooping, u.Anim.FPS, u.Anim.Time = false, 5, 0
@@ -361,8 +371,8 @@ func (u *Unit) applyPhysics() {
 	if u.IsGrounded {
 		u.VelocityX *= 1.0 - (GroundFrictionPercent/100)*DeltaTimeScaled()
 	}
-	var attack, entry = u.EnemyEntrance()
-	if attack && entry != nil {
+	var canBeActedUpon, entry = u.EnemyEntrance()
+	if canBeActedUpon && entry != nil {
 		u.VelocityX = 0
 	}
 

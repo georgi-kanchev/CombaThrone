@@ -36,7 +36,7 @@ func (u *Unit) NewProjectile(x, y, z, targetX, targetY, targetZ float32, dmg int
 	var dist = point.DistanceToPoint(x, y, targetX, targetY)
 	var totalTime = max(dist/speed, 0.01) // prevent division by zero
 	var proj = &Projectile{owner: u,
-		Object: graphics.NewSprite(x, y, 1, TilesetCrops.Crops("projectiles")[0]),
+		Object: graphics.NewSprite(x, y, 1, DecorCrops.Crops("projectiles")[0]),
 		StartX: x, StartY: y, StartZ: z, Z: z,
 		TargetX:    targetX + random.Range[float32](-12, 12)*accuracyMultiplier,
 		TargetY:    targetY + random.Range[float32](-12, 12),
@@ -68,6 +68,9 @@ func (p *Projectile) Update() {
 		var e = p.enemyEntrance
 		if !p.trigger {
 			p.trigger = true
+			Projectiles = collection.Remove(Projectiles, p)
+			ProjectilesBehind = append(ProjectilesBehind, p)
+
 			if e != nil && !e.IsOpen() && e.Health > 0 && number.IsWithin(p.X, e.Tiles[0].X, TileSize/2) {
 				e.TakeDamage(p.Damage)
 				if e.Health > 0 { // crumble sound played by entrance itself
@@ -88,6 +91,7 @@ func (p *Projectile) Update() {
 
 		if p.Age > p.TravelTime+ProjectileFadeOutTime || entranceDestroyed {
 			Projectiles = collection.Remove(Projectiles, p)
+			ProjectilesBehind = collection.Remove(ProjectilesBehind, p)
 		}
 		View.DrawObject(&p.Object)
 		return
@@ -108,6 +112,7 @@ func (p *Projectile) Update() {
 			p.trigger = true
 			u.TakeDamage(p.Damage)
 			Projectiles = collection.Remove(Projectiles, p)
+			ProjectilesBehind = collection.Remove(ProjectilesBehind, p)
 			PlaySound(Characters[p.owner.Character].Sounds.HitFlesh)
 			return
 		}

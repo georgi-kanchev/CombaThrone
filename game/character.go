@@ -15,7 +15,7 @@ type Stats struct {
 
 	Health, MoveSpeed int
 
-	AttackDamage, AttackSpeed, AttackRange int
+	ActionValue, ActionSpeed, ActionRange int
 
 	HurtTime float32
 }
@@ -24,10 +24,10 @@ type CharacterData struct {
 	Stats      Stats
 	Hitbox     geometry.Shape
 	Animations struct {
-		Idle, Walk, AttackStart, AttackEnd, Hurt, Die []assets.ImageId
+		Idle, Walk, ActionStart, ActionEnd, Hurt, Die []assets.ImageId
 	}
 	Sounds struct {
-		AttackTrigger, HitFlesh, HitWood, HitMetal, HitGround []audio.Audio
+		ActionTrigger, HitFlesh, HitWood, HitMetal, HitGround []audio.Audio
 	}
 
 	Behavior func(self *Unit)
@@ -47,8 +47,8 @@ func InitCharacters() {
 		var prefix = text.ToLowerCase(c.Stats.Name)
 		c.Animations.Idle = atlas.Crops(prefix + "_idle")
 		c.Animations.Walk = atlas.Crops(prefix + "_walk")
-		c.Animations.AttackStart = atlas.Crops(prefix + "_attack_start")
-		c.Animations.AttackEnd = atlas.Crops(prefix + "_attack_end")
+		c.Animations.ActionStart = atlas.Crops(prefix + "_action_start")
+		c.Animations.ActionEnd = atlas.Crops(prefix + "_action_end")
 		c.Animations.Hurt = atlas.Crops(prefix + "_hurt")
 		c.Animations.Die = atlas.Crops(prefix + "_death")
 		Characters[i] = c

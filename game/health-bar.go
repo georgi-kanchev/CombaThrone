@@ -5,17 +5,21 @@ import (
 	"pure-game-kit/packages/graphics"
 	"pure-game-kit/packages/utility/color"
 	"pure-game-kit/packages/utility/color/palette"
+	"pure-game-kit/packages/utility/easing"
 	"pure-game-kit/packages/utility/number"
 	"pure-game-kit/packages/utility/text"
 )
 
-var healthBarColors = [3]uint{TeamAlly: palette.Green, TeamEnemy: palette.Red, TeamNeutral: palette.Cyan}
+var healthBarColors = [3]uint{TeamAlly: palette.Green, TeamEnemy: palette.Red, TeamNeutral: palette.Azure}
 
 type HealthBar struct {
-	background, fill, label graphics.Object
+	background, fill, label, glory *graphics.Object
 
-	fadeOutTimer, fadeOutDuration float32
-	lastHealthValue               int
+	timer, duration          float32
+	lastValue                int
+	team                     Team
+	toGlory, subtractedGlory bool
+	startX, startY           float32
 }
 
 func NewHealthBar(width float32, team Team) HealthBar {
@@ -27,27 +31,49 @@ func NewHealthBar(width float32, team Team) HealthBar {
 	bgr.Effects.FillColor = color.Darken(fill.Effects.FillColor, 0.9)
 	fill.Effects.BorderSize = 0
 	label.Effects.TextLineHeight, label.Effects.FillColor = 6, 0
-	label.Effects.TextWeight = 0.15
-	label.Effects.TextShadowColor = 0
-	label.Effects.OutlineSize = 0.7
-	label.Effects.TextSymbolGap = 20
-	label.Effects.OutlineColor = palette.Black
+	label.Effects.TextWeight, label.Effects.TextSymbolGap = 0.15, 20
+	label.Effects.TextShadowColor, label.Effects.TextShadowWeight = 0, 0
+	label.Effects.OutlineSize, label.Effects.OutlineColor = 0.65, palette.Black
 	label.Effects.TextAlignX, label.Effects.TextAlignY = 0.5, 0.5
-	return HealthBar{background: bgr, fill: fill, label: label}
+	var copy = label
+	copy.Effects.TextLineHeight, copy.Effects.OutlineSize = 10, 0.45
+	copy.Height = 20
+	return HealthBar{background: &bgr, fill: &fill, label: &label, glory: &copy}
 }
 func (hb *HealthBar) FadeOut(duration float32) {
-	hb.fadeOutTimer = duration
-	hb.fadeOutDuration = duration
+	hb.duration, hb.timer = duration, duration
+}
+func (hb *HealthBar) MoveToGlory(duration float32) {
+	if hb.toGlory {
+		return
+	}
+	hb.toGlory = true
+	hb.duration, hb.timer = duration, duration
+	hb.startX, hb.startY = hb.label.X, hb.label.Y
+	hb.glory.Text = text.New(-hb.lastValue, Tags[IconGlory])
 }
 
 func (hb *HealthBar) Update(target geometry.Shape, health, maxHealth int, mask geometry.Area) {
-	if hb.fadeOutTimer > 0 {
-		var alpha = uint8(number.Map(hb.fadeOutTimer, hb.fadeOutDuration, 0, 255, 0))
-		hb.fadeOutTimer -= DeltaTimeScaled()
+	if hb == nil {
+		return
+	}
+
+	if hb.timer > 0 {
+		var alpha = uint8(number.Map(hb.timer, hb.duration, 0, 255, 0))
+		hb.timer -= DeltaTimeScaled()
 		hb.background.Effects.Tint = color.RGBA(255, 255, 255, alpha)
 		hb.fill.Effects.Tint = color.RGBA(255, 255, 255, alpha)
 		hb.label.Effects.Tint = color.RGBA(255, 255, 255, alpha)
-	} else if hb.fadeOutTimer < 0 {
+	} else if hb.timer < 0 {
+		if hb.toGlory && !hb.subtractedGlory {
+			hb.subtractedGlory = true
+
+			if hb.team == TeamAlly {
+				EnemyBase.Glory -= hb.lastValue
+			} else {
+				AllyBase.Glory -= hb.lastValue
+			}
+		}
 		return
 	}
 
@@ -59,13 +85,46 @@ func (hb *HealthBar) Update(target geometry.Shape, health, maxHealth int, mask g
 	hb.fill.X, hb.fill.Y = hb.background.X-hb.background.Width/2+hb.fill.Width/2+border/2, hb.background.Y
 	hb.label.X, hb.label.Y = hb.background.X, hb.background.Y
 
-	if hb.lastHealthValue != health {
+	if hb.lastValue != health {
 		hb.label.Text = text.New(health)
 	}
-	hb.lastHealthValue = health
+	hb.lastValue = health
 
 	hb.background.Mask, hb.fill.Mask, hb.label.Mask = mask, mask, mask
-	View.DrawObject(&hb.background)
-	View.DrawObject(&hb.fill)
-	View.DrawObject(&hb.label)
+	View.DrawObject(hb.background)
+	View.DrawObject(hb.fill)
+	View.DrawObject(hb.label)
+
+	if hb.toGlory && hb.team != TeamNeutral {
+		var targetX, targetY float32
+		if hb.team == TeamAlly {
+			targetX, targetY = EnemyBase.GloryLabel.X, EnemyBase.GloryLabel.Y
+		} else {
+			targetX, targetY = AllyBase.GloryLabel.X, AllyBase.GloryLabel.Y
+		}
+
+		var progress = number.Limit(number.Map(hb.timer, hb.duration, 0, 0, 1), 0, 1)
+		hb.glory.X = number.Map(easing.BackOut(progress), 0, 1, hb.startX, targetX)
+		hb.glory.Y = number.Map(easing.CubicIn(progress), 0, 1, hb.startY, targetY)
+
+		const riseEnd, fallStart = 0.5, 0.75
+		if progress < riseEnd { // smooth rise in
+			var t = number.Map(progress, 0, riseEnd, 0, 1)
+			var alpha = byte(number.Map(easing.CubicOut(t), 0, 1, 0, 255))
+			hb.glory.Effects.TextLineHeight = number.Map(easing.CubicOut(t), 0, 1, 4, 16)
+			hb.glory.Effects.Tint = color.RGBA(255, 255, 255, alpha)
+		} else if progress < fallStart { // breathing hang
+			var t = number.Map(progress, riseEnd, fallStart, 0, 1)
+			var microFloat = number.Sine(t*3.14159) * 2.0 // adds a breating 16 -> 18 -> 16
+			hb.glory.Effects.TextLineHeight = 16 + microFloat
+
+		} else { // faster fall
+			var t = number.Map(progress, fallStart, 1, 0, 1)
+			var alpha = byte(number.Map(easing.CubicIn(t), 0, 1, 255, 0))
+			hb.glory.Effects.TextLineHeight = number.Map(easing.CubicIn(t), 0, 1, 16, 0)
+			hb.glory.Effects.Tint = color.RGBA(255, 255, 255, alpha)
+		}
+
+		View.DrawObject(hb.glory)
+	}
 }

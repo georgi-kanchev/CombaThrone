@@ -2,6 +2,8 @@ package game
 
 import (
 	"pure-game-kit/packages/graphics"
+	"pure-game-kit/packages/utility/color/palette"
+	"pure-game-kit/packages/utility/text"
 )
 
 type Base uint8
@@ -10,10 +12,11 @@ type Garrison uint8
 type BaseData struct {
 	Glory int
 
-	Back, Front, GarrisonBack, GarrisonFront *graphics.Object
+	Back, Front, GarrisonBack, GarrisonFront, GloryLabel *graphics.Object
 
-	base     Base
-	garrison Garrison
+	lastGlory int
+	base      Base
+	garrison  Garrison
 }
 
 const BaseBarrack, BaseFort, BaseFortress Base = 0, 1, 2
@@ -22,6 +25,17 @@ const Garrison0, Garrison1, Garrison2, Garrison3 Garrison = 0, 1, 2, 3
 func NewBase(base Base, garrison Garrison, ally bool) BaseData {
 	var glory = map[Base]int{BaseBarrack: 40, BaseFort: 100, BaseFortress: 350}[base]
 	var b = BaseData{base: base, garrison: garrison, Glory: glory}
+
+	var ptsX, ptsY = PointAtCell(14, 5.5)
+	if ally {
+		ptsX, ptsY = PointAtCell(3, 5.5)
+	}
+	var label = graphics.NewTextbox(ptsX, ptsY, TileSize, TileSize, 0)
+	label.Effects.FillColor, label.Effects.TextLineHeight = 0, 11
+	label.Effects.TextAlignX, label.Effects.TextAlignY = 0.5, 0.5
+	label.Effects.TextShadowColor, label.Effects.TextShadowWeight = 0, 0
+	label.Effects.OutlineSize, label.Effects.OutlineColor = 0.4, palette.Black
+	b.GloryLabel = &label
 
 	if base == BaseBarrack {
 		var barrack = graphics.NewTilemap(Layers[0])
@@ -54,4 +68,21 @@ func NewBase(base Base, garrison Garrison, ally bool) BaseData {
 		bringGarrisonLanesDown(ally)
 	}
 	return b
+}
+
+func (b *BaseData) Update() {
+	b.Glory = max(b.Glory, 0)
+
+	if b.Glory == 0 {
+		TimeScale = 0 // game over
+	}
+
+	if b.Glory != b.lastGlory {
+		b.GloryLabel.Text = text.New(b.Glory, Tags[IconGlory])
+	}
+	b.lastGlory = b.Glory
+
+	View.DrawObject(b.Front)
+	View.DrawObject(b.GarrisonFront)
+	View.DrawObject(b.GloryLabel)
 }
