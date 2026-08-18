@@ -1,31 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="18" height="10" tilewidth="32" tileheight="32" infinite="0" nextlayerid="85" nextobjectid="47">
- <tileset firstgid="1" name="decor" tilewidth="32" tileheight="32" tilecount="240" columns="16">
-  <image source="decor.png" width="512" height="480"/>
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="18" height="10" tilewidth="32" tileheight="32" infinite="0" nextlayerid="86" nextobjectid="47">
+ <tileset firstgid="1" name="decor" tilewidth="32" tileheight="32" tilecount="1024" columns="32">
+  <image source="decor.png" width="1024" height="1024"/>
  </tileset>
- <layer id="84" name="Camp" width="18" height="10" visible="0">
+ <layer id="84" name="Camp" width="18" height="10">
   <data encoding="base64" compression="zlib">
-   eJxjYBgF9AAhQBwKxGFAHE6BOSlAnArEaUCcToE5EVCcQYEZMHMoNYOBSmaAAAAKWwUt
+   eJxjYKAMWDIyMFgxUmjICABLgHgpEC8D4uUUmHMEiI8C8TEgPk4Fdw03AAAnqgYi
   </data>
  </layer>
  <layer id="17" name="Barrack" width="18" height="10" visible="0">
   <data encoding="base64" compression="zlib">
-   eJxjYBgF+IAiECsBsTKF5hgCsREQGwNxEgXmOAKxExA7U+ieQKg5wRSakwjEQRSaAQKFVDADBAAglAQv
+   eJxjYBgF+IAjEDsBsTOF5iQCcRIQJwPxIQrMaQTiJiBuptA9C6HmLKbQnINAvIhCM0DgIRXMAAEAG9AIPw==
   </data>
  </layer>
  <layer id="72" name="FortBack0" width="18" height="10" visible="0">
   <data encoding="base64" compression="zlib">
-   eJxjYBiegBkJc1BgjjAUswCxBIXmsFDBHBaGUXPwAQA4DwEX
+   eJxjYBiegBkJc1BgjjIUswCxBoXmsFDBHBaGUXPwAQDeTwGn
   </data>
  </layer>
  <layer id="7" name="FortFront0" width="18" height="10" visible="0">
   <data encoding="base64" compression="zlib">
-   eJxjYBjegJUKZogAseggMIOBSmYMZwAAoawAbQ==
+   eJxjYBjegJUKZqgAseogMIOBSmYMZwAAFbsAvQ==
   </data>
  </layer>
  <layer id="73" name="FortBack1" width="18" height="10" visible="0">
   <data encoding="base64" compression="zlib">
-   eJxjYBj+gJlK5oiPmjPozQEAifQAjg==
+   eJxjYBj+gJlK5qiPmjPozQEA4/QA7g==
   </data>
  </layer>
  <layer id="57" name="FortFront1" width="18" height="10" visible="0">
@@ -35,7 +35,7 @@
  </layer>
  <layer id="74" name="FortBack2" width="18" height="10" visible="0">
   <data encoding="base64" compression="zlib">
-   eJxjYBj+gBmKKQViQCw+as6gNgcACVMBFQ==
+   eJxjYBj+gBmKKQVqQKw+as6gNgcAu9MB1Q==
   </data>
  </layer>
  <layer id="20" name="FortFront2" width="18" height="10" visible="0">
@@ -45,7 +45,7 @@
  </layer>
  <layer id="75" name="FortBack3" width="18" height="10" visible="0">
   <data encoding="base64" compression="zlib">
-   eJxjYBj+gBkJUwLEoFh81JxBaw4AhocBnA==
+   eJxjYBj+gBkJUwLUoFh91JxBaw4AkBYCvA==
   </data>
  </layer>
  <layer id="23" name="FortFront3" width="18" height="10" visible="0">
@@ -55,17 +55,17 @@
  </layer>
  <layer id="46" name="Map" width="18" height="10">
   <data encoding="base64" compression="zlib">
-   eJxjYBgFIxkIATETiRiop4FSM9DNosQMZLMAxpACQQ==
+   eJztjAsKACAIQ+fR0uxcHb2CCdHnBCWMDXUP+PPyFEFVATKV6N6lh93IvbMxEm9KN7ozB8sWfrAGI/5CfunbtFNmJ6sBBA4OUA==
   </data>
  </layer>
  <layer id="60" name="Flags" width="18" height="10">
   <data encoding="base64" compression="zlib">
-   eJxjYBgF9AacJKjlwiMnSYI5UiSoHcoAAE1wAEc=
+   eJxjYBgF9AacJKjlwiOnSYI5WiSoHcoAAG0wAGc=
   </data>
  </layer>
  <layer id="6" name="Grid" width="18" height="10" visible="0">
   <data encoding="base64" compression="zlib">
-   eJwTZGBgEBzFo3iYYADqyAv1
+   eJxTZGBgUBzFo3iYYADUOBc1
   </data>
  </layer>
  <objectgroup id="61" name="Lower" visible="0">

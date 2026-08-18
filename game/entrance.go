@@ -8,13 +8,13 @@ import (
 	"pure-game-kit/packages/utility/time"
 )
 
-type EntranceType uint8
+type EntranceKind uint8
 
-const EntranceNone, EntranceDoor, EntranceShortGate, EntranceTallGate EntranceType = 0, 1, 2, 3
+const EntranceNone, EntranceDoor, EntranceShortGate, EntranceTallGate EntranceKind = 0, 1, 2, 3
 
 type Entrance struct {
 	Tiles     []*graphics.Object
-	Entrance  EntranceType
+	Kind      EntranceKind
 	Lane      Lane
 	Team      Team
 	HealthBar *HealthBar
@@ -25,8 +25,8 @@ type Entrance struct {
 	openY, maxOpenY, shakeTimer float32
 }
 
-func NewEntrance(entry EntranceType, team Team, lane Lane) *Entrance {
-	var data = Entrance{Entrance: entry, Team: team, Lane: lane, maxOpenY: TileSize + (TileSize * (float32(entry) - 1))}
+func NewEntrance(entry EntranceKind, team Team, lane Lane) *Entrance {
+	var data = Entrance{Kind: entry, Team: team, Lane: lane, maxOpenY: TileSize + (TileSize * (float32(entry) - 1))}
 	var x, y float32 = -208, 48 // ally upper lane by default
 
 	if entry != EntranceNone {
@@ -47,7 +47,7 @@ func NewEntrance(entry EntranceType, team Team, lane Lane) *Entrance {
 	switch entry {
 	case EntranceNone:
 		var hole = graphics.NewSprite(x, y, 1, DecorCrops.Crops("hole")[0])
-		if (team == TeamAlly && AllyBase.Base == BaseCamp) || (team == TeamEnemy && EnemyBase.Base == BaseCamp) {
+		if (team == TeamAlly && AllyBase.Kind == BaseCamp) || (team == TeamEnemy && EnemyBase.Kind == BaseCamp) {
 			hole.X = -Background.Width / 2 // pull back entrance to edge of scene, fighting can happen inside the camp
 			hole.Effects.Tint = 0          // and hide the hole
 		}
@@ -97,7 +97,7 @@ func (e *Entrance) Update() {
 	e.shakeTimer -= DeltaTimeScaled()
 
 	var sensorDistance = float32(TileSize) * 0.75
-	if e.Entrance == EntranceDoor {
+	if e.Kind == EntranceDoor {
 		sensorDistance = TileSize
 	}
 	var shortestDistance float32 = sensorDistance
@@ -109,7 +109,7 @@ func (e *Entrance) Update() {
 	}
 	var holdOpenDistance float32 = sensorDistance / 2
 	var distance = number.Limit(shortestDistance-holdOpenDistance, 0, sensorDistance-holdOpenDistance)
-	var gate = e.Entrance == EntranceShortGate || e.Entrance == EntranceTallGate
+	var gate = e.Kind == EntranceShortGate || e.Kind == EntranceTallGate
 	e.openY = number.Map(distance, sensorDistance-holdOpenDistance, 0, 0, e.maxOpenY)
 
 	var shakeOffsetX, shakeOffsetY float32 = 0, 0
@@ -117,7 +117,7 @@ func (e *Entrance) Update() {
 		shakeOffsetX, shakeOffsetY = random.Range[float32](-3, 3)*e.shakeTimer, random.Range[float32](-3, 3)*e.shakeTimer
 	}
 
-	switch e.Entrance {
+	switch e.Kind {
 	case EntranceDoor:
 		var breakIndex = number.Map(e.Health, 0, e.MaxHealth, 5, 1)
 		var isOpen = e.IsOpen()
@@ -166,7 +166,7 @@ func (e *Entrance) TakeDamage(damage int) {
 	if e.Health <= 0 {
 		e.HealthBar.FadeOut(1.5)
 
-		switch e.Entrance {
+		switch e.Kind {
 		case EntranceDoor:
 			PlaySound(AudioDoorCrumble)
 		case EntranceShortGate, EntranceTallGate:
@@ -175,7 +175,7 @@ func (e *Entrance) TakeDamage(damage int) {
 	}
 
 	var breakIndex = number.Map(e.Health, 0, e.MaxHealth, 5, 1)
-	switch e.Entrance { // EntryDoor done in update
+	switch e.Kind { // EntryDoor done in update
 	case EntranceShortGate:
 		e.Tiles[3].ImageId = DecorCrops.Crops("gate_top")[breakIndex]
 		e.Tiles[4].ImageId = DecorCrops.Crops("gate_middle")[breakIndex]

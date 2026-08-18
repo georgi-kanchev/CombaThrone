@@ -11,6 +11,7 @@ var AudioAmbience audio.Audio
 var AudioDoorCrumble, AudioDoorOpen, AudioDoorClose, AudioGateCrumble, AudioGateOpen, AudioGateClose []audio.Audio
 var AudioBow, AudioProjectileGround, AudioProjectileWood, AudioProjectileMetal, AudioProjectileFlesh []audio.Audio
 var AudioHitFlesh, AudioHitWood, AudioHitMetal []audio.Audio
+var AudioEventPositive, AudioEventNegative []audio.Audio
 
 func LoadAudio() {
 	ambiences[EnvironmentPlains] = assets.LoadMusic("data/music/ambience-plains.mp3")
@@ -48,6 +49,10 @@ func LoadAudio() {
 		var asset = assets.LoadSound(text.New("data/sounds/projectile-flesh", i, ".mp3"), 4)
 		AudioProjectileFlesh = append(AudioProjectileFlesh, audio.New(asset))
 	}
+
+	AudioEventPositive = append(AudioEventPositive, audio.New(assets.LoadSound("data/sounds/event-positive1.mp3", 4)))
+	AudioEventPositive = append(AudioEventPositive, audio.New(assets.LoadSound("data/sounds/event-positive2.mp3", 4)))
+	AudioEventNegative = append(AudioEventNegative, audio.New(assets.LoadSound("data/sounds/event-negative.mp3", 4)))
 }
 
 func UpdateAudio() {

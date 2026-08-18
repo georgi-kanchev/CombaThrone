@@ -6,14 +6,14 @@ import (
 	"pure-game-kit/packages/utility/text"
 )
 
-type Base uint8
+type BaseKind uint8
 type Garrison uint8
 type SaveState struct {
-	Base     Base
+	Kind     BaseKind
 	Garrison Garrison
-	Coins    int
+	Gold     int
 }
-type BaseData struct {
+type Base struct {
 	SaveState
 
 	Glory int
@@ -23,12 +23,12 @@ type BaseData struct {
 	lastGlory int
 }
 
-const BaseCamp, BaseBarrack, BaseFort, BaseFortress Base = 0, 1, 2, 3
+const BaseCamp, BaseBarrack, BaseFort, BaseFortress BaseKind = 0, 1, 2, 3
 const Garrison0, Garrison1, Garrison2, Garrison3 Garrison = 0, 1, 2, 3
 
-func NewBase(saveState SaveState, ally bool) BaseData {
-	var glory = map[Base]int{BaseCamp: 15, BaseBarrack: 30, BaseFort: 90, BaseFortress: 360}[saveState.Base]
-	var b = BaseData{SaveState: saveState, Glory: glory}
+func NewBase(saveState SaveState, ally bool) Base {
+	var glory = map[BaseKind]int{BaseCamp: 15, BaseBarrack: 30, BaseFort: 90, BaseFortress: 360}[saveState.Kind]
+	var b = Base{SaveState: saveState, Glory: glory}
 
 	var ptsX, ptsY = PointAtCell(14, 5.5)
 	if ally {
@@ -41,7 +41,7 @@ func NewBase(saveState SaveState, ally bool) BaseData {
 	label.Effects.OutlineSize, label.Effects.OutlineColor = 0.4, palette.Black
 	b.GloryLabel = &label
 
-	switch b.Base {
+	switch b.Kind {
 	case BaseCamp:
 		var back = graphics.NewTilemap(Layers[0])
 		b.Back = &back
@@ -60,13 +60,13 @@ func NewBase(saveState SaveState, ally bool) BaseData {
 		var garBack, garFront = graphics.NewTilemap(Layers[indexes[0]]), graphics.NewTilemap(Layers[indexes[1]])
 		b.GarrisonBack, b.GarrisonFront = &garBack, &garFront
 
-		if b.Base == BaseFort {
+		if b.Kind == BaseFort {
 			b.GarrisonBack.Y += TileSize
 			b.GarrisonFront.Y += TileSize
 		}
 	}
 
-	if b.Base == BaseFort {
+	if b.Kind == BaseFort {
 		b.Back.Y += TileSize
 		b.Front.Y += TileSize
 
@@ -79,11 +79,11 @@ func NewBase(saveState SaveState, ally bool) BaseData {
 	return b
 }
 
-func (b *BaseData) UpdateBack() {
+func (b *Base) UpdateBack() {
 	View.DrawObject(b.Back)
 	View.DrawObject(b.GarrisonBack)
 }
-func (b *BaseData) UpdateFront() {
+func (b *Base) UpdateFront() {
 	b.Glory = max(b.Glory, 0)
 
 	if b.Glory == 0 {

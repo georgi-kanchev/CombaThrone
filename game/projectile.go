@@ -75,7 +75,7 @@ func (p *Projectile) Update() {
 				e.TakeDamage(p.Damage)
 				if e.Health > 0 { // crumble sound played by entrance itself
 					var sounds = Characters[p.owner.Character].Sounds.HitWood
-					if e.Entrance == EntranceShortGate || e.Entrance == EntranceTallGate {
+					if e.Kind == EntranceShortGate || e.Kind == EntranceTallGate {
 						sounds = Characters[p.owner.Character].Sounds.HitMetal
 					}
 					PlaySound(sounds)

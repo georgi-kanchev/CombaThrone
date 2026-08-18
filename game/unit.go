@@ -1,8 +1,5 @@
 package game
 
-// The alive unit in the scene. A unit can be any character, copying its base data at different times,
-// then acting upon it and editing it through its behavior (brain function).
-
 import (
 	"pure-game-kit/packages/assets"
 	"pure-game-kit/packages/geometry"
@@ -89,12 +86,12 @@ func NewUnit(character Character, team Team, lane Lane) *Unit {
 		unit.X, unit.Y = PointAtCell(18, 3)
 	}
 	if team == TeamAlly {
-		if AllyBase.Base == BaseCamp {
+		if AllyBase.Kind == BaseCamp {
 			unit.X = Background.Width/2 + unit.Width/2
 		}
 
 		unit.X = -unit.X
-	} else if EnemyBase.Base == BaseCamp {
+	} else if EnemyBase.Kind == BaseCamp {
 		unit.X = Background.Width / 2
 	}
 
@@ -130,7 +127,7 @@ func (u *Unit) Update() {
 	u.Z = zs[u.Lane]
 
 	u.Mask = Masks[u.Lane] // applied every frame to account for any changes in lane
-	if (u.X < 0 && AllyBase.Base == BaseCamp) || (u.X > 0 && EnemyBase.Base == BaseCamp) {
+	if (u.X < 0 && AllyBase.Kind == BaseCamp) || (u.X > 0 && EnemyBase.Kind == BaseCamp) {
 		u.Mask = geometry.Area{}
 	}
 
@@ -339,9 +336,9 @@ func (u *Unit) actUponState() {
 				PlaySound(Characters[u.Character].Sounds.HitFlesh)
 			} else if canBeActedUpon && e != nil {
 				e.TakeDamage(dmg)
-				if e.Health > 0 && e.Entrance == EntranceDoor {
+				if e.Health > 0 && e.Kind == EntranceDoor {
 					PlaySound(Characters[u.Character].Sounds.HitWood)
-				} else if e.Health > 0 && (e.Entrance == EntranceShortGate || e.Entrance == EntranceTallGate) {
+				} else if e.Health > 0 && (e.Kind == EntranceShortGate || e.Kind == EntranceTallGate) {
 					PlaySound(Characters[u.Character].Sounds.HitMetal)
 				}
 			}
@@ -355,7 +352,7 @@ func (u *Unit) actUponState() {
 			PlaySound(Characters[u.Character].Sounds.ActionTrigger)
 		} else if canBeActedUpon && e != nil {
 			var x, y = e.Tiles[0].X, e.Tiles[0].Y
-			if e.Entrance == EntranceTallGate {
+			if e.Kind == EntranceTallGate {
 				y += TileSize
 			}
 			Projectiles = append(Projectiles, u.NewProjectile(u.X, u.Y, u.Z, x, y, zs[e.Lane], dmg, e))

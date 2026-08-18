@@ -4,8 +4,6 @@ import (
 	"pure-game-kit/packages/assets"
 	"pure-game-kit/packages/geometry"
 	"pure-game-kit/packages/graphics"
-	"pure-game-kit/packages/input/keyboard"
-	"pure-game-kit/packages/input/keyboard/key"
 	"pure-game-kit/packages/utility/collection"
 	"pure-game-kit/packages/utility/color"
 	"pure-game-kit/packages/utility/number"
@@ -31,7 +29,7 @@ var MapLayer assets.TileLayerId
 var Map, Grid, Flags graphics.Object
 var DecorCrops, UserInterfaceCrops assets.AtlasId
 
-var AllyBase, EnemyBase BaseData
+var AllyBase, EnemyBase Base
 var Layers []assets.TileLayerId
 var Collisions = make([][]geometry.Shape, 13)
 var Masks = [13]geometry.Area{
@@ -42,6 +40,7 @@ var Masks = [13]geometry.Area{
 var Entrances [6]*Entrance // index is Ally[Lower, Middle, Upper], Enemy[Lower, Middle, Upper]
 var Units []*Unit = make([]*Unit, 0, 16)
 var Projectiles, ProjectilesBehind []*Projectile = make([]*Projectile, 0, 32), make([]*Projectile, 0, 32)
+var Pickups []*PickupData = make([]*PickupData, 0, 32)
 
 func InitScene() {
 	View = graphics.NewView(1)
@@ -81,12 +80,12 @@ func InitScene() {
 	Flags, Grid = graphics.NewTilemap(layers[11]), graphics.NewTilemap(layers[12])
 
 	AllyBase = NewBase(SaveState{}, true)
-	EnemyBase = NewBase(SaveState{Base: BaseFort}, false)
+	EnemyBase = NewBase(SaveState{Kind: BaseFort}, false)
 
-	// Units = append(Units, NewUnit(CharHunter, TeamAlly, LaneMiddle))
-	// Units = append(Units, NewUnit(CharMan, TeamAlly, LaneUpper))
+	Units = append(Units, NewUnit(CharHunter, TeamAlly, LaneMiddle))
+	Units = append(Units, NewUnit(CharMan, TeamAlly, LaneUpper))
 	Units = append(Units, NewUnit(CharMan, TeamEnemy, LaneUpper))
-	// Units = append(Units, NewUnit(CharWoman, TeamEnemy, LaneMiddle))
+	Units = append(Units, NewUnit(CharWoman, TeamEnemy, LaneMiddle))
 	// Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneGarrison5))
 	// Units = append(Units, NewUnit(CharHunter, TeamAlly, LaneGarrisonPlus2))
 	// Units = append(Units, NewUnit(CharHunter, TeamAlly, LaneGarrisonPlus3))
@@ -103,9 +102,11 @@ func InitScene() {
 		LaneMiddle:     NewEntrance(EntranceNone, TeamAlly, LaneMiddle),
 		LaneUpper:      NewEntrance(EntranceNone, TeamAlly, LaneUpper),
 		LaneLower + 3:  NewEntrance(EntranceNone, TeamEnemy, LaneLower),
-		LaneMiddle + 3: NewEntrance(EntranceDoor, TeamEnemy, LaneMiddle),
-		LaneUpper + 3:  NewEntrance(EntranceDoor, TeamEnemy, LaneUpper),
+		LaneMiddle + 3: NewEntrance(EntranceNone, TeamEnemy, LaneMiddle),
+		LaneUpper + 3:  NewEntrance(EntranceNone, TeamEnemy, LaneUpper),
 	}
+
+	Pickups = append(Pickups, NewPickup(0, 50, 3, PickupRelic))
 
 	PlayAmbience(EnvironmentPlains)
 }
@@ -114,10 +115,6 @@ func UpdateScene() {
 	View.FitSize(Background.Width, 0)
 	var _, h = View.Size()
 	View.Y = (bly - h/2) - 2
-
-	if keyboard.IsKeyJustPressed(key.A) {
-		Units = append(Units, NewUnit(CharHunter, TeamAlly, LaneUpper))
-	}
 
 	View.DrawColor(skyColor)
 	View.DrawObject(&Background)
@@ -132,7 +129,13 @@ func UpdateScene() {
 	View.DrawObject(&Flags)
 
 	for _, p := range ProjectilesBehind {
-		if p != nil { // may have been destroyed, faded out & removed during an update
+		if p != nil { // may have been faded out & removed during an update
+			p.Update()
+		}
+	}
+
+	for _, p := range Pickups {
+		if p != nil { // may have been removed during an update
 			p.Update()
 		}
 	}
@@ -153,7 +156,7 @@ func UpdateScene() {
 	EnemyBase.UpdateFront()
 
 	for _, p := range Projectiles {
-		if p != nil { // may have been destroyed, faded out & removed during an update
+		if p != nil { // may have been faded out & removed during an update
 			p.Update()
 		}
 	}

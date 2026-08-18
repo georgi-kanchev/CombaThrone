@@ -38,6 +38,11 @@ func NewHealthBar(width float32, team Team) HealthBar {
 	var glory, dmg = label, fill // copy
 	glory.Effects.TextLineHeight, glory.Effects.OutlineSize = 10, 0.45
 	glory.Height = 20
+	glory.Effects.Tint = palette.Green
+	if team == TeamEnemy {
+		glory.Effects.Tint = palette.Red
+	}
+
 	return HealthBar{team: team, background: &bgr, fill: &fill, damage: &dmg, label: &label, glory: &glory}
 }
 func (hb *HealthBar) FadeOut(duration float32) {
@@ -51,6 +56,12 @@ func (hb *HealthBar) MoveToGlory(duration float32) {
 	hb.duration, hb.timer = duration, duration
 	hb.startX, hb.startY = hb.label.X, hb.label.Y
 	hb.glory.Text = text.New(-hb.lastValue, Tags[IconGlory])
+
+	if hb.team == TeamAlly {
+		PlaySound(AudioEventPositive)
+	} else {
+		PlaySound(AudioEventNegative)
+	}
 }
 
 func (hb *HealthBar) Update(target geometry.Shape, health, maxHealth int, mask geometry.Area) {
@@ -64,7 +75,8 @@ func (hb *HealthBar) Update(target geometry.Shape, health, maxHealth int, mask g
 		hb.background.Effects.Tint = color.RGBA(255, 255, 255, alpha)
 		hb.fill.Effects.Tint = color.RGBA(255, 255, 255, alpha)
 		hb.damage.Effects.Tint = color.RGBA(255, 255, 255, alpha)
-		hb.label.Effects.Tint = color.RGBA(255, 255, 255, alpha)
+		var r, g, b, _ = color.Channels(hb.glory.Effects.Tint)
+		hb.label.Effects.Tint = color.RGBA(r, g, b, alpha)
 	} else if hb.timer < 0 {
 		if hb.toGlory && !hb.subtractedGlory {
 			hb.subtractedGlory = true
@@ -127,8 +139,9 @@ func (hb *HealthBar) Update(target geometry.Shape, health, maxHealth int, mask g
 		if progress < riseEnd { // smooth rise in
 			var t = number.Map(progress, 0, riseEnd, 0, 1)
 			var alpha = byte(number.Map(easing.CubicOut(t), 0, 1, 0, 255))
+			var r, g, b, _ = color.Channels(hb.glory.Effects.Tint)
 			hb.glory.Effects.TextLineHeight = number.Map(easing.CubicOut(t), 0, 1, 4, 16)
-			hb.glory.Effects.Tint = color.RGBA(255, 255, 255, alpha)
+			hb.glory.Effects.Tint = color.RGBA(r, g, b, alpha)
 		} else if progress < fallStart { // breathing hang
 			var t = number.Map(progress, riseEnd, fallStart, 0, 1)
 			var microFloat = number.Sine(t*3.14159) * 2.0 // adds a breating 16 -> 18 -> 16
@@ -137,8 +150,9 @@ func (hb *HealthBar) Update(target geometry.Shape, health, maxHealth int, mask g
 		} else { // faster fall
 			var t = number.Map(progress, fallStart, 1, 0, 1)
 			var alpha = byte(number.Map(easing.CubicIn(t), 0, 1, 255, 0))
+			var r, g, b, _ = color.Channels(hb.glory.Effects.Tint)
 			hb.glory.Effects.TextLineHeight = number.Map(easing.CubicIn(t), 0, 1, 16, 0)
-			hb.glory.Effects.Tint = color.RGBA(255, 255, 255, alpha)
+			hb.glory.Effects.Tint = color.RGBA(r, g, b, alpha)
 		}
 
 		View.DrawObject(hb.glory)

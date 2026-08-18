@@ -1,8 +1,5 @@
 package game
 
-// Defines the base stats, animations, behaviors (brain functions) etc of all characters - being a class/template.
-// The Unit copies that base data in different points in time and uses/edits it to make the character alive.
-
 import (
 	"pure-game-kit/packages/assets"
 	"pure-game-kit/packages/audio"
@@ -13,7 +10,7 @@ import (
 type Stats struct {
 	Name string
 
-	Health, MoveSpeed int
+	Health, MoveSpeed, Wage int
 
 	ActValue, ActSpeed, ActRange int
 
@@ -45,14 +42,14 @@ func NewCharacter(behavior func(self *Unit), stats Stats) CharacterData {
 func InitCharacters() {
 	var atlas = assets.LoadAtlas(assets.LoadImage("data/units.png"), "data/units.xml")
 
-	Characters[CharMan] = NewCharacter(BehaviorMan, Stats{Name: "Man", Health: 20, MoveSpeed: 30, HurtTime: 0.5,
-		ActValue: 2, ActSpeed: 15, ActRange: 1})
+	Characters[CharMan] = NewCharacter(BehaviorMan, Stats{Name: "Man", Wage: 20,
+		Health: 20, MoveSpeed: 30, HurtTime: 0.5, ActValue: 2, ActSpeed: 15, ActRange: 1})
 
-	Characters[CharWoman] = NewCharacter(BehaviorMan, Stats{Name: "Woman", Health: 12, MoveSpeed: 20, HurtTime: 0.5,
-		ActValue: 1, ActSpeed: 18, ActRange: 1})
+	Characters[CharWoman] = NewCharacter(BehaviorMan, Stats{Name: "Woman", Wage: 10,
+		Health: 12, MoveSpeed: 20, HurtTime: 0.5, ActValue: 1, ActSpeed: 18, ActRange: 1})
 
-	Characters[CharHunter] = NewCharacter(BehaviorHunter, Stats{Name: "Hunter", Health: 20, MoveSpeed: 30, HurtTime: 0.5,
-		ActValue: 6, ActSpeed: 20, ActRange: 6})
+	Characters[CharHunter] = NewCharacter(BehaviorHunter, Stats{Name: "Hunter", Wage: 40,
+		Health: 20, MoveSpeed: 30, HurtTime: 0.5, ActValue: 4, ActSpeed: 20, ActRange: 6})
 	Characters[CharHunter].Sounds = CharSounds{ActionTrigger: AudioBow, HitGround: AudioProjectileGround,
 		HitFlesh: AudioProjectileFlesh, HitWood: AudioProjectileWood, HitMetal: AudioProjectileMetal}
 
