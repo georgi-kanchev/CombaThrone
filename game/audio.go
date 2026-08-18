@@ -57,6 +57,9 @@ func UpdateAudio() {
 }
 
 func PlaySound(variations []audio.Audio) {
+	if len(variations) == 0 {
+		return
+	}
 	var sound = random.PickFrom(variations)
 	sound.Play()
 }

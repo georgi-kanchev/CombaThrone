@@ -15,10 +15,12 @@ type Stats struct {
 
 	Health, MoveSpeed int
 
-	ActionValue, ActionSpeed, ActionRange int
+	ActValue, ActSpeed, ActRange int
 
 	HurtTime float32
 }
+
+type CharSounds struct{ ActionStart, ActionTrigger, HitFlesh, HitWood, HitMetal, HitGround []audio.Audio }
 
 type CharacterData struct {
 	Stats      Stats
@@ -26,22 +28,33 @@ type CharacterData struct {
 	Animations struct {
 		Idle, Walk, ActionStart, ActionEnd, Hurt, Die []assets.ImageId
 	}
-	Sounds struct {
-		ActionTrigger, HitFlesh, HitWood, HitMetal, HitGround []audio.Audio
-	}
+	Sounds CharSounds
 
 	Behavior func(self *Unit)
 }
 
-const CharacterMan, CharacterWoman, CharacterHunter Character = 0, 1, 2
+const CharMan, CharWoman, CharHunter Character = 0, 1, 2
 
 var Characters [3]CharacterData
 
+func NewCharacter(behavior func(self *Unit), stats Stats) CharacterData {
+	return CharacterData{Behavior: behavior, Stats: stats, Hitbox: geometry.NewRoundedRectangle(0, 7, 18, 35, 0, 1),
+		Sounds: CharSounds{HitFlesh: AudioHitFlesh, HitWood: AudioHitWood, HitMetal: AudioHitMetal}}
+}
+
 func InitCharacters() {
 	var atlas = assets.LoadAtlas(assets.LoadImage("data/units.png"), "data/units.xml")
-	Characters[CharacterMan] = CharacterDataMan()
-	Characters[CharacterWoman] = CharacterDataWoman()
-	Characters[CharacterHunter] = CharacterDataHunter()
+
+	Characters[CharMan] = NewCharacter(BehaviorMan, Stats{Name: "Man", Health: 20, MoveSpeed: 30, HurtTime: 0.5,
+		ActValue: 2, ActSpeed: 15, ActRange: 1})
+
+	Characters[CharWoman] = NewCharacter(BehaviorMan, Stats{Name: "Woman", Health: 12, MoveSpeed: 20, HurtTime: 0.5,
+		ActValue: 1, ActSpeed: 18, ActRange: 1})
+
+	Characters[CharHunter] = NewCharacter(BehaviorHunter, Stats{Name: "Hunter", Health: 20, MoveSpeed: 30, HurtTime: 0.5,
+		ActValue: 6, ActSpeed: 20, ActRange: 6})
+	Characters[CharHunter].Sounds = CharSounds{ActionTrigger: AudioBow, HitGround: AudioProjectileGround,
+		HitFlesh: AudioProjectileFlesh, HitWood: AudioProjectileWood, HitMetal: AudioProjectileMetal}
 
 	for i, c := range Characters {
 		var prefix = text.ToLowerCase(c.Stats.Name)

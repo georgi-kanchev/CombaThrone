@@ -68,7 +68,7 @@ func UpdateDebug() {
 				"action timer: ", number.Round(hovered.actionTimer, 1), "\n",
 				"hurt timer: ", number.Round(hovered.hurtTimer, 1), "\n",
 				"velocity: ", number.Round(hovered.VelocityX, 1), " | ", number.Round(hovered.VelocityY, 1), "\n",
-				"move speed x: ", number.Round(hovered.moveSpeedX, 1), "\n",
+				"move speed: ", number.Round(hovered.moveSpeedX, 1), "\n",
 			)
 			View.DrawText(info, hb.X-hovered.Width/2, hb.Y-hb.Height/2-60, 50, 0, palette.White, geometry.Area{})
 		}

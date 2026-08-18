@@ -4,6 +4,8 @@ import (
 	"pure-game-kit/packages/assets"
 	"pure-game-kit/packages/geometry"
 	"pure-game-kit/packages/graphics"
+	"pure-game-kit/packages/input/keyboard"
+	"pure-game-kit/packages/input/keyboard/key"
 	"pure-game-kit/packages/utility/collection"
 	"pure-game-kit/packages/utility/color"
 	"pure-game-kit/packages/utility/number"
@@ -81,20 +83,20 @@ func InitScene() {
 	AllyBase = NewBase(SaveState{}, true)
 	EnemyBase = NewBase(SaveState{Base: BaseFort}, false)
 
-	Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneMiddle))
-	Units = append(Units, NewUnit(CharacterHunter, TeamEnemy, LaneUpper))
-	// Units = append(Units, NewUnit(CharacterMan, TeamEnemy, LaneUpper))
-	// Units = append(Units, NewUnit(CharacterWoman, TeamEnemy, LaneMiddle))
-	// Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneGarrisonPlus1))
-	// Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneGarrisonPlus2))
-	// Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneGarrisonPlus3))
-	// Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneGarrisonPlus4))
-	// Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneGarrisonPlus5))
-	// Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneGarrison1))
-	// Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneGarrison2))
-	// Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneGarrison3))
-	// Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneGarrison4))
-	// Units = append(Units, NewUnit(CharacterHunter, TeamAlly, LaneGarrison5))
+	// Units = append(Units, NewUnit(CharHunter, TeamAlly, LaneMiddle))
+	// Units = append(Units, NewUnit(CharMan, TeamAlly, LaneUpper))
+	Units = append(Units, NewUnit(CharMan, TeamEnemy, LaneUpper))
+	// Units = append(Units, NewUnit(CharWoman, TeamEnemy, LaneMiddle))
+	// Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneGarrison5))
+	// Units = append(Units, NewUnit(CharHunter, TeamAlly, LaneGarrisonPlus2))
+	// Units = append(Units, NewUnit(CharHunter, TeamAlly, LaneGarrisonPlus3))
+	// Units = append(Units, NewUnit(CharHunter, TeamAlly, LaneGarrisonPlus4))
+	// Units = append(Units, NewUnit(CharHunter, TeamAlly, LaneGarrisonPlus5))
+	// Units = append(Units, NewUnit(CharHunter, TeamAlly, LaneGarrison1))
+	// Units = append(Units, NewUnit(CharHunter, TeamAlly, LaneGarrison2))
+	// Units = append(Units, NewUnit(CharHunter, TeamAlly, LaneGarrison3))
+	// Units = append(Units, NewUnit(CharHunter, TeamAlly, LaneGarrison4))
+	// Units = append(Units, NewUnit(CharHunter, TeamAlly, LaneGarrison5))
 
 	Entrances = [6]*Entrance{
 		LaneLower:      NewEntrance(EntranceNone, TeamAlly, LaneLower),
@@ -102,7 +104,7 @@ func InitScene() {
 		LaneUpper:      NewEntrance(EntranceNone, TeamAlly, LaneUpper),
 		LaneLower + 3:  NewEntrance(EntranceNone, TeamEnemy, LaneLower),
 		LaneMiddle + 3: NewEntrance(EntranceDoor, TeamEnemy, LaneMiddle),
-		LaneUpper + 3:  NewEntrance(EntranceNone, TeamEnemy, LaneUpper),
+		LaneUpper + 3:  NewEntrance(EntranceDoor, TeamEnemy, LaneUpper),
 	}
 
 	PlayAmbience(EnvironmentPlains)
@@ -112,6 +114,10 @@ func UpdateScene() {
 	View.FitSize(Background.Width, 0)
 	var _, h = View.Size()
 	View.Y = (bly - h/2) - 2
+
+	if keyboard.IsKeyJustPressed(key.A) {
+		Units = append(Units, NewUnit(CharHunter, TeamAlly, LaneUpper))
+	}
 
 	View.DrawColor(skyColor)
 	View.DrawObject(&Background)

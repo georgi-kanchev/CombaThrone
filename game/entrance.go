@@ -48,7 +48,8 @@ func NewEntrance(entry EntranceType, team Team, lane Lane) *Entrance {
 	case EntranceNone:
 		var hole = graphics.NewSprite(x, y, 1, DecorCrops.Crops("hole")[0])
 		if (team == TeamAlly && AllyBase.Base == BaseCamp) || (team == TeamEnemy && EnemyBase.Base == BaseCamp) {
-			hole.Effects.Tint = 0
+			hole.X = -Background.Width / 2 // pull back entrance to edge of scene, fighting can happen inside the camp
+			hole.Effects.Tint = 0          // and hide the hole
 		}
 
 		data.Tiles = []*graphics.Object{&hole}

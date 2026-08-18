@@ -43,23 +43,23 @@ type Lane uint8
 type Character uint8
 type State uint8
 
-const ( // states that end on 'ing' are continuous, single frame otherwise
-	StateIdling State = iota
-	StateWalking
+const (
+	StateIdling  State = iota // continuous
+	StateWalking              // continuous
 
-	StateHurtStart
-	StateHurting
+	StateHurtStart // single frame
+	StateHurting   // continuous
 
-	StateDyingStart
-	StateDying
-	StateDyingEnd
-	StateDecaying
+	StateDyingStart // single frame
+	StateDying      // continuous
+	StateDyingEnd   // single frame
+	StateDecaying   // continuous
 
-	StateActionStart
-	StateActionCharging
-	StateActionTrigger
-	StateActionRecovering
-	StateActionEnd
+	StateActionStart      // single frame
+	StateActionCharging   // continuous
+	StateActionTrigger    // single frame
+	StateActionRecovering // continuous
+	StateActionEnd        // single frame
 )
 
 const TeamAlly, TeamEnemy, TeamNeutral Team = 0, 1, 2
@@ -115,9 +115,9 @@ func (u *Unit) EnemyEntrance() (canBeActedUpon bool, entrance *Entrance) {
 	var e *Entrance
 	if u.Team != TeamNeutral && (u.Lane == LaneUpper || u.Lane == LaneMiddle || u.Lane == LaneLower) {
 		e = Entrances[int(3*(1-u.Team))+int(u.Lane)]
-		var actionRange = float32(u.Stats.ActionRange) * TileSize
-		var melee = u.Stats.ActionRange == 1 && number.IsWithin(u.X, e.Tiles[0].X, TileSize/2)
-		var ranged = u.Stats.ActionRange > 1 && number.Absolute(u.X-e.Tiles[0].X) < actionRange
+		var actionRange = float32(u.Stats.ActRange) * TileSize
+		var melee = u.Stats.ActRange == 1 && number.IsWithin(u.X, e.Tiles[0].X, TileSize/2)
+		var ranged = u.Stats.ActRange > 1 && number.Absolute(u.X-e.Tiles[0].X) < actionRange
 		canBeActedUpon = !e.IsOpen() && e.Health > 0 && (melee || ranged)
 	}
 	return canBeActedUpon, e
@@ -127,8 +127,12 @@ func (u *Unit) Update() {
 	u.Anim.TimeScale = TimeScale
 	u.hurtTimer -= DeltaTimeScaled()
 	u.actionTimer -= DeltaTimeScaled()
-	u.Mask = Masks[u.Lane] // applied every frame to account for any changes in lane
 	u.Z = zs[u.Lane]
+
+	u.Mask = Masks[u.Lane] // applied every frame to account for any changes in lane
+	if (u.X < 0 && AllyBase.Base == BaseCamp) || (u.X > 0 && EnemyBase.Base == BaseCamp) {
+		u.Mask = geometry.Area{}
+	}
 
 	if TimeScale > 0 {
 		u.applyState()
@@ -201,10 +205,10 @@ func (u *Unit) applyState() {
 	var canAct = u.actionTimer < 0 || number.IsNaN(u.actionTimer)
 	var enemyEntranceInRange = canBeActedUpon && entrance != nil
 	var hasMeleeTarget = u.UnitFront != nil && u.Team != u.UnitFront.Team
-	var melee = canAct && (hasMeleeTarget || enemyEntranceInRange) && u.Stats.ActionRange == 1
+	var melee = canAct && (hasMeleeTarget || enemyEntranceInRange) && u.Stats.ActRange == 1
 
 	var closestDistX = number.ValueBiggest[float32]()
-	var actionRange = float32(u.Stats.ActionRange) * TileSize
+	var actionRange = float32(u.Stats.ActRange) * TileSize
 	u.ClosestEnemyInRange = nil
 	for _, t := range Units {
 		if u == t || t.Stats.Health <= 0 {
@@ -227,7 +231,7 @@ func (u *Unit) applyState() {
 			u.ClosestEnemyInRange = t
 		}
 	}
-	var ranged = u.Stats.ActionRange > 1 && (u.ClosestEnemyInRange != nil || enemyEntranceInRange)
+	var ranged = u.Stats.ActRange > 1 && (u.ClosestEnemyInRange != nil || enemyEntranceInRange)
 	var isGarrison = u.Lane > LaneUpper
 	var garrisonOrNot = !isGarrison || (isGarrison && u.IsAtGarrison)
 
@@ -300,48 +304,45 @@ func (u *Unit) actUponState() {
 		switch u.Team {
 		case TeamAlly:
 			u.VelocityX = float32(u.Stats.MoveSpeed)
-			if (u.X < 0 && AllyBase.Base == BaseCamp) || (u.X > 0 && EnemyBase.Base == BaseCamp) {
-				u.Mask = geometry.Area{}
-			}
 			if e != nil && u.X > e.Tiles[0].X {
 				u.HealthBar.MoveToGlory(2.0)
 			}
-			if u.X > Background.Width/2+u.Width/2 {
-				Units = collection.Remove(Units, u)
+			if u.X > Background.Width/2+u.Width { // unit outside of scene, time to die of natural causes
+				u.hurtTimer = 0 // no instant delete - to have time to play glory text animation etc
+				u.State = StateDecaying
 			}
 		case TeamEnemy:
 			u.VelocityX = -float32(u.Stats.MoveSpeed)
-			if u.X < 0 && AllyBase.Base == BaseCamp {
-				u.Mask = geometry.Area{}
-			}
 			if e != nil && u.X < e.Tiles[0].X {
 				u.HealthBar.MoveToGlory(2.0)
 			}
-			if u.X < -Background.Width/2-u.Width/2 {
-				Units = collection.Remove(Units, u)
+			if u.X < -Background.Width/2-u.Width { // unit outside of scene, time to die of natural causes
+				u.hurtTimer = 0 // no instant delete - to have time to play glory text animation etc
+				u.State = StateDecaying
 			}
 		}
 	case StateActionStart:
-		u.actionTimer = float32(u.Stats.ActionSpeed) / 10
+		u.actionTimer = float32(u.Stats.ActSpeed) / 10
 		u.Anim.Frames = Characters[u.Character].Animations.ActionStart
 		u.Anim.IsLooping, u.Anim.FPS, u.Anim.Time = false, 8, 0
 		u.VelocityX = 0
+		PlaySound(Characters[u.Character].Sounds.ActionStart)
 	case StateActionTrigger:
 		u.Anim.Frames = Characters[u.Character].Animations.ActionEnd
 		u.Anim.IsLooping, u.Anim.FPS, u.Anim.Time = false, 8, 0
 
-		var dmg = u.Stats.ActionValue
+		var dmg = u.Stats.ActValue
 		var canBeActedUpon, e = u.EnemyEntrance()
-		if u.Stats.ActionRange == 1 {
+		if u.Stats.ActRange == 1 {
 			if u.UnitFront != nil {
 				u.UnitFront.TakeDamage(dmg)
-				PlaySound(AudioHitFlesh)
+				PlaySound(Characters[u.Character].Sounds.HitFlesh)
 			} else if canBeActedUpon && e != nil {
 				e.TakeDamage(dmg)
 				if e.Health > 0 && e.Entrance == EntranceDoor {
-					PlaySound(AudioHitWood)
+					PlaySound(Characters[u.Character].Sounds.HitWood)
 				} else if e.Health > 0 && (e.Entrance == EntranceShortGate || e.Entrance == EntranceTallGate) {
-					PlaySound(AudioHitMetal)
+					PlaySound(Characters[u.Character].Sounds.HitMetal)
 				}
 			}
 			break
