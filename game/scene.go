@@ -26,6 +26,7 @@ const ( // layer tilemaps
 	LayerFortBack3
 	LayerFortFront3
 	LayerPlains
+	LayerPlainsNoBase
 	LayerFlags
 	LayerGrid
 	LayerCount
@@ -54,13 +55,12 @@ const TileSize, MapCount = 32, 4
 
 var TimeScale float32 = 1
 var View graphics.View
-var Background, Map, Grid, Flags graphics.Object
+var Background, MapNoBase, Map, Grid, Flags *graphics.Object
 var DecorCrops, UserInterfaceCrops assets.AtlasId
 var Layers [LayerCount]assets.TileLayerId
 
 func InitScene() {
 	View = graphics.NewView(1)
-	Background = graphics.NewSprite(0, 0, 1, assets.LoadImage("data/bgr-field.png"))
 	UserInterfaceCrops = assets.LoadAtlas(assets.LoadImage("data/user-interface.png"), "data/user-interface.xml")
 
 	assets.FontId(0).EmbedImage(text.At(Tags[IconGlory], 0), UserInterfaceCrops.Crops("icons")[IconGlory])
@@ -103,11 +103,16 @@ func InitScene() {
 
 	mirrorGarrisonLanes()
 
-	Map = graphics.NewTilemap(layers[LayerPlains])
-	Flags, Grid = graphics.NewTilemap(layers[LayerFlags]), graphics.NewTilemap(layers[LayerGrid])
+	var bgr = graphics.NewSprite(0, 0, 1, assets.LoadImage("data/bgr-field.png"))
+	var _map, mapNoBase = graphics.NewTilemap(layers[LayerPlains]), graphics.NewTilemap(layers[LayerPlainsNoBase])
+	Background, Map, MapNoBase = &bgr, &_map, &mapNoBase
 
-	AllyBase = NewBase(SaveState{}, true)
-	EnemyBase = NewBase(SaveState{Kind: BaseFortress, Garrison: Garrison3}, false)
+	var flag, grid = graphics.NewTilemap(layers[LayerFlags]), graphics.NewTilemap(layers[LayerGrid])
+	Flags, Grid = &flag, &grid
+	Flags.Y += TileSize * 0.1
+
+	AllyBase = NewBase(SaveState{Kind: BaseBarrack}, true)
+	EnemyBase = NewBase(SaveState{Kind: BaseFort, Garrison: Garrison1}, false)
 
 	Units = append(Units, NewUnit(CharHunter, TeamAlly, LaneMiddle))
 	Units = append(Units, NewUnit(CharMan, TeamAlly, LaneUpper))
@@ -125,15 +130,15 @@ func InitScene() {
 	// Units = append(Units, NewUnit(CharHunter, TeamAlly, LaneGarrison5))
 
 	Entrances = [6]*Entrance{
+		LaneUpper:      NewEntrance(EntranceDoor, TeamAlly, LaneUpper),
+		LaneMiddle:     NewEntrance(EntranceDoor, TeamAlly, LaneMiddle),
 		LaneLower:      NewEntrance(EntranceNone, TeamAlly, LaneLower),
-		LaneMiddle:     NewEntrance(EntranceNone, TeamAlly, LaneMiddle),
-		LaneUpper:      NewEntrance(EntranceNone, TeamAlly, LaneUpper),
-		LaneLower + 3:  NewEntrance(EntranceNone, TeamEnemy, LaneLower),
-		LaneMiddle + 3: NewEntrance(EntranceNone, TeamEnemy, LaneMiddle),
 		LaneUpper + 3:  NewEntrance(EntranceNone, TeamEnemy, LaneUpper),
+		LaneMiddle + 3: NewEntrance(EntranceNone, TeamEnemy, LaneMiddle),
+		LaneLower + 3:  NewEntrance(EntranceNone, TeamEnemy, LaneLower),
 	}
 
-	Pickups = append(Pickups, NewPickup(0, 50, 3, PickupRelic))
+	Pickups = append(Pickups, NewPickup(0, 58, 2.75, PickupRelic))
 
 	PlayAmbience(EnvironmentPlains)
 }
@@ -147,7 +152,7 @@ func UpdateScene() {
 	View.Y = (bly - h/2) - 2
 
 	View.DrawColor(skyColor)
-	View.DrawObject(&Background)
+	View.DrawObject(Background)
 
 	AllyBase.UpdateBack()
 	EnemyBase.UpdateBack()
@@ -155,8 +160,17 @@ func UpdateScene() {
 	for _, g := range Entrances {
 		g.Update()
 	}
-	View.DrawObject(&Map)
-	View.DrawObject(&Flags)
+
+	if AllyBase.Kind < BaseBarrack {
+		MapNoBase.Width = number.Absolute(MapNoBase.Width)
+		View.DrawObject(MapNoBase)
+	}
+	if EnemyBase.Kind < BaseBarrack {
+		MapNoBase.Width = -number.Absolute(MapNoBase.Width)
+		View.DrawObject(MapNoBase)
+	}
+	View.DrawObject(Map)
+	View.DrawObject(Flags)
 
 	for _, p := range ProjectilesBehind {
 		if p != nil { // may have been faded out & removed during an update

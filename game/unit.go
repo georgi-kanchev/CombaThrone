@@ -88,12 +88,12 @@ func NewUnit(character Character, team Team, lane Lane) *Unit {
 		unit.X, unit.Y = PointAtCell(18, 3)
 	}
 	if team == TeamAlly {
-		if AllyBase.Kind == BaseCamp {
+		if AllyBase.Kind < BaseBarrack {
 			unit.X = Background.Width/2 + unit.Width/2
 		}
 
 		unit.X = -unit.X
-	} else if EnemyBase.Kind == BaseCamp {
+	} else if EnemyBase.Kind < BaseBarrack {
 		unit.X = Background.Width / 2
 	}
 
@@ -129,7 +129,7 @@ func (u *Unit) Update() {
 	u.Z = laneZs[u.Lane]
 
 	u.Mask = laneMasks[u.Lane] // applied every frame to account for any changes in lane
-	if (u.X < 0 && AllyBase.Kind == BaseCamp) || (u.X > 0 && EnemyBase.Kind == BaseCamp) {
+	if (u.X < 0 && AllyBase.Kind < BaseBarrack) || (u.X > 0 && EnemyBase.Kind < BaseBarrack) {
 		u.Mask = geometry.Area{}
 	}
 
