@@ -8,7 +8,7 @@
    eJxjYKAMWDIyMFgxUmjICABLgHgpEC8D4uUUmHMEiI8C8TEgPk4Fdw03AAAnqgYi
   </data>
  </layer>
- <layer id="17" name="Barrack" width="18" height="10">
+ <layer id="17" name="Barrack" width="18" height="10" visible="0">
   <data encoding="base64" compression="zlib">
    eJxjYBgF+IAjEDsBsTOF5iQCcRIQJwPxIQrMaQTiJiBuptA9C6HmLKbQnINAvIhCM0DgIRXMAAEAG9AIPw==
   </data>
@@ -73,13 +73,13 @@
    eJxTZGBgUBzFo3iYYADUOBc1
   </data>
  </layer>
- <objectgroup id="61" name="Lower">
+ <objectgroup id="61" name="Lower" visible="0">
   <object id="3" x="-62" y="309" width="700" height="15"/>
  </objectgroup>
- <objectgroup id="62" name="Middle">
+ <objectgroup id="62" name="Middle" visible="0">
   <object id="2" x="-62" y="277" width="700" height="15"/>
  </objectgroup>
- <objectgroup id="63" name="Upper">
+ <objectgroup id="63" name="Upper" visible="0">
   <object id="1" x="-62" y="245" width="700" height="15"/>
  </objectgroup>
  <objectgroup id="65" name="Garrison1" visible="0">

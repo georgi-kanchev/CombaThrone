@@ -310,7 +310,7 @@ func (u *Unit) actUponState() {
 		case TeamAlly:
 			u.VelocityX = float32(u.Stats.MoveSpeed)
 			if e != nil && u.X > e.Tiles[0].X {
-				u.HealthBar.MoveToGlory(2.0)
+				u.HealthBar.MoveToGlory(2.5)
 			}
 			if u.X > Background.Width/2+u.Width { // unit outside of scene, time to die of natural causes
 				u.hurtTimer = 0 // no instant delete - to have time to play glory text animation etc
@@ -319,7 +319,7 @@ func (u *Unit) actUponState() {
 		case TeamEnemy:
 			u.VelocityX = -float32(u.Stats.MoveSpeed)
 			if e != nil && u.X < e.Tiles[0].X {
-				u.HealthBar.MoveToGlory(2.0)
+				u.HealthBar.MoveToGlory(2.5)
 			}
 			if u.X < -Background.Width/2-u.Width { // unit outside of scene, time to die of natural causes
 				u.hurtTimer = 0 // no instant delete - to have time to play glory text animation etc

@@ -114,8 +114,8 @@ func InitScene() {
 	AllyBase = NewBase(SaveState{Kind: BaseFortress, Garrison: Garrison3}, true)
 	EnemyBase = NewBase(SaveState{Kind: BaseFortress, Garrison: Garrison3}, false)
 
-	// Units = append(Units, NewUnit(CharHunter, TeamAlly, LaneMiddle))
-	Units = append(Units, NewUnit(CharMan, TeamAlly, LaneUpper))
+	Units = append(Units, NewUnit(CharHunter, TeamAlly, LaneMiddle))
+	// Units = append(Units, NewUnit(CharMan, TeamAlly, LaneUpper))
 	Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneUpper))
 	Units = append(Units, NewUnit(CharWoman, TeamEnemy, LaneMiddle))
 	// Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneGarrison5))
@@ -130,8 +130,8 @@ func InitScene() {
 	// Units = append(Units, NewUnit(CharHunter, TeamAlly, LaneGarrison5))
 
 	Entrances = [6]*Entrance{
-		LaneUpper:      NewEntrance(EntranceDoor, TeamAlly, LaneUpper),
-		LaneMiddle:     NewEntrance(EntranceDoor, TeamAlly, LaneMiddle),
+		LaneUpper:      NewEntrance(EntranceNone, TeamAlly, LaneUpper),
+		LaneMiddle:     NewEntrance(EntranceNone, TeamAlly, LaneMiddle),
 		LaneLower:      NewEntrance(EntranceNone, TeamAlly, LaneLower),
 		LaneUpper + 3:  NewEntrance(EntranceNone, TeamEnemy, LaneUpper),
 		LaneMiddle + 3: NewEntrance(EntranceNone, TeamEnemy, LaneMiddle),
