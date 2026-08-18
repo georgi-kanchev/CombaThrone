@@ -11,6 +11,10 @@ import (
 	"pure-game-kit/packages/utility/random"
 )
 
+type Team uint8
+type Lane uint8
+type Character uint8
+type State uint8
 type Unit struct {
 	graphics.Object
 	Stats     Stats
@@ -35,12 +39,7 @@ type Unit struct {
 	actionTimer, hurtTimer   float32 // negative values can be used for "time since last"
 }
 
-type Team uint8
-type Lane uint8
-type Character uint8
-type State uint8
-
-const (
+const ( // states
 	StateIdling  State = iota // continuous
 	StateWalking              // continuous
 
@@ -60,7 +59,10 @@ const (
 )
 
 const TeamAlly, TeamEnemy, TeamNeutral Team = 0, 1, 2
+
 const Gravity, GroundFrictionPercent, DeathFadeOutTime = 256, 15.0, 30.0
+
+var Units []*Unit = make([]*Unit, 0, 16)
 
 func NewUnit(character Character, team Team, lane Lane) *Unit {
 	var char = Characters[character]
@@ -72,7 +74,7 @@ func NewUnit(character Character, team Team, lane Lane) *Unit {
 
 	unit.draw() // update frame size
 
-	var col = Collisions[lane]
+	var col = laneCollisions[lane]
 	switch lane {
 	case LaneLower:
 		unit.X, unit.Y = col[0].X+col[0].Width/2-40, col[0].Y-col[0].Height/2-unit.Height/2
@@ -124,9 +126,9 @@ func (u *Unit) Update() {
 	u.Anim.TimeScale = TimeScale
 	u.hurtTimer -= DeltaTimeScaled()
 	u.actionTimer -= DeltaTimeScaled()
-	u.Z = zs[u.Lane]
+	u.Z = laneZs[u.Lane]
 
-	u.Mask = Masks[u.Lane] // applied every frame to account for any changes in lane
+	u.Mask = laneMasks[u.Lane] // applied every frame to account for any changes in lane
 	if (u.X < 0 && AllyBase.Kind == BaseCamp) || (u.X > 0 && EnemyBase.Kind == BaseCamp) {
 		u.Mask = geometry.Area{}
 	}
@@ -160,11 +162,17 @@ func (u *Unit) TakeDamage(damage int) {
 
 // private ========================================================
 
-var zs = map[Lane]float32{
+var laneZs = map[Lane]float32{
 	LaneLower: 0, LaneMiddle: 1, LaneUpper: 2, LaneGarrison1: 0, LaneGarrison2: 0.5,
 	LaneGarrison3: 1, LaneGarrison4: 1.5, LaneGarrison5: 2, LaneGarrisonPlus1: 2.5, LaneGarrisonPlus2: 2.5,
 	LaneGarrisonPlus3: 2.5, LaneGarrisonPlus4: 2.5, LaneGarrisonPlus5: 2.5,
 }
+var laneMasks = map[Lane]geometry.Area{
+	LaneLower:  geometry.NewArea(0, 0, 556, 1000),
+	LaneMiddle: geometry.NewArea(0, 0, 492, 1000),
+	LaneUpper:  geometry.NewArea(0, 0, 428, 1000),
+}
+var laneCollisions = map[Lane][]geometry.Shape{}
 
 func (u *Unit) particlesBlood(p *motion.Particle) (alive bool) {
 	if p.Age == 0 {
@@ -355,7 +363,7 @@ func (u *Unit) actUponState() {
 			if e.Kind == EntranceTallGate {
 				y += TileSize
 			}
-			Projectiles = append(Projectiles, u.NewProjectile(u.X, u.Y, u.Z, x, y, zs[e.Lane], dmg, e))
+			Projectiles = append(Projectiles, u.NewProjectile(u.X, u.Y, u.Z, x, y, laneZs[e.Lane], dmg, e))
 			PlaySound(Characters[u.Character].Sounds.ActionTrigger)
 		}
 	case StateActionCharging, StateActionRecovering, StateActionEnd: // empty
@@ -403,7 +411,7 @@ func (u *Unit) applyCollisions() {
 
 	u.IsGrounded = false
 	if u.VelocityY > 0 { // collide with ground only when falling down (allows jumping up to a lane)
-		for _, s := range Collisions[u.Lane] {
+		for _, s := range laneCollisions[u.Lane] {
 			if hb.Overlaps(s) {
 				hb = hb.Collide(s)
 				u.X, u.Y = hb.X+diffX, hb.Y+diffY

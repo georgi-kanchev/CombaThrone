@@ -55,6 +55,8 @@ func LoadAudio() {
 	AudioEventNegative = append(AudioEventNegative, audio.New(assets.LoadSound("data/sounds/event-negative.mp3", 4)))
 }
 
+//=================================================================
+
 func UpdateAudio() {
 	if AudioAmbience.IsJustFinished() {
 		AudioAmbience.Play()

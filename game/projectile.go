@@ -26,6 +26,8 @@ type Projectile struct {
 
 const ProjectileFadeOutTime float32 = 10
 
+var Projectiles, ProjectilesBehind []*Projectile = make([]*Projectile, 0, 32), make([]*Projectile, 0, 32)
+
 func (u *Unit) NewProjectile(x, y, z, targetX, targetY, targetZ float32, dmg int, enemyEntrance *Entrance) *Projectile {
 	const speed float32 = 100
 	var accuracyMultiplier float32 = 1
@@ -45,6 +47,8 @@ func (u *Unit) NewProjectile(x, y, z, targetX, targetY, targetZ float32, dmg int
 	}
 	return proj
 }
+
+//=================================================================
 
 func (p *Projectile) Update() {
 	p.Age += DeltaTimeScaled()

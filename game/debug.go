@@ -72,7 +72,7 @@ func UpdateDebug() {
 			)
 			View.DrawText(info, hb.X-hovered.Width/2, hb.Y-hb.Height/2-60, 50, 0, palette.White, geometry.Area{})
 		}
-		for _, cols := range Collisions {
+		for _, cols := range laneCollisions {
 			for _, s := range cols {
 				View.DrawShape(s.X, s.Y, s.Width, s.Height, s.Angle, 0, DebugCollisionColor, geometry.Area{})
 			}

@@ -9,9 +9,6 @@ import (
 )
 
 type EntranceKind uint8
-
-const EntranceNone, EntranceDoor, EntranceShortGate, EntranceTallGate EntranceKind = 0, 1, 2, 3
-
 type Entrance struct {
 	Tiles     []*graphics.Object
 	Kind      EntranceKind
@@ -24,6 +21,10 @@ type Entrance struct {
 	originalTileYs              []float32
 	openY, maxOpenY, shakeTimer float32
 }
+
+const EntranceNone, EntranceDoor, EntranceShortGate, EntranceTallGate EntranceKind = 0, 1, 2, 3
+
+var Entrances [6]*Entrance // index is Ally[Lower, Middle, Upper], Enemy[Lower, Middle, Upper]
 
 func NewEntrance(entry EntranceKind, team Team, lane Lane) *Entrance {
 	var data = Entrance{Kind: entry, Team: team, Lane: lane, maxOpenY: TileSize + (TileSize * (float32(entry) - 1))}
@@ -87,11 +88,11 @@ func NewEntrance(entry EntranceKind, team Team, lane Lane) *Entrance {
 	return &data
 }
 
+//=================================================================
+
 func (e *Entrance) IsOpen() bool {
 	return number.IsWithin(e.openY, e.maxOpenY, 0.1)
 }
-
-//=================================================================
 
 func (e *Entrance) Update() {
 	e.shakeTimer -= DeltaTimeScaled()

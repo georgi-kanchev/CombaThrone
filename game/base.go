@@ -26,6 +26,8 @@ type Base struct {
 const BaseCamp, BaseBarrack, BaseFort, BaseFortress BaseKind = 0, 1, 2, 3
 const Garrison0, Garrison1, Garrison2, Garrison3 Garrison = 0, 1, 2, 3
 
+var AllyBase, EnemyBase Base
+
 func NewBase(saveState SaveState, ally bool) Base {
 	var glory = map[BaseKind]int{BaseCamp: 15, BaseBarrack: 30, BaseFort: 90, BaseFortress: 360}[saveState.Kind]
 	var b = Base{SaveState: saveState, Glory: glory}
@@ -43,41 +45,48 @@ func NewBase(saveState SaveState, ally bool) Base {
 
 	switch b.Kind {
 	case BaseCamp:
-		var back = graphics.NewTilemap(Layers[0])
+		var back = graphics.NewTilemap(Layers[LayerCamp])
 		b.Back = &back
 		return b
 	case BaseBarrack:
-		var barrack = graphics.NewTilemap(Layers[1])
+		var barrack = graphics.NewTilemap(Layers[LayerBarrack])
 		b.Back = &barrack
 		return b
 	}
 
-	var back, front = graphics.NewTilemap(Layers[2]), graphics.NewTilemap(Layers[3])
+	var back, front = graphics.NewTilemap(Layers[LayerFortBack0]), graphics.NewTilemap(Layers[LayerFortFront0])
 	b.Back, b.Front = &back, &front
 
+	if !ally {
+		b.Back.Width *= -1
+		b.Front.Width *= -1
+	}
+	if b.Kind == BaseFort {
+		b.Back.Y += TileSize
+		b.Front.Y += TileSize
+
+		bringGarrisonLanesDown(ally)
+	}
+
 	if b.Garrison != Garrison0 {
-		var indexes = map[Garrison][2]int{Garrison1: {4, 5}, Garrison2: {6, 7}, Garrison3: {8, 9}}[b.Garrison]
-		var garBack, garFront = graphics.NewTilemap(Layers[indexes[0]]), graphics.NewTilemap(Layers[indexes[1]])
+		var backIndex = int(LayerFortBack0) + int(b.Garrison)*2
+		var frontIndex = int(LayerFortFront0) + int(b.Garrison)*2
+		var garBack, garFront = graphics.NewTilemap(Layers[backIndex]), graphics.NewTilemap(Layers[frontIndex])
 		b.GarrisonBack, b.GarrisonFront = &garBack, &garFront
 
 		if b.Kind == BaseFort {
 			b.GarrisonBack.Y += TileSize
 			b.GarrisonFront.Y += TileSize
 		}
-	}
-
-	if b.Kind == BaseFort {
-		b.Back.Y += TileSize
-		b.Front.Y += TileSize
-
 		if !ally {
-			b.Back.Width *= -1
-			b.Front.Width *= -1
+			b.GarrisonBack.Width *= -1
+			b.GarrisonFront.Width *= -1
 		}
-		bringGarrisonLanesDown(ally)
 	}
 	return b
 }
+
+//=================================================================
 
 func (b *Base) UpdateBack() {
 	View.DrawObject(b.Back)

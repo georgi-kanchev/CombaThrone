@@ -10,8 +10,6 @@ import (
 	"pure-game-kit/packages/utility/text"
 )
 
-var healthBarColors = [3]uint{TeamAlly: palette.Green, TeamEnemy: palette.Red, TeamNeutral: palette.Azure}
-
 type HealthBar struct {
 	background, fill, damage, label, glory *graphics.Object
 
@@ -45,6 +43,9 @@ func NewHealthBar(width float32, team Team) HealthBar {
 
 	return HealthBar{team: team, background: &bgr, fill: &fill, damage: &dmg, label: &label, glory: &glory}
 }
+
+//=================================================================
+
 func (hb *HealthBar) FadeOut(duration float32) {
 	hb.duration, hb.timer = duration, duration
 }
@@ -158,3 +159,7 @@ func (hb *HealthBar) Update(target geometry.Shape, health, maxHealth int, mask g
 		View.DrawObject(hb.glory)
 	}
 }
+
+// private ========================================================
+
+var healthBarColors = [3]uint{TeamAlly: palette.Green, TeamEnemy: palette.Red, TeamNeutral: palette.Azure}

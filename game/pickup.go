@@ -19,10 +19,14 @@ type PickupData struct {
 const PickupCoin, PickupGem, PickupCrystal, PickupRelic PickupKind = 0, 1, 2, 3
 const PickupRune, PickupSnowflake, PickupStar, PickupKey PickupKind = 4, 5, 6, 7
 
+var Pickups []*PickupData = make([]*PickupData, 0, 32)
+
 func NewPickup(x, y, z float32, kind PickupKind) *PickupData {
 	var anim = motion.NewAnimation(6, true, DecorCrops.Crops("pickup-"+pickupGroups[kind])...)
 	return &PickupData{Object: graphics.NewSprite(x, y, 1, 0), Z: z, Kind: kind, Anim: &anim}
 }
+
+//=================================================================
 
 func (p *PickupData) Pickup(by *Unit) {
 	p.Effect(by)

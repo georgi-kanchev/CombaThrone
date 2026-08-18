@@ -11,36 +11,52 @@ import (
 	"pure-game-kit/packages/utility/time"
 )
 
+type Layer uint8
 type Environment uint8
+
+const ( // layer tilemaps
+	LayerCamp Layer = iota
+	LayerBarrack
+	LayerFortBack0
+	LayerFortFront0
+	LayerFortBack1
+	LayerFortFront1
+	LayerFortBack2
+	LayerFortFront2
+	LayerFortBack3
+	LayerFortFront3
+	LayerPlains
+	LayerFlags
+	LayerGrid
+	LayerCount
+)
+
+const ( // lanes (collision layers)
+	LaneLower Lane = iota
+	LaneMiddle
+	LaneUpper
+	LaneGarrison1
+	LaneGarrison2
+	LaneGarrison3
+	LaneGarrison4
+	LaneGarrison5
+	LaneGarrisonPlus1
+	LaneGarrisonPlus2
+	LaneGarrisonPlus3
+	LaneGarrisonPlus4
+	LaneGarrisonPlus5
+	LaneCount
+)
+
+const EnvironmentPlains Environment = 0
 
 const TileSize, MapCount = 32, 4
 
-const LaneLower, LaneMiddle, LaneUpper Lane = 0, 1, 2
-const LaneGarrison1, LaneGarrison2, LaneGarrison3, LaneGarrison4, LaneGarrison5 Lane = 3, 4, 5, 6, 7
-const LaneGarrisonPlus1, LaneGarrisonPlus2, LaneGarrisonPlus3, LaneGarrisonPlus4, LaneGarrisonPlus5 Lane = 8, 9, 10, 11, 12
-const EnvironmentPlains Environment = 0
-
 var TimeScale float32 = 1
-
 var View graphics.View
-var Background graphics.Object
-
-var MapLayer assets.TileLayerId
-var Map, Grid, Flags graphics.Object
+var Background, Map, Grid, Flags graphics.Object
 var DecorCrops, UserInterfaceCrops assets.AtlasId
-
-var AllyBase, EnemyBase Base
-var Layers []assets.TileLayerId
-var Collisions = make([][]geometry.Shape, 13)
-var Masks = [13]geometry.Area{
-	LaneLower:  geometry.NewArea(0, 0, 556, 1000),
-	LaneMiddle: geometry.NewArea(0, 0, 492, 1000),
-	LaneUpper:  geometry.NewArea(0, 0, 428, 1000),
-}
-var Entrances [6]*Entrance // index is Ally[Lower, Middle, Upper], Enemy[Lower, Middle, Upper]
-var Units []*Unit = make([]*Unit, 0, 16)
-var Projectiles, ProjectilesBehind []*Projectile = make([]*Projectile, 0, 32), make([]*Projectile, 0, 32)
-var Pickups []*PickupData = make([]*PickupData, 0, 32)
+var Layers [LayerCount]assets.TileLayerId
 
 func InitScene() {
 	View = graphics.NewView(1)
@@ -51,36 +67,47 @@ func InitScene() {
 	assets.FontId(0).EmbedImage(text.At(Tags[IconHealth], 0), UserInterfaceCrops.Crops("icons")[IconHealth])
 
 	var layers, decor = assets.LoadTileLayersFromTiled("data/map.tmx")
-	var low, mid, up = graphics.NewTilemap(layers[13]), graphics.NewTilemap(layers[14]), graphics.NewTilemap(layers[15])
-	var g1, g2, g3 = graphics.NewTilemap(layers[16]), graphics.NewTilemap(layers[17]), graphics.NewTilemap(layers[18])
-	var g4, g5 = graphics.NewTilemap(layers[19]), graphics.NewTilemap(layers[20])
-	var p1, p2, p3 = graphics.NewTilemap(layers[21]), graphics.NewTilemap(layers[22]), graphics.NewTilemap(layers[23])
-	var p4, p5 = graphics.NewTilemap(layers[24]), graphics.NewTilemap(layers[25])
+	var low = graphics.NewTilemap(layers[Lane(LayerCount)+LaneLower])
+	var mid = graphics.NewTilemap(layers[Lane(LayerCount)+LaneMiddle])
+	var up = graphics.NewTilemap(layers[Lane(LayerCount)+LaneUpper])
+	var g1 = graphics.NewTilemap(layers[Lane(LayerCount)+LaneGarrison1])
+	var g2 = graphics.NewTilemap(layers[Lane(LayerCount)+LaneGarrison2])
+	var g3 = graphics.NewTilemap(layers[Lane(LayerCount)+LaneGarrison3])
+	var g4 = graphics.NewTilemap(layers[Lane(LayerCount)+LaneGarrison4])
+	var g5 = graphics.NewTilemap(layers[Lane(LayerCount)+LaneGarrison5])
+	var p1 = graphics.NewTilemap(layers[Lane(LayerCount)+LaneGarrisonPlus1])
+	var p2 = graphics.NewTilemap(layers[Lane(LayerCount)+LaneGarrisonPlus2])
+	var p3 = graphics.NewTilemap(layers[Lane(LayerCount)+LaneGarrisonPlus3])
+	var p4 = graphics.NewTilemap(layers[Lane(LayerCount)+LaneGarrisonPlus4])
+	var p5 = graphics.NewTilemap(layers[Lane(LayerCount)+LaneGarrisonPlus5])
 
-	Layers = layers
+	for i := range LayerCount {
+		Layers[i] = layers[i]
+	}
+
 	DecorCrops = assets.LoadAtlas(decor, "data/decor.xml")
 	DecorCrops = assets.LoadAtlas(decor, "data/decor.xml")
-	Collisions[LaneLower] = low.TilemapShapes()
-	Collisions[LaneMiddle] = mid.TilemapShapes()
-	Collisions[LaneUpper] = up.TilemapShapes()
-	Collisions[LaneGarrison1] = g1.TilemapShapes()
-	Collisions[LaneGarrison2] = g2.TilemapShapes()
-	Collisions[LaneGarrison3] = g3.TilemapShapes()
-	Collisions[LaneGarrison4] = g4.TilemapShapes()
-	Collisions[LaneGarrison5] = g5.TilemapShapes()
-	Collisions[LaneGarrisonPlus1] = p1.TilemapShapes()
-	Collisions[LaneGarrisonPlus2] = p2.TilemapShapes()
-	Collisions[LaneGarrisonPlus3] = p3.TilemapShapes()
-	Collisions[LaneGarrisonPlus4] = p4.TilemapShapes()
-	Collisions[LaneGarrisonPlus5] = p5.TilemapShapes()
+	laneCollisions[LaneLower] = low.TilemapShapes()
+	laneCollisions[LaneMiddle] = mid.TilemapShapes()
+	laneCollisions[LaneUpper] = up.TilemapShapes()
+	laneCollisions[LaneGarrison1] = g1.TilemapShapes()
+	laneCollisions[LaneGarrison2] = g2.TilemapShapes()
+	laneCollisions[LaneGarrison3] = g3.TilemapShapes()
+	laneCollisions[LaneGarrison4] = g4.TilemapShapes()
+	laneCollisions[LaneGarrison5] = g5.TilemapShapes()
+	laneCollisions[LaneGarrisonPlus1] = p1.TilemapShapes()
+	laneCollisions[LaneGarrisonPlus2] = p2.TilemapShapes()
+	laneCollisions[LaneGarrisonPlus3] = p3.TilemapShapes()
+	laneCollisions[LaneGarrisonPlus4] = p4.TilemapShapes()
+	laneCollisions[LaneGarrisonPlus5] = p5.TilemapShapes()
 
 	mirrorGarrisonLanes()
 
-	MapLayer, Map = layers[9], graphics.NewTilemap(layers[10])
-	Flags, Grid = graphics.NewTilemap(layers[11]), graphics.NewTilemap(layers[12])
+	Map = graphics.NewTilemap(layers[LayerPlains])
+	Flags, Grid = graphics.NewTilemap(layers[LayerFlags]), graphics.NewTilemap(layers[LayerGrid])
 
 	AllyBase = NewBase(SaveState{}, true)
-	EnemyBase = NewBase(SaveState{Kind: BaseFort}, false)
+	EnemyBase = NewBase(SaveState{Kind: BaseFortress, Garrison: Garrison3}, false)
 
 	Units = append(Units, NewUnit(CharHunter, TeamAlly, LaneMiddle))
 	Units = append(Units, NewUnit(CharMan, TeamAlly, LaneUpper))
@@ -110,6 +137,9 @@ func InitScene() {
 
 	PlayAmbience(EnvironmentPlains)
 }
+
+//=================================================================
+
 func UpdateScene() {
 	var _, bly = Background.PointFromEdge(0.5, 1)
 	View.FitSize(Background.Width, 0)
@@ -172,13 +202,13 @@ func UpdateScene() {
 }
 
 func PointAtCell(cellX, cellY float32) (x, y float32) {
-	var tw, th = MapLayer.TileSize()
-	var cols, rows = MapLayer.Size()
+	var tw, th = Layers[LayerGrid].TileSize()
+	var cols, rows = Layers[LayerGrid].Size()
 	return (cellX-float32(cols)/2)*tw + (tw / 2), (cellY-float32(rows)/2)*th + (th / 2)
 }
 func CellAtPoint(x, y float32) (cellX, cellY float32) {
-	var tw, th = MapLayer.TileSize()
-	var cols, rows = MapLayer.Size()
+	var tw, th = Layers[LayerGrid].TileSize()
+	var cols, rows = Layers[LayerGrid].Size()
 	return x/tw + float32(cols)/2, y/th + float32(rows)/2
 }
 func TileAtCell(cellX, cellY int, layer assets.TileLayerId) assets.Tile {
@@ -190,7 +220,7 @@ func DeltaTimeScaled() float32 {
 }
 
 func DrawShadow(x, z, width, height, angle float32, mask geometry.Area) {
-	var lower, upper = Collisions[LaneLower][0], Collisions[LaneUpper][0]
+	var lower, upper = laneCollisions[LaneLower][0], laneCollisions[LaneUpper][0]
 	var y = number.Map(z, 0, 2, lower.Y-lower.Height/2, upper.Y-upper.Height/2)
 	View.DrawShape(x, y, width, height, angle, 1, color.RGBA(0, 0, 0, 100), mask)
 }
@@ -201,28 +231,28 @@ var skyColor = color.TagRGBA("rgb(98, 171, 212)")
 
 func mirrorGarrisonLanes() {
 	for i := LaneGarrison1; i < LaneGarrisonPlus5+1; i++ {
-		var length = len(Collisions[i])
+		var length = len(laneCollisions[i])
 		for j := range length {
-			var shape = Collisions[i][j]
+			var shape = laneCollisions[i][j]
 			shape.X *= -1
 			if shape.Angle != 0 {
 				shape.Angle += 90
 			}
-			Collisions[i] = append(Collisions[i], shape)
+			laneCollisions[i] = append(laneCollisions[i], shape)
 		}
 	}
 }
 func bringGarrisonLanesDown(ally bool) {
 	for i := LaneGarrison1; i < LaneGarrisonPlus5+1; i++ {
-		var length = len(Collisions[i])
+		var length = len(laneCollisions[i])
 		var j = length / 2
 		if ally {
 			j, length = 0, length/2
 		}
 		for ; j < length; j++ {
-			var shape = Collisions[i][j]
+			var shape = laneCollisions[i][j]
 			shape.Y += TileSize
-			Collisions[i][j] = shape
+			laneCollisions[i][j] = shape
 		}
 	}
 }
