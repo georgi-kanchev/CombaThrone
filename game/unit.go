@@ -112,7 +112,7 @@ func (u *Unit) Hitbox() geometry.Shape {
 }
 func (u *Unit) EnemyEntrance() (canBeActedUpon bool, entrance *Entrance) {
 	var e *Entrance
-	if u.Team != TeamNeutral && (u.Lane <= LaneUpperOff) {
+	if u.Team != TeamNeutral && (u.IsLaner() || u.IsOffLaner()) {
 		if u.Team == TeamAlly {
 			e = EnemyBase.Entrances[u.Lane/2]
 		} else {
@@ -124,6 +124,15 @@ func (u *Unit) EnemyEntrance() (canBeActedUpon bool, entrance *Entrance) {
 		canBeActedUpon = !e.IsOpen() && e.Health > 0 && (melee || ranged)
 	}
 	return canBeActedUpon, e
+}
+func (u *Unit) IsLaner() bool {
+	return u.Lane == LaneLower || u.Lane == LaneMiddle || u.Lane == LaneUpper
+}
+func (u *Unit) IsOffLaner() bool {
+	return u.Lane == LaneLowerOff || u.Lane == LaneMiddleOff || u.Lane == LaneUpperOff
+}
+func (u *Unit) IsGarrisoner() bool {
+	return u.Lane >= LaneGarrison1
 }
 
 func (u *Unit) Update() {
@@ -241,8 +250,7 @@ func (u *Unit) applyState() {
 		}
 	}
 	var ranged = u.Stats.ActRange > 1 && (u.ClosestEnemyInRange != nil || enemyEntranceInRange)
-	var isGarrison = u.Lane > LaneUpper
-	var garrisonOrNot = !isGarrison || (isGarrison && u.IsAtGarrison)
+	var garrisonOrNot = !u.IsGarrisoner() || (u.IsGarrisoner() && u.IsAtGarrison)
 
 	if u.State == StateWalking && u.Stats.Health > 0 && (!u.IsGrounded || u.moveSpeedX < 0.01) {
 		u.State = StateIdling
@@ -302,7 +310,7 @@ func (u *Unit) actUponState() {
 		u.VelocityX = 0
 
 		var arrived = u.moveSpeedX != 0 && u.moveSpeedX < 0.01
-		if arrived && u.Lane > LaneUpper {
+		if arrived && u.IsGarrisoner() {
 			u.IsAtGarrison = true
 		}
 	case StateWalking:
@@ -389,7 +397,7 @@ func (u *Unit) actUponState() {
 		u.Blood.EmitFromLine(30, u.X, u.Y-6, u.X, u.Y+6)
 	case StateDying, StateDyingEnd: // empty
 	case StateDecaying:
-		if u.hurtTimer < -DeathFadeOutTime || u.Lane > LaneUpper { // is garrison
+		if u.hurtTimer < -DeathFadeOutTime || u.IsGarrisoner() {
 			Units = collection.Remove(Units, u)
 		} else if u.hurtTimer < 0 {
 			u.Effects.Tint = color.RGBA(255, 255, 255, byte(number.Map(u.hurtTimer, 0, -DeathFadeOutTime, 255, 0)))
@@ -433,7 +441,7 @@ func (u *Unit) applyCollisions() {
 	for _, other := range Units {
 		var ohb = other.Hitbox()
 		var anyoneDead = u.Stats.Health <= 0 || other.Stats.Health <= 0
-		var isGarrison = other.Lane > LaneUpper || u.Lane > LaneUpper
+		var isGarrison = other.IsGarrisoner() || u.IsGarrisoner()
 		if other == u || u.Lane != other.Lane || anyoneDead || !hb.Overlaps(ohb) || isGarrison {
 			continue
 		}
@@ -449,11 +457,10 @@ func (u *Unit) applyCollisions() {
 func (u *Unit) draw() {
 	var frame = u.Anim.Frame()
 	var crop = frame.CropArea()
-	var garrison = u.Lane > LaneUpper
 
 	u.ImageId, u.Width, u.Height = frame, crop.Width, crop.Height
 
-	if u.Stats.Health > 0 && !garrison {
+	if u.Stats.Health > 0 && !u.IsGarrisoner() {
 		DrawShadow(u.X, u.Z, u.Width*0.6, u.Height*0.1, 0, u.Mask)
 	}
 

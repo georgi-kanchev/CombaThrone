@@ -107,9 +107,9 @@ func (p *Projectile) Update() {
 		}
 
 		var hb = u.Hitbox()
-		if u.Lane > LaneUpper { // is garrison - hide behind wall (shrink hitbox & move up)
-			hb.Height /= 2
-			hb.Y -= hb.Height / 2
+		if u.IsGarrisoner() { // hide behind wall
+			hb.Height /= 2        // shrink hitbox
+			hb.Y -= hb.Height / 2 // move up
 		}
 
 		if p.Shape.Overlaps(hb) && number.IsWithin(p.Z, u.Z, 0.2) {
