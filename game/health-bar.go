@@ -76,8 +76,7 @@ func (hb *HealthBar) Update(target geometry.Shape, health, maxHealth int, mask g
 		hb.background.Effects.Tint = color.RGBA(255, 255, 255, alpha)
 		hb.fill.Effects.Tint = color.RGBA(255, 255, 255, alpha)
 		hb.damage.Effects.Tint = color.RGBA(255, 255, 255, alpha)
-		var r, g, b, _ = color.Channels(hb.glory.Effects.Tint)
-		hb.label.Effects.Tint = color.RGBA(r, g, b, alpha)
+		hb.label.Effects.Tint = color.RGBA(255, 255, 255, alpha)
 	} else if hb.timer < 0 {
 		if hb.toGlory && !hb.subtractedGlory {
 			hb.subtractedGlory = true

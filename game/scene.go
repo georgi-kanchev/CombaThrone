@@ -111,12 +111,12 @@ func InitScene() {
 	Flags, Grid = &flag, &grid
 	Flags.Y += TileSize * 0.1
 
-	AllyBase = NewBase(SaveState{Kind: BaseBarrack}, true)
-	EnemyBase = NewBase(SaveState{Kind: BaseFort, Garrison: Garrison1}, false)
+	AllyBase = NewBase(SaveState{Kind: BaseFortress, Garrison: Garrison3}, true)
+	EnemyBase = NewBase(SaveState{Kind: BaseFortress, Garrison: Garrison3}, false)
 
-	Units = append(Units, NewUnit(CharHunter, TeamAlly, LaneMiddle))
+	// Units = append(Units, NewUnit(CharHunter, TeamAlly, LaneMiddle))
 	Units = append(Units, NewUnit(CharMan, TeamAlly, LaneUpper))
-	Units = append(Units, NewUnit(CharMan, TeamEnemy, LaneUpper))
+	Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneUpper))
 	Units = append(Units, NewUnit(CharWoman, TeamEnemy, LaneMiddle))
 	// Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneGarrison5))
 	// Units = append(Units, NewUnit(CharHunter, TeamAlly, LaneGarrisonPlus2))
