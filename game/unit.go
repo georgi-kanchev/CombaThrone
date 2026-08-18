@@ -360,7 +360,7 @@ func (u *Unit) actUponState() {
 		var t = u.ClosestEnemyInRange
 		if t != nil {
 			var prediction = t.VelocityX
-			if number.Absolute(t.X-u.X) < TileSize {
+			if number.Absolute(t.X-u.X) < TileSize*3 {
 				prediction = 0 // target is too close - don't predict movement to not shoot behind self
 			}
 			var proj = u.NewProjectile(u.X, u.Y, u.Z, t.X+prediction, t.Y+t.Height/2-8, t.Z, dmg, nil)

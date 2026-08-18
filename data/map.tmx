@@ -74,22 +74,22 @@
   </data>
  </layer>
  <objectgroup id="61" name="Lower">
-  <object id="3" x="-62" y="309" width="700" height="15"/>
+  <object id="3" x="-62" y="309" width="700" height="8"/>
  </objectgroup>
  <objectgroup id="90" name="LowerOff">
-  <object id="51" x="-62" y="294" width="700" height="15"/>
+  <object id="51" x="-62" y="294" width="700" height="8"/>
  </objectgroup>
- <objectgroup id="62" name="Middle" visible="0">
-  <object id="2" x="-62" y="277" width="700" height="15"/>
+ <objectgroup id="62" name="Middle">
+  <object id="2" x="-62" y="277" width="700" height="8"/>
  </objectgroup>
- <objectgroup id="89" name="MiddleOff" visible="0">
-  <object id="50" x="-62" y="262" width="700" height="15"/>
+ <objectgroup id="89" name="MiddleOff">
+  <object id="50" x="-62" y="262" width="700" height="8"/>
  </objectgroup>
- <objectgroup id="63" name="Upper" visible="0">
-  <object id="1" x="-62" y="245" width="700" height="15"/>
+ <objectgroup id="63" name="Upper">
+  <object id="1" x="-62" y="245" width="700" height="8"/>
  </objectgroup>
- <objectgroup id="88" name="UpperOff" visible="0">
-  <object id="49" x="-62" y="230" width="700" height="15"/>
+ <objectgroup id="88" name="UpperOff">
+  <object id="49" x="-62" y="230" width="700" height="8"/>
  </objectgroup>
  <objectgroup id="65" name="Garrison1" visible="0">
   <object id="7" x="-81.5" y="290.5" width="144.957" height="4" rotation="315"/>

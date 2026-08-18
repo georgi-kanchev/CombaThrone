@@ -71,8 +71,11 @@ func InitScene() {
 
 	var layers, decor = assets.LoadTileLayersFromTiled("data/map.tmx")
 	var low = graphics.NewTilemap(layers[Lane(LayerCount)+LaneLower])
+	var lowOff = graphics.NewTilemap(layers[Lane(LayerCount)+LaneLowerOff])
 	var mid = graphics.NewTilemap(layers[Lane(LayerCount)+LaneMiddle])
+	var midOff = graphics.NewTilemap(layers[Lane(LayerCount)+LaneMiddleOff])
 	var up = graphics.NewTilemap(layers[Lane(LayerCount)+LaneUpper])
+	var upOff = graphics.NewTilemap(layers[Lane(LayerCount)+LaneUpperOff])
 	var g1 = graphics.NewTilemap(layers[Lane(LayerCount)+LaneGarrison1])
 	var g2 = graphics.NewTilemap(layers[Lane(LayerCount)+LaneGarrison2])
 	var g3 = graphics.NewTilemap(layers[Lane(LayerCount)+LaneGarrison3])
@@ -91,8 +94,11 @@ func InitScene() {
 	DecorCrops = assets.LoadAtlas(decor, "data/decor.xml")
 	DecorCrops = assets.LoadAtlas(decor, "data/decor.xml")
 	laneCollisions[LaneLower] = low.TilemapShapes()
+	laneCollisions[LaneLowerOff] = lowOff.TilemapShapes()
 	laneCollisions[LaneMiddle] = mid.TilemapShapes()
+	laneCollisions[LaneMiddleOff] = midOff.TilemapShapes()
 	laneCollisions[LaneUpper] = up.TilemapShapes()
+	laneCollisions[LaneUpperOff] = upOff.TilemapShapes()
 	laneCollisions[LaneGarrison1] = g1.TilemapShapes()
 	laneCollisions[LaneGarrison2] = g2.TilemapShapes()
 	laneCollisions[LaneGarrison3] = g3.TilemapShapes()
@@ -121,14 +127,14 @@ func InitScene() {
 	})
 	EnemyBase = NewBase(TeamEnemy, SaveState{
 		Kind: BaseFortress, Garrison: Garrison3, EntranceKinds: [3]EntranceKind{
-			EntranceShortGate, EntranceShortGate, EntranceShortGate,
+			EntranceDoor, EntranceShortGate, EntranceNone,
 		},
 	})
 
 	Units = append(Units, NewUnit(CharHunter, TeamAlly, LaneMiddle))
 	// Units = append(Units, NewUnit(CharMan, TeamAlly, LaneUpper))
-	Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneUpper))
-	Units = append(Units, NewUnit(CharWoman, TeamEnemy, LaneMiddle))
+	// Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneUpper))
+	Units = append(Units, NewUnit(CharMan, TeamEnemy, LaneMiddle))
 	// Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneGarrison5))
 	// Units = append(Units, NewUnit(CharHunter, TeamAlly, LaneGarrisonPlus2))
 	// Units = append(Units, NewUnit(CharHunter, TeamAlly, LaneGarrisonPlus3))
