@@ -24,9 +24,7 @@ type Entrance struct {
 
 const EntranceNone, EntranceDoor, EntranceShortGate, EntranceTallGate EntranceKind = 0, 1, 2, 3
 
-var Entrances [6]*Entrance // index is Ally[Lower, Middle, Upper], Enemy[Lower, Middle, Upper]
-
-func NewEntrance(entry EntranceKind, team Team, lane Lane) *Entrance {
+func NewEntrance(entry EntranceKind, base BaseKind, team Team, lane Lane) *Entrance {
 	var data = Entrance{Kind: entry, Team: team, Lane: lane, maxOpenY: TileSize + (TileSize * (float32(entry) - 1))}
 	var x, y float32 = -208, 48 // ally upper lane by default
 
@@ -48,7 +46,7 @@ func NewEntrance(entry EntranceKind, team Team, lane Lane) *Entrance {
 	switch entry {
 	case EntranceNone:
 		var hole = graphics.NewSprite(x, y, 1, DecorCrops.Crops("hole")[0])
-		if (team == TeamAlly && AllyBase.Kind < BaseBarrack) || (team == TeamEnemy && EnemyBase.Kind < BaseBarrack) {
+		if base < BaseBarrack {
 			hole.X = -Background.Width / 2 // pull back entrance to edge of scene, fighting can happen further back
 			hole.Effects.Tint = 0          // and hide the hole
 		}

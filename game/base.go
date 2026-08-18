@@ -9,12 +9,15 @@ import (
 type BaseKind uint8
 type Garrison uint8
 type SaveState struct {
-	Kind     BaseKind
-	Garrison Garrison
-	Gold     int
+	Kind          BaseKind
+	Garrison      Garrison
+	EntranceKinds [3]EntranceKind
+	Gold          int
 }
 type Base struct {
 	SaveState
+
+	Entrances [3]*Entrance
 
 	Glory int
 
@@ -28,11 +31,14 @@ const GarrisonNone, Garrison1, Garrison2, Garrison3 Garrison = 0, 1, 2, 3
 
 var AllyBase, EnemyBase Base
 
-func NewBase(saveState SaveState, ally bool) Base {
+func NewBase(team Team, saveState SaveState) Base {
 	var b = Base{SaveState: saveState, Glory: baseGlory[saveState.Kind]}
+	b.Entrances[LaneLower/2] = NewEntrance(saveState.EntranceKinds[LaneLower/2], b.Kind, team, LaneLower)
+	b.Entrances[LaneMiddle/2] = NewEntrance(saveState.EntranceKinds[LaneMiddle/2], b.Kind, team, LaneMiddle)
+	b.Entrances[LaneUpper/2] = NewEntrance(saveState.EntranceKinds[LaneUpper/2], b.Kind, team, LaneUpper)
 
 	var ptsX, ptsY = PointAtCell(14, 5.5)
-	if ally {
+	if team == TeamAlly {
 		ptsX, ptsY = PointAtCell(3, 5.5)
 	}
 	var label = graphics.NewTextbox(ptsX+Flags.X, ptsY+Flags.Y, TileSize, TileSize, 0)
@@ -58,7 +64,7 @@ func NewBase(saveState SaveState, ally bool) Base {
 	var back, front = graphics.NewTilemap(Layers[LayerFortBack0]), graphics.NewTilemap(Layers[LayerFortFront0])
 	b.Back, b.Front = &back, &front
 
-	if !ally {
+	if team == TeamEnemy {
 		b.Back.Width *= -1
 		b.Front.Width *= -1
 	}
@@ -66,7 +72,7 @@ func NewBase(saveState SaveState, ally bool) Base {
 		b.Back.Y += TileSize
 		b.Front.Y += TileSize
 
-		bringGarrisonLanesDown(ally)
+		bringGarrisonLanesDown(team)
 	}
 
 	if b.Garrison != GarrisonNone {
@@ -79,7 +85,7 @@ func NewBase(saveState SaveState, ally bool) Base {
 			b.GarrisonBack.Y += TileSize
 			b.GarrisonFront.Y += TileSize
 		}
-		if !ally {
+		if team == TeamEnemy {
 			b.GarrisonBack.Width *= -1
 			b.GarrisonFront.Width *= -1
 		}

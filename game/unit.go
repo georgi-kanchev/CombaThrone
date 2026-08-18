@@ -112,8 +112,12 @@ func (u *Unit) Hitbox() geometry.Shape {
 }
 func (u *Unit) EnemyEntrance() (canBeActedUpon bool, entrance *Entrance) {
 	var e *Entrance
-	if u.Team != TeamNeutral && (u.Lane == LaneUpper || u.Lane == LaneMiddle || u.Lane == LaneLower) {
-		e = Entrances[int(3*(1-u.Team))+int(u.Lane)]
+	if u.Team != TeamNeutral && (u.Lane <= LaneUpperOff) {
+		if u.Team == TeamAlly {
+			e = EnemyBase.Entrances[u.Lane/2]
+		} else {
+			e = AllyBase.Entrances[u.Lane/2]
+		}
 		var actionRange = float32(u.Stats.ActRange) * TileSize
 		var melee = u.Stats.ActRange == 1 && number.IsWithin(u.X, e.Tiles[0].X, TileSize/2)
 		var ranged = u.Stats.ActRange > 1 && number.Absolute(u.X-e.Tiles[0].X) < actionRange
