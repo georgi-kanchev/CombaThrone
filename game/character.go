@@ -49,7 +49,7 @@ func InitCharacters() {
 		Health: 12, MoveSpeed: 20, HurtTime: 0.5, ActValue: 1, ActSpeed: 18, ActRange: 1})
 
 	Characters[CharHunter] = NewCharacter(BehaviorHunter, Stats{Name: "Hunter", Wage: 40,
-		Health: 20, MoveSpeed: 30, HurtTime: 0.5, ActValue: 4, ActSpeed: 20, ActRange: 6})
+		Health: 20, MoveSpeed: 15, HurtTime: 0.5, ActValue: 4, ActSpeed: 20, ActRange: 6})
 	Characters[CharHunter].Sounds = CharSounds{ActionTrigger: AudioBow, HitGround: AudioProjectileGround,
 		HitFlesh: AudioProjectileFlesh, HitWood: AudioProjectileWood, HitMetal: AudioProjectileMetal}
 

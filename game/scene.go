@@ -62,6 +62,8 @@ var Background, MapNoBase, Map, Grid, Flags *graphics.Object
 var Decor, UserInterface assets.AtlasId
 var Layers [LayerCount]assets.TileLayerId
 
+var SortedY []*graphics.Object // for units & pickups
+
 func InitScene() {
 	View = graphics.NewView(1)
 	UserInterface = assets.LoadAtlas(assets.LoadImage("data/user-interface.png"), "data/user-interface.xml")
@@ -135,18 +137,17 @@ func InitScene() {
 	// Units = append(Units, NewUnit(CharMan, TeamAlly, LaneUpper))
 	Units = append(Units, NewUnit(CharHunter, TeamAlly, LaneLower))
 	Units = append(Units, NewUnit(CharMan, TeamEnemy, LaneMiddle))
-	// Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneGarrison5))
-	// Units = append(Units, NewUnit(CharHunter, TeamAlly, LaneGarrisonPlus2))
-	// Units = append(Units, NewUnit(CharHunter, TeamAlly, LaneGarrisonPlus3))
-	// Units = append(Units, NewUnit(CharHunter, TeamAlly, LaneGarrisonPlus4))
-	// Units = append(Units, NewUnit(CharHunter, TeamAlly, LaneGarrisonPlus5))
-	// Units = append(Units, NewUnit(CharHunter, TeamAlly, LaneGarrison1))
-	// Units = append(Units, NewUnit(CharHunter, TeamAlly, LaneGarrison2))
-	// Units = append(Units, NewUnit(CharHunter, TeamAlly, LaneGarrison3))
-	// Units = append(Units, NewUnit(CharHunter, TeamAlly, LaneGarrison4))
-	// Units = append(Units, NewUnit(CharHunter, TeamAlly, LaneGarrison5))
+	// Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneGarrisonPlus1))
+	// Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneGarrisonPlus3))
+	// Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneGarrisonPlus4))
+	// Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneGarrisonPlus5))
+	Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneGarrison1))
+	Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneGarrison2))
+	Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneGarrison3))
+	Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneGarrison4))
+	Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneGarrison5))
 
-	Pickups = append(Pickups, NewPickup(0, 65, 2.5, PickupRelic))
+	Pickups = append(Pickups, NewPickup(0, PickupRelic, LaneLowerOff))
 
 	PlayAmbience(EnvironmentPlains)
 }

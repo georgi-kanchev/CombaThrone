@@ -78,10 +78,8 @@ func UpdateDebug() {
 				)
 			}
 
-			var hb = hovered.Hitbox()
-			var lines = float32(text.CountOccurrences(debugInfo, "\n"))
-			var x, y = hb.X - hovered.Width/2, hb.Y - hb.Height/2 - lines*12
-			View.DrawText(debugInfo, x, y, 50, 0, palette.White, geometry.Area{})
+			var topX, topY = View.PointFromEdge(0.5, 0)
+			View.DrawText(debugInfo, topX, topY, 50, 0, palette.White, geometry.Area{})
 		}
 	case DebugProfile:
 		View.DrawDebugInfo(true)

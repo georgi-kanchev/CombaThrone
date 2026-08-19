@@ -78,8 +78,12 @@ func (p *Projectile) Update() {
 		var e = p.enemyEntrance
 		if !p.trigger {
 			p.trigger = true
-			Projectiles = collection.Remove(Projectiles, p)
-			ProjectilesBehind = append(ProjectilesBehind, p)
+
+			var _, aboveGroundY = PointAtCell(0, 6)
+			if p.Y > aboveGroundY { // rendering projectiles above walls is fine
+				Projectiles = collection.Remove(Projectiles, p)
+				ProjectilesBehind = append(ProjectilesBehind, p)
+			}
 
 			if e != nil && !e.IsOpen() && e.Health > 0 && number.IsWithin(p.X, e.Tiles[0].X, TileSize/2) {
 				e.TakeDamage(p.Value)
@@ -104,6 +108,7 @@ func (p *Projectile) Update() {
 			ProjectilesBehind = collection.Remove(ProjectilesBehind, p)
 		}
 		View.DrawObject(&p.Object)
+		// View.DrawText(text.New(alpha), p.Object.X, p.Object.Y, 32, 0, palette.White, geometry.Area{})
 		return
 	}
 

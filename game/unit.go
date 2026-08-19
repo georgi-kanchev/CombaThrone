@@ -38,7 +38,6 @@ type Unit struct {
 
 	lastX, lastY, moveSpeedX float32
 	actionTimer, hurtTimer   float32 // negative values can be used for "time since last"
-	carrying                 graphics.Object
 }
 
 const ( // states
@@ -70,27 +69,27 @@ func NewUnit(character Character, team Team, lane Lane) *Unit {
 	var char = Characters[character]
 	var anim = motion.NewAnimation(0, false, char.Animations.Idle...)
 	var unit = Unit{Object: graphics.NewSprite(-2000, -2000, 1, 0), Character: character, Team: team, Lane: lane,
-		Behavior: char.Behavior, Stats: char.Stats, Anim: &anim, actionTimer: number.NaN(), hurtTimer: number.NaN(),
-		carrying: graphics.NewSprite(0, 0, 1, 0)}
+		Behavior: char.Behavior, Stats: char.Stats, Anim: &anim, actionTimer: number.NaN(), hurtTimer: number.NaN()}
 
 	unit.Blood = motion.NewParticleSystem(unit.particlesBlood)
 
 	unit.draw() // update frame size
 
 	var col = laneCollisions[lane]
+	var laneX, laneY = col[0].X + col[0].Width/2, col[0].Y - col[0].Height/2 - unit.Height/2
 	switch lane {
 	case LaneLower, LaneLowerOff:
-		unit.X, unit.Y = col[0].X+col[0].Width/2-40, col[0].Y-col[0].Height/2-unit.Height/2
+		unit.X, unit.Y = laneX-40, laneY
 	case LaneMiddle, LaneMiddleOff:
-		unit.X, unit.Y = col[0].X+col[0].Width/2-72, col[0].Y-col[0].Height/2-unit.Height/2
+		unit.X, unit.Y = laneX-72, laneY
 	case LaneUpper, LaneUpperOff:
-		unit.X, unit.Y = col[0].X+col[0].Width/2-104, col[0].Y-col[0].Height/2-unit.Height/2
+		unit.X, unit.Y = laneX-104, laneY
 	case LaneGarrison1, LaneGarrison2, LaneGarrison3, LaneGarrison4, LaneGarrison5:
-		unit.X, unit.Y = PointAtCell(18, 6)
+		unit.X, unit.Y = Background.Width/2+unit.Width/2, laneY
 	case LaneGarrisonPlus1, LaneGarrisonPlus2, LaneGarrisonPlus3, LaneGarrisonPlus4, LaneGarrisonPlus5:
 		unit.X, unit.Y = PointAtCell(18, 3)
 	}
-	if lane == LaneLowerOff || lane == LaneMiddleOff || lane == LaneUpperOff {
+	if unit.IsOffLaner() {
 		unit.Y += TileSize / 2
 	}
 
@@ -328,25 +327,21 @@ func (u *Unit) actUponState() {
 		u.Anim.IsLooping, u.Anim.FPS = true, u.moveSpeedX*0.25
 
 		var _, e = u.EnemyEntrance()
-		if e == nil {
-			return
-		}
-
 		switch u.Team {
 		case TeamAlly:
 			u.VelocityX = float32(u.Stats.MoveSpeed)
-			if u.IsOffLaner() && u.X > e.Tiles[0].X-TileSize {
+			if e != nil && u.IsOffLaner() && u.X > e.Tiles[0].X-TileSize {
 				u.IsReturning = true
 			}
-			if u.X > e.Tiles[0].X {
+			if e != nil && u.X > e.Tiles[0].X {
 				u.HealthBar.MoveToGlory(2.5)
 			}
 		case TeamEnemy:
 			u.VelocityX = -float32(u.Stats.MoveSpeed)
-			if u.IsOffLaner() && u.X < e.Tiles[0].X+TileSize {
+			if e != nil && u.IsOffLaner() && u.X < e.Tiles[0].X+TileSize {
 				u.IsReturning = true
 			}
-			if u.X < e.Tiles[0].X {
+			if e != nil && u.X < e.Tiles[0].X {
 				u.HealthBar.MoveToGlory(2.5)
 			}
 		}
@@ -475,6 +470,14 @@ func (u *Unit) applyCollisions() {
 			u.UnitBehind = other
 		}
 	}
+
+	if u.IsOffLaner() {
+		// for _, p := range Pickups {
+		// if p {
+
+		// }
+		// }
+	}
 }
 func (u *Unit) draw() {
 	var frame = u.Anim.Frame()
@@ -494,14 +497,4 @@ func (u *Unit) draw() {
 	}
 	View.DrawObject(&u.Object)
 	u.Width = crop.Width
-
-	if u.IsOffLaner() && u.HealthBar != nil {
-		u.carrying.ImageId = Decor.Crops("pickup-relic")[0]
-		var carryCrop = u.carrying.ImageId.CropArea()
-		var hb = u.HealthBar.background
-		u.carrying.Width, u.carrying.Height = carryCrop.Width, carryCrop.Height
-		u.carrying.X, u.carrying.Y = hb.X, hb.Y-hb.Height/2-u.carrying.Height/2-2
-		u.carrying.Mask = u.Mask
-		View.DrawObject(&u.carrying)
-	}
 }

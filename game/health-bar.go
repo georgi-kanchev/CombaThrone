@@ -27,8 +27,7 @@ func NewHealthBar(width float32, team Team, offLane bool) *HealthBar {
 	}
 	var bgr = graphics.NewShapeRectangle(0, 0, width, height, 0)
 	var fill = graphics.NewShapeRectangle(0, 0, 0, 0, 0)
-	var dmg = fill // copy
-	var data = HealthBar{team: team, background: &bgr, fill: &fill, damage: &dmg}
+	var data = HealthBar{team: team, background: &bgr, fill: &fill}
 	bgr.Effects.FillColor, bgr.Effects.BorderSize = color.Darken(fill.Effects.FillColor, 0.9), 0
 	fill.Effects.FillColor, fill.Effects.BorderSize = healthBarColors[team], 0
 
@@ -39,14 +38,15 @@ func NewHealthBar(width float32, team Team, offLane bool) *HealthBar {
 		label.Effects.TextShadowColor, label.Effects.TextShadowWeight = 0, 0
 		label.Effects.OutlineSize, label.Effects.OutlineColor = 0.65, palette.Black
 		label.Effects.TextAlignX, label.Effects.TextAlignY = 0.5, 0.5
-		var glory = label // copy
+		var glory, dmg = label, fill // copy
 		glory.Effects.TextLineHeight, glory.Effects.OutlineSize = 10, 0.45
 		glory.Height = 20
 		glory.Effects.Tint = palette.Green
 		if team == TeamEnemy {
 			glory.Effects.Tint = palette.Red
 		}
-		data.label, data.glory = &label, &glory
+
+		data.label, data.glory, data.damage = &label, &glory, &dmg
 	}
 
 	return &data
