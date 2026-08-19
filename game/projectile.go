@@ -10,40 +10,46 @@ import (
 	"pure-game-kit/packages/utility/random"
 )
 
+type ProjectileKind uint8
 type Projectile struct {
 	graphics.Object
-	Damage int
+	Value int
 
 	StartX, StartY, StartZ    float32
 	TargetX, TargetY, TargetZ float32
 
 	Z, Age, TravelTime, ArcHeight float32
 
+	FadeOutTime float32
+	Kind        ProjectileKind
+
 	owner         *Unit
 	enemyEntrance *Entrance
 	trigger       bool
 }
 
-const ProjectileFadeOutTime float32 = 10
+const ProjectileArrow ProjectileKind = 0
 
 var Projectiles, ProjectilesBehind []*Projectile = make([]*Projectile, 0, 32), make([]*Projectile, 0, 32)
 
-func (u *Unit) NewProjectile(x, y, z, targetX, targetY, targetZ float32, dmg int, enemyEntrance *Entrance) *Projectile {
+func (u *Unit) NewProjectile(x, y, z, targetX, targetY, targetZ float32, value int,
+	kind ProjectileKind, enemyEntrance *Entrance) *Projectile {
 	const speed float32 = 100
 	var accuracyMultiplier float32 = 1
-	if enemyEntrance != nil { // cannot and should not miss the entrances
+	if enemyEntrance != nil { // should not miss the entrances
 		accuracyMultiplier = 0
 		targetY += TileSize / 2
 	}
 	var dist = point.DistanceToPoint(x, y, targetX, targetY)
 	var totalTime = max(dist/speed, 0.01) // prevent division by zero
-	var proj = &Projectile{owner: u,
-		Object: graphics.NewSprite(x, y, 1, DecorCrops.Crops("projectiles")[0]),
+	var proj = &Projectile{owner: u, Kind: kind,
+		Object: graphics.NewSprite(x, y, 1, Decor.Crops("projectiles")[0]),
 		StartX: x, StartY: y, StartZ: z, Z: z,
 		TargetX:    targetX + random.Range[float32](-12, 12)*accuracyMultiplier,
 		TargetY:    targetY + random.Range[float32](-12, 12),
 		TargetZ:    targetZ + random.Range[float32](-0.35, 0.35)*accuracyMultiplier,
-		TravelTime: totalTime, ArcHeight: dist / 3, Damage: dmg, enemyEntrance: enemyEntrance,
+		TravelTime: totalTime, ArcHeight: dist / 3, Value: value, enemyEntrance: enemyEntrance,
+		FadeOutTime: 10,
 	}
 	return proj
 }
@@ -76,7 +82,7 @@ func (p *Projectile) Update() {
 			ProjectilesBehind = append(ProjectilesBehind, p)
 
 			if e != nil && !e.IsOpen() && e.Health > 0 && number.IsWithin(p.X, e.Tiles[0].X, TileSize/2) {
-				e.TakeDamage(p.Damage)
+				e.TakeDamage(p.Value)
 				if e.Health > 0 { // crumble sound played by entrance itself
 					var sounds = Characters[p.owner.Character].Sounds.HitWood
 					if e.Kind == EntranceShortGate || e.Kind == EntranceTallGate {
@@ -89,11 +95,11 @@ func (p *Projectile) Update() {
 			}
 		}
 
-		var alpha = min(255, number.Map(p.Age, p.TravelTime, p.TravelTime+ProjectileFadeOutTime, 255, 0))
+		var alpha = min(255, number.Map(p.Age, p.TravelTime, p.TravelTime+p.FadeOutTime, 255, 0))
 		var entranceDestroyed = e != nil && (e.IsOpen() || e.openY > 0 || e.Health <= 0)
 		p.Effects.Tint = color.RGBA(255, 255, 255, byte(alpha))
 
-		if p.Age > p.TravelTime+ProjectileFadeOutTime || entranceDestroyed {
+		if p.Age > p.TravelTime+p.FadeOutTime || entranceDestroyed {
 			Projectiles = collection.Remove(Projectiles, p)
 			ProjectilesBehind = collection.Remove(ProjectilesBehind, p)
 		}
@@ -114,7 +120,7 @@ func (p *Projectile) Update() {
 
 		if p.Shape.Overlaps(hb) && number.IsWithin(p.Z, u.Z, 0.2) {
 			p.trigger = true
-			u.TakeDamage(p.Damage)
+			u.TakeDamage(p.Value)
 			Projectiles = collection.Remove(Projectiles, p)
 			ProjectilesBehind = collection.Remove(ProjectilesBehind, p)
 			PlaySound(Characters[p.owner.Character].Sounds.HitFlesh)

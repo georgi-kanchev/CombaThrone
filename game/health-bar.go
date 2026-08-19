@@ -20,28 +20,36 @@ type HealthBar struct {
 	startX, startY           float32
 }
 
-func NewHealthBar(width float32, team Team) HealthBar {
-	var bgr = graphics.NewShapeRectangle(0, 0, width, 6, 0)
+func NewHealthBar(width float32, team Team, offLane bool) *HealthBar {
+	var height float32 = 6
+	if offLane {
+		height = 3
+	}
+	var bgr = graphics.NewShapeRectangle(0, 0, width, height, 0)
 	var fill = graphics.NewShapeRectangle(0, 0, 0, 0, 0)
-	var label = graphics.NewTextbox(0, 0, 50, 6, 0)
-	bgr.Effects.BorderSize = 0
-	fill.Effects.FillColor = healthBarColors[team]
-	bgr.Effects.FillColor = color.Darken(fill.Effects.FillColor, 0.9)
-	fill.Effects.BorderSize = 0
-	label.Effects.TextLineHeight, label.Effects.FillColor = 6, 0
-	label.Effects.TextWeight, label.Effects.TextSymbolGap = 0.15, 20
-	label.Effects.TextShadowColor, label.Effects.TextShadowWeight = 0, 0
-	label.Effects.OutlineSize, label.Effects.OutlineColor = 0.65, palette.Black
-	label.Effects.TextAlignX, label.Effects.TextAlignY = 0.5, 0.5
-	var glory, dmg = label, fill // copy
-	glory.Effects.TextLineHeight, glory.Effects.OutlineSize = 10, 0.45
-	glory.Height = 20
-	glory.Effects.Tint = palette.Green
-	if team == TeamEnemy {
-		glory.Effects.Tint = palette.Red
+	var dmg = fill // copy
+	var data = HealthBar{team: team, background: &bgr, fill: &fill, damage: &dmg}
+	bgr.Effects.FillColor, bgr.Effects.BorderSize = color.Darken(fill.Effects.FillColor, 0.9), 0
+	fill.Effects.FillColor, fill.Effects.BorderSize = healthBarColors[team], 0
+
+	if !offLane {
+		var label = graphics.NewTextbox(0, 0, 50, 24, 0)
+		label.Effects.TextLineHeight, label.Effects.FillColor = 6, 0
+		label.Effects.TextWeight, label.Effects.TextSymbolGap = 0.15, 20
+		label.Effects.TextShadowColor, label.Effects.TextShadowWeight = 0, 0
+		label.Effects.OutlineSize, label.Effects.OutlineColor = 0.65, palette.Black
+		label.Effects.TextAlignX, label.Effects.TextAlignY = 0.5, 0.5
+		var glory = label // copy
+		glory.Effects.TextLineHeight, glory.Effects.OutlineSize = 10, 0.45
+		glory.Height = 20
+		glory.Effects.Tint = palette.Green
+		if team == TeamEnemy {
+			glory.Effects.Tint = palette.Red
+		}
+		data.label, data.glory = &label, &glory
 	}
 
-	return HealthBar{team: team, background: &bgr, fill: &fill, damage: &dmg, label: &label, glory: &glory}
+	return &data
 }
 
 //=================================================================
@@ -96,32 +104,39 @@ func (hb *HealthBar) Update(target geometry.Shape, health, maxHealth int, mask g
 	hb.fill.Width = number.Map(float32(max(health, 0)), 0, float32(maxHealth), 0, hb.background.Width-border)
 	hb.fill.Height = hb.background.Height - border
 	hb.fill.X, hb.fill.Y = hb.background.X-hb.background.Width/2+hb.fill.Width/2+border/2, hb.background.Y
-	hb.label.X, hb.label.Y = hb.background.X, hb.background.Y
 
-	const dmgSpeed = 0.4
-	hb.damage.Width += (hb.fill.Width - hb.damage.Width) * float32(1.0-number.Power(0.01, dmgSpeed*DeltaTimeScaled()))
-	if number.Absolute(hb.fill.Width-hb.damage.Width) < 0.1 {
-		hb.damage.Width = hb.fill.Width
-	}
-	hb.damage.Height = hb.fill.Height
-	hb.damage.X, hb.damage.Y = hb.background.X-hb.background.Width/2+hb.damage.Width/2+border/2, hb.background.Y
-
-	if hb.team == TeamAlly {
-		hb.damage.Effects.FillColor = palette.Red
-	} else {
-		hb.damage.Effects.FillColor = palette.Orange
-	}
-
-	if hb.lastValue != health {
-		hb.label.Text = text.New(health)
-	}
-	hb.lastValue = health
-
-	hb.background.Mask, hb.fill.Mask, hb.damage.Mask, hb.label.Mask = mask, mask, mask, mask
+	hb.background.Mask, hb.fill.Mask = mask, mask
 	View.DrawObject(hb.background)
-	View.DrawObject(hb.damage)
+
+	if hb.damage != nil {
+		const dmgSpeed = 0.4
+		hb.damage.Width += (hb.fill.Width - hb.damage.Width) * float32(1.0-number.Power(0.01, dmgSpeed*DeltaTimeScaled()))
+		if number.Absolute(hb.fill.Width-hb.damage.Width) < 0.1 {
+			hb.damage.Width = hb.fill.Width
+		}
+		hb.damage.Height = hb.fill.Height
+		hb.damage.X, hb.damage.Y = hb.background.X-hb.background.Width/2+hb.damage.Width/2+border/2, hb.background.Y
+
+		if hb.team == TeamAlly {
+			hb.damage.Effects.FillColor = palette.Red
+		} else {
+			hb.damage.Effects.FillColor = palette.Orange
+		}
+		hb.damage.Mask = mask
+		View.DrawObject(hb.damage)
+	}
+
 	View.DrawObject(hb.fill)
-	View.DrawObject(hb.label)
+
+	if hb.label != nil {
+		hb.label.X, hb.label.Y = hb.background.X, hb.background.Y
+		if hb.lastValue != health {
+			hb.label.Text = text.New(health)
+		}
+		hb.lastValue = health
+		hb.label.Mask = mask
+		View.DrawObject(hb.label)
+	}
 
 	if hb.toGlory && hb.team != TeamNeutral {
 		var targetX, targetY float32

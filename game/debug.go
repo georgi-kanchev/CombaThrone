@@ -1,6 +1,7 @@
 package game
 
 import (
+	"pure-game-kit/packages/execution/condition"
 	"pure-game-kit/packages/geometry"
 	"pure-game-kit/packages/input/keyboard"
 	"pure-game-kit/packages/input/keyboard/key"
@@ -59,25 +60,36 @@ func UpdateDebug() {
 				DebugHoveredUnit = u
 			}
 		}
-		var hovered = DebugHoveredUnit
-		if hovered != nil {
-			var hb = hovered.Hitbox()
-			var states = [13]string{"idle", "walk", "hurt", "hurt", "dying", "dying", "dying", "dead",
-				"action charge", "action charge", "action charge", "action recover", "action recover"}
-			var info = text.New("state: ", states[hovered.State], "\n",
-				"action timer: ", number.Round(hovered.actionTimer, 1), "\n",
-				"hurt timer: ", number.Round(hovered.hurtTimer, 1), "\n",
-				"velocity: ", number.Round(hovered.VelocityX, 1), " | ", number.Round(hovered.VelocityY, 1), "\n",
-				"move speed: ", number.Round(hovered.moveSpeedX, 1), "\n",
-			)
-			View.DrawText(info, hb.X-hovered.Width/2, hb.Y-hb.Height/2-60, 50, 0, palette.White, geometry.Area{})
-		}
 		for _, cols := range laneCollisions {
 			for _, s := range cols {
 				View.DrawShape(s.X, s.Y, s.Width, s.Height, s.Angle, 0, DebugCollisionColor, geometry.Area{})
 			}
 		}
+
+		var hovered = DebugHoveredUnit
+		if hovered != nil {
+			if condition.TrueEvery(0.2, -111) {
+				debugInfo = text.New("state: ", debugStates[hovered.State], "\n",
+					"action timer: ", number.Round(hovered.actionTimer, 1), "\n",
+					"hurt timer: ", number.Round(hovered.hurtTimer, 1), "\n",
+					"velocity: ", number.Round(hovered.VelocityX, 1), " | ", number.Round(hovered.VelocityY, 1), "\n",
+					"move speed: ", number.Round(hovered.moveSpeedX, 1), "\n",
+					"returning: ", hovered.IsReturning, "\n",
+				)
+			}
+
+			var hb = hovered.Hitbox()
+			var lines = float32(text.CountOccurrences(debugInfo, "\n"))
+			var x, y = hb.X - hovered.Width/2, hb.Y - hb.Height/2 - lines*12
+			View.DrawText(debugInfo, x, y, 50, 0, palette.White, geometry.Area{})
+		}
 	case DebugProfile:
 		View.DrawDebugInfo(true)
 	}
 }
+
+// private ========================================================
+
+var debugStates = [13]string{"idle", "walk", "hurt", "hurt", "dying", "dying", "dying", "dead",
+	"action charge", "action charge", "action charge", "action recover", "action recover"}
+var debugInfo = ""

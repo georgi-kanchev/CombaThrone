@@ -23,7 +23,7 @@ type Unit struct {
 	Team      Team
 	Behavior  func(self *Unit)
 	Anim      *motion.Animation[assets.ImageId]
-	HealthBar HealthBar
+	HealthBar *HealthBar
 	State     State
 
 	Blood *motion.ParticleSystem
@@ -31,12 +31,14 @@ type Unit struct {
 	VelocityX, VelocityY, Z float32
 
 	IsGrounded   bool
+	IsReturning  bool // for OffLaners only
 	IsAtGarrison bool // cannot act before garrison position - once there, can never move again (only act)
 
 	UnitFront, UnitBehind, ClosestEnemyInRange *Unit
 
 	lastX, lastY, moveSpeedX float32
 	actionTimer, hurtTimer   float32 // negative values can be used for "time since last"
+	carrying                 graphics.Object
 }
 
 const ( // states
@@ -68,7 +70,8 @@ func NewUnit(character Character, team Team, lane Lane) *Unit {
 	var char = Characters[character]
 	var anim = motion.NewAnimation(0, false, char.Animations.Idle...)
 	var unit = Unit{Object: graphics.NewSprite(-2000, -2000, 1, 0), Character: character, Team: team, Lane: lane,
-		Behavior: char.Behavior, Stats: char.Stats, Anim: &anim, actionTimer: number.NaN(), hurtTimer: number.NaN()}
+		Behavior: char.Behavior, Stats: char.Stats, Anim: &anim, actionTimer: number.NaN(), hurtTimer: number.NaN(),
+		carrying: graphics.NewSprite(0, 0, 1, 0)}
 
 	unit.Blood = motion.NewParticleSystem(unit.particlesBlood)
 
@@ -102,7 +105,7 @@ func NewUnit(character Character, team Team, lane Lane) *Unit {
 	}
 
 	var hb = unit.Hitbox()
-	unit.HealthBar = NewHealthBar(hb.Width-1, team)
+	unit.HealthBar = NewHealthBar(hb.Width-1, team, unit.IsOffLaner())
 	return &unit
 }
 
@@ -236,7 +239,7 @@ func (u *Unit) applyState() {
 	var actionRange = float32(u.Stats.ActRange) * TileSize
 	u.ClosestEnemyInRange = nil
 	for _, t := range Units {
-		if u == t || t.Stats.Health <= 0 {
+		if u == t || t.Stats.Health <= 0 || t.IsOffLaner() {
 			continue
 		}
 		var _, myEntrance = t.EnemyEntrance()
@@ -325,26 +328,37 @@ func (u *Unit) actUponState() {
 		u.Anim.IsLooping, u.Anim.FPS = true, u.moveSpeedX*0.25
 
 		var _, e = u.EnemyEntrance()
+		if e == nil {
+			return
+		}
+
 		switch u.Team {
 		case TeamAlly:
 			u.VelocityX = float32(u.Stats.MoveSpeed)
-			if e != nil && u.X > e.Tiles[0].X {
-				u.HealthBar.MoveToGlory(2.5)
+			if u.IsOffLaner() && u.X > e.Tiles[0].X-TileSize {
+				u.IsReturning = true
 			}
-			if u.X > Background.Width/2+u.Width { // unit outside of scene, time to die of natural causes
-				u.hurtTimer = 0 // no instant delete - to have time to play glory text animation etc
-				u.State = StateDecaying
+			if u.X > e.Tiles[0].X {
+				u.HealthBar.MoveToGlory(2.5)
 			}
 		case TeamEnemy:
 			u.VelocityX = -float32(u.Stats.MoveSpeed)
-			if e != nil && u.X < e.Tiles[0].X {
+			if u.IsOffLaner() && u.X < e.Tiles[0].X+TileSize {
+				u.IsReturning = true
+			}
+			if u.X < e.Tiles[0].X {
 				u.HealthBar.MoveToGlory(2.5)
 			}
-			if u.X < -Background.Width/2-u.Width { // unit outside of scene, time to die of natural causes
-				u.hurtTimer = 0 // no instant delete - to have time to play glory text animation etc
-				u.State = StateDecaying
-			}
 		}
+		if u.IsReturning {
+			u.VelocityX = -u.VelocityX
+		}
+
+		if u.X < -Background.Width/2-u.Width*2 || u.X > Background.Width/2+u.Width*2 {
+			u.hurtTimer = 0 // no instant delete - to have time to play glory text animation etc
+			u.State = StateDecaying
+		}
+
 	case StateActionStart:
 		u.actionTimer = float32(u.Stats.ActSpeed) / 10
 		u.Anim.Frames = Characters[u.Character].Animations.ActionStart
@@ -378,7 +392,7 @@ func (u *Unit) actUponState() {
 			if number.Absolute(t.X-u.X) < TileSize*3 {
 				prediction = 0 // target is too close - don't predict movement to not shoot behind self
 			}
-			var proj = u.NewProjectile(u.X, u.Y, u.Z, t.X+prediction, t.Y+t.Height/2-8, t.Z, dmg, nil)
+			var proj = u.NewProjectile(u.X, u.Y, u.Z, t.X+prediction, t.Y+t.Height/2-8, t.Z, dmg, ProjectileArrow, nil)
 			Projectiles = append(Projectiles, proj)
 			PlaySound(Characters[u.Character].Sounds.ActionTrigger)
 		} else if canBeActedUpon && e != nil {
@@ -386,7 +400,7 @@ func (u *Unit) actUponState() {
 			if e.Kind == EntranceTallGate {
 				y += TileSize
 			}
-			Projectiles = append(Projectiles, u.NewProjectile(u.X, u.Y, u.Z, x, y, laneZs[e.Lane], dmg, e))
+			Projectiles = append(Projectiles, u.NewProjectile(u.X, u.Y, u.Z, x, y, laneZs[e.Lane], dmg, ProjectileArrow, e))
 			PlaySound(Characters[u.Character].Sounds.ActionTrigger)
 		}
 	case StateActionCharging, StateActionRecovering, StateActionEnd: // empty
@@ -449,7 +463,8 @@ func (u *Unit) applyCollisions() {
 		var ohb = other.Hitbox()
 		var anyoneDead = u.Stats.Health <= 0 || other.Stats.Health <= 0
 		var isGarrison = other.IsGarrisoner() || u.IsGarrisoner()
-		if other == u || u.Lane != other.Lane || anyoneDead || !hb.Overlaps(ohb) || isGarrison {
+		var isOffLaner = other.IsOffLaner() || u.IsOffLaner()
+		if other == u || u.Lane != other.Lane || anyoneDead || isGarrison || isOffLaner || !hb.Overlaps(ohb) {
 			continue
 		}
 		hb = hb.Collide(ohb)
@@ -474,6 +489,19 @@ func (u *Unit) draw() {
 	if u.Team == TeamEnemy {
 		u.Width = -crop.Width
 	}
+	if u.IsReturning {
+		u.Width = -u.Width
+	}
 	View.DrawObject(&u.Object)
 	u.Width = crop.Width
+
+	if u.IsOffLaner() && u.HealthBar != nil {
+		u.carrying.ImageId = Decor.Crops("pickup-relic")[0]
+		var carryCrop = u.carrying.ImageId.CropArea()
+		var hb = u.HealthBar.background
+		u.carrying.Width, u.carrying.Height = carryCrop.Width, carryCrop.Height
+		u.carrying.X, u.carrying.Y = hb.X, hb.Y-hb.Height/2-u.carrying.Height/2-2
+		u.carrying.Mask = u.Mask
+		View.DrawObject(&u.carrying)
+	}
 }

@@ -101,6 +101,9 @@ func (b *Base) UpdateBack() {
 	View.DrawObject(b.Back)
 	View.DrawObject(b.GarrisonBack)
 }
+func (b *Base) UpdateMiddle() {
+	View.DrawObject(b.GloryLabel)
+}
 func (b *Base) UpdateFront() {
 	b.Glory = max(b.Glory, 0)
 
@@ -115,5 +118,4 @@ func (b *Base) UpdateFront() {
 
 	View.DrawObject(b.Front)
 	View.DrawObject(b.GarrisonFront)
-	View.DrawObject(b.GloryLabel)
 }
