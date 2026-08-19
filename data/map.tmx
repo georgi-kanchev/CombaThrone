@@ -1,68 +1,201 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="18" height="10" tilewidth="32" tileheight="32" infinite="0" nextlayerid="91" nextobjectid="52">
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="18" height="10" tilewidth="32" tileheight="32" infinite="0" nextlayerid="98" nextobjectid="52">
  <tileset firstgid="1" name="decor" tilewidth="32" tileheight="32" tilecount="1024" columns="32">
   <image source="decor.png" width="1024" height="1024"/>
+  <tile id="20">
+   <animation>
+    <frame tileid="20" duration="1500"/>
+    <frame tileid="21" duration="1500"/>
+    <frame tileid="22" duration="1500"/>
+   </animation>
+  </tile>
+  <tile id="23">
+   <animation>
+    <frame tileid="23" duration="1500"/>
+    <frame tileid="24" duration="1500"/>
+    <frame tileid="25" duration="1500"/>
+   </animation>
+  </tile>
+  <tile id="52">
+   <animation>
+    <frame tileid="52" duration="1500"/>
+    <frame tileid="53" duration="1500"/>
+    <frame tileid="54" duration="1500"/>
+   </animation>
+  </tile>
+  <tile id="55">
+   <animation>
+    <frame tileid="55" duration="1500"/>
+    <frame tileid="56" duration="1500"/>
+    <frame tileid="57" duration="1500"/>
+   </animation>
+  </tile>
+  <tile id="58">
+   <animation>
+    <frame tileid="58" duration="1500"/>
+    <frame tileid="59" duration="1500"/>
+    <frame tileid="60" duration="1500"/>
+   </animation>
+  </tile>
+  <tile id="84">
+   <animation>
+    <frame tileid="84" duration="1500"/>
+    <frame tileid="85" duration="1500"/>
+    <frame tileid="86" duration="1500"/>
+   </animation>
+  </tile>
+  <tile id="87">
+   <animation>
+    <frame tileid="87" duration="1500"/>
+    <frame tileid="88" duration="1500"/>
+    <frame tileid="89" duration="1500"/>
+   </animation>
+  </tile>
+  <tile id="90">
+   <animation>
+    <frame tileid="90" duration="1500"/>
+    <frame tileid="91" duration="1500"/>
+    <frame tileid="92" duration="1500"/>
+   </animation>
+  </tile>
+  <tile id="116">
+   <animation>
+    <frame tileid="116" duration="1500"/>
+    <frame tileid="117" duration="1500"/>
+    <frame tileid="118" duration="1500"/>
+   </animation>
+  </tile>
+  <tile id="119">
+   <animation>
+    <frame tileid="119" duration="1500"/>
+    <frame tileid="120" duration="1500"/>
+    <frame tileid="121" duration="1500"/>
+   </animation>
+  </tile>
+  <tile id="122">
+   <animation>
+    <frame tileid="122" duration="1500"/>
+    <frame tileid="123" duration="1500"/>
+    <frame tileid="124" duration="1500"/>
+   </animation>
+  </tile>
+  <tile id="148">
+   <animation>
+    <frame tileid="148" duration="1500"/>
+    <frame tileid="149" duration="1500"/>
+    <frame tileid="150" duration="1500"/>
+   </animation>
+  </tile>
+  <tile id="151">
+   <animation>
+    <frame tileid="151" duration="1500"/>
+    <frame tileid="152" duration="1500"/>
+    <frame tileid="153" duration="1500"/>
+   </animation>
+  </tile>
+  <tile id="218">
+   <animation>
+    <frame tileid="218" duration="500"/>
+    <frame tileid="219" duration="500"/>
+    <frame tileid="220" duration="500"/>
+    <frame tileid="221" duration="500"/>
+    <frame tileid="222" duration="500"/>
+    <frame tileid="223" duration="500"/>
+   </animation>
+  </tile>
+  <tile id="282">
+   <animation>
+    <frame tileid="282" duration="500"/>
+    <frame tileid="283" duration="500"/>
+    <frame tileid="284" duration="500"/>
+    <frame tileid="285" duration="500"/>
+   </animation>
+  </tile>
  </tileset>
- <layer id="84" name="Camp" width="18" height="10" visible="0">
-  <data encoding="base64" compression="zlib">
-   eJxjYKAMWDIyMFgxUmjICABLgHgpEC8D4uUUmHMEiI8C8TEgPk4Fdw03AAAnqgYi
+ <group id="96" name="Bases">
+  <layer id="84" name="Camp" width="18" height="10">
+   <data encoding="base64" compression="zlib">
+   eJxjYKAMWDJSaMAIAUuAeCkQLwPi5RSYcwSIjwLxMSA+TgV3DTcAAJFYBec=
   </data>
- </layer>
- <layer id="17" name="Barrack" width="18" height="10" visible="0">
-  <data encoding="base64" compression="zlib">
+  </layer>
+  <layer id="17" name="Barrack" width="18" height="10" visible="0">
+   <data encoding="base64" compression="zlib">
    eJxjYBgF+IAjEDsBsTOF5iQCcRIQJwPxIQrMaQTiJiBuptA9C6HmLKbQnINAvIhCM0DgIRXMAAEAG9AIPw==
   </data>
- </layer>
- <layer id="72" name="FortBack0" width="18" height="10">
-  <data encoding="base64" compression="zlib">
+  </layer>
+  <layer id="72" name="FortBack0" width="18" height="10" visible="0">
+   <data encoding="base64" compression="zlib">
    eJxjYBiegBkJc1BgjjIUswCxBoXmsFDBHBaGUXPwAQDeTwGn
   </data>
- </layer>
- <layer id="7" name="FortFront0" width="18" height="10">
-  <data encoding="base64" compression="zlib">
+  </layer>
+  <layer id="7" name="FortFront0" width="18" height="10" visible="0">
+   <data encoding="base64" compression="zlib">
    eJxjYBjegJUKZqgAseogMIOBSmYMZwAAFbsAvQ==
   </data>
- </layer>
- <layer id="73" name="FortBack1" width="18" height="10" visible="0">
-  <data encoding="base64" compression="zlib">
+  </layer>
+  <layer id="73" name="FortBack1" width="18" height="10" visible="0">
+   <data encoding="base64" compression="zlib">
    eJxjYBj+gJlK5qiPmjPozQEA4/QA7g==
   </data>
- </layer>
- <layer id="57" name="FortFront1" width="18" height="10" visible="0">
-  <data encoding="base64" compression="zlib">
+  </layer>
+  <layer id="57" name="FortFront1" width="18" height="10" visible="0">
+   <data encoding="base64" compression="zlib">
    eJxjYBj+gH2gHTAK6AYAEEQACA==
   </data>
- </layer>
- <layer id="74" name="FortBack2" width="18" height="10" visible="0">
-  <data encoding="base64" compression="zlib">
+  </layer>
+  <layer id="74" name="FortBack2" width="18" height="10" visible="0">
+   <data encoding="base64" compression="zlib">
    eJxjYBj+gBmKKQVqQKw+as6gNgcAu9MB1Q==
   </data>
- </layer>
- <layer id="20" name="FortFront2" width="18" height="10" visible="0">
-  <data encoding="base64" compression="zlib">
+  </layer>
+  <layer id="20" name="FortFront2" width="18" height="10" visible="0">
+   <data encoding="base64" compression="zlib">
    eJxjYBj+gA2I2QfaEaOALgAAG7AADg==
   </data>
- </layer>
- <layer id="75" name="FortBack3" width="18" height="10" visible="0">
-  <data encoding="base64" compression="zlib">
+  </layer>
+  <layer id="75" name="FortBack3" width="18" height="10" visible="0">
+   <data encoding="base64" compression="zlib">
    eJxjYBj+gBkJUwLUoFh91JxBaw4AkBYCvA==
   </data>
- </layer>
- <layer id="23" name="FortFront3" width="18" height="10" visible="0">
-  <data encoding="base64" compression="zlib">
+  </layer>
+  <layer id="23" name="FortFront3" width="18" height="10" visible="0">
+   <data encoding="base64" compression="zlib">
    eJxjYBj+gA2K2QfaIaOA5gAAJwQAFA==
   </data>
- </layer>
- <layer id="46" name="Plains" width="18" height="10">
-  <data encoding="base64" compression="zlib">
+  </layer>
+ </group>
+ <group id="97" name="Environments">
+  <layer id="46" name="Field" width="18" height="10">
+   <data encoding="base64" compression="zlib">
    eJztjAsKACAIQ+fR0uxcHb2CCdHnBCWMDXUP+PPyFEFVATKV6N6lh93IvbMxEm9KN7ozB8sWfrAGI/5CfunbtFNmJ6sBBA4OUA==
   </data>
- </layer>
- <layer id="86" name="PlainsNoBase" width="18" height="10" visible="0">
-  <data encoding="base64" compression="zlib">
+  </layer>
+  <layer id="86" name="FieldNoBase" width="18" height="10" visible="0">
+   <data encoding="base64" compression="zlib">
    eJxjYBgFIxG4MkKwMyPl5rhQaAYIOFLBDBAAAA7NAZ4=
   </data>
- </layer>
+  </layer>
+  <layer id="93" name="FieldBuildings" width="18" height="10" visible="0">
+   <data encoding="base64" compression="zlib">
+   eJzVzEEKAWEYx+HPIRRm4RRTSuESU0oZl1BqCpdQNoxj2BiugZNg4znCl1lM/vVs3np/ITSzNh2Smp2UAUNGjJn80MmYMmNOziLy986DJ0tWFKzZsI3svHjzYceeA0dKTpGdbiuEHgl9zm4XKq7cIjv/uC8LaRP+
+  </data>
+  </layer>
+  <layer id="92" name="Desert" width="18" height="10" visible="0">
+   <data encoding="base64" compression="zlib">
+   eJxjYBgFIxksY2RoWMjIwLAUDYPElkDZi6H0IigN1INhxiIk9YuQzFgE1Q9jw9TBxGFmwdyxGIcemNxiJHuWYjELAFrPIFU=
+  </data>
+  </layer>
+  <layer id="91" name="DesertNoBase" width="18" height="10" visible="0">
+   <data encoding="base64" compression="zlib">
+   eJxjYBgFIxEsZWRgWAzESxgpM2cJ1BxquIcaAACCCAPf
+  </data>
+  </layer>
+  <layer id="94" name="DesertBuildings" width="18" height="10" visible="0">
+   <data encoding="base64" compression="zlib">
+   eJzVzFs2gmEYhuH/Nyhk1yyEEqMIJYwCbahRRCmMwiaRUUS2XdbqtL5j71rX0fOuO4om32wcRXPMk2CBRZZYZoVkPCUwvlU/KdZYZ4M0GTbJssV2oJWz77DLHnkK7FPkgEOOAp1j+wmnlChTocoZ59SoBzoN+wWXNGlxRZsO19xwG+jc2e954JEuT/R45oU+r4HOwP7GO0M++OSLb374/WvMTO/85xsBOlQtrQ==
+  </data>
+  </layer>
+ </group>
  <layer id="60" name="Flags" width="18" height="10" visible="0">
   <data encoding="base64" compression="zlib">
    eJxjYBgF9AacJKjlwiOnSYI5WiSoHcoAAG0wAGc=
@@ -73,62 +206,64 @@
    eJxTZGBgUBzFo3iYYADUOBc1
   </data>
  </layer>
- <objectgroup id="61" name="Lower" visible="0">
-  <object id="3" x="-62" y="309" width="700" height="8"/>
- </objectgroup>
- <objectgroup id="90" name="LowerOff" visible="0">
-  <object id="51" x="-62" y="294" width="700" height="8"/>
- </objectgroup>
- <objectgroup id="62" name="Middle" visible="0">
-  <object id="2" x="-62" y="277" width="700" height="8"/>
- </objectgroup>
- <objectgroup id="89" name="MiddleOff" visible="0">
-  <object id="50" x="-62" y="262" width="700" height="8"/>
- </objectgroup>
- <objectgroup id="63" name="Upper" visible="0">
-  <object id="1" x="-62" y="245" width="700" height="8"/>
- </objectgroup>
- <objectgroup id="88" name="UpperOff" visible="0">
-  <object id="49" x="-62" y="230" width="700" height="8"/>
- </objectgroup>
- <objectgroup id="65" name="Garrison1">
-  <object id="7" x="-40" y="182" width="71" height="4"/>
-  <object id="12" x="27" y="145" width="4" height="37"/>
- </objectgroup>
- <objectgroup id="68" name="Garrison2">
-  <object id="18" x="-40" y="169" width="84" height="4"/>
-  <object id="20" x="40" y="132" width="4" height="37"/>
- </objectgroup>
- <objectgroup id="78" name="Garrison3">
-  <object id="35" x="-40" y="153" width="100" height="4"/>
-  <object id="36" x="56" y="116" width="4" height="37"/>
- </objectgroup>
- <objectgroup id="77" name="Garrison4">
-  <object id="33" x="-40" y="137" width="115.91" height="4"/>
-  <object id="34" x="72" y="100" width="4" height="37"/>
- </objectgroup>
- <objectgroup id="67" name="Garrison5">
-  <object id="14" x="-40" y="126" width="132" height="4"/>
-  <object id="16" x="88" y="89" width="4" height="37"/>
- </objectgroup>
- <objectgroup id="69" name="GarrisonPlus1" visible="0">
-  <object id="22" x="-40" y="126" width="152" height="4"/>
-  <object id="23" x="108" y="96" width="4" height="30"/>
- </objectgroup>
- <objectgroup id="70" name="GarrisonPlus2" visible="0">
-  <object id="24" x="-40" y="126" width="172" height="4"/>
-  <object id="25" x="128" y="96" width="4" height="30"/>
- </objectgroup>
- <objectgroup id="71" name="GarrisonPlus3" visible="0">
-  <object id="26" x="-40" y="126" width="192" height="4"/>
-  <object id="27" x="148" y="96" width="4" height="30"/>
- </objectgroup>
- <objectgroup id="80" name="GarrisonPlus4" visible="0">
-  <object id="40" x="-40" y="126" width="212" height="4"/>
-  <object id="41" x="168" y="96" width="4" height="30"/>
- </objectgroup>
- <objectgroup id="81" name="GarrisonPlus5" visible="0">
-  <object id="42" x="-40" y="126" width="232" height="4"/>
-  <object id="43" x="188" y="96" width="4" height="30"/>
- </objectgroup>
+ <group id="95" name="Collisions">
+  <objectgroup id="61" name="Lower" visible="0">
+   <object id="3" x="-62" y="309" width="700" height="8"/>
+  </objectgroup>
+  <objectgroup id="90" name="LowerOff" visible="0">
+   <object id="51" x="-62" y="294" width="700" height="8"/>
+  </objectgroup>
+  <objectgroup id="62" name="Middle" visible="0">
+   <object id="2" x="-62" y="277" width="700" height="8"/>
+  </objectgroup>
+  <objectgroup id="89" name="MiddleOff" visible="0">
+   <object id="50" x="-62" y="262" width="700" height="8"/>
+  </objectgroup>
+  <objectgroup id="63" name="Upper" visible="0">
+   <object id="1" x="-62" y="245" width="700" height="8"/>
+  </objectgroup>
+  <objectgroup id="88" name="UpperOff" visible="0">
+   <object id="49" x="-62" y="230" width="700" height="8"/>
+  </objectgroup>
+  <objectgroup id="65" name="Garrison1" visible="0">
+   <object id="7" x="-40" y="182" width="71" height="4"/>
+   <object id="12" x="27" y="145" width="4" height="37"/>
+  </objectgroup>
+  <objectgroup id="68" name="Garrison2" visible="0">
+   <object id="18" x="-40" y="169" width="84" height="4"/>
+   <object id="20" x="40" y="132" width="4" height="37"/>
+  </objectgroup>
+  <objectgroup id="78" name="Garrison3" visible="0">
+   <object id="35" x="-40" y="153" width="100" height="4"/>
+   <object id="36" x="56" y="116" width="4" height="37"/>
+  </objectgroup>
+  <objectgroup id="77" name="Garrison4" visible="0">
+   <object id="33" x="-40" y="137" width="115.91" height="4"/>
+   <object id="34" x="72" y="100" width="4" height="37"/>
+  </objectgroup>
+  <objectgroup id="67" name="Garrison5" visible="0">
+   <object id="14" x="-40" y="126" width="132" height="4"/>
+   <object id="16" x="88" y="89" width="4" height="37"/>
+  </objectgroup>
+  <objectgroup id="69" name="GarrisonPlus1" visible="0">
+   <object id="22" x="-40" y="126" width="152" height="4"/>
+   <object id="23" x="108" y="96" width="4" height="30"/>
+  </objectgroup>
+  <objectgroup id="70" name="GarrisonPlus2" visible="0">
+   <object id="24" x="-40" y="126" width="172" height="4"/>
+   <object id="25" x="128" y="96" width="4" height="30"/>
+  </objectgroup>
+  <objectgroup id="71" name="GarrisonPlus3" visible="0">
+   <object id="26" x="-40" y="126" width="192" height="4"/>
+   <object id="27" x="148" y="96" width="4" height="30"/>
+  </objectgroup>
+  <objectgroup id="80" name="GarrisonPlus4" visible="0">
+   <object id="40" x="-40" y="126" width="212" height="4"/>
+   <object id="41" x="168" y="96" width="4" height="30"/>
+  </objectgroup>
+  <objectgroup id="81" name="GarrisonPlus5" visible="0">
+   <object id="42" x="-40" y="126" width="232" height="4"/>
+   <object id="43" x="188" y="96" width="4" height="30"/>
+  </objectgroup>
+ </group>
 </map>

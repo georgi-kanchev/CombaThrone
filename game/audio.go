@@ -14,8 +14,8 @@ var AudioHitFlesh, AudioHitWood, AudioHitMetal []audio.Audio
 var AudioEventPositive, AudioEventNegative []audio.Audio
 
 func LoadAudio() {
-	ambiences[EnvironmentPlains] = assets.LoadMusic("data/music/ambience-plains.mp3")
-	AudioAmbience = audio.New(ambiences[EnvironmentPlains])
+	ambiences[EnvironmentField] = assets.LoadMusic("data/music/ambience-plains.mp3")
+	AudioAmbience = audio.New(ambiences[EnvironmentField])
 
 	AudioDoorOpen = append(AudioDoorOpen, audio.New(assets.LoadSound("data/sounds/door-open1.mp3", 4)))
 	AudioDoorOpen = append(AudioDoorOpen, audio.New(assets.LoadSound("data/sounds/door-open2.mp3", 4)))

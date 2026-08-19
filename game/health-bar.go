@@ -159,7 +159,7 @@ func (hb *HealthBar) Update(target geometry.Shape, health, maxHealth int, mask g
 			hb.glory.Effects.Tint = color.RGBA(r, g, b, alpha)
 		} else if progress < fallStart { // breathing hang
 			var t = number.Map(progress, riseEnd, fallStart, 0, 1)
-			var microFloat = number.Sine(t*3.14159) * 2.0 // adds a breating 16 -> 18 -> 16
+			var microFloat = number.Sine(t*3.14159) * 2.0 // adds pulsing 16 -> 18 -> 16...
 			hb.glory.Effects.TextLineHeight = 16 + microFloat
 
 		} else { // faster fall

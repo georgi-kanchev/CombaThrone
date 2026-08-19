@@ -25,8 +25,14 @@ const ( // layer tilemaps
 	LayerFortFront2
 	LayerFortBack3
 	LayerFortFront3
-	LayerPlains
-	LayerPlainsNoBase
+
+	LayerField
+	LayerFieldNoBase
+	LayerFieldBuildings
+	LayerDesert
+	LayerDesertNoBase
+	LayerDesertBuildings
+
 	LayerFlags
 	LayerGrid
 	LayerCount
@@ -52,13 +58,13 @@ const ( // lanes (collision layers)
 	LaneCount
 )
 
-const EnvironmentPlains Environment = 0
+const EnvironmentField, EnvironmentDesert Environment = 0, 1
 
 const TileSize, MapCount = 32, 4
 
 var TimeScale float32 = 1
 var View graphics.View
-var Background, MapNoBase, Map, Grid, Flags *graphics.Object
+var Background, Map, MapNoBase, MapBuildings, Grid, Flags *graphics.Object
 var Decor, UserInterface assets.AtlasId
 var Layers [LayerCount]assets.TileLayerId
 
@@ -94,7 +100,6 @@ func InitScene() {
 	}
 
 	Decor = assets.LoadAtlas(decor, "data/decor.xml")
-	Decor = assets.LoadAtlas(decor, "data/decor.xml")
 	laneCollisions[LaneLower] = low.TilemapShapes()
 	laneCollisions[LaneLowerOff] = lowOff.TilemapShapes()
 	laneCollisions[LaneMiddle] = mid.TilemapShapes()
@@ -114,28 +119,29 @@ func InitScene() {
 
 	mirrorGarrisonLanes()
 
-	var bgr = graphics.NewSprite(0, 0, 1, assets.LoadImage("data/bgr-field.png"))
-	var _map, mapNoBase = graphics.NewTilemap(layers[LayerPlains]), graphics.NewTilemap(layers[LayerPlainsNoBase])
-	Background, Map, MapNoBase = &bgr, &_map, &mapNoBase
+	var bgr = graphics.NewSprite(0, 0, 1, assets.LoadImage("data/environments/background-desert.png"))
+	var _map, mapNoBase = graphics.NewTilemap(layers[LayerDesert]), graphics.NewTilemap(layers[LayerDesertNoBase])
+	var mapBuildings = graphics.NewTilemap(layers[LayerDesertBuildings])
+	Background, Map, MapNoBase, MapBuildings = &bgr, &_map, &mapNoBase, &mapBuildings
 
 	var flag, grid = graphics.NewTilemap(layers[LayerFlags]), graphics.NewTilemap(layers[LayerGrid])
 	Flags, Grid = &flag, &grid
 
 	AllyBase = NewBase(TeamAlly, SaveState{
-		Kind: BaseNone, Garrison: Garrison3, EntranceKinds: [3]EntranceKind{
+		Kind: BaseCamp, Garrison: Garrison3, EntranceKinds: [3]EntranceKind{
 			EntranceNone, EntranceNone, EntranceNone,
 		},
 	})
 	EnemyBase = NewBase(TeamEnemy, SaveState{
-		Kind: BaseFortress, Garrison: Garrison3, EntranceKinds: [3]EntranceKind{
-			EntranceDoor, EntranceShortGate, EntranceNone,
+		Kind: BaseNone, Garrison: Garrison3, EntranceKinds: [3]EntranceKind{
+			EntranceNone, EntranceNone, EntranceNone,
 		},
 	})
 
 	// Units = append(Units, NewUnit(CharWoman, TeamAlly, LaneUpperOff))
 	// Units = append(Units, NewUnit(CharWoman, TeamEnemy, LaneUpperOff))
 	// Units = append(Units, NewUnit(CharMan, TeamAlly, LaneUpper))
-	Units = append(Units, NewUnit(CharHunter, TeamAlly, LaneLower))
+	// Units = append(Units, NewUnit(CharHunter, TeamAlly, LaneLower))
 	// Units = append(Units, NewUnit(CharMan, TeamEnemy, LaneMiddle))
 	// Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneGarrisonPlus1))
 	// Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneGarrisonPlus3))
@@ -145,11 +151,11 @@ func InitScene() {
 	// Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneGarrison2))
 	// Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneGarrison3))
 	// Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneGarrison4))
-	Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneGarrison5))
+	// Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneGarrison5))
 
 	Pickups = append(Pickups, NewPickup(0, PickupRelic, LaneLowerOff))
 
-	PlayAmbience(EnvironmentPlains)
+	PlayAmbience(EnvironmentField)
 }
 
 //=================================================================
@@ -162,6 +168,7 @@ func UpdateScene() {
 
 	View.DrawColor(skyColor)
 	View.DrawObject(Background)
+	View.DrawObject(MapBuildings)
 
 	AllyBase.UpdateBack()
 	EnemyBase.UpdateBack()
@@ -237,6 +244,8 @@ func DrawShadow(x, z, width, height, angle float32, mask geometry.Area) {
 // private ========================================================
 
 var skyColor = color.TagRGBA("rgb(98, 171, 212)")
+
+// var skyColor = color.TagRGBA("rgb(227, 177, 109)")
 
 func mirrorGarrisonLanes() {
 	for i := LaneGarrison1; i < LaneGarrisonPlus5+1; i++ {
