@@ -131,10 +131,11 @@ func InitScene() {
 		},
 	})
 
-	Units = append(Units, NewUnit(CharHunter, TeamAlly, LaneMiddle))
+	Units = append(Units, NewUnit(CharWoman, TeamAlly, LaneUpperOff))
+	// Units = append(Units, NewUnit(CharHunter, TeamAlly, LaneMiddle))
 	// Units = append(Units, NewUnit(CharMan, TeamAlly, LaneUpper))
 	// Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneUpper))
-	Units = append(Units, NewUnit(CharMan, TeamEnemy, LaneMiddle))
+	// Units = append(Units, NewUnit(CharMan, TeamEnemy, LaneMiddle))
 	// Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneGarrison5))
 	// Units = append(Units, NewUnit(CharHunter, TeamAlly, LaneGarrisonPlus2))
 	// Units = append(Units, NewUnit(CharHunter, TeamAlly, LaneGarrisonPlus3))
@@ -146,7 +147,7 @@ func InitScene() {
 	// Units = append(Units, NewUnit(CharHunter, TeamAlly, LaneGarrison4))
 	// Units = append(Units, NewUnit(CharHunter, TeamAlly, LaneGarrison5))
 
-	Pickups = append(Pickups, NewPickup(0, 58, 2.75, PickupRelic))
+	Pickups = append(Pickups, NewPickup(0, 65, 2.5, PickupRelic))
 
 	PlayAmbience(EnvironmentPlains)
 }

@@ -76,17 +76,21 @@ func NewUnit(character Character, team Team, lane Lane) *Unit {
 
 	var col = laneCollisions[lane]
 	switch lane {
-	case LaneLower:
+	case LaneLower, LaneLowerOff:
 		unit.X, unit.Y = col[0].X+col[0].Width/2-40, col[0].Y-col[0].Height/2-unit.Height/2
-	case LaneMiddle:
+	case LaneMiddle, LaneMiddleOff:
 		unit.X, unit.Y = col[0].X+col[0].Width/2-72, col[0].Y-col[0].Height/2-unit.Height/2
-	case LaneUpper:
+	case LaneUpper, LaneUpperOff:
 		unit.X, unit.Y = col[0].X+col[0].Width/2-104, col[0].Y-col[0].Height/2-unit.Height/2
 	case LaneGarrison1, LaneGarrison2, LaneGarrison3, LaneGarrison4, LaneGarrison5:
 		unit.X, unit.Y = PointAtCell(18, 6)
 	case LaneGarrisonPlus1, LaneGarrisonPlus2, LaneGarrisonPlus3, LaneGarrisonPlus4, LaneGarrisonPlus5:
 		unit.X, unit.Y = PointAtCell(18, 3)
 	}
+	if lane == LaneLowerOff || lane == LaneMiddleOff || lane == LaneUpperOff {
+		unit.Y += TileSize / 2
+	}
+
 	if team == TeamAlly {
 		if AllyBase.Kind < BaseBarrack {
 			unit.X = Background.Width/2 + unit.Width/2
@@ -175,15 +179,18 @@ func (u *Unit) TakeDamage(damage int) {
 
 // private ========================================================
 
-var laneZs = map[Lane]float32{
-	LaneLower: 0, LaneMiddle: 1, LaneUpper: 2, LaneGarrison1: 0, LaneGarrison2: 0.5,
-	LaneGarrison3: 1, LaneGarrison4: 1.5, LaneGarrison5: 2, LaneGarrisonPlus1: 2.5, LaneGarrisonPlus2: 2.5,
-	LaneGarrisonPlus3: 2.5, LaneGarrisonPlus4: 2.5, LaneGarrisonPlus5: 2.5,
+var laneZs = [LaneCount]float32{
+	LaneLower: 0, LaneLowerOff: 0.5, LaneMiddle: 1, LaneMiddleOff: 1.5, LaneUpper: 2, LaneUpperOff: 2.5,
+	LaneGarrison1: 0, LaneGarrison2: 0.5, LaneGarrison3: 1, LaneGarrison4: 1.5, LaneGarrison5: 2,
+	LaneGarrisonPlus1: 2.5, LaneGarrisonPlus2: 2.5, LaneGarrisonPlus3: 2.5, LaneGarrisonPlus4: 2.5, LaneGarrisonPlus5: 2.5,
 }
 var laneMasks = map[Lane]geometry.Area{
-	LaneLower:  geometry.NewArea(0, 0, 556, 1000),
-	LaneMiddle: geometry.NewArea(0, 0, 492, 1000),
-	LaneUpper:  geometry.NewArea(0, 0, 428, 1000),
+	LaneLower:     geometry.NewArea(0, 0, 556, 1000),
+	LaneLowerOff:  geometry.NewArea(0, 0, 556, 1000),
+	LaneMiddle:    geometry.NewArea(0, 0, 492, 1000),
+	LaneMiddleOff: geometry.NewArea(0, 0, 492, 1000),
+	LaneUpper:     geometry.NewArea(0, 0, 428, 1000),
+	LaneUpperOff:  geometry.NewArea(0, 0, 428, 1000),
 }
 var laneCollisions = map[Lane][]geometry.Shape{}
 
@@ -366,7 +373,7 @@ func (u *Unit) actUponState() {
 		}
 
 		var t = u.ClosestEnemyInRange
-		if t != nil {
+		if t != nil && !t.IsOffLaner() {
 			var prediction = t.VelocityX
 			if number.Absolute(t.X-u.X) < TileSize*3 {
 				prediction = 0 // target is too close - don't predict movement to not shoot behind self

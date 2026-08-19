@@ -102,7 +102,8 @@ func (e *Entrance) Update() {
 	var shortestDistance float32 = sensorDistance
 	for _, u := range Units {
 		var distance = number.Absolute(u.X - e.Tiles[0].X)
-		if e.Team == u.Team && e.Lane == u.Lane && distance < shortestDistance {
+		var sameOrOffLane = e.Lane == u.Lane || (e.Lane == u.Lane-1 && u.IsOffLaner())
+		if e.Team == u.Team && sameOrOffLane && distance < shortestDistance {
 			shortestDistance = distance
 		}
 	}

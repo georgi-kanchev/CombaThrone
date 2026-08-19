@@ -37,9 +37,9 @@ func NewBase(team Team, saveState SaveState) Base {
 	b.Entrances[LaneMiddle/2] = NewEntrance(saveState.EntranceKinds[LaneMiddle/2], b.Kind, team, LaneMiddle)
 	b.Entrances[LaneUpper/2] = NewEntrance(saveState.EntranceKinds[LaneUpper/2], b.Kind, team, LaneUpper)
 
-	var ptsX, ptsY = PointAtCell(14, 5.5)
+	var ptsX, ptsY = PointAtCell(14, 5)
 	if team == TeamAlly {
-		ptsX, ptsY = PointAtCell(3, 5.5)
+		ptsX, ptsY = PointAtCell(3, 5)
 	}
 	var label = graphics.NewTextbox(ptsX+Flags.X, ptsY+Flags.Y, TileSize, TileSize, 0)
 	label.Effects.FillColor, label.Effects.TextLineHeight = 0, 11

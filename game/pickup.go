@@ -23,7 +23,10 @@ var Pickups []*PickupData = make([]*PickupData, 0, 32)
 
 func NewPickup(x, y, z float32, kind PickupKind) *PickupData {
 	var anim = motion.NewAnimation(6, true, DecorCrops.Crops("pickup-"+pickupGroups[kind])...)
-	return &PickupData{Object: graphics.NewSprite(x, y, 1, 0), Z: z, Kind: kind, Anim: &anim}
+	var data = &PickupData{Object: graphics.NewSprite(x, y, 1, 0), Z: z, Kind: kind, Anim: &anim}
+	data.Update()
+	data.Y -= data.Height / 2 // taller pickups go below their shadows - accounting for that by pivoting bottom
+	return data
 }
 
 //=================================================================
@@ -38,7 +41,7 @@ func (p *PickupData) Update() {
 	var crop = frame.CropArea()
 	p.ImageId, p.Width, p.Height = frame, crop.Width, crop.Height
 
-	DrawShadow(p.X, p.Z-crop.Height/60, p.Width*0.6, p.Height*0.15, 0, p.Mask)
+	DrawShadow(p.X, p.Z, p.Width*0.6, p.Height*0.15, 0, p.Mask)
 	View.DrawObject(&p.Object)
 }
 
