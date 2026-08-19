@@ -132,19 +132,19 @@ func InitScene() {
 		},
 	})
 
-	Units = append(Units, NewUnit(CharWoman, TeamAlly, LaneUpperOff))
-	Units = append(Units, NewUnit(CharWoman, TeamEnemy, LaneUpperOff))
+	// Units = append(Units, NewUnit(CharWoman, TeamAlly, LaneUpperOff))
+	// Units = append(Units, NewUnit(CharWoman, TeamEnemy, LaneUpperOff))
 	// Units = append(Units, NewUnit(CharMan, TeamAlly, LaneUpper))
 	Units = append(Units, NewUnit(CharHunter, TeamAlly, LaneLower))
-	Units = append(Units, NewUnit(CharMan, TeamEnemy, LaneMiddle))
+	// Units = append(Units, NewUnit(CharMan, TeamEnemy, LaneMiddle))
 	// Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneGarrisonPlus1))
 	// Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneGarrisonPlus3))
 	// Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneGarrisonPlus4))
 	// Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneGarrisonPlus5))
-	Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneGarrison1))
-	Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneGarrison2))
-	Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneGarrison3))
-	Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneGarrison4))
+	// Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneGarrison1))
+	// Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneGarrison2))
+	// Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneGarrison3))
+	// Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneGarrison4))
 	Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneGarrison5))
 
 	Pickups = append(Pickups, NewPickup(0, PickupRelic, LaneLowerOff))
@@ -170,12 +170,8 @@ func UpdateScene() {
 	AllyBase.UpdateMiddle()
 	EnemyBase.UpdateMiddle()
 
-	for _, g := range AllyBase.Entrances {
-		g.Update()
-	}
-	for _, g := range EnemyBase.Entrances {
-		g.Update()
-	}
+	iterateRemovable(&AllyBase.Entrances, func(e *Entrance) { e.Update() })
+	iterateRemovable(&EnemyBase.Entrances, func(e *Entrance) { e.Update() })
 
 	if AllyBase.Kind < BaseBarrack {
 		MapNoBase.Width = number.Absolute(MapNoBase.Width)
@@ -187,17 +183,8 @@ func UpdateScene() {
 	}
 	View.DrawObject(Map)
 
-	for _, p := range ProjectilesBehind {
-		if p != nil { // may have been faded out & removed during an update
-			p.Update()
-		}
-	}
-
-	for _, p := range Pickups {
-		if p != nil { // may have been removed during an update
-			p.Update()
-		}
-	}
+	iterateRemovable(&ProjectilesBehind, func(p *Projectile) { p.Update() })
+	iterateRemovable(&Pickups, func(p *Pickup) { p.Update() })
 
 	collection.SortByField(Units, func(u *Unit) float32 {
 		if u.Stats.Health <= 0 { // dead units go behind all alive units
@@ -205,20 +192,10 @@ func UpdateScene() {
 		}
 		return u.Y // fall back to Y sort
 	})
-	for _, u := range Units {
-		if u != nil { // may have died, faded out & removed during an update
-			u.Update()
-		}
-	}
-
+	iterateRemovable(&Units, func(u *Unit) { u.Update() })
 	AllyBase.UpdateFront()
 	EnemyBase.UpdateFront()
-
-	for _, p := range Projectiles {
-		if p != nil { // may have been faded out & removed during an update
-			p.Update()
-		}
-	}
+	iterateRemovable(&Projectiles, func(p *Projectile) { p.Update() })
 
 	for _, g := range AllyBase.Entrances {
 		g.HealthBar.Update(g.Tiles[0].Shape, g.Health, g.MaxHealth, geometry.Area{})
@@ -285,6 +262,15 @@ func bringGarrisonLanesDown(team Team) {
 			var shape = laneCollisions[i][j]
 			shape.Y += TileSize
 			laneCollisions[i][j] = shape
+		}
+	}
+}
+func iterateRemovable[T any](things *[]*T, iteration func(*T)) {
+	for i := 0; i < len(*things); i++ {
+		var lastLength = len(*things)
+		iteration((*things)[i])
+		if lastLength != len(*things) {
+			i-- // was removed during update
 		}
 	}
 }

@@ -108,8 +108,8 @@
   <object id="34" x="72" y="100" width="4" height="37"/>
  </objectgroup>
  <objectgroup id="67" name="Garrison5">
-  <object id="14" x="-40" y="121" width="132" height="4"/>
-  <object id="16" x="88" y="84" width="4" height="37"/>
+  <object id="14" x="-40" y="126" width="132" height="4"/>
+  <object id="16" x="88" y="89" width="4" height="37"/>
  </objectgroup>
  <objectgroup id="69" name="GarrisonPlus1" visible="0">
   <object id="22" x="-40" y="126" width="152" height="4"/>

@@ -17,7 +17,7 @@ type SaveState struct {
 type Base struct {
 	SaveState
 
-	Entrances [3]*Entrance
+	Entrances []*Entrance
 
 	Glory int
 
@@ -33,6 +33,7 @@ var AllyBase, EnemyBase Base
 
 func NewBase(team Team, saveState SaveState) Base {
 	var b = Base{SaveState: saveState, Glory: baseGlory[saveState.Kind]}
+	b.Entrances = make([]*Entrance, 3)
 	b.Entrances[LaneLower/2] = NewEntrance(saveState.EntranceKinds[LaneLower/2], b.Kind, team, LaneLower)
 	b.Entrances[LaneMiddle/2] = NewEntrance(saveState.EntranceKinds[LaneMiddle/2], b.Kind, team, LaneMiddle)
 	b.Entrances[LaneUpper/2] = NewEntrance(saveState.EntranceKinds[LaneUpper/2], b.Kind, team, LaneUpper)

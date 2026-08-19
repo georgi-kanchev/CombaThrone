@@ -108,7 +108,6 @@ func (p *Projectile) Update() {
 			ProjectilesBehind = collection.Remove(ProjectilesBehind, p)
 		}
 		View.DrawObject(&p.Object)
-		// View.DrawText(text.New(alpha), p.Object.X, p.Object.Y, 32, 0, palette.White, geometry.Area{})
 		return
 	}
 

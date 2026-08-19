@@ -9,7 +9,7 @@ import (
 )
 
 type PickupKind uint8
-type PickupData struct {
+type Pickup struct {
 	graphics.Object
 
 	Kind PickupKind
@@ -24,11 +24,11 @@ type PickupData struct {
 const PickupCoin, PickupGem, PickupCrystal, PickupRelic PickupKind = 0, 1, 2, 3
 const PickupRune, PickupSnowflake, PickupStar, PickupKey PickupKind = 4, 5, 6, 7
 
-var Pickups []*PickupData = make([]*PickupData, 0, 32)
+var Pickups []*Pickup = make([]*Pickup, 0, 32)
 
-func NewPickup(x float32, kind PickupKind, lane Lane) *PickupData {
+func NewPickup(x float32, kind PickupKind, lane Lane) *Pickup {
 	var anim = motion.NewAnimation(6, true, Decor.Crops("pickup-"+pickupGroups[kind])...)
-	var data = &PickupData{Object: graphics.NewSprite(x, 0, 1, 0), Z: laneZs[lane], Kind: kind, Anim: &anim, lane: lane}
+	var data = &Pickup{Object: graphics.NewSprite(x, 0, 1, 0), Z: laneZs[lane], Kind: kind, Anim: &anim, lane: lane}
 	var collision = laneCollisions[lane][0]
 	data.Update()
 	data.Y = collision.Y - collision.Height/2 - data.Height/2 // taller pickups go below their shadows - pivot bottom
@@ -37,13 +37,13 @@ func NewPickup(x float32, kind PickupKind, lane Lane) *PickupData {
 
 //=================================================================
 
-func (p *PickupData) Pickup(by *Unit) {
+func (p *Pickup) Pickup(by *Unit) {
 	p.timer = pickupDuration
 	p.target = by
 	p.startX, p.startY = p.X, p.Y
 }
 
-func (p *PickupData) Update() {
+func (p *Pickup) Update() {
 	p.Anim.TimeScale = TimeScale
 	p.timer -= DeltaTimeScaled()
 
