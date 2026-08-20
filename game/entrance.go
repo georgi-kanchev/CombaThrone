@@ -46,8 +46,8 @@ func NewEntrance(entry EntranceKind, base BaseKind, team Team, lane Lane) *Entra
 	case EntranceNone:
 		var hole = graphics.NewSprite(x, y, 1, Decor.Crops("hole")[0])
 		if base < BaseBarrack {
-			hole.X = -Background.Width / 2 // pull back entrance to edge of scene, fighting can happen further back
-			hole.Effects.Tint = 0          // and hide the hole
+			hole.X = -CurrentZone.Background.Width / 2 // pull back entrance to edge of scene (valid playfield)
+			hole.Effects.Tint = 0                      // and hide the hole
 		}
 
 		data.Tiles = []*graphics.Object{&hole}

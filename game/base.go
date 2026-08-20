@@ -26,7 +26,13 @@ type Base struct {
 	lastGlory int
 }
 
-const BaseNone, BaseCamp, BaseBarrack, BaseFort, BaseFortress BaseKind = 0, 1, 2, 3, 4
+const (
+	BaseNone BaseKind = iota
+	BaseCamp
+	BaseBarrack
+	BaseFort
+	BaseFortress
+)
 const GarrisonNone, Garrison1, Garrison2, Garrison3 Garrison = 0, 1, 2, 3
 
 var AllyBase, EnemyBase Base
@@ -53,16 +59,16 @@ func NewBase(team Team, saveState SaveState) Base {
 	case BaseNone:
 		return b
 	case BaseCamp:
-		var back = graphics.NewTilemap(Layers[LayerCamp])
+		var back = graphics.NewTilemap(Layers[BaseCamp-1])
 		b.Back = &back
 		return b
 	case BaseBarrack:
-		var barrack = graphics.NewTilemap(Layers[LayerBarrack])
+		var barrack = graphics.NewTilemap(Layers[BaseBarrack-1])
 		b.Back = &barrack
 		return b
 	}
 
-	var back, front = graphics.NewTilemap(Layers[LayerFortBack0]), graphics.NewTilemap(Layers[LayerFortFront0])
+	var back, front = graphics.NewTilemap(Layers[BaseFort-1]), graphics.NewTilemap(Layers[BaseFort])
 	b.Back, b.Front = &back, &front
 
 	if team == TeamEnemy {
@@ -77,8 +83,7 @@ func NewBase(team Team, saveState SaveState) Base {
 	}
 
 	if b.Garrison != GarrisonNone {
-		var backIndex = int(LayerFortBack0) + int(b.Garrison)*2
-		var frontIndex = int(LayerFortFront0) + int(b.Garrison)*2
+		var backIndex, frontIndex = int(BaseFort-1) + int(b.Garrison)*2, int(BaseFort) + int(b.Garrison)*2
 		var garBack, garFront = graphics.NewTilemap(Layers[backIndex]), graphics.NewTilemap(Layers[frontIndex])
 		b.GarrisonBack, b.GarrisonFront = &garBack, &garFront
 

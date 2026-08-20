@@ -14,8 +14,8 @@ var AudioHitFlesh, AudioHitWood, AudioHitMetal []audio.Audio
 var AudioEventPositive, AudioEventNegative []audio.Audio
 
 func LoadAudio() {
-	ambiences[EnvironmentField] = assets.LoadMusic("data/music/ambience-plains.mp3")
-	AudioAmbience = audio.New(ambiences[EnvironmentField])
+	ambiences[ZoneField] = assets.LoadMusic("data/music/ambience-plains.mp3")
+	AudioAmbience = audio.New(ambiences[ZoneField])
 
 	AudioDoorOpen = append(AudioDoorOpen, audio.New(assets.LoadSound("data/sounds/door-open1.mp3", 4)))
 	AudioDoorOpen = append(AudioDoorOpen, audio.New(assets.LoadSound("data/sounds/door-open2.mp3", 4)))
@@ -69,12 +69,12 @@ func PlaySound(variations []audio.Audio) {
 	var sound = random.PickFrom(variations)
 	sound.Play()
 }
-func PlayAmbience(environment Environment) {
-	AudioAmbience.AssetId = ambiences[environment]
+func PlayAmbience(zone ZoneKind) {
+	AudioAmbience.AssetId = ambiences[zone]
 	AudioAmbience.ApplyProperties()
 	AudioAmbience.Play()
 }
 
 // private ========================================================
 
-var ambiences [1]assets.AudioId // index is Environment
+var ambiences [ZoneCount]assets.AudioId

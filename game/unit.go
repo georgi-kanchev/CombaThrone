@@ -85,7 +85,7 @@ func NewUnit(character Character, team Team, lane Lane) *Unit {
 	case LaneUpper, LaneUpperOff:
 		unit.X, unit.Y = laneX-104, laneY
 	case LaneGarrison1, LaneGarrison2, LaneGarrison3, LaneGarrison4, LaneGarrison5:
-		unit.X, unit.Y = Background.Width/2+unit.Width/2, laneY
+		unit.X, unit.Y = CurrentZone.Background.Width/2+unit.Width/2, laneY
 	case LaneGarrisonPlus1, LaneGarrisonPlus2, LaneGarrisonPlus3, LaneGarrisonPlus4, LaneGarrisonPlus5:
 		unit.X, unit.Y = PointAtCell(18, 3)
 	}
@@ -95,12 +95,12 @@ func NewUnit(character Character, team Team, lane Lane) *Unit {
 
 	if team == TeamAlly {
 		if AllyBase.Kind < BaseBarrack {
-			unit.X = Background.Width/2 + unit.Width/2
+			unit.X = CurrentZone.Background.Width/2 + unit.Width/2
 		}
 
 		unit.X = -unit.X
 	} else if EnemyBase.Kind < BaseBarrack {
-		unit.X = Background.Width / 2
+		unit.X = CurrentZone.Background.Width / 2
 	}
 
 	var hb = unit.Hitbox()
@@ -349,7 +349,7 @@ func (u *Unit) actUponState() {
 			u.VelocityX = -u.VelocityX
 		}
 
-		if u.X < -Background.Width/2-u.Width*2 || u.X > Background.Width/2+u.Width*2 {
+		if u.X < -CurrentZone.Background.Width/2-u.Width*2 || u.X > CurrentZone.Background.Width/2+u.Width*2 {
 			u.hurtTimer = 0 // no instant delete - to have time to play glory text animation etc
 			u.State = StateDecaying
 		}
