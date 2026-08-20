@@ -47,8 +47,9 @@ func UpdateDebug() {
 	case DebugOff:
 		View.DrawDebugInfo(false)
 	case DebugGame:
-		Grid.Effects.Tint = color.RGBA(0, 0, 0, 50)
-		View.DrawObject(Grid)
+		View.DrawGrid(1, TileSize, TileSize, color.RGBA(0, 0, 0, 100))
+		View.DrawGrid(1, TileSize*100, TileSize*100, palette.Black)
+		// View.DrawObject(Grid)
 		View.DrawDebugInfo(false)
 		for _, u := range Units {
 			View.DrawShape(u.X, u.Y, u.Width, u.Height, 0, 0, DebugUnitColor, geometry.Area{})

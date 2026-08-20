@@ -153,9 +153,9 @@
   </tile>
  </tileset>
  <group id="96" name="Bases">
-  <layer id="84" name="Camp" width="18" height="10">
+  <layer id="84" name="Camp" width="18" height="10" visible="0">
    <data encoding="base64" compression="zlib">
-   eJxjYKAMWDJSaMAIAUuAeCkQLwPi5RSYcwSIjwLxMSA+TgV3DTcAAJFYBec=
+   eJxjYKAMWDJSaMAIAZxAzAXE3EDMQ4E5mkCsBcTaQKxDBXcNNwAAjK4BDw==
   </data>
   </layer>
   <layer id="17" name="Barrack" width="18" height="10" visible="0">
@@ -207,7 +207,7 @@
  <group id="97" name="Environments">
   <layer id="46" name="Field" width="18" height="10">
    <data encoding="base64" compression="zlib">
-   eJztjgEKwDAIA9OnaNu9c09fhQRC94RWCBHFi8Ctk+tpeKMBpbnU6YNKerAvXzc/hu6SDCmNnbbXTCz9Mbdczx7GCNt3erE+kx0ITQ==
+   eJxjYBgF9AatjMSrbcOjdikJ5izDoVaNkaFBESgHwqpArAylVaBYCUorQtkgWo0R0wyYPiWoGTCshGS2EpI8TAxmFswdqmj2ItutgmSGIpK8MpQGmQUANA4Kpw==
   </data>
   </layer>
   <layer id="86" name="FieldNoBase" width="18" height="10" visible="0">
@@ -265,22 +265,12 @@
    eJxjYBgFgxVcY2ZguA7EN5jJN+MrUO83IP4OxD+A+CcQ/6LAvMEOAFHZCG4=
   </data>
   </layer>
-  <layer id="105" name="HellBuildings" width="18" height="10">
+  <layer id="105" name="HellBuildings" width="18" height="10" visible="0">
    <data encoding="base64" compression="zlib">
    eJzN0bcNQlEQBMAn/RbIMFWQ4Zog42OKIMLXAUjUgZGgDTylMCHpQcJJk+1ucinFrpilVKJMJQuWP66mW6dBk9aXWx29nC49+gyCWyP5MROmzJizCO4s5VesKdBmE9zYyu/Yc6DKkCOnwNZZ9sKVG3cePHn98Ld/vzfBbRaR
   </data>
   </layer>
  </group>
- <layer id="60" name="Flags" width="18" height="10" visible="0">
-  <data encoding="base64" compression="zlib">
-   eJxjYBgF9AacJKjlwiOnSYI5WiSoHcoAAG0wAGc=
-  </data>
- </layer>
- <layer id="6" name="Grid" width="18" height="10" visible="0">
-  <data encoding="base64" compression="zlib">
-   eJxTZGBgUBzFo3iYYADUOBc1
-  </data>
- </layer>
  <group id="95" name="Collisions">
   <objectgroup id="61" name="Lower" visible="0">
    <object id="3" x="-62" y="309" width="700" height="8"/>

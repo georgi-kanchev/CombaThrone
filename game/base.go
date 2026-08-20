@@ -42,7 +42,7 @@ func NewBase(team Team, saveState SaveState) Base {
 	if team == TeamAlly {
 		ptsX, ptsY = PointAtCell(3, 5)
 	}
-	var label = graphics.NewTextbox(ptsX+Flags.X, ptsY+Flags.Y, TileSize, TileSize, 0)
+	var label = graphics.NewTextbox(ptsX, ptsY, TileSize, TileSize, 0)
 	label.Effects.FillColor, label.Effects.TextLineHeight = 0, 11
 	label.Effects.TextAlignX, label.Effects.TextAlignY = 0.5, 0.5
 	label.Effects.TextShadowColor, label.Effects.TextShadowWeight = 0, 0

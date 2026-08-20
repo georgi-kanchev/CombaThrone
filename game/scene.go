@@ -26,15 +26,21 @@ const ( // layer tilemaps
 	LayerFortBack3
 	LayerFortFront3
 
-	LayerField
+	LayerFieldGround
 	LayerFieldNoBase
 	LayerFieldBuildings
-	LayerDesert
+	LayerDesertGround
 	LayerDesertNoBase
 	LayerDesertBuildings
 
-	LayerFlags
-	LayerGrid
+	LayerRuinsBuildings
+	LayerCaveBuildings
+	LayerMineBuildings
+	LayerGlacierBuildings
+	LayerDocksBuildings
+	LayerSwampBuildings
+	LayerHellBuildings
+
 	LayerCount
 )
 
@@ -64,7 +70,7 @@ const TileSize, MapCount = 32, 4
 
 var TimeScale float32 = 1
 var View graphics.View
-var Background, Map, MapNoBase, MapBuildings, Grid, Flags *graphics.Object
+var Background, MapGround, MapNoBase, MapBuildings *graphics.Object
 var Decor, UserInterface assets.AtlasId
 var Layers [LayerCount]assets.TileLayerId
 
@@ -120,16 +126,13 @@ func InitScene() {
 	mirrorGarrisonLanes()
 
 	var bgr = graphics.NewSprite(0, 0, 1, assets.LoadImage("data/environments/background-glacier.png"))
-	var _map, mapNoBase = graphics.NewTilemap(layers[LayerField]), graphics.NewTilemap(layers[LayerFieldNoBase])
+	var _map, mapNoBase = graphics.NewTilemap(layers[LayerFieldGround]), graphics.NewTilemap(layers[LayerFieldNoBase])
 	var mapBuildings = graphics.NewTilemap(layers[LayerFieldBuildings])
-	Background, Map, MapNoBase, MapBuildings = &bgr, &_map, &mapNoBase, &mapBuildings
-
-	var flag, grid = graphics.NewTilemap(layers[LayerFlags]), graphics.NewTilemap(layers[LayerGrid])
-	Flags, Grid = &flag, &grid
+	Background, MapGround, MapNoBase, MapBuildings = &bgr, &_map, &mapNoBase, &mapBuildings
 
 	AllyBase = NewBase(TeamAlly, SaveState{
-		Kind: BaseCamp, Garrison: Garrison3, EntranceKinds: [3]EntranceKind{
-			EntranceNone, EntranceNone, EntranceNone,
+		Kind: BaseFortress, Garrison: Garrison3, EntranceKinds: [3]EntranceKind{
+			EntranceDoor, EntranceShortGate, EntranceTallGate,
 		},
 	})
 	EnemyBase = NewBase(TeamEnemy, SaveState{
@@ -138,7 +141,9 @@ func InitScene() {
 		},
 	})
 
-	// Units = append(Units, NewUnit(CharWoman, TeamAlly, LaneUpperOff))
+	Units = append(Units, NewUnit(CharWoman, TeamAlly, LaneUpper))
+	Units = append(Units, NewUnit(CharWoman, TeamAlly, LaneMiddle))
+	Units = append(Units, NewUnit(CharWoman, TeamAlly, LaneLower))
 	// Units = append(Units, NewUnit(CharWoman, TeamEnemy, LaneUpperOff))
 	// Units = append(Units, NewUnit(CharMan, TeamAlly, LaneUpper))
 	// Units = append(Units, NewUnit(CharHunter, TeamAlly, LaneLower))
@@ -173,10 +178,6 @@ func UpdateScene() {
 	AllyBase.UpdateBack()
 	EnemyBase.UpdateBack()
 
-	View.DrawObject(Flags)
-	AllyBase.UpdateMiddle()
-	EnemyBase.UpdateMiddle()
-
 	iterateRemovable(&AllyBase.Entrances, func(e *Entrance) { e.Update() })
 	iterateRemovable(&EnemyBase.Entrances, func(e *Entrance) { e.Update() })
 
@@ -188,7 +189,11 @@ func UpdateScene() {
 		MapNoBase.Width = -number.Absolute(MapNoBase.Width)
 		View.DrawObject(MapNoBase)
 	}
-	View.DrawObject(Map)
+
+	View.DrawObject(MapGround)
+
+	AllyBase.UpdateMiddle()
+	EnemyBase.UpdateMiddle()
 
 	iterateRemovable(&ProjectilesBehind, func(p *Projectile) { p.Update() })
 	iterateRemovable(&Pickups, func(p *Pickup) { p.Update() })
@@ -218,13 +223,13 @@ func UpdateScene() {
 }
 
 func PointAtCell(cellX, cellY float32) (x, y float32) {
-	var tw, th = Layers[LayerGrid].TileSize()
-	var cols, rows = Layers[LayerGrid].Size()
+	var tw, th = Layers[LayerCamp].TileSize()
+	var cols, rows = Layers[LayerCamp].Size()
 	return (cellX-float32(cols)/2)*tw + (tw / 2), (cellY-float32(rows)/2)*th + (th / 2)
 }
 func CellAtPoint(x, y float32) (cellX, cellY float32) {
-	var tw, th = Layers[LayerGrid].TileSize()
-	var cols, rows = Layers[LayerGrid].Size()
+	var tw, th = Layers[LayerCamp].TileSize()
+	var cols, rows = Layers[LayerCamp].Size()
 	return x/tw + float32(cols)/2, y/th + float32(rows)/2
 }
 func TileAtCell(cellX, cellY int, layer assets.TileLayerId) assets.Tile {

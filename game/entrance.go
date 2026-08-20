@@ -121,7 +121,7 @@ func (e *Entrance) Update() {
 		var breakIndex = number.Map(e.Health, 0, e.MaxHealth, 5, 1)
 		var isOpen = e.IsOpen()
 		if isOpen {
-			breakIndex = 0
+			breakIndex = 6
 		}
 
 		if condition.JustTurnedTrue(isOpen, int(e.Tiles[0].X)) {
