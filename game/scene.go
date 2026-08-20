@@ -4,6 +4,8 @@ import (
 	"pure-game-kit/packages/assets"
 	"pure-game-kit/packages/geometry"
 	"pure-game-kit/packages/graphics"
+	"pure-game-kit/packages/input/keyboard"
+	"pure-game-kit/packages/input/keyboard/key"
 	"pure-game-kit/packages/utility/collection"
 	"pure-game-kit/packages/utility/color"
 	"pure-game-kit/packages/utility/number"
@@ -65,7 +67,7 @@ func InitScene() {
 		Backgrounds[i] = assets.LoadImage("data/zones/background-" + name + ".png")
 		Zones[i] = NewZone(ZoneKind(i))
 	}
-	CurrentZone = Zones[ZoneSwamp]
+	CurrentZone = Zones[ZoneField]
 
 	AllyBase = NewBase(TeamAlly, SaveState{
 		Kind: BaseCamp, Garrison: Garrison3, EntranceKinds: [3]EntranceKind{
@@ -78,9 +80,9 @@ func InitScene() {
 		},
 	})
 
-	Units = append(Units, NewUnit(CharWoman, TeamAlly, LaneUpper))
-	Units = append(Units, NewUnit(CharWoman, TeamAlly, LaneMiddle))
-	Units = append(Units, NewUnit(CharWoman, TeamAlly, LaneLower))
+	// Units = append(Units, NewUnit(CharWoman, TeamAlly, LaneUpper))
+	// Units = append(Units, NewUnit(CharWoman, TeamAlly, LaneMiddle))
+	// Units = append(Units, NewUnit(CharWoman, TeamAlly, LaneLower))
 
 	Pickups = append(Pickups, NewPickup(0, PickupRelic, LaneLowerOff))
 
@@ -94,6 +96,13 @@ func UpdateScene() {
 	View.FitSize(CurrentZone.Background.Width, 0)
 	var _, h = View.Size()
 	View.Y = (bly - h/2) - 2
+
+	if keyboard.IsKeyJustPressed(key.RightArrow) && CurrentZone.kind < ZoneHell {
+		CurrentZone = Zones[CurrentZone.kind+1]
+	}
+	if keyboard.IsKeyJustPressed(key.LeftArrow) && CurrentZone.kind > ZoneField {
+		CurrentZone = Zones[CurrentZone.kind-1]
+	}
 
 	CurrentZone.UpdateBack()
 	AllyBase.UpdateBack()

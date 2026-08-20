@@ -33,7 +33,7 @@ func NewZone(kind ZoneKind) *Zone {
 	var bgr = graphics.NewSprite(0, 0, 1, Backgrounds[kind])
 	var ground = graphics.NewTilemap(Layers[ZoneLayerOffset+int(kind)*2])
 	var buildings = graphics.NewTilemap(Layers[ZoneLayerOffset+int(kind)*2+1])
-	return &Zone{Background: &bgr, Ground: &ground, Buildings: &buildings, skyColor: zoneSkyColors[kind]}
+	return &Zone{Background: &bgr, Ground: &ground, Buildings: &buildings, skyColor: zoneSkyColors[kind], kind: kind}
 }
 
 //=================================================================

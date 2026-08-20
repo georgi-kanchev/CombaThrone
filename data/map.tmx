@@ -121,44 +121,34 @@
     <frame tileid="632" duration="1000"/>
    </animation>
   </tile>
-  <tile id="787">
+  <tile id="820">
    <animation>
-    <frame tileid="787" duration="100"/>
-    <frame tileid="788" duration="100"/>
-    <frame tileid="789" duration="100"/>
-    <frame tileid="790" duration="100"/>
-    <frame tileid="791" duration="100"/>
-    <frame tileid="792" duration="100"/>
-   </animation>
-  </tile>
-  <tile id="819">
-   <animation>
-    <frame tileid="819" duration="100"/>
     <frame tileid="820" duration="100"/>
     <frame tileid="821" duration="100"/>
     <frame tileid="822" duration="100"/>
     <frame tileid="823" duration="100"/>
     <frame tileid="824" duration="100"/>
+    <frame tileid="825" duration="100"/>
    </animation>
   </tile>
-  <tile id="851">
+  <tile id="852">
    <animation>
-    <frame tileid="851" duration="100"/>
     <frame tileid="852" duration="100"/>
     <frame tileid="853" duration="100"/>
     <frame tileid="854" duration="100"/>
     <frame tileid="855" duration="100"/>
     <frame tileid="856" duration="100"/>
+    <frame tileid="857" duration="100"/>
    </animation>
   </tile>
-  <tile id="883">
+  <tile id="884">
    <animation>
-    <frame tileid="883" duration="100"/>
     <frame tileid="884" duration="100"/>
     <frame tileid="885" duration="100"/>
     <frame tileid="886" duration="100"/>
     <frame tileid="887" duration="100"/>
     <frame tileid="888" duration="100"/>
+    <frame tileid="889" duration="100"/>
    </animation>
   </tile>
  </tileset>
@@ -237,7 +227,7 @@
   </layer>
   <layer id="106" name="RuinsGround" width="18" height="10" visible="0">
    <data encoding="base64" compression="zlib">
-   eJztjgEKwDAIA9OnaNu9c09fhQRC94RWCBHFi8Ctk+tpeKMBpbnU6YNKerAvXzc/hu6SDCmNnbbXTCz9Mbdczx7GCNt3erE+kx0ITQ==
+   eJztToEJACAImweb1QWdXoLCqD4oYTjmnAK/Xq4uGE0Ahy4Y9Rpcg5fga+fISI+RzzbNLsgsz8gblfYbIWf8i5LuWRNb5xaL
   </data>
   </layer>
   <layer id="98" name="RuinsBuildings" width="18" height="10" visible="0">
@@ -275,34 +265,34 @@
    eJxjYBgFgw1IMTEwSAOxDBDLArEcEMsDsQITaeZYAdVbA7ENENsCsR0Q2wOxA4nmDCUAAJNKApM=
   </data>
   </layer>
-  <layer id="110" name="DocksGround" width="18" height="10">
+  <layer id="110" name="DocksGround" width="18" height="10" visible="0">
    <data encoding="base64" compression="zlib">
    eJztjgEKACAIA+cDtexFPT0DhVFPKGHIdB4Cv16uIZgugIZaqIcsvdGMe9xcDM57Zj29Et9yV/liFaNTTo9/mMs/l9+sBe0eEJA=
   </data>
   </layer>
-  <layer id="103" name="DocksBuildings" width="18" height="10">
+  <layer id="103" name="DocksBuildings" width="18" height="10" visible="0">
    <data encoding="base64" compression="zlib">
    eJzVz8dtQlEURdEvKBNDFYxANlRBTlWQUxNkG9yEwWQWDXwkJogrrdHR29ILgtdcLBIEH8RJRJ5rpLxLk+STLzJkH/Ry9jwFipQoU6FKjTqNB52mvUWbDl169BkwZMQ4pDOxTZkxZ8GSFd/8sGbDb0jnz7Zlxz97Dhw5cebC9d6Ihv/rne8GnSAo9w==
   </data>
   </layer>
   <layer id="111" name="SwampGround" width="18" height="10" visible="0">
    <data encoding="base64" compression="zlib">
-   eJztjgEKwDAIA9OnaNu9c09fhQRC94RWCBHFi8Ctk+tpeKMBpbnU6YNKerAvXzc/hu6SDCmNnbbXTCz9Mbdczx7GCNt3erE+kx0ITQ==
+   eJztjYkJADAIA+Oo2meOjt4HhUDdoBUOROMJ/Hq5umCoALZoi+oY9bHfFDk3l8Mop56r7oxZuDRxhSO7aU4h+JeSawJw1BRE
   </data>
   </layer>
-  <layer id="104" name="SwampBuildings" width="18" height="10" visible="0">
+  <layer id="104" name="SwampBuildings" width="18" height="10">
    <data encoding="base64" compression="zlib">
-   eJxjYBgFgxVcY2ZguA7EN5jJN+MrUO83IP4OxD+A+CcQ/6LAvMEOAFHZCG4=
+   eJxjYBgFgxFMYWZgmArE04B4OhDPAOKZzKSbswWoZysQbwPi7UC8A4h3kmHOUAEAKQwH8w==
   </data>
   </layer>
   <layer id="112" name="HellGround" width="18" height="10" visible="0">
    <data encoding="base64" compression="zlib">
-   eJztjgEKwDAIA9OnaNu9c09fhQRC94RWCBHFi8Ctk+tpeKMBpbnU6YNKerAvXzc/hu6SDCmNnbbXTCz9Mbdczx7GCNt3erE+kx0ITQ==
+   eJztjIkJwDAMA5Vp/WWIjl4bFDDOCK1B+JMO+OvLtRceX0CkLOXsQZ2fUvXLzMU4HhkMbyzlLpyjsYqhwy/kWMv3rIx7sV70+BWB
   </data>
   </layer>
   <layer id="105" name="HellBuildings" width="18" height="10" visible="0">
    <data encoding="base64" compression="zlib">
-   eJzN0bcNQlEQBMAn/RbIMFWQ4Zog42OKIMLXAUjUgZGgDTylMCHpQcJJk+1ucinFrpilVKJMJQuWP66mW6dBk9aXWx29nC49+gyCWyP5MROmzJizCO4s5VesKdBmE9zYyu/Yc6DKkCOnwNZZ9sKVG3cePHn98Ld/vzfBbRaR
+   eJzV0bcNQkEQBNCTfhuYKoiwTRDxMU0QYftAQB8YQRt4SuG1cJsx0st2JtmU8lMpUqpSo14EBqSp16JNhy69wNZAp2TIiDGTwM5MZ86CJSvWgZ2NTp8tO/ZMM3cO7o+cONPgwjVj5+b2zoMnL958+AZ/9g/5AXbkFlA=
   </data>
   </layer>
  </group>
