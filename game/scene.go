@@ -119,9 +119,9 @@ func InitScene() {
 
 	mirrorGarrisonLanes()
 
-	var bgr = graphics.NewSprite(0, 0, 1, assets.LoadImage("data/environments/background-desert.png"))
-	var _map, mapNoBase = graphics.NewTilemap(layers[LayerDesert]), graphics.NewTilemap(layers[LayerDesertNoBase])
-	var mapBuildings = graphics.NewTilemap(layers[LayerDesertBuildings])
+	var bgr = graphics.NewSprite(0, 0, 1, assets.LoadImage("data/environments/background-glacier.png"))
+	var _map, mapNoBase = graphics.NewTilemap(layers[LayerField]), graphics.NewTilemap(layers[LayerFieldNoBase])
+	var mapBuildings = graphics.NewTilemap(layers[LayerFieldBuildings])
 	Background, Map, MapNoBase, MapBuildings = &bgr, &_map, &mapNoBase, &mapBuildings
 
 	var flag, grid = graphics.NewTilemap(layers[LayerFlags]), graphics.NewTilemap(layers[LayerGrid])
@@ -243,7 +243,8 @@ func DrawShadow(x, z, width, height, angle float32, mask geometry.Area) {
 
 // private ========================================================
 
-var skyColor = color.TagRGBA("rgb(98, 171, 212)")
+// var skyColor = color.TagRGBA("rgb(98, 171, 212)")
+var skyColor = color.TagRGBA("rgb(155, 240, 253)")
 
 // var skyColor = color.TagRGBA("rgb(227, 177, 109)")
 

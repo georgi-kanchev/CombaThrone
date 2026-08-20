@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="18" height="10" tilewidth="32" tileheight="32" infinite="0" nextlayerid="98" nextobjectid="52">
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="18" height="10" tilewidth="32" tileheight="32" infinite="0" nextlayerid="106" nextobjectid="52">
  <tileset firstgid="1" name="decor" tilewidth="32" tileheight="32" tilecount="1024" columns="32">
   <image source="decor.png" width="1024" height="1024"/>
   <tile id="20">
@@ -93,22 +93,62 @@
     <frame tileid="153" duration="1500"/>
    </animation>
   </tile>
-  <tile id="218">
+  <tile id="214">
    <animation>
+    <frame tileid="214" duration="500"/>
+    <frame tileid="215" duration="500"/>
+    <frame tileid="216" duration="500"/>
+    <frame tileid="217" duration="500"/>
     <frame tileid="218" duration="500"/>
     <frame tileid="219" duration="500"/>
-    <frame tileid="220" duration="500"/>
-    <frame tileid="221" duration="500"/>
-    <frame tileid="222" duration="500"/>
-    <frame tileid="223" duration="500"/>
    </animation>
   </tile>
-  <tile id="282">
+  <tile id="278">
    <animation>
-    <frame tileid="282" duration="500"/>
-    <frame tileid="283" duration="500"/>
-    <frame tileid="284" duration="500"/>
-    <frame tileid="285" duration="500"/>
+    <frame tileid="278" duration="500"/>
+    <frame tileid="279" duration="500"/>
+    <frame tileid="280" duration="500"/>
+    <frame tileid="281" duration="500"/>
+   </animation>
+  </tile>
+  <tile id="787">
+   <animation>
+    <frame tileid="787" duration="100"/>
+    <frame tileid="788" duration="100"/>
+    <frame tileid="789" duration="100"/>
+    <frame tileid="790" duration="100"/>
+    <frame tileid="791" duration="100"/>
+    <frame tileid="792" duration="100"/>
+   </animation>
+  </tile>
+  <tile id="819">
+   <animation>
+    <frame tileid="819" duration="100"/>
+    <frame tileid="820" duration="100"/>
+    <frame tileid="821" duration="100"/>
+    <frame tileid="822" duration="100"/>
+    <frame tileid="823" duration="100"/>
+    <frame tileid="824" duration="100"/>
+   </animation>
+  </tile>
+  <tile id="851">
+   <animation>
+    <frame tileid="851" duration="100"/>
+    <frame tileid="852" duration="100"/>
+    <frame tileid="853" duration="100"/>
+    <frame tileid="854" duration="100"/>
+    <frame tileid="855" duration="100"/>
+    <frame tileid="856" duration="100"/>
+   </animation>
+  </tile>
+  <tile id="883">
+   <animation>
+    <frame tileid="883" duration="100"/>
+    <frame tileid="884" duration="100"/>
+    <frame tileid="885" duration="100"/>
+    <frame tileid="886" duration="100"/>
+    <frame tileid="887" duration="100"/>
+    <frame tileid="888" duration="100"/>
    </animation>
   </tile>
  </tileset>
@@ -167,32 +207,67 @@
  <group id="97" name="Environments">
   <layer id="46" name="Field" width="18" height="10">
    <data encoding="base64" compression="zlib">
-   eJztjAsKACAIQ+fR0uxcHb2CCdHnBCWMDXUP+PPyFEFVATKV6N6lh93IvbMxEm9KN7ozB8sWfrAGI/5CfunbtFNmJ6sBBA4OUA==
+   eJztjgEKwDAIA9OnaNu9c09fhQRC94RWCBHFi8Ctk+tpeKMBpbnU6YNKerAvXzc/hu6SDCmNnbbXTCz9Mbdczx7GCNt3erE+kx0ITQ==
   </data>
   </layer>
   <layer id="86" name="FieldNoBase" width="18" height="10" visible="0">
    <data encoding="base64" compression="zlib">
-   eJxjYBgFIxG4MkKwMyPl5rhQaAYIOFLBDBAAAA7NAZ4=
+   eJxjYBgFIxEoMjIwqACxKiPl5ihTaAbMHGoAAI1eANY=
   </data>
   </layer>
   <layer id="93" name="FieldBuildings" width="18" height="10" visible="0">
    <data encoding="base64" compression="zlib">
-   eJzVzEEKAWEYx+HPIRRm4RRTSuESU0oZl1BqCpdQNoxj2BiugZNg4znCl1lM/vVs3np/ITSzNh2Smp2UAUNGjJn80MmYMmNOziLy986DJ0tWFKzZsI3svHjzYceeA0dKTpGdbiuEHgl9zm4XKq7cIjv/uC8LaRP+
+   eJzVzEsKQFAYhuFjEQdlHUopu1BK2YVSCptQJi7LMHHZBFaCqXcJR2cgXz2Tv/5XiG8mYcPR7Ljw4CPQ6ISIECN5+bthx4EUGXIUKFEpdk5cuFGjQYsOPQbFjjSEMGHBwchtwowFq2Lnj3sAlrQSmA==
   </data>
   </layer>
   <layer id="92" name="Desert" width="18" height="10" visible="0">
    <data encoding="base64" compression="zlib">
-   eJxjYBgFIxksY2RoWMjIwLAUDYPElkDZi6H0IigN1INhxiIk9YuQzFgE1Q9jw9TBxGFmwdyxGIcemNxiJHuWYjELAFrPIFU=
+   eJxjYBgFIxnoMDI0qDMyMMCwBhBrA7EWmhiI1oRioB4MM7SQ9GkiqddComFqkO2AmQUyQwPJLm0ktVpoWANJDt1dAAb8CXI=
   </data>
   </layer>
   <layer id="91" name="DesertNoBase" width="18" height="10" visible="0">
    <data encoding="base64" compression="zlib">
-   eJxjYBgFIxEsZWRgWAzESxgpM2cJ1BxquIcaAACCCAPf
+   eJxjYBgFIxFoMzIwqAOxBiNl5mhBzaEUUMMMEAAAo6oA+Q==
   </data>
   </layer>
   <layer id="94" name="DesertBuildings" width="18" height="10" visible="0">
    <data encoding="base64" compression="zlib">
-   eJzVzFs2gmEYhuH/Nyhk1yyEEqMIJYwCbahRRCmMwiaRUUS2XdbqtL5j71rX0fOuO4om32wcRXPMk2CBRZZYZoVkPCUwvlU/KdZYZ4M0GTbJssV2oJWz77DLHnkK7FPkgEOOAp1j+wmnlChTocoZ59SoBzoN+wWXNGlxRZsO19xwG+jc2e954JEuT/R45oU+r4HOwP7GO0M++OSLb374/WvMTO/85xsBOlQtrQ==
+   eJzV0El2QQEQBdDPsrARwT6IbhmaaLILbbAK0miyCn3CNTXxmalz7qjqvUEFQfiJRYIgTiJyR+hqkrIvpEiTeaArK5PjlTwFipQoh+yruKtSo84bDZq0aPMeoqvjpkuPPgOGfDBizORGz9R+xidffPPDnAVLVvze6Fnbb9iyY8+BI3/8c7p0RMP96BnnDLFJJyg=
+  </data>
+  </layer>
+  <layer id="98" name="RuinsBuildings" width="18" height="10" visible="0">
+   <data encoding="base64" compression="zlib">
+   eJxjYBgFgwn8AeK/QPwPiP+DBBgZGOyA2B6IHRiJN0cGqFYWiOWAWB6IFYA4DojjgTiBBHOGGgAASx0Gcw==
+  </data>
+  </layer>
+  <layer id="99" name="CaveBuildings" width="18" height="10" visible="0">
+   <data encoding="base64" compression="zlib">
+   eJxjYBgFtAKmjAwMZkBszkiZOaFA/WFAHE6hOaVA/WVAXE6hOYMZAABWNAMQ
+  </data>
+  </layer>
+  <layer id="100" name="MineBuildings" width="18" height="10" visible="0">
+   <data encoding="base64" compression="zlib">
+   eJxjYBgFgxWIMjEwiAGxJBNl5pgC9ZsBsSUQhwNxBIXmDWYAAI/XAag=
+  </data>
+  </layer>
+  <layer id="101" name="GlacierBuildings" width="18" height="10" visible="0">
+   <data encoding="base64" compression="zlib">
+   eJxjYBgFgw1IMTEwSAOxDBDLArEcEMsDsQITaeZYAdVbA7ENENsCsR0Q2wOxA4nmDCUAAJNKApM=
+  </data>
+  </layer>
+  <layer id="103" name="DocksBuildings" width="18" height="10" visible="0">
+   <data encoding="base64" compression="zlib">
+   eJzVz9lNgmEUBNAvUKZCHyhbFSCbUAWyaxOyCWgT7AgcGvgJT4SbnKfJTHJDuM89xUJ4JkEydns/pfPCK2kyZMmRv7JXkBd5o0SZClVqvFOncWWnKf+gRZsOXXr0GfDJV8TOt2zIiDETpvwwY86CX/4idpayFWs2bNmx58A/R06XjXj0X498Z68VKXo=
+  </data>
+  </layer>
+  <layer id="104" name="SwampBuildings" width="18" height="10" visible="0">
+   <data encoding="base64" compression="zlib">
+   eJxjYBgFgxVcY2ZguA7EN5jJN+MrUO83IP4OxD+A+CcQ/6LAvMEOAFHZCG4=
+  </data>
+  </layer>
+  <layer id="105" name="HellBuildings" width="18" height="10">
+   <data encoding="base64" compression="zlib">
+   eJzN0bcNQlEQBMAn/RbIMFWQ4Zog42OKIMLXAUjUgZGgDTylMCHpQcJJk+1ucinFrpilVKJMJQuWP66mW6dBk9aXWx29nC49+gyCWyP5MROmzJizCO4s5VesKdBmE9zYyu/Yc6DKkCOnwNZZ9sKVG3cePHn98Ld/vzfBbRaR
   </data>
   </layer>
  </group>
