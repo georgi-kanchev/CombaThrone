@@ -482,7 +482,6 @@ func (u *Unit) applyCollisions() {
 func (u *Unit) draw() {
 	var frame = u.Anim.Frame()
 	var crop = frame.CropArea()
-
 	u.ImageId, u.Width, u.Height = frame, crop.Width, crop.Height
 
 	if u.Stats.Health > 0 && !u.IsGarrisoner() {

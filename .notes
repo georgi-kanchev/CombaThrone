@@ -25,3 +25,14 @@ characters:
     - grandpa   damage buff radius
     - hunter    ???
     - fisherman ??? hook someone up a lane
+
+campaign zone order:
+- 1 ZoneField
+- 2 ZoneRuins
+- 3 ZoneSwamp
+- 4 ZoneDesert
+- 5 ZoneDocks
+- 6 ZoneGlacier
+- 7 ZoneMine
+- 8 ZoneCave
+- 9 ZoneHell

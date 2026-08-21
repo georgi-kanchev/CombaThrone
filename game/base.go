@@ -1,7 +1,9 @@
 package game
 
 import (
+	"pure-game-kit/packages/assets"
 	"pure-game-kit/packages/graphics"
+	"pure-game-kit/packages/motion"
 	"pure-game-kit/packages/utility/color/palette"
 	"pure-game-kit/packages/utility/text"
 )
@@ -21,8 +23,11 @@ type Base struct {
 
 	Glory int
 
-	Back, Front, GarrisonBack, GarrisonFront, GloryLabel *graphics.Object
+	Back, Front, GarrisonBack, GarrisonFront, GloryLabel, Flag *graphics.Object
 
+	FlagAnim *motion.Animation[assets.ImageId]
+
+	team      Team
 	lastGlory int
 }
 
@@ -38,22 +43,29 @@ const GarrisonNone, Garrison1, Garrison2, Garrison3 Garrison = 0, 1, 2, 3
 var AllyBase, EnemyBase Base
 
 func NewBase(team Team, saveState SaveState) Base {
-	var b = Base{SaveState: saveState, Glory: baseGlory[saveState.Kind]}
+	var b = Base{SaveState: saveState, Glory: baseGlory[saveState.Kind], team: team}
 	b.Entrances = make([]*Entrance, 3)
 	b.Entrances[LaneLower/2] = NewEntrance(saveState.EntranceKinds[LaneLower/2], b.Kind, team, LaneLower)
 	b.Entrances[LaneMiddle/2] = NewEntrance(saveState.EntranceKinds[LaneMiddle/2], b.Kind, team, LaneMiddle)
 	b.Entrances[LaneUpper/2] = NewEntrance(saveState.EntranceKinds[LaneUpper/2], b.Kind, team, LaneUpper)
 
-	var ptsX, ptsY = PointAtCell(14, 5)
-	if team == TeamAlly {
-		ptsX, ptsY = PointAtCell(3, 5)
-	}
-	var label = graphics.NewTextbox(ptsX, ptsY, TileSize, TileSize, 0)
-	label.Effects.FillColor, label.Effects.TextLineHeight = 0, 11
-	label.Effects.TextAlignX, label.Effects.TextAlignY = 0.5, 0.5
+	var label = graphics.NewTextbox(0, 0, TileSize*2, TileSize, 0)
+	label.Effects.FillColor, label.Effects.TextLineHeight = 0, 16
+	label.Effects.TextAlignX, label.Effects.TextAlignY = 0, 0.5
 	label.Effects.TextShadowColor, label.Effects.TextShadowWeight = 0, 0
 	label.Effects.OutlineSize, label.Effects.OutlineColor = 0.4, palette.Black
+	label.Effects.Tint = palette.Red
 	b.GloryLabel = &label
+
+	var x, y = PointAtCell(14, 5.5)
+	if team == TeamAlly {
+		label.Effects.Tint = palette.Green
+		x, _ = PointAtCell(3, 5.5)
+	}
+
+	var flag = graphics.NewSprite(x, y, 1, 0)
+	var anim = motion.NewAnimation[assets.ImageId](2, true)
+	b.Flag, b.FlagAnim = &flag, &anim
 
 	switch b.Kind {
 	case BaseNone:
@@ -106,9 +118,16 @@ var baseGlory = map[BaseKind]int{BaseNone: 10, BaseCamp: 15, BaseBarrack: 30, Ba
 func (b *Base) UpdateBack() {
 	View.DrawObject(b.Back)
 	View.DrawObject(b.GarrisonBack)
-}
-func (b *Base) UpdateMiddle() {
-	View.DrawObject(b.GloryLabel)
+
+	var group = "flag-" + zoneNames[CurrentZone.kind]
+	if b.team == TeamAlly {
+		group = "flag-player"
+	}
+	b.FlagAnim.Frames = Decor.Crops(group)
+	var frame = b.FlagAnim.Frame()
+	var crop = frame.CropArea()
+	b.Flag.ImageId, b.Flag.Width, b.Flag.Height = frame, crop.Width, crop.Height
+	View.DrawObject(b.Flag)
 }
 func (b *Base) UpdateFront() {
 	b.Glory = max(b.Glory, 0)
@@ -124,4 +143,15 @@ func (b *Base) UpdateFront() {
 
 	View.DrawObject(b.Front)
 	View.DrawObject(b.GarrisonFront)
+
+	if b.team == TeamAlly {
+		var tlx, tly = View.PointFromEdge(0, 0)
+		b.GloryLabel.Effects.TextAlignX = 0.05
+		b.GloryLabel.X, b.GloryLabel.Y = tlx+TileSize*1.2, tly+TileSize/2
+	} else {
+		var tlx, tly = View.PointFromEdge(1, 0)
+		b.GloryLabel.Effects.TextAlignX = 0.95
+		b.GloryLabel.X, b.GloryLabel.Y = tlx-TileSize*1.2, tly+TileSize/2
+	}
+	View.DrawObject(b.GloryLabel)
 }

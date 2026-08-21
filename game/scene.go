@@ -62,15 +62,14 @@ func InitScene() {
 	}
 	mirrorGarrisonLanes()
 
-	var bgrNames = [ZoneCount]string{"field", "desert", "ruins", "cave", "mine", "glacier", "docks", "swamp", "hell"}
-	for i, name := range bgrNames {
+	for i, name := range zoneNames {
 		Backgrounds[i] = assets.LoadImage("data/zones/background-" + name + ".png")
 		Zones[i] = NewZone(ZoneKind(i))
 	}
 	CurrentZone = Zones[ZoneField]
 
 	AllyBase = NewBase(TeamAlly, SaveState{
-		Kind: BaseCamp, Garrison: Garrison3, EntranceKinds: [3]EntranceKind{
+		Kind: BaseNone, Garrison: Garrison3, EntranceKinds: [3]EntranceKind{
 			EntranceNone, EntranceNone, EntranceNone,
 		},
 	})
@@ -110,8 +109,6 @@ func UpdateScene() {
 	iterateRemovable(&AllyBase.Entrances, func(e *Entrance) { e.Update() })
 	iterateRemovable(&EnemyBase.Entrances, func(e *Entrance) { e.Update() })
 	CurrentZone.UpdateFront()
-	AllyBase.UpdateMiddle()
-	EnemyBase.UpdateMiddle()
 
 	iterateRemovable(&ProjectilesBehind, func(p *Projectile) { p.Update() })
 	iterateRemovable(&Pickups, func(p *Pickup) { p.Update() })

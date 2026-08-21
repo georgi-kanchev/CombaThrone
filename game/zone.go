@@ -38,6 +38,7 @@ func NewZone(kind ZoneKind) *Zone {
 
 //=================================================================
 
+var zoneNames = [ZoneCount]string{"field", "desert", "ruins", "cave", "mine", "glacier", "docks", "swamp", "hell"}
 var zoneSkyColors = [ZoneCount]uint{
 	ZoneField: color.TagRGBA("rgb(98, 171, 212)"), ZoneDesert: color.TagRGBA("rgb(155, 240, 253)"),
 	ZoneRuins: color.TagRGBA("rgb(98, 171, 212)"), ZoneCave: color.TagRGBA("rgb(72, 54, 59)"),
@@ -46,20 +47,20 @@ var zoneSkyColors = [ZoneCount]uint{
 	ZoneHell: color.TagRGBA("rgb(227, 177, 109)"),
 }
 
-func (e *Zone) UpdateBack() {
-	View.DrawColor(e.skyColor)
-	View.DrawObject(e.Background)
-	View.DrawObject(e.Buildings)
+func (z *Zone) UpdateBack() {
+	View.DrawColor(z.skyColor)
+	View.DrawObject(z.Background)
+	View.DrawObject(z.Buildings)
 }
-func (e *Zone) UpdateFront() {
+func (z *Zone) UpdateFront() {
 	if AllyBase.Kind < BaseBarrack {
-		e.Ground.X = -TileSize * 4
-		View.DrawObject(e.Ground)
+		z.Ground.X = -TileSize * 4
+		View.DrawObject(z.Ground)
 	}
 	if EnemyBase.Kind < BaseBarrack {
-		e.Ground.X = TileSize * 4
-		View.DrawObject(e.Ground)
+		z.Ground.X = TileSize * 4
+		View.DrawObject(z.Ground)
 	}
-	e.Ground.X = 0
-	View.DrawObject(e.Ground)
+	z.Ground.X = 0
+	View.DrawObject(z.Ground)
 }

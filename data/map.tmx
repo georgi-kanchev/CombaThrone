@@ -207,7 +207,7 @@
  <group id="97" name="Zones">
   <layer id="46" name="FieldGround" width="18" height="10" visible="0">
    <data encoding="base64" compression="zlib">
-   eJztjgEKwDAIA9OnaNu9c09fhQRC94RWCBHFi8Ctk+tpeKMBpbnU6YNKerAvXzc/hu6SDCmNnbbXTCz9Mbdczx7GCNt3erE+kx0ITQ==
+   eJxjYBgFIxmIMDA0CABpEOZHo0FYGIphfCGIHqxmCCKp44fq40fjw8zgRzMLZAbMLkEkswSR1KO7RxCNBpkFAByKBLg=
   </data>
   </layer>
   <layer id="93" name="FieldBuildings" width="18" height="10" visible="0">
@@ -217,7 +217,7 @@
   </layer>
   <layer id="92" name="DesertGround" width="18" height="10" visible="0">
    <data encoding="base64" compression="zlib">
-   eJxjYBgFIxnoMDI0qDMyMMCwBhBrA7EWmhiI1oRioB4MM7SQ9GkiqddComFqkO2AmQUyQwPJLm0ktVpoWANJDt1dAAb8CXI=
+   eJxjYBgFIxmYMDA06ANpQyA2hmIQ3wBKwzBI3AhKm2AxAyYPwwZIZulDxWDmGCLJmyCZYYQmZ4jDfgM0OwyhfJBZAJSYCso=
   </data>
   </layer>
   <layer id="94" name="DesertBuildings" width="18" height="10" visible="0">
@@ -227,7 +227,7 @@
   </layer>
   <layer id="106" name="RuinsGround" width="18" height="10" visible="0">
    <data encoding="base64" compression="zlib">
-   eJztToEJACAImweb1QWdXoLCqD4oYTjmnAK/Xq4uGE0Ahy4Y9Rpcg5fga+fISI+RzzbNLsgsz8gblfYbIWf8i5LuWRNb5xaL
+   eJztjgEKwDAIA9MXrKl7cJ++ChFC6Q9WIRhFT4Ebf463YfYGPEtDyprqdctDfu0cGWEzlA9jUXJmsZJBm+H2E8UKY9St6iXrAzBOBOs=
   </data>
   </layer>
   <layer id="98" name="RuinsBuildings" width="18" height="10" visible="0">
@@ -237,7 +237,7 @@
   </layer>
   <layer id="107" name="CaveGround" width="18" height="10" visible="0">
    <data encoding="base64" compression="zlib">
-   eJztjgEKACAIA9fT1OpdPT2FhGFPqMFgip4CXy9rNqzegPA4jixuO3VkpZ7vXAwpDCNW9rWwBrGCoWXG6Beh+2mlO8naCM4OUw==
+   eJztjoEJACAIBB29DdJs4JJeeKoNSjh8qS5Ffr1cXaS02X3SgFLOObH15nAoHIZ7nI1wgl3hqJf/I1fg6Hlu257hGuldHMw=
   </data>
   </layer>
   <layer id="99" name="CaveBuildings" width="18" height="10" visible="0">
@@ -247,7 +247,7 @@
   </layer>
   <layer id="108" name="MineGround" width="18" height="10" visible="0">
    <data encoding="base64" compression="zlib">
-   eJztjQEKACAIA+frTOtRPT0FBZF+UIOBOnYCXy9rEfYkQMzD7LOaOXa97Na5MrgxJG61z42ZLGdIybKfHuWWP2omwTp7fg9z
+   eJztjgsKACAIQz16N7S0A2W0waAjlDDMz16a/Xg5plnrlUfJkaOUEPuBdz+ei+EyJy/hTfTII1NZvMPFE7I3pNaZyz+btQDBbCi4
   </data>
   </layer>
   <layer id="100" name="MineBuildings" width="18" height="10" visible="0">
@@ -257,7 +257,7 @@
   </layer>
   <layer id="109" name="GlacierGround" width="18" height="10" visible="0">
    <data encoding="base64" compression="zlib">
-   eJxjYBgFIxkYMTI06DEyMOgDsQEQg9iGUAzi60Ll9JHYQD0YZugjqTdAUq+HRMPM1YNiZLOQzUBWA+Mju8EQSRxmnwHULAB/gAqW
+   eJxjYBgFIxmEMDA0BAFpGA4GYn8oDcKBSHQQlA7BYwZIbwCSOQFoZgRAxWFqQ5DM8IeqgWGYumA0c2DuQ3c3yCwACaEQzg==
   </data>
   </layer>
   <layer id="101" name="GlacierBuildings" width="18" height="10" visible="0">
@@ -267,7 +267,7 @@
   </layer>
   <layer id="110" name="DocksGround" width="18" height="10" visible="0">
    <data encoding="base64" compression="zlib">
-   eJztjgEKACAIA+cDtexFPT0DhVFPKGHIdB4Cv16uIZgugIZaqIcsvdGMe9xcDM57Zj29Et9yV/liFaNTTo9/mMs/l9+sBe0eEJA=
+   eJztjg0KADAEhd3YsAPs6KOol9xgUy//H0TfXrZNdJb7kKYqF4jNxdnfA0NhToAlKYMaD6xg1A1ruwp1bv8wzATrAnS7FsU=
   </data>
   </layer>
   <layer id="103" name="DocksBuildings" width="18" height="10" visible="0">
@@ -277,17 +277,17 @@
   </layer>
   <layer id="111" name="SwampGround" width="18" height="10" visible="0">
    <data encoding="base64" compression="zlib">
-   eJztjYkJADAIA+Oo2meOjt4HhUDdoBUOROMJ/Hq5umCoALZoi+oY9bHfFDk3l8Mop56r7oxZuDRxhSO7aU4h+JeSawJw1BRE
+   eJztTFsKADAI6ui7UY91wPVhILEbbIFYaor8eXlSZO1iB6KghdYMO+t56VBkjLg72PORSeoI/Nj4b13pjuEFug5X+iLP
   </data>
   </layer>
-  <layer id="104" name="SwampBuildings" width="18" height="10">
+  <layer id="104" name="SwampBuildings" width="18" height="10" visible="0">
    <data encoding="base64" compression="zlib">
    eJxjYBgFgxFMYWZgmArE04B4OhDPAOKZzKSbswWoZysQbwPi7UC8A4h3kmHOUAEAKQwH8w==
   </data>
   </layer>
-  <layer id="112" name="HellGround" width="18" height="10" visible="0">
+  <layer id="112" name="HellGround" width="18" height="10">
    <data encoding="base64" compression="zlib">
-   eJztjIkJwDAMA5Vp/WWIjl4bFDDOCK1B+JMO+OvLtRceX0CkLOXsQZ2fUvXLzMU4HhkMbyzlLpyjsYqhwy/kWMv3rIx7sV70+BWB
+   eJztjgEKACAIA316P07NB2TgYEg/KEGmsh2K/Hq5QmRo6sxepdi95qNGnrgwrHzwOCmYWhwldhADN+TAdMp33mx/bTF5Lrw=
   </data>
   </layer>
   <layer id="105" name="HellBuildings" width="18" height="10" visible="0">
