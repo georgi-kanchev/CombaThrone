@@ -29,7 +29,7 @@ func NewHealthBar(width float32, team Team, offLane bool) *HealthBar {
 	var fill = graphics.NewShapeRectangle(0, 0, 0, 0, 0)
 	var data = HealthBar{team: team, background: &bgr, fill: &fill}
 	bgr.Effects.FillColor, bgr.Effects.BorderSize = color.Darken(fill.Effects.FillColor, 0.9), 0
-	fill.Effects.FillColor, fill.Effects.BorderSize = healthBarColors[team], 0
+	fill.Effects.FillColor, fill.Effects.BorderSize = teamColors[team], 0
 
 	if !offLane {
 		var label = graphics.NewTextbox(0, 0, 50, 24, 0)
@@ -41,10 +41,7 @@ func NewHealthBar(width float32, team Team, offLane bool) *HealthBar {
 		var glory, dmg = label, fill // copy
 		glory.Effects.TextLineHeight, glory.Effects.OutlineSize = 10, 0.45
 		glory.Height = 20
-		glory.Effects.Tint = palette.Green
-		if team == TeamEnemy {
-			glory.Effects.Tint = palette.Red
-		}
+		glory.Effects.Tint = teamColors[team]
 
 		data.label, data.glory, data.damage = &label, &glory, &dmg
 	}
@@ -139,16 +136,9 @@ func (hb *HealthBar) Update(target geometry.Shape, health, maxHealth int, mask g
 	}
 
 	if hb.toGlory && hb.team != TeamNeutral {
-		var targetX, targetY float32
-		if hb.team == TeamAlly {
-			targetX, targetY = EnemyBase.GloryLabel.X, EnemyBase.GloryLabel.Y
-		} else {
-			targetX, targetY = AllyBase.GloryLabel.X, AllyBase.GloryLabel.Y
-		}
-
 		var progress = number.Limit(number.Map(hb.timer, hb.duration, 0, 0, 1), 0, 1)
-		hb.glory.X = number.Map(easing.BackOut(progress), 0, 1, hb.startX, targetX)
-		hb.glory.Y = number.Map(easing.CubicIn(progress), 0, 1, hb.startY, targetY)
+		hb.glory.X = number.Map(easing.BackOut(progress), 0, 1, hb.startX, Hud.TeamGlory[1-hb.team].X)
+		hb.glory.Y = number.Map(easing.CubicIn(progress), 0, 1, hb.startY, Hud.TeamGlory[1-hb.team].Y)
 
 		const riseEnd, fallStart = 0.5, 0.75
 		if progress < riseEnd { // smooth rise in
@@ -166,14 +156,10 @@ func (hb *HealthBar) Update(target geometry.Shape, health, maxHealth int, mask g
 			var t = number.Map(progress, fallStart, 1, 0, 1)
 			var alpha = byte(number.Map(easing.CubicIn(t), 0, 1, 255, 0))
 			var r, g, b, _ = color.Channels(hb.glory.Effects.Tint)
-			hb.glory.Effects.TextLineHeight = number.Map(easing.CubicIn(t), 0, 1, 16, 0)
+			hb.glory.Effects.TextLineHeight = number.Map(easing.CubicIn(t), 0, 1, 16, 12)
 			hb.glory.Effects.Tint = color.RGBA(r, g, b, alpha)
 		}
 
 		View.DrawObject(hb.glory)
 	}
 }
-
-// private ========================================================
-
-var healthBarColors = [3]uint{TeamAlly: palette.Green, TeamEnemy: palette.Red, TeamNeutral: palette.Azure}

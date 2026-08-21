@@ -45,16 +45,19 @@ var CurrentZone *Zone
 var Layers []assets.TileLayerId
 var SortedY []*graphics.Object // for units & pickups
 
+var Hud *HUD
+
 func InitScene() {
 	View = graphics.NewView(1)
 	UserInterface = assets.LoadAtlas(assets.LoadImage("data/user-interface.png"), "data/user-interface.xml")
 
-	assets.FontId(0).EmbedImage(text.At(Tags[IconGlory], 0), UserInterface.Crops("icons")[IconGlory])
-	assets.FontId(0).EmbedImage(text.At(Tags[IconHealth], 0), UserInterface.Crops("icons")[IconHealth])
-
 	var layers, decor = assets.LoadTileLayersFromTiled("data/map.tmx")
 	Layers = layers
 	Decor = assets.LoadAtlas(decor, "data/decor.xml")
+
+	assets.FontId(0).EmbedImage(text.At(Tags[IconGlory], 0), UserInterface.Crops("icons")[IconGlory])
+	assets.FontId(0).EmbedImage(text.At(Tags[IconHealth], 0), UserInterface.Crops("icons")[IconHealth])
+	assets.FontId(0).EmbedImage(text.At(Tags[IconCoin], 0), UserInterface.Crops("icons")[IconCoin])
 
 	for i := range LaneCount {
 		var tilemap = graphics.NewTilemap(layers[Lane(LaneLayerOffset)+i])
@@ -74,18 +77,21 @@ func InitScene() {
 		},
 	})
 	EnemyBase = NewBase(TeamEnemy, SaveState{
-		Kind: BaseNone, Garrison: GarrisonNone, EntranceKinds: [3]EntranceKind{
+		Kind: BaseNone, Garrison: Garrison3, EntranceKinds: [3]EntranceKind{
 			EntranceNone, EntranceNone, EntranceNone,
 		},
 	})
 
-	// Units = append(Units, NewUnit(CharWoman, TeamAlly, LaneUpper))
 	// Units = append(Units, NewUnit(CharWoman, TeamAlly, LaneMiddle))
-	// Units = append(Units, NewUnit(CharWoman, TeamAlly, LaneLower))
+	Units = append(Units, NewUnit(CharMan, TeamEnemy, LaneUpper))
+	Units = append(Units, NewUnit(CharMan, TeamEnemy, LaneMiddle))
+	Units = append(Units, NewUnit(CharMan, TeamEnemy, LaneLower))
 
 	Pickups = append(Pickups, NewPickup(0, PickupRelic, LaneLowerOff))
 
 	PlayAmbience(CurrentZone.kind)
+
+	Hud = NewHUD()
 }
 
 //=================================================================
@@ -135,6 +141,8 @@ func UpdateScene() {
 		hb.Height += 8
 		u.HealthBar.Update(hb, u.Stats.Health, Characters[u.Character].Stats.Health, u.Mask)
 	}
+
+	Hud.Update()
 }
 
 func PointAtCell(cellX, cellY float32) (x, y float32) {

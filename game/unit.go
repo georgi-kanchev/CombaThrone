@@ -7,6 +7,7 @@ import (
 	"pure-game-kit/packages/motion"
 	"pure-game-kit/packages/utility/collection"
 	"pure-game-kit/packages/utility/color"
+	"pure-game-kit/packages/utility/color/palette"
 	"pure-game-kit/packages/utility/number"
 	"pure-game-kit/packages/utility/random"
 )
@@ -59,7 +60,7 @@ const ( // states
 	StateActionEnd        // single frame
 )
 
-const TeamAlly, TeamEnemy, TeamNeutral Team = 0, 1, 2
+const TeamAlly, TeamEnemy, TeamNeutral, TeamCount Team = 0, 1, 2, 3
 
 const Gravity, GroundFrictionPercent, DeathFadeOutTime = 256, 15.0, 30.0
 
@@ -195,6 +196,8 @@ var laneMasks = map[Lane]geometry.Area{
 	LaneUpperOff:  geometry.NewArea(0, 0, 428, 1000),
 }
 var laneCollisions = map[Lane][]geometry.Shape{}
+
+var teamColors = [TeamCount]uint{TeamAlly: palette.Green, TeamEnemy: palette.Red, TeamNeutral: palette.Orange}
 
 func (u *Unit) particlesBlood(p *motion.Particle) (alive bool) {
 	if p.Age == 0 {

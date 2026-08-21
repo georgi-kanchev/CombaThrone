@@ -1,14 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<data grid="20">
+<data grid="32">
   <crops>
-    1,1,15,15|17,1,16,20|34,1,9,12|44,1,5,14|50,1,5,14|0,40,20,20|20,40,20,20
+    0,0,288,128|0,128,288,64|288,0,32,32|288,32,32,32|288,64,32,32|288,96,32,32|288,128,32,32|288,160,32,32|
+    320,0,20,20|340,0,20,20|360,0,20,20
   </crops>
   <groups>
-    <group name="panel" cropIndexes="0"/>
-    <group name="bar-background" cropIndexes="1"/>
-    <group name="bar-fill" cropIndexes="2"/>
-    <group name="button-down" cropIndexes="3"/>
-    <group name="button-up" cropIndexes="4"/>
-    <group name="icons" cropIndexes="5 6"/>
+    <group name="logo" cropIndexes="0"/>
+    <group name="hud-top" cropIndexes="1"/>
+    <group name="panel" cropIndexes="2"/>
+    <group name="button" cropIndexes="3 4"/>
+    <group name="bar" cropIndexes="5 6"/>
+    <group name="handle" cropIndexes="7"/>
+    <group name="icons" cropIndexes="8 9 10"/>
   </groups>
 </data>

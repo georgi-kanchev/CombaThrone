@@ -4,7 +4,6 @@ import (
 	"pure-game-kit/packages/assets"
 	"pure-game-kit/packages/graphics"
 	"pure-game-kit/packages/motion"
-	"pure-game-kit/packages/utility/color/palette"
 	"pure-game-kit/packages/utility/text"
 )
 
@@ -23,7 +22,7 @@ type Base struct {
 
 	Glory int
 
-	Back, Front, GarrisonBack, GarrisonFront, GloryLabel, Flag *graphics.Object
+	Back, Front, GarrisonBack, GarrisonFront, Flag *graphics.Object
 
 	FlagAnim *motion.Animation[assets.ImageId]
 
@@ -49,17 +48,8 @@ func NewBase(team Team, saveState SaveState) Base {
 	b.Entrances[LaneMiddle/2] = NewEntrance(saveState.EntranceKinds[LaneMiddle/2], b.Kind, team, LaneMiddle)
 	b.Entrances[LaneUpper/2] = NewEntrance(saveState.EntranceKinds[LaneUpper/2], b.Kind, team, LaneUpper)
 
-	var label = graphics.NewTextbox(0, 0, TileSize*2, TileSize, 0)
-	label.Effects.FillColor, label.Effects.TextLineHeight = 0, 16
-	label.Effects.TextAlignX, label.Effects.TextAlignY = 0, 0.5
-	label.Effects.TextShadowColor, label.Effects.TextShadowWeight = 0, 0
-	label.Effects.OutlineSize, label.Effects.OutlineColor = 0.4, palette.Black
-	label.Effects.Tint = palette.Red
-	b.GloryLabel = &label
-
 	var x, y = PointAtCell(14, 5.5)
 	if team == TeamAlly {
-		label.Effects.Tint = palette.Green
 		x, _ = PointAtCell(3, 5.5)
 	}
 
@@ -120,9 +110,18 @@ func (b *Base) UpdateBack() {
 	View.DrawObject(b.GarrisonBack)
 
 	var group = "flag-" + zoneNames[CurrentZone.kind]
+	var x, y = b.Flag.X, b.Flag.Y
 	if b.team == TeamAlly {
 		group = "flag-player"
+	} else if CurrentZone.kind == ZoneDocks {
+		x, y = PointAtCell(11.5, 1.55)
+		b.FlagAnim.FPS = 8
+	} else {
+		x, y = PointAtCell(14, 5.5)
+		b.FlagAnim.FPS = 2
 	}
+	b.Flag.X, b.Flag.Y = x, y
+	b.FlagAnim.TimeScale = TimeScale
 	b.FlagAnim.Frames = Decor.Crops(group)
 	var frame = b.FlagAnim.Frame()
 	var crop = frame.CropArea()
@@ -137,21 +136,10 @@ func (b *Base) UpdateFront() {
 	}
 
 	if b.Glory != b.lastGlory {
-		b.GloryLabel.Text = text.New(b.Glory, Tags[IconGlory])
+		Hud.TeamGlory[b.team].Text = text.New(b.Glory, Tags[IconGlory])
 	}
 	b.lastGlory = b.Glory
 
 	View.DrawObject(b.Front)
 	View.DrawObject(b.GarrisonFront)
-
-	if b.team == TeamAlly {
-		var tlx, tly = View.PointFromEdge(0, 0)
-		b.GloryLabel.Effects.TextAlignX = 0.05
-		b.GloryLabel.X, b.GloryLabel.Y = tlx+TileSize*1.2, tly+TileSize/2
-	} else {
-		var tlx, tly = View.PointFromEdge(1, 0)
-		b.GloryLabel.Effects.TextAlignX = 0.95
-		b.GloryLabel.X, b.GloryLabel.Y = tlx-TileSize*1.2, tly+TileSize/2
-	}
-	View.DrawObject(b.GloryLabel)
 }

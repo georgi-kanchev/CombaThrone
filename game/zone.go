@@ -50,6 +50,7 @@ var zoneSkyColors = [ZoneCount]uint{
 func (z *Zone) UpdateBack() {
 	View.DrawColor(z.skyColor)
 	View.DrawObject(z.Background)
+	z.Buildings.Effects.TileTimeScale = TimeScale
 	View.DrawObject(z.Buildings)
 }
 func (z *Zone) UpdateFront() {

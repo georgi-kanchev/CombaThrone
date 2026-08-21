@@ -7,7 +7,7 @@ import (
 
 func main() {
 	window.Create("CombaThrone", true, false)
-	// window.SetQuality(3, window.FilterPoint)
+	// window.SetQuality(1.75, window.FilterPoint)
 	// window.SetMode(window.ModeFullscreenBorderless)
 	window.SetTargetFPS(0)
 

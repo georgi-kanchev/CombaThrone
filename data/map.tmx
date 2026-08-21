@@ -270,12 +270,12 @@
    eJztjg0KADAEhd3YsAPs6KOol9xgUy//H0TfXrZNdJb7kKYqF4jNxdnfA0NhToAlKYMaD6xg1A1ruwp1bv8wzATrAnS7FsU=
   </data>
   </layer>
-  <layer id="103" name="DocksBuildings" width="18" height="10" visible="0">
+  <layer id="103" name="DocksBuildings" width="18" height="10">
    <data encoding="base64" compression="zlib">
    eJzVz8dtQlEURdEvKBNDFYxANlRBTlWQUxNkG9yEwWQWDXwkJogrrdHR29ILgtdcLBIEH8RJRJ5rpLxLk+STLzJkH/Ry9jwFipQoU6FKjTqNB52mvUWbDl169BkwZMQ4pDOxTZkxZ8GSFd/8sGbDb0jnz7Zlxz97Dhw5cebC9d6Ihv/rne8GnSAo9w==
   </data>
   </layer>
-  <layer id="111" name="SwampGround" width="18" height="10" visible="0">
+  <layer id="111" name="SwampGround" width="18" height="10">
    <data encoding="base64" compression="zlib">
    eJztTFsKADAI6ui7UY91wPVhILEbbIFYaor8eXlSZO1iB6KghdYMO+t56VBkjLg72PORSeoI/Nj4b13pjuEFug5X+iLP
   </data>
@@ -285,7 +285,7 @@
    eJxjYBgFgxFMYWZgmArE04B4OhDPAOKZzKSbswWoZysQbwPi7UC8A4h3kmHOUAEAKQwH8w==
   </data>
   </layer>
-  <layer id="112" name="HellGround" width="18" height="10">
+  <layer id="112" name="HellGround" width="18" height="10" visible="0">
    <data encoding="base64" compression="zlib">
    eJztjgEKACAIA316P07NB2TgYEg/KEGmsh2K/Hq5QmRo6sxepdi95qNGnrgwrHzwOCmYWhwldhADN+TAdMp33mx/bTF5Lrw=
   </data>
