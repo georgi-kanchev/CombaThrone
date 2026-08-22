@@ -24,8 +24,8 @@ func NewHUD() *HUD {
 	label.Effects.OutlineSize, label.Effects.OutlineColor = 0.4, palette.Black
 	var info, ally, enemy, coins = label, label, label, label
 	coins.Effects.TextLineHeight, coins.Effects.Tint = 10, palette.White
-	info.Width, info.Effects.TextLineHeight = TileSize*8, 8
-	info.Effects.TextSymbolGap, info.Effects.TextColor = 12, palette.Gold
+	info.Width, info.Effects.TextLineHeight = TileSize*8.5, 8
+	info.Effects.TextSymbolGap, info.Effects.TextColor = 10, palette.Gold
 	return &HUD{ZoneInfo: &info, Top: &top, TeamGlory: [2]*graphics.Object{&ally, &enemy}, Coins: &coins}
 }
 
@@ -36,12 +36,11 @@ func (h *HUD) Update() {
 	h.Top.X, h.Top.Y = tx, ty+h.Top.Height/2
 	View.DrawObject(h.Top)
 
-	h.ZoneInfo.Text = "1. The Field of the Villagers"
+	h.ZoneInfo.Text = zoneInfos[CurrentZone.kind]
 	h.ZoneInfo.X, h.ZoneInfo.Y = h.Top.X, h.Top.Y-TileSize+4.5
 	View.DrawObject(h.ZoneInfo)
 
 	h.Coins.X, h.Coins.Y = h.Top.X, h.Top.Y-7
-	h.Coins.Text = "99999$"
 	View.DrawObject(h.Coins)
 
 	h.TeamGlory[TeamAlly].X, h.TeamGlory[TeamAlly].Y = h.Top.X-TileSize*3.5+0.5, h.Top.Y-6

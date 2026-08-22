@@ -215,6 +215,26 @@
    eJzVzEsKQFAYhuFjEQdlHUopu1BK2YVSCptQJi7LMHHZBFaCqXcJR2cgXz2Tv/5XiG8mYcPR7Ljw4CPQ6ISIECN5+bthx4EUGXIUKFEpdk5cuFGjQYsOPQbFjjSEMGHBwchtwowFq2Lnj3sAlrQSmA==
   </data>
   </layer>
+  <layer id="106" name="RuinsGround" width="18" height="10" visible="0">
+   <data encoding="base64" compression="zlib">
+   eJztjgEKwDAIA9MXrKl7cJ++ChFC6Q9WIRhFT4Ebf463YfYGPEtDyprqdctDfu0cGWEzlA9jUXJmsZJBm+H2E8UKY9St6iXrAzBOBOs=
+  </data>
+  </layer>
+  <layer id="98" name="RuinsBuildings" width="18" height="10" visible="0">
+   <data encoding="base64" compression="zlib">
+   eJxjYBgFgwn8AeK/QPwPiP+DBBgZGOyA2B6IHRiJN0cGqFYWiOWAWB6IFYA4DojjgTiBBHOGGgAASx0Gcw==
+  </data>
+  </layer>
+  <layer id="111" name="SwampGround" width="18" height="10">
+   <data encoding="base64" compression="zlib">
+   eJztTFsKADAI6ui7UY91wPVhILEbbIFYaor8eXlSZO1iB6KghdYMO+t56VBkjLg72PORSeoI/Nj4b13pjuEFug5X+iLP
+  </data>
+  </layer>
+  <layer id="104" name="SwampBuildings" width="18" height="10" visible="0">
+   <data encoding="base64" compression="zlib">
+   eJxjYBgFgxFMYWZgmArE04B4OhDPAOKZzKSbswWoZysQbwPi7UC8A4h3kmHOUAEAKQwH8w==
+  </data>
+  </layer>
   <layer id="92" name="DesertGround" width="18" height="10" visible="0">
    <data encoding="base64" compression="zlib">
    eJxjYBgFIxmYMDA06ANpQyA2hmIQ3wBKwzBI3AhKm2AxAyYPwwZIZulDxWDmGCLJmyCZYYQmZ4jDfgM0OwyhfJBZAJSYCso=
@@ -225,14 +245,24 @@
    eJzV0EdSQlEQBdD/3RW6EdM+yC4DBQR2AQoSNkGSuAkDSjrMqV+vnNlVZ9R976CjKGxScRRdchUHBs7MtewNt9xx/4eutEyGLDnyFCjyENhXcvfIE2UqVHmmRp1GQFfTTYsXXmnT4Y0uPfoMErqGdiPGTJjyzow5C5asWCf0fNh98sU3G374ZcuOPYdTx0XYn/7jHAHkpymR
   </data>
   </layer>
-  <layer id="106" name="RuinsGround" width="18" height="10" visible="0">
+  <layer id="110" name="DocksGround" width="18" height="10" visible="0">
    <data encoding="base64" compression="zlib">
-   eJztjgEKwDAIA9MXrKl7cJ++ChFC6Q9WIRhFT4Ebf463YfYGPEtDyprqdctDfu0cGWEzlA9jUXJmsZJBm+H2E8UKY9St6iXrAzBOBOs=
+   eJztjg0KADAEhd3YsAPs6KOol9xgUy//H0TfXrZNdJb7kKYqF4jNxdnfA0NhToAlKYMaD6xg1A1ruwp1bv8wzATrAnS7FsU=
   </data>
   </layer>
-  <layer id="98" name="RuinsBuildings" width="18" height="10" visible="0">
+  <layer id="103" name="DocksBuildings" width="18" height="10">
    <data encoding="base64" compression="zlib">
-   eJxjYBgFgwn8AeK/QPwPiP+DBBgZGOyA2B6IHRiJN0cGqFYWiOWAWB6IFYA4DojjgTiBBHOGGgAASx0Gcw==
+   eJzVz8dtQlEURdEvKBNDFYxANlRBTlWQUxNkG9yEwWQWDXwkJogrrdHR29ILgtdcLBIEH8RJRJ5rpLxLk+STLzJkH/Ry9jwFipQoU6FKjTqNB52mvUWbDl169BkwZMQ4pDOxTZkxZ8GSFd/8sGbDb0jnz7Zlxz97Dhw5cebC9d6Ihv/rne8GnSAo9w==
+  </data>
+  </layer>
+  <layer id="109" name="GlacierGround" width="18" height="10" visible="0">
+   <data encoding="base64" compression="zlib">
+   eJxjYBgFIxmEMDA0BAFpGA4GYn8oDcKBSHQQlA7BYwZIbwCSOQFoZgRAxWFqQ5DM8IeqgWGYumA0c2DuQ3c3yCwACaEQzg==
+  </data>
+  </layer>
+  <layer id="101" name="GlacierBuildings" width="18" height="10" visible="0">
+   <data encoding="base64" compression="zlib">
+   eJxjYBgFgw1IMTEwSAOxDBDLArEcEMsDsQITaeZYAdVbA7ENENsCsR0Q2wOxA4nmDCUAAJNKApM=
   </data>
   </layer>
   <layer id="107" name="CaveGround" width="18" height="10" visible="0">
@@ -253,36 +283,6 @@
   <layer id="100" name="MineBuildings" width="18" height="10" visible="0">
    <data encoding="base64" compression="zlib">
    eJxjYBgF1AQiTAwMokAsBsTiQCwBxJJMpJtjAtRjCsRmQGwOxBZAbEmGOSFAPaFAHAbE4UAcAcSRZJgzVAAARdQD+g==
-  </data>
-  </layer>
-  <layer id="109" name="GlacierGround" width="18" height="10" visible="0">
-   <data encoding="base64" compression="zlib">
-   eJxjYBgFIxmEMDA0BAFpGA4GYn8oDcKBSHQQlA7BYwZIbwCSOQFoZgRAxWFqQ5DM8IeqgWGYumA0c2DuQ3c3yCwACaEQzg==
-  </data>
-  </layer>
-  <layer id="101" name="GlacierBuildings" width="18" height="10" visible="0">
-   <data encoding="base64" compression="zlib">
-   eJxjYBgFgw1IMTEwSAOxDBDLArEcEMsDsQITaeZYAdVbA7ENENsCsR0Q2wOxA4nmDCUAAJNKApM=
-  </data>
-  </layer>
-  <layer id="110" name="DocksGround" width="18" height="10" visible="0">
-   <data encoding="base64" compression="zlib">
-   eJztjg0KADAEhd3YsAPs6KOol9xgUy//H0TfXrZNdJb7kKYqF4jNxdnfA0NhToAlKYMaD6xg1A1ruwp1bv8wzATrAnS7FsU=
-  </data>
-  </layer>
-  <layer id="103" name="DocksBuildings" width="18" height="10">
-   <data encoding="base64" compression="zlib">
-   eJzVz8dtQlEURdEvKBNDFYxANlRBTlWQUxNkG9yEwWQWDXwkJogrrdHR29ILgtdcLBIEH8RJRJ5rpLxLk+STLzJkH/Ry9jwFipQoU6FKjTqNB52mvUWbDl169BkwZMQ4pDOxTZkxZ8GSFd/8sGbDb0jnz7Zlxz97Dhw5cebC9d6Ihv/rne8GnSAo9w==
-  </data>
-  </layer>
-  <layer id="111" name="SwampGround" width="18" height="10">
-   <data encoding="base64" compression="zlib">
-   eJztTFsKADAI6ui7UY91wPVhILEbbIFYaor8eXlSZO1iB6KghdYMO+t56VBkjLg72PORSeoI/Nj4b13pjuEFug5X+iLP
-  </data>
-  </layer>
-  <layer id="104" name="SwampBuildings" width="18" height="10" visible="0">
-   <data encoding="base64" compression="zlib">
-   eJxjYBgFgxFMYWZgmArE04B4OhDPAOKZzKSbswWoZysQbwPi7UC8A4h3kmHOUAEAKQwH8w==
   </data>
   </layer>
   <layer id="112" name="HellGround" width="18" height="10" visible="0">

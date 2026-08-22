@@ -13,7 +13,7 @@ type SaveState struct {
 	Kind          BaseKind
 	Garrison      Garrison
 	EntranceKinds [3]EntranceKind
-	Gold          int
+	Coins         int
 }
 type Base struct {
 	SaveState
@@ -26,8 +26,8 @@ type Base struct {
 
 	FlagAnim *motion.Animation[assets.ImageId]
 
-	team      Team
-	lastGlory int
+	team                 Team
+	lastGlory, lastCoins int
 }
 
 const (
@@ -42,7 +42,7 @@ const GarrisonNone, Garrison1, Garrison2, Garrison3 Garrison = 0, 1, 2, 3
 var AllyBase, EnemyBase Base
 
 func NewBase(team Team, saveState SaveState) Base {
-	var b = Base{SaveState: saveState, Glory: baseGlory[saveState.Kind], team: team}
+	var b = Base{SaveState: saveState, Glory: baseGlory[saveState.Kind], team: team, lastCoins: -1}
 	b.Entrances = make([]*Entrance, 3)
 	b.Entrances[LaneLower/2] = NewEntrance(saveState.EntranceKinds[LaneLower/2], b.Kind, team, LaneLower)
 	b.Entrances[LaneMiddle/2] = NewEntrance(saveState.EntranceKinds[LaneMiddle/2], b.Kind, team, LaneMiddle)
@@ -135,10 +135,14 @@ func (b *Base) UpdateFront() {
 		//TimeScale = 0 // game over
 	}
 
+	if b.team == TeamAlly && b.Coins != b.lastCoins {
+		Hud.Coins.Text = text.New(b.Coins, "$")
+		b.lastCoins = b.Coins
+	}
 	if b.Glory != b.lastGlory {
 		Hud.TeamGlory[b.team].Text = text.New(b.Glory, Tags[IconGlory])
+		b.lastGlory = b.Glory
 	}
-	b.lastGlory = b.Glory
 
 	View.DrawObject(b.Front)
 	View.DrawObject(b.GarrisonFront)

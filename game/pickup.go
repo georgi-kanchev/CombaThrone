@@ -67,5 +67,5 @@ const pickupDuration = 1.0
 
 var pickupGroups = []string{"coin", "gem", "crystal", "relic", "rune", "snowflake", "star", "key"}
 var pickupEffects = []func(pickedUpBy *Unit){
-	PickupCoin: func(pickedUpBy *Unit) { AllyBase.Gold += 10 },
+	PickupCoin: func(pickedUpBy *Unit) { AllyBase.Coins += 10 },
 }

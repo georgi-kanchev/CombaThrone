@@ -26,13 +26,22 @@ characters:
     - hunter    ???
     - fisherman ??? hook someone up a lane
 
-campaign zone order:
-- 1 ZoneField
-- 2 ZoneRuins
-- 3 ZoneSwamp
-- 4 ZoneDesert
-- 5 ZoneDocks
-- 6 ZoneGlacier
-- 7 ZoneMine
-- 8 ZoneCave
-- 9 ZoneHell
+campaign:
+- 1 ZoneField - welcome! the game developer told us that you have to fight Something Somewhere to save the
+                world in a true game-like fashion, but we don't know what or where because we are just dumb villagers!
+                don't let our stupidity fool you - we are big hearted, so we will help you however we can!
+                let's start with the basics...
+                ---
+                now we will be returning to our dumb simple lives -
+                luckily, our problems cannot even reach the closeby town that is abandoned!
+- 2 ZoneRuins - or is it... i knew it smelled like trouble... --- we should probably follow the slimey trails...
+- 3 ZoneSwamp - ew! these must be the things that destroyed that overgrown town ---
+                we're getting closer - it's getting warmer...
+- 4 ZoneDesert - a bit too warm... --- the docks nearby will help us escape this oven...
+- 5 ZoneDocks - across the ocean, far from the heat... --- the ocean breeze is getting colder...
+- 6 ZoneGlacier - a bit too cold... i guess we got a bit too far from the heat... --- we've looked all across the world...
+                  where could this Somewhere be...
+- 8 ZoneCave - perhaps it's underground? --- deeper?
+- 7 ZoneMine - it's getting warmer... --- even deeper?
+- 9 ZoneHell - a bit too deep... and a bit too warm...
+               but that looks like the Somethings from the Somewhere those villagers were talking about!

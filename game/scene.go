@@ -102,6 +102,10 @@ func UpdateScene() {
 	var _, h = View.Size()
 	View.Y = (bly - h/2) - 2
 
+	if keyboard.IsKeyJustPressed(key.A) {
+		AllyBase.Coins += 100
+	}
+
 	if keyboard.IsKeyJustPressed(key.RightArrow) && CurrentZone.kind < ZoneHell {
 		CurrentZone = Zones[CurrentZone.kind+1]
 	}

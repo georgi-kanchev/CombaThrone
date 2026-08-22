@@ -15,13 +15,13 @@ type Zone struct {
 
 const (
 	ZoneField ZoneKind = iota
-	ZoneDesert
 	ZoneRuins
+	ZoneSwamp
+	ZoneDesert
+	ZoneDocks
+	ZoneGlacier
 	ZoneCave
 	ZoneMine
-	ZoneGlacier
-	ZoneDocks
-	ZoneSwamp
 	ZoneHell
 	ZoneCount
 	ZoneLayerOffset = 10
@@ -38,13 +38,23 @@ func NewZone(kind ZoneKind) *Zone {
 
 //=================================================================
 
-var zoneNames = [ZoneCount]string{"field", "desert", "ruins", "cave", "mine", "glacier", "docks", "swamp", "hell"}
+var zoneNames = [ZoneCount]string{
+	ZoneField: "field", ZoneRuins: "ruins", ZoneSwamp: "swamp", ZoneDesert: "desert", ZoneDocks: "docks",
+	ZoneGlacier: "glacier", ZoneCave: "cave", ZoneMine: "mine", ZoneHell: "hell",
+}
 var zoneSkyColors = [ZoneCount]uint{
 	ZoneField: color.TagRGBA("rgb(98, 171, 212)"), ZoneDesert: color.TagRGBA("rgb(155, 240, 253)"),
 	ZoneRuins: color.TagRGBA("rgb(98, 171, 212)"), ZoneCave: color.TagRGBA("rgb(72, 54, 59)"),
 	ZoneMine: color.TagRGBA("rgb(61, 36, 59)"), ZoneGlacier: color.TagRGBA("rgb(155, 240, 253)"),
 	ZoneDocks: color.TagRGBA("rgb(98, 171, 212)"), ZoneSwamp: color.TagRGBA("rgb(37, 65, 61)"),
 	ZoneHell: color.TagRGBA("rgb(227, 177, 109)"),
+}
+var zoneInfos = [ZoneCount]string{
+	ZoneField: "1. The Field of the Vanilla-gers", ZoneRuins: "2. The Ruins of the Robbing Hoods",
+	ZoneSwamp: "3. The Swamp of the Abomi Nation", ZoneDesert: "4. The Desert of the Sarcopha-guys",
+	ZoneDocks: "5. The Docks of the Plank-ton Pirates", ZoneGlacier: "6. The Glacier of the Satan Claws & Co.",
+	ZoneCave: "7. The Cave of the Troglo-bites", ZoneMine: "8. The Mine of the Avant Guards",
+	ZoneHell: "9. The Hell of the Demons-trosities (The Somewhere of the Somethings)",
 }
 
 func (z *Zone) UpdateBack() {
