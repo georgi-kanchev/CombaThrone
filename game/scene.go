@@ -34,30 +34,31 @@ const ( // lanes (collision layers)
 	LaneLayerOffset = 28
 )
 
-const TileSize, MapCount = 32, 4
+const TileSize, MapCount = 32.0, 4
 
 var Decor, UserInterface assets.AtlasId
 var Backgrounds [ZoneCount]assets.ImageId
 
 var TimeScale float32 = 1
-var View graphics.View
+var View *graphics.View
 var CurrentZone *Zone
 var Layers []assets.TileLayerId
 var SortedY []*graphics.Object // for units & pickups
 
-var Hud *HUD
+var UI *GUI
 
 func InitScene() {
-	View = graphics.NewView(1)
+	var view = graphics.NewView(1)
+	View = &view
 	UserInterface = assets.LoadAtlas(assets.LoadImage("data/user-interface.png"), "data/user-interface.xml")
 
 	var layers, decor = assets.LoadTileLayersFromTiled("data/map.tmx")
 	Layers = layers
 	Decor = assets.LoadAtlas(decor, "data/decor.xml")
 
-	assets.FontId(0).EmbedImage(text.At(Tags[IconGlory], 0), UserInterface.Crops("icons")[IconGlory])
-	assets.FontId(0).EmbedImage(text.At(Tags[IconHealth], 0), UserInterface.Crops("icons")[IconHealth])
-	assets.FontId(0).EmbedImage(text.At(Tags[IconCoin], 0), UserInterface.Crops("icons")[IconCoin])
+	assets.FontId(0).EmbedImage(text.At(UITags[IconGlory], 0), UserInterface.Crops("icons")[IconGlory])
+	assets.FontId(0).EmbedImage(text.At(UITags[IconHealth], 0), UserInterface.Crops("icons")[IconHealth])
+	assets.FontId(0).EmbedImage(text.At(UITags[IconCoin], 0), UserInterface.Crops("icons")[IconCoin])
 
 	for i := range LaneCount {
 		var tilemap = graphics.NewTilemap(layers[Lane(LaneLayerOffset)+i])
@@ -72,7 +73,7 @@ func InitScene() {
 	CurrentZone = Zones[ZoneField]
 
 	AllyBase = NewBase(TeamAlly, SaveState{
-		Kind: BaseNone, Garrison: Garrison3, EntranceKinds: [3]EntranceKind{
+		Kind: BaseFort, Garrison: Garrison3, EntranceKinds: [3]EntranceKind{
 			EntranceNone, EntranceNone, EntranceNone,
 		},
 	})
@@ -91,7 +92,7 @@ func InitScene() {
 
 	PlayAmbience(CurrentZone.kind)
 
-	Hud = NewHUD()
+	UI = NewUI()
 }
 
 //=================================================================
@@ -146,7 +147,7 @@ func UpdateScene() {
 		u.HealthBar.Update(hb, u.Stats.Health, Characters[u.Character].Stats.Health, u.Mask)
 	}
 
-	Hud.Update()
+	UI.Update()
 }
 
 func PointAtCell(cellX, cellY float32) (x, y float32) {

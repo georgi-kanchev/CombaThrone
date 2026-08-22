@@ -54,7 +54,7 @@ var zoneInfos = [ZoneCount]string{
 	ZoneSwamp: "3. The Swamp of the Abomi Nation", ZoneDesert: "4. The Desert of the Sarcopha-guys",
 	ZoneDocks: "5. The Docks of the Plank-ton Pirates", ZoneGlacier: "6. The Glacier of the Satan Claws & Co.",
 	ZoneCave: "7. The Cave of the Troglo-bites", ZoneMine: "8. The Mine of the Avant Guards",
-	ZoneHell: "9. The Hell of the Demons-trosities (The Somewhere of the Somethings)",
+	ZoneHell: "9. The Hell of the Demons-trosities",
 }
 
 func (z *Zone) UpdateBack() {

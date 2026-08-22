@@ -61,7 +61,7 @@ func (hb *HealthBar) MoveToGlory(duration float32) {
 	hb.toGlory = true
 	hb.duration, hb.timer = duration, duration
 	hb.startX, hb.startY = hb.label.X, hb.label.Y
-	hb.glory.Text = text.New(-hb.lastValue, Tags[IconGlory])
+	hb.glory.Text = text.New(-hb.lastValue, UITags[IconGlory])
 
 	if hb.team == TeamAlly {
 		PlaySound(AudioEventPositive)
@@ -137,8 +137,9 @@ func (hb *HealthBar) Update(target geometry.Shape, health, maxHealth int, mask g
 
 	if hb.toGlory && hb.team != TeamNeutral {
 		var progress = number.Limit(number.Map(hb.timer, hb.duration, 0, 0, 1), 0, 1)
-		hb.glory.X = number.Map(easing.BackOut(progress), 0, 1, hb.startX, Hud.TeamGlory[1-hb.team].X)
-		hb.glory.Y = number.Map(easing.CubicIn(progress), 0, 1, hb.startY, Hud.TeamGlory[1-hb.team].Y)
+		var targetX, targetY = View.PointFromView(UI.View, UI.TeamGlory[1-hb.team].X, UI.TeamGlory[1-hb.team].Y)
+		hb.glory.X = number.Map(easing.CircOut(progress), 0, 1, hb.startX, targetX)
+		hb.glory.Y = number.Map(easing.CubicIn(progress), 0, 1, hb.startY, targetY)
 
 		const riseEnd, fallStart = 0.5, 0.75
 		if progress < riseEnd { // smooth rise in

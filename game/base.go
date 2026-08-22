@@ -114,7 +114,7 @@ func (b *Base) UpdateBack() {
 	if b.team == TeamAlly {
 		group = "flag-player"
 	} else if CurrentZone.kind == ZoneDocks {
-		x, y = PointAtCell(11.5, 1.55)
+		x, y = PointAtCell(13.85, -0.15)
 		b.FlagAnim.FPS = 8
 	} else {
 		x, y = PointAtCell(14, 5.5)
@@ -136,11 +136,11 @@ func (b *Base) UpdateFront() {
 	}
 
 	if b.team == TeamAlly && b.Coins != b.lastCoins {
-		Hud.Coins.Text = text.New(b.Coins, "$")
+		UI.Coins.Text = text.New(b.Coins, "$")
 		b.lastCoins = b.Coins
 	}
 	if b.Glory != b.lastGlory {
-		Hud.TeamGlory[b.team].Text = text.New(b.Glory, Tags[IconGlory])
+		UI.TeamGlory[b.team].Text = text.New(b.Glory, UITags[IconGlory])
 		b.lastGlory = b.Glory
 	}
 
