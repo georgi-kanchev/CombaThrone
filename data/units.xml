@@ -1,36 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <data grid="16">
   <crops>
-    32,0,32,48|64,0,32,48|96,0,32,48|128,0,32,48|176,0,32,48|208,0,32,48|240,0,32,48|272,0,32,48|
-    304,0,32,48|336,0,32,48|384,0,32,48|416,0,32,48|448,0,32,48|480,0,32,48|528,0,32,48|560,0,32,48|
-    608,0,32,48|640,0,32,48|672,0,48,48|720,0,48,48|32,48,32,48|64,48,32,48|96,48,32,48|128,48,32,48|
-    176,48,32,48|208,48,32,48|240,48,32,48|272,48,32,48|304,48,32,48|336,48,32,48|384,48,32,48|416,48,32,48|
-    448,48,32,48|480,48,32,48|528,48,32,48|560,48,32,48|608,48,32,48|640,48,48,48|688,48,48,48|736,48,48,48|
-    32,96,32,48|64,96,32,48|96,96,32,48|128,96,32,48|176,96,32,48|208,96,32,48|240,96,32,48|272,96,32,48|
-    304,96,32,48|336,96,32,48|384,96,32,48|416,96,32,48|448,96,32,48|480,96,32,48|512,96,32,48|544,96,32,48|
-    592,96,32,48|624,96,32,48|672,96,32,48|704,96,32,48|736,96,48,48|784,96,48,48|912,0,48,48|912,48,48,48|
-    912,96,48,48|912,144,48,48|912,192,48,48|912,240,48,48
+    0,16,32,32|32,0,32,48|64,0,32,48|96,0,32,48|128,0,32,48|176,0,32,48|208,0,32,48|240,0,32,48|
+    272,0,32,48|304,0,32,48|336,0,32,48|384,0,32,48|416,0,32,48|448,0,32,48|480,0,32,48|528,0,32,48|
+    560,0,32,48|608,0,32,48|640,0,32,48|672,0,48,48|720,0,48,48|0,64,32,32|32,48,32,48|64,48,32,48|
+    96,48,32,48|128,48,32,48|176,48,32,48|208,48,32,48|240,48,32,48|272,48,32,48|304,48,32,48|336,48,32,48|
+    384,48,32,48|416,48,32,48|448,48,32,48|480,48,32,48|528,48,32,48|560,48,32,48|608,48,32,48|640,48,48,48|
+    688,48,48,48|736,48,48,48|0,112,32,32|32,96,32,48|64,96,32,48|96,96,32,48|128,96,32,48|176,96,32,48|
+    208,96,32,48|240,96,32,48|272,96,32,48|304,96,32,48|336,96,32,48|384,96,32,48|416,96,32,48|448,96,32,48|
+    480,96,32,48|512,96,32,48|544,96,32,48|592,96,32,48|624,96,32,48|672,96,32,48|704,96,32,48|736,96,48,48|
+    784,96,48,48|928,0,32,32|912,32,48,48|912,96,48,48|912,144,48,48|912,192,48,48|912,240,48,48|912,288,48,48
   </crops>
   <groups>
-    <group name="man_idle" cropIndexes="0 1 2 3"/>
-    <group name="woman_idle" cropIndexes="20 21 22 23"/>
-    <group name="woman_walk" cropIndexes="24 25 26 27 28 29"/>
-    <group name="woman_action_start" cropIndexes="30 31"/>
-    <group name="woman_action_end" cropIndexes="32 33"/>
-    <group name="woman_hurt" cropIndexes="34 35"/>
-    <group name="woman_death" cropIndexes="36 37 38 39"/>
-    <group name="man_walk" cropIndexes="4 5 6 7 8 9"/>
-    <group name="man_action_start" cropIndexes="10 11"/>
-    <group name="man_action_end" cropIndexes="12 13"/>
-    <group name="man_hurt" cropIndexes="14 15"/>
-    <group name="man_death" cropIndexes="16 17 18 19"/>
-    <group name="hunter_idle" cropIndexes="40 41 42 43"/>
-    <group name="hunter_walk" cropIndexes="44 45 46 47 48 49"/>
-    <group name="hunter_action_start" cropIndexes="50 51 52 53"/>
-    <group name="hunter_action_end" cropIndexes="54 55"/>
-    <group name="hunter_hurt" cropIndexes="56 57"/>
-    <group name="hunter_death" cropIndexes="58 59 60 61"/>
-    <group name="dummy-idle" cropIndexes="62"/>
-    <group name="dummy-hurt" cropIndexes="63 64 65 66 67"/>
+    <group name="man-icon" cropIndexes="0"/>
+    <group name="man-idle" cropIndexes="1 2 3 4"/>
+    <group name="woman-icon" cropIndexes="21"/>
+    <group name="woman-idle" cropIndexes="23 24 25"/>
+    <group name="woman-walk" cropIndexes="26 27 28 29 30 31"/>
+    <group name="woman-action-start" cropIndexes="32 33"/>
+    <group name="woman-action-end" cropIndexes="34 35"/>
+    <group name="woman-hurt" cropIndexes="36 37"/>
+    <group name="woman-death" cropIndexes="38 39 40 41"/>
+    <group name="man-walk" cropIndexes="5 6 7 8 9 10"/>
+    <group name="man-action-start" cropIndexes="11 12"/>
+    <group name="man-action-end" cropIndexes="13 14"/>
+    <group name="man-hurt" cropIndexes="15 16"/>
+    <group name="man-death" cropIndexes="17 18 19 20"/>
+    <group name="hunter-icon" cropIndexes="42"/>
+    <group name="hunter-idle" cropIndexes="44 45 46"/>
+    <group name="hunter-walk" cropIndexes="47 48 49 50 51 52"/>
+    <group name="hunter-action-start" cropIndexes="53 54 55 56"/>
+    <group name="hunter-action-end" cropIndexes="57 58"/>
+    <group name="hunter-hurt" cropIndexes="59 60"/>
+    <group name="hunter-death" cropIndexes="61 62 63 64"/>
+    <group name="dummy-icon" cropIndexes="65"/>
+    <group name="dummy-idle" cropIndexes="66"/>
+    <group name="dummy-hurt" cropIndexes="67 68 69 70 71"/>
   </groups>
 </data>

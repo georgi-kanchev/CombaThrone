@@ -61,7 +61,7 @@ func (hb *HealthBar) MoveToGlory(duration float32) {
 	hb.toGlory = true
 	hb.duration, hb.timer = duration, duration
 	hb.startX, hb.startY = hb.label.X, hb.label.Y
-	hb.glory.Text = text.New(-hb.lastValue, UITags[IconGlory])
+	hb.glory.Text = text.New(-hb.lastValue, Tags[IconGlory])
 
 	if hb.team == TeamAlly {
 		PlaySound(AudioEventPositive)

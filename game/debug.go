@@ -29,10 +29,6 @@ func UpdateDebug() {
 		DebugMode = number.Wrap(DebugMode+1, 0, 3)
 	}
 
-	if keyboard.IsKeyJustPressed(key.S) {
-		Units[0].TakeDamage(12)
-	}
-
 	for i := range 10 {
 		if keyboard.IsKeyJustPressed(key.Number0 + i) {
 			if keyboard.IsKeyPressed(key.Dot) {
@@ -89,6 +85,10 @@ func UpdateDebug() {
 
 // private ========================================================
 
-var debugStates = [13]string{"idle", "walk", "hurt", "hurt", "dying", "dying", "dying", "dead",
-	"action charge", "action charge", "action charge", "action recover", "action recover"}
+var debugStates = []string{
+	StateIdling: "idle", StateWalking: "walk",
+	StateHurtStart: "hurt", StateHurting: "hurt",
+	StateDyingStart: "dying", StateDying: "dying", StateDyingEnd: "dying", StateDecaying: "dead",
+	StateActionStart: "action charge", StateActionCharging: "action charge", StateActionTrigger: "action charge",
+	StateActionRecovering: "action recover", StateActionEnd: "action recover"}
 var debugInfo = ""

@@ -6,8 +6,11 @@ import (
 	"pure-game-kit/packages/graphics"
 	"pure-game-kit/packages/input/keyboard"
 	"pure-game-kit/packages/input/keyboard/key"
+	"pure-game-kit/packages/input/mouse"
+	"pure-game-kit/packages/input/mouse/cursor"
 	"pure-game-kit/packages/utility/collection"
 	"pure-game-kit/packages/utility/color"
+	"pure-game-kit/packages/utility/color/palette"
 	"pure-game-kit/packages/utility/number"
 	"pure-game-kit/packages/utility/text"
 	"pure-game-kit/packages/utility/time"
@@ -45,20 +48,23 @@ var CurrentZone *Zone
 var Layers []assets.TileLayerId
 var SortedY []*graphics.Object // for units & pickups
 
+var Player *PlayerState
+
 var UI *GUI
 
 func InitScene() {
 	var view = graphics.NewView(1)
 	View = &view
 	UserInterface = assets.LoadAtlas(assets.LoadImage("data/user-interface.png"), "data/user-interface.xml")
+	UI = NewUI()
 
 	var layers, decor = assets.LoadTileLayersFromTiled("data/map.tmx")
 	Layers = layers
 	Decor = assets.LoadAtlas(decor, "data/decor.xml")
 
-	assets.FontId(0).EmbedImage(text.At(UITags[IconGlory], 0), UserInterface.Crops("icons")[IconGlory])
-	assets.FontId(0).EmbedImage(text.At(UITags[IconHealth], 0), UserInterface.Crops("icons")[IconHealth])
-	assets.FontId(0).EmbedImage(text.At(UITags[IconCoin], 0), UserInterface.Crops("icons")[IconCoin])
+	assets.FontId(0).EmbedImage(text.At(Tags[IconGlory], 0), UserInterface.Crops("icons")[IconGlory])
+	assets.FontId(0).EmbedImage(text.At(Tags[IconHealth], 0), UserInterface.Crops("icons")[IconHealth])
+	assets.FontId(0).EmbedImage(text.At(Tags[IconCoin], 0), UserInterface.Crops("icons")[IconCoin])
 
 	for i := range LaneCount {
 		var tilemap = graphics.NewTilemap(layers[Lane(LaneLayerOffset)+i])
@@ -72,27 +78,23 @@ func InitScene() {
 	}
 	CurrentZone = Zones[ZoneField]
 
-	AllyBase = NewBase(TeamAlly, SaveState{
-		Kind: BaseFort, Garrison: Garrison3, EntranceKinds: [3]EntranceKind{
-			EntranceNone, EntranceNone, EntranceNone,
-		},
-	})
-	EnemyBase = NewBase(TeamEnemy, SaveState{
-		Kind: BaseNone, Garrison: Garrison3, EntranceKinds: [3]EntranceKind{
-			EntranceNone, EntranceNone, EntranceNone,
-		},
-	})
+	AllyBase = NewBase(TeamAlly, BaseFortress, Garrison3, [3]EntranceKind{EntranceDoor, EntranceTallGate, EntranceShortGate})
+	EnemyBase = NewBase(TeamEnemy, BaseNone, Garrison3, [3]EntranceKind{EntranceNone, EntranceNone, EntranceNone})
 
 	// Units = append(Units, NewUnit(CharWoman, TeamAlly, LaneMiddle))
-	Units = append(Units, NewUnit(CharMan, TeamEnemy, LaneUpper))
-	Units = append(Units, NewUnit(CharMan, TeamEnemy, LaneMiddle))
-	Units = append(Units, NewUnit(CharMan, TeamEnemy, LaneLower))
+	// Units = append(Units, NewUnit(CharMan, TeamEnemy, LaneUpper))
+	// Units = append(Units, NewUnit(CharMan, TeamEnemy, LaneMiddle))
+	// Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneLower))
+	// Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneLower))
 
 	Pickups = append(Pickups, NewPickup(0, PickupRelic, LaneLowerOff))
 
 	PlayAmbience(CurrentZone.kind)
 
-	UI = NewUI()
+	Player = NewPlayer()
+	Player.Units[0] = NewUnit(CharHunter, TeamAlly, 0)
+	Player.Units[1] = NewUnit(CharWoman, TeamAlly, 0)
+	Player.Units[2] = NewUnit(CharMan, TeamAlly, 0)
 }
 
 //=================================================================
@@ -103,9 +105,8 @@ func UpdateScene() {
 	var _, h = View.Size()
 	View.Y = (bly - h/2) - 2
 
-	if keyboard.IsKeyJustPressed(key.A) {
-		AllyBase.Coins += 100
-	}
+	UI.Tooltip = nil
+	mouse.SetCursor(cursor.Default)
 
 	if keyboard.IsKeyJustPressed(key.RightArrow) && CurrentZone.kind < ZoneHell {
 		CurrentZone = Zones[CurrentZone.kind+1]
@@ -124,13 +125,20 @@ func UpdateScene() {
 	iterateRemovable(&ProjectilesBehind, func(p *Projectile) { p.Update() })
 	iterateRemovable(&Pickups, func(p *Pickup) { p.Update() })
 
+	iterateRemovable(&Player.Units, func(u *Unit) { u.Update() })
 	collection.SortByField(Units, func(u *Unit) float32 {
 		if u.Stats.Health <= 0 { // dead units go behind all alive units
 			return number.NegativeInfinity()
 		}
 		return u.Y // fall back to Y sort
 	})
-	iterateRemovable(&Units, func(u *Unit) { u.Update() })
+	iterateRemovable(&Units, func(u *Unit) {
+		if u.State == StateWaitingToBeSummoned {
+			u.State = StateSummoned
+		}
+
+		u.Update()
+	})
 	AllyBase.UpdateFront()
 	EnemyBase.UpdateFront()
 	iterateRemovable(&Projectiles, func(p *Projectile) { p.Update() })
@@ -148,6 +156,12 @@ func UpdateScene() {
 	}
 
 	UI.Update()
+	Player.Update()
+}
+func DrawShadow(x, z, width, height, angle float32, mask geometry.Area) {
+	var lower, upper = laneCollisions[LaneLower][0], laneCollisions[LaneUpper][0]
+	var y = number.Map(z, 0, 2, lower.Y-lower.Height/2, upper.Y-upper.Height/2)
+	View.DrawShape(x, y, width, height, angle, 1, color.RGBA(0, 0, 0, 100), mask)
 }
 
 func PointAtCell(cellX, cellY float32) (x, y float32) {
@@ -163,18 +177,15 @@ func CellAtPoint(x, y float32) (cellX, cellY float32) {
 func TileAtCell(cellX, cellY int, layer assets.TileLayerId) assets.Tile {
 	return layer.TileAtCell(cellX, cellY)
 }
-
 func DeltaTimeScaled() float32 {
 	return time.Delta() * TimeScale
 }
 
-func DrawShadow(x, z, width, height, angle float32, mask geometry.Area) {
-	var lower, upper = laneCollisions[LaneLower][0], laneCollisions[LaneUpper][0]
-	var y = number.Map(z, 0, 2, lower.Y-lower.Height/2, upper.Y-upper.Height/2)
-	View.DrawShape(x, y, width, height, angle, 1, color.RGBA(0, 0, 0, 100), mask)
-}
-
 // private ========================================================
+
+var highlightCursorColors = map[int]uint{
+	cursor.Arrow: palette.LightGray, cursor.Hand: palette.White, cursor.NotAllowed: palette.Red,
+}
 
 func mirrorGarrisonLanes() {
 	for i := LaneGarrison1; i < LaneGarrisonPlus5+1; i++ {

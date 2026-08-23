@@ -55,23 +55,23 @@ func NewEntrance(entry EntranceKind, base BaseKind, team Team, lane Lane) *Entra
 		var door = graphics.NewSprite(x, y, 1, Decor.Crops("door")[1])
 		data.Tiles = []*graphics.Object{&door}
 	case EntranceShortGate:
-		var top0 = graphics.NewSprite(x, y-TileSize, 1, Decor.Crops("gate_top")[0])
-		var mid0 = graphics.NewSprite(x, y, 1, Decor.Crops("gate_middle")[0])
-		var bot0 = graphics.NewSprite(x, y+TileSize, 1, Decor.Crops("gate_bottom")[0])
-		var top1 = graphics.NewSprite(x, y-TileSize, 1, Decor.Crops("gate_top")[1])
-		var mid1 = graphics.NewSprite(x, y, 1, Decor.Crops("gate_middle")[1])
-		var bot1 = graphics.NewSprite(x, y+TileSize, 1, Decor.Crops("gate_bottom")[1])
+		var top0 = graphics.NewSprite(x, y-TileSize, 1, Decor.Crops("gate-top")[0])
+		var mid0 = graphics.NewSprite(x, y, 1, Decor.Crops("gate-middle")[0])
+		var bot0 = graphics.NewSprite(x, y+TileSize, 1, Decor.Crops("gate-bottom")[0])
+		var top1 = graphics.NewSprite(x, y-TileSize, 1, Decor.Crops("gate-top")[1])
+		var mid1 = graphics.NewSprite(x, y, 1, Decor.Crops("gate-middle")[1])
+		var bot1 = graphics.NewSprite(x, y+TileSize, 1, Decor.Crops("gate-bottom")[1])
 		data.Tiles = []*graphics.Object{&top0, &mid0, &bot0, &top1, &mid1, &bot1}
 	case EntranceTallGate:
 		y -= TileSize / 2
-		var top0 = graphics.NewSprite(x, y-TileSize*1.5, 1, Decor.Crops("gate_top")[0])
-		var midU0 = graphics.NewSprite(x, y-TileSize*0.5, 1, Decor.Crops("gate_middle")[0])
-		var midD0 = graphics.NewSprite(x, y+TileSize*0.5, 1, Decor.Crops("gate_middle")[0])
-		var bot0 = graphics.NewSprite(x, y+TileSize*1.5, 1, Decor.Crops("gate_bottom")[0])
-		var top1 = graphics.NewSprite(x, y-TileSize*1.5, 1, Decor.Crops("gate_top")[1])
-		var midU1 = graphics.NewSprite(x, y-TileSize*0.5, 1, Decor.Crops("gate_middle")[1])
-		var midD1 = graphics.NewSprite(x, y+TileSize*0.5, 1, Decor.Crops("gate_middle")[1])
-		var bot1 = graphics.NewSprite(x, y+TileSize*1.5, 1, Decor.Crops("gate_bottom")[1])
+		var top0 = graphics.NewSprite(x, y-TileSize*1.5, 1, Decor.Crops("gate-top")[0])
+		var midU0 = graphics.NewSprite(x, y-TileSize*0.5, 1, Decor.Crops("gate-middle")[0])
+		var midD0 = graphics.NewSprite(x, y+TileSize*0.5, 1, Decor.Crops("gate-middle")[0])
+		var bot0 = graphics.NewSprite(x, y+TileSize*1.5, 1, Decor.Crops("gate-bottom")[0])
+		var top1 = graphics.NewSprite(x, y-TileSize*1.5, 1, Decor.Crops("gate-top")[1])
+		var midU1 = graphics.NewSprite(x, y-TileSize*0.5, 1, Decor.Crops("gate-middle")[1])
+		var midD1 = graphics.NewSprite(x, y+TileSize*0.5, 1, Decor.Crops("gate-middle")[1])
+		var bot1 = graphics.NewSprite(x, y+TileSize*1.5, 1, Decor.Crops("gate-bottom")[1])
 		data.Tiles = []*graphics.Object{&top0, &midU0, &midD0, &bot0, &top1, &midU1, &midD1, &bot1}
 	}
 
@@ -116,6 +116,7 @@ func (e *Entrance) Update() {
 		shakeOffsetX, shakeOffsetY = random.Range[float32](-3, 3)*e.shakeTimer, random.Range[float32](-3, 3)*e.shakeTimer
 	}
 
+	var centerY, height float32 = e.Tiles[0].Y, TileSize * 2.3
 	switch e.Kind {
 	case EntranceDoor:
 		var breakIndex = number.Map(e.Health, 0, e.MaxHealth, 5, 1)
@@ -123,6 +124,7 @@ func (e *Entrance) Update() {
 		if isOpen {
 			breakIndex = 6
 		}
+		centerY += TileSize / 4
 
 		if condition.JustTurnedTrue(isOpen, int(e.Tiles[0].X)) {
 			PlaySound(AudioDoorOpen)
@@ -139,6 +141,12 @@ func (e *Entrance) Update() {
 		if condition.JustTurnedTrue(e.openY == 0, int(e.Tiles[0].X*30)) && time.Frame() > 1 {
 			PlaySound(AudioGateClose)
 		}
+		centerY += TileSize
+		height = TileSize * 2.7
+		if e.Kind == EntranceTallGate {
+			centerY += TileSize / 2
+			height = TileSize * 3.5
+		}
 
 		for i := len(e.Tiles) / 2; i < len(e.Tiles); i++ {
 			e.Tiles[i].Y = e.originalTileYs[i] + e.openY
@@ -153,6 +161,9 @@ func (e *Entrance) Update() {
 		View.DrawObject(t)
 		t.X, t.Y = lastX, lastY
 	}
+	_ = height
+	// var shape = geometry.NewRectangle(e.Tiles[0].X, centerY, TileSize*0.85, height, 0)
+	// UI.TryShowTooltip(View, shape, cursor.Arrow)
 }
 func (e *Entrance) TakeDamage(damage int) {
 	if e.Health <= 0 {
@@ -176,13 +187,13 @@ func (e *Entrance) TakeDamage(damage int) {
 	var breakIndex = number.Map(e.Health, 0, e.MaxHealth, 5, 1)
 	switch e.Kind { // EntryDoor done in update
 	case EntranceShortGate:
-		e.Tiles[3].ImageId = Decor.Crops("gate_top")[breakIndex]
-		e.Tiles[4].ImageId = Decor.Crops("gate_middle")[breakIndex]
-		e.Tiles[5].ImageId = Decor.Crops("gate_bottom")[breakIndex]
+		e.Tiles[3].ImageId = Decor.Crops("gate-top")[breakIndex]
+		e.Tiles[4].ImageId = Decor.Crops("gate-middle")[breakIndex]
+		e.Tiles[5].ImageId = Decor.Crops("gate-bottom")[breakIndex]
 	case EntranceTallGate:
-		e.Tiles[4].ImageId = Decor.Crops("gate_top")[breakIndex]
-		e.Tiles[5].ImageId = Decor.Crops("gate_middle")[breakIndex]
-		e.Tiles[6].ImageId = Decor.Crops("gate_middle")[breakIndex]
-		e.Tiles[7].ImageId = Decor.Crops("gate_bottom")[breakIndex]
+		e.Tiles[4].ImageId = Decor.Crops("gate-top")[breakIndex]
+		e.Tiles[5].ImageId = Decor.Crops("gate-middle")[breakIndex]
+		e.Tiles[6].ImageId = Decor.Crops("gate-middle")[breakIndex]
+		e.Tiles[7].ImageId = Decor.Crops("gate-bottom")[breakIndex]
 	}
 }

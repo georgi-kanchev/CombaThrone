@@ -18,9 +18,9 @@
   <groups>
     <group name="hole" cropIndexes="0"/>
     <group name="door" cropIndexes="0 1 2 3 4 5 6"/>
-    <group name="gate_top" cropIndexes="7 8 9 10 11 12"/>
-    <group name="gate_middle" cropIndexes="13 14 15 16 17 18"/>
-    <group name="gate_bottom" cropIndexes="19 20 21 22 23 24"/>
+    <group name="gate-top" cropIndexes="7 8 9 10 11 12"/>
+    <group name="gate-middle" cropIndexes="13 14 15 16 17 18"/>
+    <group name="gate-bottom" cropIndexes="19 20 21 22 23 24"/>
     <group name="projectiles" cropIndexes="25"/>
     <group name="pickup-coin" cropIndexes="26 27 28 29"/>
     <group name="pickup-gem" cropIndexes="30 31 32 33"/>

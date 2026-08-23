@@ -3,6 +3,7 @@ package game
 import (
 	"pure-game-kit/packages/assets"
 	"pure-game-kit/packages/graphics"
+	"pure-game-kit/packages/input/mouse/cursor"
 	"pure-game-kit/packages/motion"
 	"pure-game-kit/packages/utility/easing"
 	"pure-game-kit/packages/utility/number"
@@ -59,6 +60,7 @@ func (p *Pickup) Update() {
 
 	DrawShadow(p.X, p.Z-0.1, p.Width*0.6, p.Height*0.15, 0, p.Mask)
 	View.DrawObject(&p.Object)
+	UI.TryShowTooltip(View, p.Object.Shape, cursor.Arrow)
 }
 
 // private ========================================================
@@ -67,5 +69,5 @@ const pickupDuration = 1.0
 
 var pickupGroups = []string{"coin", "gem", "crystal", "relic", "rune", "snowflake", "star", "key"}
 var pickupEffects = []func(pickedUpBy *Unit){
-	PickupCoin: func(pickedUpBy *Unit) { AllyBase.Coins += 10 },
+	PickupCoin: func(pickedUpBy *Unit) { Player.Coins += 10 },
 }

@@ -9,14 +9,10 @@ import (
 
 type BaseKind uint8
 type Garrison uint8
-type SaveState struct {
+type Base struct {
 	Kind          BaseKind
 	Garrison      Garrison
 	EntranceKinds [3]EntranceKind
-	Coins         int
-}
-type Base struct {
-	SaveState
 
 	Entrances []*Entrance
 
@@ -26,8 +22,8 @@ type Base struct {
 
 	FlagAnim *motion.Animation[assets.ImageId]
 
-	team                 Team
-	lastGlory, lastCoins int
+	team      Team
+	lastGlory int
 }
 
 const (
@@ -41,12 +37,12 @@ const GarrisonNone, Garrison1, Garrison2, Garrison3 Garrison = 0, 1, 2, 3
 
 var AllyBase, EnemyBase Base
 
-func NewBase(team Team, saveState SaveState) Base {
-	var b = Base{SaveState: saveState, Glory: baseGlory[saveState.Kind], team: team, lastCoins: -1}
+func NewBase(team Team, kind BaseKind, garrison Garrison, entrances [3]EntranceKind) Base {
+	var b = Base{team: team, Kind: kind, Garrison: garrison, Glory: baseGlory[kind]}
 	b.Entrances = make([]*Entrance, 3)
-	b.Entrances[LaneLower/2] = NewEntrance(saveState.EntranceKinds[LaneLower/2], b.Kind, team, LaneLower)
-	b.Entrances[LaneMiddle/2] = NewEntrance(saveState.EntranceKinds[LaneMiddle/2], b.Kind, team, LaneMiddle)
-	b.Entrances[LaneUpper/2] = NewEntrance(saveState.EntranceKinds[LaneUpper/2], b.Kind, team, LaneUpper)
+	b.Entrances[LaneLower/2] = NewEntrance(entrances[LaneLower/2], b.Kind, team, LaneLower)
+	b.Entrances[LaneMiddle/2] = NewEntrance(entrances[LaneMiddle/2], b.Kind, team, LaneMiddle)
+	b.Entrances[LaneUpper/2] = NewEntrance(entrances[LaneUpper/2], b.Kind, team, LaneUpper)
 
 	var x, y = PointAtCell(14, 5.5)
 	if team == TeamAlly {
@@ -127,6 +123,7 @@ func (b *Base) UpdateBack() {
 	var crop = frame.CropArea()
 	b.Flag.ImageId, b.Flag.Width, b.Flag.Height = frame, crop.Width, crop.Height
 	View.DrawObject(b.Flag)
+	// UI.TryShowTooltip(View, b.Flag.Shape, cursor.Arrow)
 }
 func (b *Base) UpdateFront() {
 	b.Glory = max(b.Glory, 0)
@@ -135,12 +132,11 @@ func (b *Base) UpdateFront() {
 		//TimeScale = 0 // game over
 	}
 
-	if b.team == TeamAlly && b.Coins != b.lastCoins {
-		UI.Coins.Text = text.New(b.Coins, "$")
-		b.lastCoins = b.Coins
+	if b.team == TeamAlly && Player.CoinsJustChanged() {
+		UI.Coins.Text = text.New(Player.Coins, "$")
 	}
 	if b.Glory != b.lastGlory {
-		UI.TeamGlory[b.team].Text = text.New(b.Glory, UITags[IconGlory])
+		UI.TeamGlory[b.team].Text = text.New(b.Glory, Tags[IconGlory])
 		b.lastGlory = b.Glory
 	}
 
