@@ -65,8 +65,8 @@ func UpdateDebug() {
 
 		var hovered = DebugHoveredUnit
 		if hovered != nil {
-			if condition.TrueEvery(0.2, -111) {
-				debugInfo = text.New("state: ", debugStates[hovered.State], "\n",
+			if condition.TrueEvery(0.1, -111) {
+				debugInfo = text.New("\nstate: ", debugStates[hovered.State], "\n",
 					"action timer: ", number.Round(hovered.actionTimer, 1), "\n",
 					"hurt timer: ", number.Round(hovered.hurtTimer, 1), "\n",
 					"velocity: ", number.Round(hovered.VelocityX, 1), " | ", number.Round(hovered.VelocityY, 1), "\n",
@@ -75,7 +75,7 @@ func UpdateDebug() {
 				)
 			}
 
-			var topX, topY = View.PointFromEdge(0.5, 0)
+			var topX, topY = View.PointFromEdge(0, 0)
 			View.DrawText(debugInfo, topX, topY, 50, 0, palette.White, geometry.Area{})
 		}
 	case DebugProfile:

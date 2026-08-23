@@ -85,12 +85,7 @@ func (hb *HealthBar) Update(target geometry.Shape, health, maxHealth int, mask g
 	} else if hb.timer < 0 {
 		if hb.toGlory && !hb.subtractedGlory {
 			hb.subtractedGlory = true
-
-			if hb.team == TeamAlly {
-				EnemyBase.Glory -= hb.lastValue
-			} else {
-				AllyBase.Glory -= hb.lastValue
-			}
+			Bases[1-hb.team].Glory -= hb.lastValue
 		}
 		return
 	}

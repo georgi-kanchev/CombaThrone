@@ -4,6 +4,7 @@ import (
 	"pure-game-kit/packages/assets"
 	"pure-game-kit/packages/audio"
 	"pure-game-kit/packages/geometry"
+	"pure-game-kit/packages/utility/number"
 	"pure-game-kit/packages/utility/text"
 )
 
@@ -47,7 +48,7 @@ func InitCharacters() {
 		Health: 20, MoveSpeed: 30, HurtTime: 0.5, ActValue: 2, ActSpeed: 15, ActRange: 1, RespawnTimer: 10})
 
 	Characters[CharWoman] = NewCharacter(BehaviorMan, Stats{Name: "Woman", Wage: 10,
-		Health: 12, MoveSpeed: 20, HurtTime: 0.5, ActValue: 1, ActSpeed: 18, ActRange: 1, RespawnTimer: 10})
+		Health: 12, MoveSpeed: 20, HurtTime: 0.5, ActValue: 1, ActSpeed: 18, ActRange: 1, RespawnTimer: number.Infinity()})
 
 	Characters[CharHunter] = NewCharacter(BehaviorHunter, Stats{Name: "Hunter", Wage: 40,
 		Health: 20, MoveSpeed: 15, HurtTime: 0.5, ActValue: 4, ActSpeed: 20, ActRange: 6, RespawnTimer: 10})

@@ -26,13 +26,9 @@ const ( // lanes (collision layers)
 	LaneGarrison1
 	LaneGarrison2
 	LaneGarrison3
-	LaneGarrison4
-	LaneGarrison5
 	LaneGarrisonPlus1
 	LaneGarrisonPlus2
 	LaneGarrisonPlus3
-	LaneGarrisonPlus4
-	LaneGarrisonPlus5
 	LaneCount
 	LaneLayerOffset = 28
 )
@@ -40,7 +36,6 @@ const ( // lanes (collision layers)
 const TileSize, MapCount = 32.0, 4
 
 var Decor, UserInterface assets.AtlasId
-var Backgrounds [ZoneCount]assets.ImageId
 
 var TimeScale float32 = 1
 var View *graphics.View
@@ -72,36 +67,44 @@ func InitScene() {
 	}
 	mirrorGarrisonLanes()
 
+	Clouds[CloudsNone] = []assets.ImageId{0}
+	Clouds[CloudsWindy] = append(Clouds[CloudsWindy], assets.LoadImage("data/zones/sky-clouds-wind.png"))
+	for i := 1; i <= 4; i++ {
+		Clouds[CloudsNormal] = append(Clouds[CloudsNormal], assets.LoadImage(text.New("data/zones/sky-clouds", i, ".png")))
+	}
 	for i, name := range zoneNames {
-		Backgrounds[i] = assets.LoadImage("data/zones/background-" + name + ".png")
+		ZoneBackgrounds[i] = assets.LoadImage("data/zones/background-" + name + ".png")
 		Zones[i] = NewZone(ZoneKind(i))
 	}
 	CurrentZone = Zones[ZoneField]
 
-	AllyBase = NewBase(TeamAlly, BaseFortress, Garrison3, [3]EntranceKind{EntranceDoor, EntranceTallGate, EntranceShortGate})
-	EnemyBase = NewBase(TeamEnemy, BaseNone, Garrison3, [3]EntranceKind{EntranceNone, EntranceNone, EntranceNone})
+	Bases[TeamAlly] = NewBase(TeamAlly, BaseFortress, Garrison3,
+		[3]EntranceKind{EntranceDoor, EntranceTallGate, EntranceShortGate})
+	Bases[TeamEnemy] = NewBase(TeamEnemy, BaseNone, Garrison3,
+		[3]EntranceKind{EntranceNone, EntranceNone, EntranceNone})
 
 	// Units = append(Units, NewUnit(CharWoman, TeamAlly, LaneMiddle))
 	// Units = append(Units, NewUnit(CharMan, TeamEnemy, LaneUpper))
 	// Units = append(Units, NewUnit(CharMan, TeamEnemy, LaneMiddle))
 	// Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneLower))
 	// Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneLower))
+	// Units = append(Units, NewUnit(CharMan, TeamEnemy, LaneMiddle))
 
 	Pickups = append(Pickups, NewPickup(0, PickupRelic, LaneLowerOff))
 
 	PlayAmbience(CurrentZone.kind)
 
 	Player = NewPlayer()
-	Player.Units[0] = NewUnit(CharHunter, TeamAlly, 0)
-	Player.Units[1] = NewUnit(CharWoman, TeamAlly, 0)
-	Player.Units[2] = NewUnit(CharMan, TeamAlly, 0)
+	Player.Units[0] = NewUnit(CharHunter, TeamAlly, LaneMiddle)
+	Player.Units[1] = NewUnit(CharWoman, TeamAlly, LaneMiddle)
+	Player.Units[2] = NewUnit(CharMan, TeamAlly, LaneMiddle)
 }
 
 //=================================================================
 
 func UpdateScene() {
-	var _, bly = CurrentZone.Background.PointFromEdge(0.5, 1)
-	View.FitSize(CurrentZone.Background.Width, 0)
+	var _, bly = CurrentZone.Ground.PointFromEdge(0.5, 1)
+	View.FitSize(CurrentZone.Ground.Width, 0)
 	var _, h = View.Size()
 	View.Y = (bly - h/2) - 2
 
@@ -116,16 +119,20 @@ func UpdateScene() {
 	}
 
 	CurrentZone.UpdateBack()
-	AllyBase.UpdateBack()
-	EnemyBase.UpdateBack()
-	iterateRemovable(&AllyBase.Entrances, func(e *Entrance) { e.Update() })
-	iterateRemovable(&EnemyBase.Entrances, func(e *Entrance) { e.Update() })
+	Bases[TeamAlly].UpdateBack()
+	Bases[TeamEnemy].UpdateBack()
+	iterateRemovable(&Bases[TeamAlly].Entrances, func(e *Entrance) { e.Update() })
+	iterateRemovable(&Bases[TeamEnemy].Entrances, func(e *Entrance) { e.Update() })
 	CurrentZone.UpdateFront()
 
 	iterateRemovable(&ProjectilesBehind, func(p *Projectile) { p.Update() })
 	iterateRemovable(&Pickups, func(p *Pickup) { p.Update() })
 
-	iterateRemovable(&Player.Units, func(u *Unit) { u.Update() })
+	iterateRemovable(&Player.Units, func(u *Unit) {
+		if !u.IsSummoned() {
+			u.Update()
+		}
+	})
 	collection.SortByField(Units, func(u *Unit) float32 {
 		if u.Stats.Health <= 0 { // dead units go behind all alive units
 			return number.NegativeInfinity()
@@ -139,14 +146,15 @@ func UpdateScene() {
 
 		u.Update()
 	})
-	AllyBase.UpdateFront()
-	EnemyBase.UpdateFront()
+
+	Bases[TeamAlly].UpdateFront()
+	Bases[TeamEnemy].UpdateFront()
 	iterateRemovable(&Projectiles, func(p *Projectile) { p.Update() })
 
-	for _, g := range AllyBase.Entrances {
+	for _, g := range Bases[TeamAlly].Entrances {
 		g.HealthBar.Update(g.Tiles[0].Shape, g.Health, g.MaxHealth, geometry.Area{})
 	}
-	for _, g := range EnemyBase.Entrances {
+	for _, g := range Bases[TeamEnemy].Entrances {
 		g.HealthBar.Update(g.Tiles[0].Shape, g.Health, g.MaxHealth, geometry.Area{})
 	}
 	for _, u := range Units { // health bars take the Z order of the units
@@ -188,7 +196,7 @@ var highlightCursorColors = map[int]uint{
 }
 
 func mirrorGarrisonLanes() {
-	for i := LaneGarrison1; i < LaneGarrisonPlus5+1; i++ {
+	for i := LaneGarrison1; i < LaneGarrisonPlus3+1; i++ {
 		var length = len(laneCollisions[i])
 		for j := range length {
 			var shape = laneCollisions[i][j]
@@ -201,7 +209,7 @@ func mirrorGarrisonLanes() {
 	}
 }
 func bringGarrisonLanesDown(team Team) {
-	for i := LaneGarrison1; i < LaneGarrisonPlus5+1; i++ {
+	for i := LaneGarrison1; i < LaneGarrisonPlus3+1; i++ {
 		var length = len(laneCollisions[i])
 		var j = length / 2
 		if team == TeamAlly {

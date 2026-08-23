@@ -35,10 +35,10 @@ const (
 )
 const GarrisonNone, Garrison1, Garrison2, Garrison3 Garrison = 0, 1, 2, 3
 
-var AllyBase, EnemyBase Base
+var Bases [TeamCount]*Base
 
-func NewBase(team Team, kind BaseKind, garrison Garrison, entrances [3]EntranceKind) Base {
-	var b = Base{team: team, Kind: kind, Garrison: garrison, Glory: baseGlory[kind]}
+func NewBase(team Team, kind BaseKind, garrison Garrison, entrances [3]EntranceKind) *Base {
+	var b = &Base{team: team, Kind: kind, Garrison: garrison, Glory: baseGlory[kind]}
 	b.Entrances = make([]*Entrance, 3)
 	b.Entrances[LaneLower/2] = NewEntrance(entrances[LaneLower/2], b.Kind, team, LaneLower)
 	b.Entrances[LaneMiddle/2] = NewEntrance(entrances[LaneMiddle/2], b.Kind, team, LaneMiddle)
@@ -117,13 +117,12 @@ func (b *Base) UpdateBack() {
 		b.FlagAnim.FPS = 2
 	}
 	b.Flag.X, b.Flag.Y = x, y
-	b.FlagAnim.TimeScale = TimeScale
+	b.FlagAnim.TimeScale = TimeScale * CurrentZone.WindSpeed
 	b.FlagAnim.Frames = Decor.Crops(group)
 	var frame = b.FlagAnim.Frame()
 	var crop = frame.CropArea()
 	b.Flag.ImageId, b.Flag.Width, b.Flag.Height = frame, crop.Width, crop.Height
 	View.DrawObject(b.Flag)
-	// UI.TryShowTooltip(View, b.Flag.Shape, cursor.Arrow)
 }
 func (b *Base) UpdateFront() {
 	b.Glory = max(b.Glory, 0)

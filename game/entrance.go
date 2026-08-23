@@ -46,8 +46,8 @@ func NewEntrance(entry EntranceKind, base BaseKind, team Team, lane Lane) *Entra
 	case EntranceNone:
 		var hole = graphics.NewSprite(x, y, 1, Decor.Crops("hole")[0])
 		if base < BaseBarrack {
-			hole.X = -CurrentZone.Background.Width / 2 // pull back entrance to edge of scene (valid playfield)
-			hole.Effects.Tint = 0                      // and hide the hole
+			hole.X = -CurrentZone.Ground.Width / 2 // pull back entrance to edge of scene (valid playfield)
+			hole.Effects.Tint = 0                  // and hide the hole
 		}
 
 		data.Tiles = []*graphics.Object{&hole}
@@ -94,9 +94,9 @@ func (e *Entrance) IsOpen() bool {
 func (e *Entrance) Update() {
 	e.shakeTimer -= DeltaTimeScaled()
 
-	var sensorDistance = float32(TileSize) * 0.75
+	var sensorDistance = float32(TileSize) * 1.2
 	if e.Kind == EntranceDoor {
-		sensorDistance = TileSize
+		sensorDistance = TileSize * 2.3
 	}
 	var shortestDistance float32 = sensorDistance
 	for _, u := range Units {
