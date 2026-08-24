@@ -50,8 +50,10 @@ func LoadAudio() {
 		AudioProjectileFlesh = append(AudioProjectileFlesh, audio.New(asset))
 	}
 
-	AudioEventPositive = append(AudioEventPositive, audio.New(assets.LoadSound("data/sounds/event-positive.mp3", 4)))
-	AudioEventNegative = append(AudioEventNegative, audio.New(assets.LoadSound("data/sounds/event-negative.mp3", 4)))
+	AudioEventPositive = append(AudioEventPositive, audio.New(assets.LoadSound("data/sounds/event-positive1.mp3", 4)))
+	AudioEventPositive = append(AudioEventPositive, audio.New(assets.LoadSound("data/sounds/event-positive2.mp3", 4)))
+	AudioEventNegative = append(AudioEventNegative, audio.New(assets.LoadSound("data/sounds/event-negative1.mp3", 4)))
+	AudioEventNegative = append(AudioEventNegative, audio.New(assets.LoadSound("data/sounds/event-negative2.mp3", 4)))
 }
 
 //=================================================================

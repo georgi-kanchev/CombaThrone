@@ -105,68 +105,64 @@ func (e *Entrance) Shape() geometry.Shape {
 }
 
 func (e *Entrance) IsOpen() bool {
-	return number.IsWithin(e.openY, e.maxOpenY, 0.1)
+	return number.IsWithin(e.openY, e.maxOpenY, 0.1) || e.Health <= 0
 }
 
 func (e *Entrance) Update() {
 	e.shakeTimer -= DeltaTimeScaled()
 
-	var sensorDistance = float32(TileSize) * 1.2
-	if e.Kind == EntranceDoor {
-		sensorDistance = TileSize * 2.3
-	}
-	var shortestDistance float32 = sensorDistance
-	for _, u := range Units {
-		var distance = number.Absolute(u.X - e.Tiles[0].X)
-		var sameOrOffLane = e.Lane == u.Lane || (e.Lane == u.Lane-1 && u.IsOffLaner())
-		if e.Team == u.Team && sameOrOffLane && distance < shortestDistance {
-			shortestDistance = distance
-		}
-	}
-	var holdOpenDistance float32 = sensorDistance / 2
-	var distance = number.Limit(shortestDistance-holdOpenDistance, 0, sensorDistance-holdOpenDistance)
 	var gate = e.Kind == EntranceShortGate || e.Kind == EntranceTallGate
-	e.openY = number.Map(distance, sensorDistance-holdOpenDistance, 0, 0, e.maxOpenY)
-
 	var shakeOffsetX, shakeOffsetY float32 = 0, 0
-	if e.shakeTimer > 0 {
-		shakeOffsetX, shakeOffsetY = random.Range[float32](-3, 3)*e.shakeTimer, random.Range[float32](-3, 3)*e.shakeTimer
-	}
 
-	var centerY, height float32 = e.Tiles[0].Y, TileSize * 2.3
-	switch e.Kind {
-	case EntranceDoor:
-		var breakIndex = number.Map(e.Health, 0, e.MaxHealth, 5, 1)
-		var isOpen = e.IsOpen()
-		if isOpen {
-			breakIndex = 6
+	if e.Health > 0 {
+		var sensorDistance = float32(TileSize) * 1.2
+		if e.Kind == EntranceDoor {
+			sensorDistance = TileSize * 2.3
 		}
-		centerY += TileSize / 4
+		var shortestDistance float32 = sensorDistance
+		for _, u := range Units {
+			var distance = number.Absolute(u.X - e.Tiles[0].X)
+			var sameOrOffLane = e.Lane == u.Lane || (e.Lane == u.Lane-1 && u.IsOffLaner())
+			if e.Team == u.Team && sameOrOffLane && distance < shortestDistance {
+				shortestDistance = distance
+			}
+		}
+		var holdOpenDistance float32 = sensorDistance / 2
+		var distance = number.Limit(shortestDistance-holdOpenDistance, 0, sensorDistance-holdOpenDistance)
+		e.openY = number.Map(distance, sensorDistance-holdOpenDistance, 0, 0, e.maxOpenY)
 
-		if condition.JustTurnedTrue(isOpen, int(e.Tiles[0].X)) {
-			PlaySound(AudioDoorOpen)
-		}
-		if condition.JustTurnedTrue(!isOpen, int(e.Tiles[0].X)*30) && time.Frame() > 1 {
-			PlaySound(AudioDoorClose)
-		}
-
-		e.Tiles[0].ImageId = Decor.Crops("door")[breakIndex]
-	case EntranceShortGate, EntranceTallGate:
-		if condition.JustTurnedTrue(e.openY > 0, int(e.Tiles[0].X)) {
-			PlaySound(AudioGateOpen)
-		}
-		if condition.JustTurnedTrue(e.openY == 0, int(e.Tiles[0].X*30)) && time.Frame() > 1 {
-			PlaySound(AudioGateClose)
-		}
-		centerY += TileSize
-		height = TileSize * 2.7
-		if e.Kind == EntranceTallGate {
-			centerY += TileSize / 2
-			height = TileSize * 3.5
+		const shakeForce = 3.0
+		if e.shakeTimer > 0 {
+			shakeOffsetX = random.Range[float32](-shakeForce, shakeForce) * e.shakeTimer
+			shakeOffsetY = random.Range[float32](-shakeForce, shakeForce) * e.shakeTimer
 		}
 
-		for i := len(e.Tiles) / 2; i < len(e.Tiles); i++ {
-			e.Tiles[i].Y = e.originalTileYs[i] + e.openY
+		switch e.Kind {
+		case EntranceDoor:
+			var breakIndex = number.Map(e.Health, 0, e.MaxHealth, 5, 1)
+			if e.IsOpen() && e.Health > 0 {
+				breakIndex = 6
+			}
+
+			if condition.JustTurnedTrue(e.IsOpen(), int(e.Tiles[0].X)) {
+				PlaySound(AudioDoorOpen)
+			}
+			if condition.JustTurnedTrue(!e.IsOpen(), int(e.Tiles[0].X)*30) && time.Frame() > 1 {
+				PlaySound(AudioDoorClose)
+			}
+
+			e.Tiles[0].ImageId = Decor.Crops("door")[breakIndex]
+		case EntranceShortGate, EntranceTallGate:
+			if condition.JustTurnedTrue(e.openY > 0, int(e.Tiles[0].X)) {
+				PlaySound(AudioGateOpen)
+			}
+			if condition.JustTurnedTrue(e.openY == 0, int(e.Tiles[0].X*30)) && time.Frame() > 1 {
+				PlaySound(AudioGateClose)
+			}
+
+			for i := len(e.Tiles) / 2; i < len(e.Tiles); i++ {
+				e.Tiles[i].Y = e.originalTileYs[i] + e.openY
+			}
 		}
 	}
 
@@ -178,9 +174,6 @@ func (e *Entrance) Update() {
 		View.DrawObject(t)
 		t.X, t.Y = lastX, lastY
 	}
-	_ = height
-	// var shape = geometry.NewRectangle(e.Tiles[0].X, centerY, TileSize*0.85, height, 0)
-	// UI.TryShowTooltip(View, shape, cursor.Arrow)
 }
 func (e *Entrance) TakeDamage(damage int) {
 	if e.Health <= 0 {
