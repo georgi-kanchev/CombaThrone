@@ -111,7 +111,7 @@ func (b *Base) UpdateBack() {
 		group = "flag-player"
 	} else if CurrentZone.kind == ZoneDocks {
 		x, y = PointAtCell(13.85, -0.15)
-		b.FlagAnim.FPS = 8
+		b.FlagAnim.FPS = 5
 	} else {
 		x, y = PointAtCell(14, 5.5)
 		b.FlagAnim.FPS = 2

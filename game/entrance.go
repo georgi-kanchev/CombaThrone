@@ -2,6 +2,7 @@ package game
 
 import (
 	"pure-game-kit/packages/execution/condition"
+	"pure-game-kit/packages/geometry"
 	"pure-game-kit/packages/graphics"
 	"pure-game-kit/packages/utility/number"
 	"pure-game-kit/packages/utility/random"
@@ -86,6 +87,22 @@ func NewEntrance(entry EntranceKind, base BaseKind, team Team, lane Lane) *Entra
 }
 
 //=================================================================
+
+func (e *Entrance) Shape() geometry.Shape {
+	var shape geometry.Shape
+	switch e.Kind {
+	case EntranceNone, EntranceDoor:
+		shape = e.Tiles[0].Shape
+	case EntranceShortGate:
+		shape = e.Tiles[1].Shape
+		shape.Height = TileSize * 3
+	case EntranceTallGate:
+		shape = e.Tiles[2].Shape
+		shape.Y -= TileSize / 2
+		shape.Height = TileSize * 4
+	}
+	return shape
+}
 
 func (e *Entrance) IsOpen() bool {
 	return number.IsWithin(e.openY, e.maxOpenY, 0.1)

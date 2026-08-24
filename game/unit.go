@@ -69,6 +69,7 @@ const TeamAlly, TeamEnemy, TeamNeutral, TeamCount Team = 0, 1, 2, 3
 const Gravity, GroundFrictionPercent, BloodMultiplier = 256.0, 15.0, 40.0
 
 var Units []*Unit = make([]*Unit, 0, 16)
+var Collisions = map[Lane][]geometry.Shape{}
 
 func NewUnit(character CharacterKind, team Team, lane Lane) *Unit {
 	var char = Characters[character]
@@ -122,6 +123,9 @@ func (u *Unit) IsSummoned() bool {
 	return u != nil && u.State != StateWaitingToBeSummoned
 }
 func (u *Unit) IsOutsideOwnBase() bool {
+	if u.IsGarrisoner() {
+		return false
+	}
 	var myEntrance = Bases[u.Team].Entrances[u.Lane/2]
 	if u.Team == TeamAlly && u.X > myEntrance.Tiles[0].X {
 		return true
@@ -131,10 +135,6 @@ func (u *Unit) IsOutsideOwnBase() bool {
 	return false
 }
 func (u *Unit) IsInsideEnemyBase(offset float32) bool {
-	if !u.IsLaner() {
-		return false
-	}
-
 	var _, entrance = u.EnemyEntrance()
 	if entrance != nil && u.Team == TeamEnemy && u.X < entrance.Tiles[0].X-offset {
 		return true
@@ -149,7 +149,7 @@ func (u *Unit) PrepareSpawn() {
 	u.Effects.Tint = palette.White
 	u.Stats = Characters[u.Character].Stats
 
-	var col = laneCollisions[u.Lane]
+	var col = Collisions[u.Lane]
 	var laneX, laneY = col[0].X + col[0].Width/2, col[0].Y - col[0].Height/2 - u.Height/2
 	switch u.Lane {
 	case LaneLower, LaneLowerOff:
@@ -243,8 +243,6 @@ var laneMasks = map[Lane]geometry.Area{
 	LaneUpper:     geometry.NewArea(0, 0, 428, 1000),
 	LaneUpperOff:  geometry.NewArea(0, 0, 428, 1000),
 }
-var laneCollisions = map[Lane][]geometry.Shape{}
-
 var teamColors = [TeamCount]uint{TeamAlly: palette.Green, TeamEnemy: palette.Red, TeamNeutral: palette.Orange}
 
 func (u *Unit) particlesBlood(p *motion.Particle) (alive bool) {
@@ -305,8 +303,16 @@ func (u *Unit) applyState() {
 	}
 	var ranged = u.Stats.ActRange > 1 && (u.ClosestEnemyInRange != nil || enemyEntranceInRange)
 	var garrisonOrNot = !u.IsGarrisoner() || (u.IsGarrisoner() && u.IsAtGarrison)
-	var myEntrance = Bases[u.Team].Entrances[u.Lane/2]
-	var lanerCanShoot = u.IsOutsideOwnBase() || (!u.IsOutsideOwnBase() && myEntrance.IsOpen())
+	var myEntrance *Entrance
+	if u.IsLaner() {
+		myEntrance = Bases[u.Team].Entrances[u.Lane/2]
+	}
+	var sameLaneWithTarget = u.ClosestEnemyInRange != nil && u.Lane == u.ClosestEnemyInRange.Lane
+	var openDoorShoot = u.IsLaner() && !u.IsOutsideOwnBase() && myEntrance.IsOpen() && sameLaneWithTarget
+	var canShoot = u.IsOutsideOwnBase() || openDoorShoot
+	if u.IsGarrisoner() {
+		canShoot = true
+	}
 
 	if u.State == StateWalking && u.Stats.Health > 0 && (!u.IsGrounded || u.moveSpeedX < 0.01) {
 		u.State = StateIdling
@@ -331,7 +337,7 @@ func (u *Unit) applyState() {
 		u.State = StateActionCharging
 	} else if (u.State == StateIdling || u.State == StateWalking) && melee {
 		u.State = StateActionStart
-	} else if (u.State == StateIdling || u.State == StateWalking) && ranged && garrisonOrNot && lanerCanShoot {
+	} else if (u.State == StateIdling || u.State == StateWalking) && ranged && garrisonOrNot && canShoot {
 		if canAct {
 			u.State = StateActionStart
 		} else if u.Stats.Health > 0 {
@@ -393,6 +399,19 @@ func (u *Unit) actUponState() {
 		if u.X < -CurrentZone.Ground.Width/2-u.Width*2 || u.X > CurrentZone.Ground.Width/2+u.Width*2 {
 			u.hurtTimer = 0 // no instant delete - to have time to play glory text animation etc
 			u.State = StateDecaying
+
+			if u.IsOffLaner() && u.IsReturning {
+				for _, p := range Pickups {
+					if p.Target == u {
+						p.Target = nil
+						p.Mask = geometry.Area{}
+						p.SlotUI = UI.FreePickupSlot()
+						collection.Remove(Pickups, p)
+						UI.Pickups[p.SlotUI] = p
+						break
+					}
+				}
+			}
 		}
 	case StateActionStart: // random delay to balance same sided units melee VVVVVVV
 		u.actionTimer = float32(u.Stats.ActSpeed)/10 + random.Range[float32](0, 0.1)
@@ -489,7 +508,7 @@ func (u *Unit) applyCollisions() {
 
 	u.IsGrounded = false
 	if u.VelocityY > 0 { // collide with ground only when falling down (allows jumping up to a lane)
-		for _, s := range laneCollisions[u.Lane] {
+		for _, s := range Collisions[u.Lane] {
 			if hb.Overlaps(s) {
 				hb = hb.Collide(s)
 				u.X, u.Y = hb.X+diffX, hb.Y+diffY
@@ -518,12 +537,13 @@ func (u *Unit) applyCollisions() {
 		}
 	}
 
-	if u.IsOffLaner() {
-		// for _, p := range Pickups {
-		// if p {
-
-		// }
-		// }
+	if u.IsOffLaner() && UI.FreePickupSlot() >= 0 {
+		for _, p := range Pickups {
+			if p != nil && p.lane == u.Lane && p.Overlaps(hb) {
+				p.Target = u
+				u.IsReturning = true
+			}
+		}
 	}
 }
 func (u *Unit) draw() {
@@ -543,5 +563,8 @@ func (u *Unit) draw() {
 	}
 	View.DrawObject(&u.Object)
 	u.Width = crop.Width
-	UI.TryShowTooltip(View, u.Object.Shape, cursor.Arrow)
+
+	if u.IsOutsideOwnBase() {
+		UI.TryShowTooltip(View, u.Object.Shape, cursor.Arrow)
+	}
 }

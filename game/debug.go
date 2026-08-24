@@ -57,7 +57,7 @@ func UpdateDebug() {
 				DebugHoveredUnit = u
 			}
 		}
-		for _, cols := range laneCollisions {
+		for _, cols := range Collisions {
 			for _, s := range cols {
 				View.DrawShape(s.X, s.Y, s.Width, s.Height, s.Angle, 0, DebugCollisionColor, geometry.Area{})
 			}

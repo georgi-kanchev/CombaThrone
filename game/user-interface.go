@@ -24,7 +24,10 @@ type GUI struct {
 	Tooltip        *Tooltip
 	HoverHighlight *graphics.Object
 
-	SummonIndex int
+	Pickups []*Pickup
+
+	SummonIndex              int
+	SummonDragX, SummonDragY float32
 }
 
 type Tooltip struct {
@@ -33,7 +36,7 @@ type Tooltip struct {
 	cursor int
 }
 
-const IconHealth, IconCoin, IconGlory, IconDeath, IconCount Icon = 0, 1, 2, 3, 4
+const IconHealth, IconCoin, IconGlory, IconDeath, IconCircle, IconCount Icon = 0, 1, 2, 3, 4, 5
 
 var Tags = [IconCount]string{IconHealth: "~", IconCoin: "$", IconGlory: "*"}
 
@@ -67,25 +70,43 @@ func NewUI() *GUI {
 
 	return &GUI{
 		View: &view, ZoneInfo: &info, Top: &top, TeamGlory: glory, Coins: &coins, UnitsPanel: &unitsPanel,
-		HoverHighlight: &highlight, SummonIndex: -1,
+		HoverHighlight: &highlight, SummonIndex: -1, Pickups: make([]*Pickup, 4),
 	}
 }
 
 //=================================================================
 
-func (u *GUI) UnitPosition(index int) (x, y float32) {
+func (u *GUI) UnitIconPosition(index int) (x, y float32) {
 	var width, height = float32(TileSize) + 7, float32(TileSize) + 7
 	var offX, offY float32 = width/2 - width*2, height/2 - height
 	var i, j = index / 4, index % 4
 	return u.UnitsPanel.X + float32(j)*width + offX, u.UnitsPanel.Y + float32(i)*height + offY
 }
+func (u *GUI) FreePickupSlot() int {
+	for i, p := range u.Pickups {
+		if p == nil {
+			return i
+		}
+	}
+	return -1
+}
+func (u *GUI) PickupSlotPosition(slot int) (x, y float32) {
+	switch slot {
+	case 0:
+		return u.Coins.X - 45, u.Coins.Y + 5
+	case 1:
+		return u.Coins.X - 28, u.Coins.Y + 3
+	case 2:
+		return u.Coins.X + 28, u.Coins.Y + 3
+	case 3:
+		return u.Coins.X + 45, u.Coins.Y + 5
+	}
+	return number.NaN(), number.NaN()
+}
 
 func (u *GUI) Update() {
-	const scale = 1
-	var noMask = geometry.Area{}
+	const scale = 0.8
 	var sz float32 = TileSize
-	var click = mouse.IsButtonJustPressed(button.Left)
-	var drop = u.SummonIndex >= 0 && mouse.IsButtonJustReleased(button.Left)
 	u.View.Zoom = scale * 5
 
 	var tx, ty = u.View.PointFromEdge(0.5, 0)
@@ -97,9 +118,79 @@ func (u *GUI) Update() {
 		u.SummonIndex = -1
 	}
 
+	u.drawUnitsBench(lastSummonIndex)
+
+	u.Top.X, u.Top.Y = tx, ty+u.Top.Height/2
+	u.View.DrawObject(u.Top)
+
+	u.ZoneInfo.Text = zoneInfos[CurrentZone.kind]
+	u.ZoneInfo.X, u.ZoneInfo.Y = u.Top.X, u.Top.Y-sz+4.5
+	u.View.DrawObject(u.ZoneInfo)
+
+	u.Coins.X, u.Coins.Y = u.Top.X, u.Top.Y-9
+	u.View.DrawObject(u.Coins)
+	u.TryShowTooltip(u.View, u.Coins.Shape, cursor.Arrow)
+
+	u.TeamGlory[TeamAlly].X, u.TeamGlory[TeamAlly].Y = u.Top.X-sz*3.5, u.Top.Y-6
+	u.TeamGlory[TeamEnemy].X, u.TeamGlory[TeamEnemy].Y = u.Top.X+sz*3.5, u.Top.Y-6
+	u.View.DrawObject(u.TeamGlory[TeamAlly])
+	u.View.DrawObject(u.TeamGlory[TeamEnemy])
+	u.TryShowTooltip(u.View, u.TeamGlory[TeamAlly].Shape, cursor.Arrow)
+	u.TryShowTooltip(u.View, u.TeamGlory[TeamEnemy].Shape, cursor.Arrow)
+
+	iterateRemovable(&u.Pickups, func(p *Pickup) { p.Update() })
+
+	u.trySummon(lastSummonIndex)
+
+	if u.SummonIndex < 0 && u.Tooltip != nil {
+		mouse.SetCursor(u.Tooltip.cursor)
+		u.Highlight(u.Tooltip.view, u.Tooltip.shape, highlightCursorColors[u.Tooltip.cursor])
+	}
+}
+
+func (u *GUI) TryShowTooltip(view *graphics.View, shape geometry.Shape, cursor int) {
+	if !shape.ContainsPoint(view.MousePosition()) {
+		return
+	}
+	u.Tooltip = &Tooltip{view: view, shape: shape, cursor: cursor}
+}
+func (u *GUI) Highlight(view *graphics.View, shape geometry.Shape, color uint) {
+	shape.Width += 2
+	shape.Height += 2
+	u.HoverHighlight.Shape = shape
+	u.HoverHighlight.Effects.Tint = color
+	view.DrawObject(u.HoverHighlight)
+}
+
+func (u *GUI) DrawPath(view *graphics.View, fromX, fromY, toX, toY float32) {
+	const size = 4.0
+	var count float32 = point.DistanceToPoint(fromX, fromY, toX, toY) / 15
+	for i := 1; i < int(count+2); i++ {
+		var x1 = number.Map(easing.Linear(float32(i-1)/count), 0, 1, fromX, toX)
+		var y1 = number.Map(easing.QuadIn(float32(i-1)/count), 0, 1, fromY, toY)
+		var x2 = number.Map(easing.Linear(float32(i)/count), 0, 1, fromX, toX)
+		var y2 = number.Map(easing.QuadIn(float32(i)/count), 0, 1, fromY, toY)
+		if i == int(count+1) {
+			x2, y2 = toX, toY
+		}
+		var line = geometry.NewLine(x1, y1, x2, y2, 1)
+		var width = max(size, line.Width-size)
+		view.DrawShape(line.X, line.Y, width, size, line.Angle, 1, palette.Black, geometry.Area{})
+		view.DrawShape(line.X, line.Y, width-2, size-2, line.Angle, 1, palette.White, geometry.Area{})
+	}
+}
+
+// private ========================================================
+
+func (u *GUI) drawUnitsBench(lastSummonIndex int) {
 	var slotImageId = UserInterface.Crops("slot")[0]
+	var noMask geometry.Area
+	var drop = u.SummonIndex >= 0 && mouse.IsButtonJustReleased(button.Left)
+	var click = mouse.IsButtonJustPressed(button.Left)
+	var sz float32 = TileSize
+
 	for index, unit := range Player.Units {
-		var x, y = u.UnitPosition(index)
+		var x, y = u.UnitIconPosition(index)
 		var shape = geometry.NewRoundedRectangle(x, y, sz, sz, 0, 0)
 		var hovered = shape.ContainsPoint(u.View.MousePosition())
 		u.View.DrawImage(x, y, sz, sz, 0, slotImageId, palette.White, noMask)
@@ -145,9 +236,8 @@ func (u *GUI) Update() {
 			u.View.DrawShape(x+sz/2-sz/2, y+sz/2-2, sz-2, 3, 0, 0, palette.Black, noMask)
 			u.View.DrawShape(x+hpWidth/2-sz/2+2, y+sz/2-2, hpWidth, 1, 0, 0, teamColors[TeamAlly], noMask)
 		} else if hovered && click && lastSummonIndex < 0 {
-			// Units = append(Units, unit)
-			// unit.PrepareSpawn()
 			u.SummonIndex = index
+			u.SummonDragX, u.SummonDragY = u.View.PointToView(View, x, y)
 		}
 
 		u.TryShowTooltip(u.View, shape, newCursor)
@@ -156,71 +246,103 @@ func (u *GUI) Update() {
 			u.Highlight(u.View, shape, palette.White)
 		}
 
-		if unit.IsSummoned() && hovered {
-			u.Highlight(View, unit.Shape, palette.LightGray)
-		} else if unit.IsSummoned() && unit.Shape.ContainsPoint(View.MousePosition()) {
-			u.Highlight(u.View, shape, palette.LightGray)
+		if u.SummonIndex < 0 {
+			if unit.IsSummoned() && hovered {
+				u.Highlight(View, unit.Shape, palette.LightGray)
+			} else if unit.IsSummoned() && unit.Shape.ContainsPoint(View.MousePosition()) {
+				u.Highlight(u.View, shape, palette.LightGray)
+			}
 		}
 	}
-
-	u.Top.X, u.Top.Y = tx, ty+u.Top.Height/2
-	u.View.DrawObject(u.Top)
-
-	u.ZoneInfo.Text = zoneInfos[CurrentZone.kind]
-	u.ZoneInfo.X, u.ZoneInfo.Y = u.Top.X, u.Top.Y-sz+4.5
-	u.View.DrawObject(u.ZoneInfo)
-
-	u.Coins.X, u.Coins.Y = u.Top.X, u.Top.Y-9
-	u.View.DrawObject(u.Coins)
-	u.TryShowTooltip(u.View, u.Coins.Shape, cursor.Arrow)
-
-	u.TeamGlory[TeamAlly].X, u.TeamGlory[TeamAlly].Y = u.Top.X-sz*3.5, u.Top.Y-6
-	u.TeamGlory[TeamEnemy].X, u.TeamGlory[TeamEnemy].Y = u.Top.X+sz*3.5, u.Top.Y-6
-	u.View.DrawObject(u.TeamGlory[TeamAlly])
-	u.View.DrawObject(u.TeamGlory[TeamEnemy])
-	u.TryShowTooltip(u.View, u.TeamGlory[TeamAlly].Shape, cursor.Arrow)
-	u.TryShowTooltip(u.View, u.TeamGlory[TeamEnemy].Shape, cursor.Arrow)
-
-	if u.SummonIndex >= 0 {
-		var unitX, unitY = u.UnitPosition(u.SummonIndex)
-		var mx, my = u.View.MousePosition()
-		mouse.SetCursor(cursor.Move)
-		u.DrawPath(unitX, unitY, mx, my)
-		u.View.DrawImage(mx, my, sz, sz, 0, Characters[Player.Units[u.SummonIndex].Character].Icon, palette.White, noMask)
-	} else if u.Tooltip != nil {
-		mouse.SetCursor(u.Tooltip.cursor)
-		u.Highlight(u.Tooltip.view, u.Tooltip.shape, highlightCursorColors[u.Tooltip.cursor])
-	}
 }
-
-func (u *GUI) TryShowTooltip(view *graphics.View, shape geometry.Shape, cursor int) {
-	if !shape.ContainsPoint(view.MousePosition()) {
+func (u *GUI) trySummon(lastSummonIndex int) {
+	if lastSummonIndex < 0 {
 		return
 	}
-	u.Tooltip = &Tooltip{view: view, shape: shape, cursor: cursor}
-}
-func (u *GUI) Highlight(view *graphics.View, shape geometry.Shape, color uint) {
-	shape.Width += 2
-	shape.Height += 2
-	u.HoverHighlight.Shape = shape
-	u.HoverHighlight.Effects.Tint = color
-	view.DrawObject(u.HoverHighlight)
-}
 
-func (u *GUI) DrawPath(fromX, fromY, toX, toY float32) {
-	const size = 4.0
-	var count float32 = point.DistanceToPoint(fromX, fromY, toX, toY) / 15
-	for i := 1; i < int(count+2); i++ {
-		var x1 = number.Map(easing.Linear(float32(i-1)/count), 0, 1, fromX, toX)
-		var y1 = number.Map(easing.QuadIn(float32(i-1)/count), 0, 1, fromY, toY)
-		var x2 = number.Map(easing.Linear(float32(i)/count), 0, 1, fromX, toX)
-		var y2 = number.Map(easing.QuadIn(float32(i)/count), 0, 1, fromY, toY)
-		if i == int(count+1) {
-			x2, y2 = toX, toY
+	var unit = Player.Units[lastSummonIndex]
+	var unitX, unitY = u.UnitIconPosition(lastSummonIndex)
+	var mx, my = u.View.MousePosition()
+	mx, my = u.View.PointToView(View, mx, my)
+	unitX, unitY = u.View.PointToView(View, unitX, unitY)
+
+	mouse.SetCursor(cursor.Move)
+
+	var targetX, targetY = mx, my
+	var hoverShape geometry.Shape
+	var drop, click = mouse.IsButtonJustReleased(button.Left), mouse.IsButtonJustPressed(button.Left)
+	var smallestDist = number.Infinity()
+	const size = TileSize * 0.85
+	var lane Lane
+
+	for _, e := range Bases[TeamAlly].Entrances {
+		var shape = e.Shape()
+		if Bases[TeamAlly].Kind < BaseBarrack {
+			shape.X += TileSize / 1.5
+			shape.Y += TileSize
+		} else if e.Kind == EntranceTallGate {
+			shape.Y += TileSize / 2
 		}
-		var line = geometry.NewLine(x1, y1, x2, y2, 1)
-		var width = max(size, line.Width-size)
-		u.View.DrawShape(line.X, line.Y, width, size, line.Angle, 1, palette.Black, geometry.Area{})
-		u.View.DrawShape(line.X, line.Y, width-2, size-2, line.Angle, 1, palette.White, geometry.Area{})
+		shape.Width, shape.Height = size, size
+
+		var dist = point.DistanceToPoint(shape.X, shape.Y, mx, my)
+		if dist < smallestDist && dist < TileSize*1.5 {
+			smallestDist = dist
+			hoverShape = shape
+			lane = e.Lane
+		}
+		View.DrawShape(shape.X, shape.Y, shape.Width, shape.Height, 0, 0, color.RGBA(0, 255, 0, 80), geometry.Area{})
+		u.Highlight(View, shape, palette.Green)
 	}
+
+	var from, to = int(LaneGarrison3 + Lane(Bases[TeamAlly].Garrison)), int(LaneGarrison1)
+	var takenGarrisons = make([]Lane, 0, 8)
+	for _, pu := range Player.Units {
+		if pu != nil && pu.IsSummoned() && pu.IsGarrisoner() && pu.Stats.Health > 0 {
+			takenGarrisons = append(takenGarrisons, pu.Lane)
+		}
+	}
+	if unit.Stats.ActRange > 1 && len(takenGarrisons) < 6 {
+		var garrisonX, garrisonY = PointAtCell(0, 4)
+		var shape = geometry.NewRectangle(garrisonX, garrisonY, size, size, 0)
+
+		var dist = point.DistanceToPoint(shape.X, shape.Y, mx, my)
+		if dist < smallestDist && dist < TileSize*1.5 {
+			smallestDist = dist
+			hoverShape = shape
+			lane = LaneGarrison1
+
+			for i := from; i >= to; i-- {
+				if !collection.Contains(takenGarrisons, Lane(i)) {
+					lane = Lane(i)
+					break
+				}
+			}
+		}
+
+		View.DrawShape(shape.X, shape.Y, shape.Width, shape.Height, 0, 0, color.RGBA(0, 255, 0, 80), geometry.Area{})
+		u.Highlight(View, shape, palette.Green)
+	}
+
+	if hoverShape != (geometry.Shape{}) {
+		u.Highlight(View, hoverShape, palette.White)
+		targetX, targetY = hoverShape.X, hoverShape.Y
+
+		if click || drop {
+			u.SummonIndex = -1
+			Units = append(Units, unit)
+			unit.Lane = lane
+
+			if Characters[unit.Character].Stats.IsOffLaner {
+				unit.Lane++
+			}
+			unit.PrepareSpawn()
+		}
+	}
+
+	u.SummonDragX, u.SummonDragY = point.MoveToPointSmooth(u.SummonDragX, u.SummonDragY, targetX, targetY, 0.4)
+
+	u.DrawPath(View, unitX, unitY, u.SummonDragX, u.SummonDragY)
+	var icon = Characters[unit.Character].Icon
+	View.DrawImage(u.SummonDragX, u.SummonDragY, size, size, 0, icon, palette.White, geometry.Area{})
 }

@@ -2,7 +2,7 @@
 <data grid="32">
   <crops>
     0,0,288,128|0,128,288,64|288,0,32,32|288,32,32,32|288,64,32,32|288,96,32,32|288,128,32,32|288,160,32,32|
-    288,192,32,32|288,224,32,32|320,0,64,64|384,0,64,64|448,0,64,64|320,64,64,64
+    288,192,32,32|288,224,32,32|320,0,64,64|384,0,64,64|448,0,64,64|320,64,64,64|384,64,64,64
   </crops>
   <groups>
     <group name="logo" cropIndexes="0"/>
@@ -13,6 +13,6 @@
     <group name="handle" cropIndexes="7"/>
     <group name="slot" cropIndexes="8"/>
     <group name="highlight" cropIndexes="9"/>
-    <group name="icons" cropIndexes="10 11 12 13"/>
+    <group name="icons" cropIndexes="10 11 12 13 14"/>
   </groups>
 </data>

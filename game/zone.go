@@ -56,7 +56,7 @@ func NewZone(kind ZoneKind) *Zone {
 		collection.Remove(randomClouds, cloud) // field and ruins shouldn't have the same clouds
 		windSpeed = random.Range[float32](0.5, 2.0)
 	case CloudsWindy:
-		windSpeed = random.Range[float32](3.0, 5.0)
+		windSpeed = random.Range[float32](2.0, 5.0)
 	}
 	clouds.ImageCrop = cloud.CropArea()
 	return &Zone{Ground: &ground, Buildings: &buildings, skyColor: zoneSkyColors[kind], kind: kind, Clouds: &clouds,

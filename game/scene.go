@@ -63,7 +63,7 @@ func InitScene() {
 
 	for i := range LaneCount {
 		var tilemap = graphics.NewTilemap(layers[Lane(LaneLayerOffset)+i])
-		laneCollisions[i] = tilemap.TilemapShapes()
+		Collisions[i] = tilemap.TilemapShapes()
 	}
 	mirrorGarrisonLanes()
 
@@ -79,7 +79,7 @@ func InitScene() {
 	CurrentZone = Zones[ZoneField]
 
 	Bases[TeamAlly] = NewBase(TeamAlly, BaseFortress, Garrison3,
-		[3]EntranceKind{EntranceDoor, EntranceTallGate, EntranceShortGate})
+		[3]EntranceKind{EntranceDoor, EntranceShortGate, EntranceTallGate})
 	Bases[TeamEnemy] = NewBase(TeamEnemy, BaseNone, Garrison3,
 		[3]EntranceKind{EntranceNone, EntranceNone, EntranceNone})
 
@@ -88,16 +88,20 @@ func InitScene() {
 	// Units = append(Units, NewUnit(CharMan, TeamEnemy, LaneMiddle))
 	// Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneLower))
 	// Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneLower))
-	// Units = append(Units, NewUnit(CharMan, TeamEnemy, LaneMiddle))
+	Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneMiddle))
 
 	Pickups = append(Pickups, NewPickup(0, PickupRelic, LaneLowerOff))
+	Pickups = append(Pickups, NewPickup(0, PickupRelic, LaneMiddleOff))
+	Pickups = append(Pickups, NewPickup(0, PickupRelic, LaneUpperOff))
 
 	PlayAmbience(CurrentZone.kind)
 
 	Player = NewPlayer()
-	Player.Units[0] = NewUnit(CharHunter, TeamAlly, LaneMiddle)
-	Player.Units[1] = NewUnit(CharWoman, TeamAlly, LaneMiddle)
-	Player.Units[2] = NewUnit(CharMan, TeamAlly, LaneMiddle)
+
+	Player.Units[0] = NewUnit(CharWoman, TeamAlly, 0)
+	Player.Units[1] = NewUnit(CharWoman, TeamAlly, 0)
+	Player.Units[2] = NewUnit(CharWoman, TeamAlly, 0)
+	Player.Units[3] = NewUnit(CharWoman, TeamAlly, 0)
 }
 
 //=================================================================
@@ -149,6 +153,9 @@ func UpdateScene() {
 
 	Bases[TeamAlly].UpdateFront()
 	Bases[TeamEnemy].UpdateFront()
+
+	UI.Update()
+
 	iterateRemovable(&Projectiles, func(p *Projectile) { p.Update() })
 
 	for _, g := range Bases[TeamAlly].Entrances {
@@ -163,11 +170,10 @@ func UpdateScene() {
 		u.HealthBar.Update(hb, u.Stats.Health, Characters[u.Character].Stats.Health, u.Mask)
 	}
 
-	UI.Update()
 	Player.Update()
 }
 func DrawShadow(x, z, width, height, angle float32, mask geometry.Area) {
-	var lower, upper = laneCollisions[LaneLower][0], laneCollisions[LaneUpper][0]
+	var lower, upper = Collisions[LaneLower][0], Collisions[LaneUpper][0]
 	var y = number.Map(z, 0, 2, lower.Y-lower.Height/2, upper.Y-upper.Height/2)
 	View.DrawShape(x, y, width, height, angle, 1, color.RGBA(0, 0, 0, 100), mask)
 }
@@ -197,28 +203,28 @@ var highlightCursorColors = map[int]uint{
 
 func mirrorGarrisonLanes() {
 	for i := LaneGarrison1; i < LaneGarrisonPlus3+1; i++ {
-		var length = len(laneCollisions[i])
+		var length = len(Collisions[i])
 		for j := range length {
-			var shape = laneCollisions[i][j]
+			var shape = Collisions[i][j]
 			shape.X *= -1
 			if shape.Angle != 0 {
 				shape.Angle += 90
 			}
-			laneCollisions[i] = append(laneCollisions[i], shape)
+			Collisions[i] = append(Collisions[i], shape)
 		}
 	}
 }
 func bringGarrisonLanesDown(team Team) {
 	for i := LaneGarrison1; i < LaneGarrisonPlus3+1; i++ {
-		var length = len(laneCollisions[i])
+		var length = len(Collisions[i])
 		var j = length / 2
 		if team == TeamAlly {
 			j, length = 0, length/2
 		}
 		for ; j < length; j++ {
-			var shape = laneCollisions[i][j]
+			var shape = Collisions[i][j]
 			shape.Y += TileSize
-			laneCollisions[i][j] = shape
+			Collisions[i][j] = shape
 		}
 	}
 }
