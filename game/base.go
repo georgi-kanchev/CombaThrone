@@ -132,10 +132,10 @@ func (b *Base) UpdateFront() {
 	}
 
 	if b.team == TeamAlly && Player.CoinsJustChanged() {
-		UI.Coins.Text = text.New(Player.Coins, "$")
+		GameHUD.Coins.Text = text.New(Player.Coins, "$")
 	}
 	if b.Glory != b.lastGlory {
-		UI.TeamGlory[b.team].Text = text.New(b.Glory, Tags[IconGlory])
+		GameHUD.TeamGlory[b.team].Text = text.New(b.Glory, Tags[IconGlory])
 		b.lastGlory = b.Glory
 	}
 

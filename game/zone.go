@@ -71,7 +71,7 @@ var zoneNames = [ZoneCount]string{
 }
 var zoneSkyColors = [ZoneCount]uint{
 	ZoneField: color.TagRGBA("rgb(98, 171, 212)"), ZoneRuins: color.TagRGBA("rgb(98, 171, 212)"),
-	ZoneSwamp: color.TagRGBA("rgb(37, 65, 61)"), ZoneDesert: color.TagRGBA("hsl(188, 96%, 80%)"),
+	ZoneSwamp: color.TagRGBA("rgb(37, 65, 61)"), ZoneDesert: color.TagRGBA("rgb(155, 240, 253)"),
 	ZoneDocks: color.TagRGBA("rgb(98, 171, 212)"), ZoneGlacier: color.TagRGBA("rgb(155, 240, 253)"),
 	ZoneCave: color.TagRGBA("rgb(72, 54, 59)"), ZoneMine: color.TagRGBA("rgb(61, 36, 59)"),
 	ZoneHell: color.TagRGBA("rgb(227, 177, 109)"),

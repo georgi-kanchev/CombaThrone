@@ -16,6 +16,12 @@ func main() {
 	game.InitScene()
 	for window.KeepOpen() {
 		game.UpdateAudio()
+
+		if !game.InGame {
+			game.UpdateTitleScreen()
+			continue
+		}
+
 		game.UpdateScene()
 		game.UpdateDebug()
 	}

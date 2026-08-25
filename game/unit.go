@@ -405,9 +405,9 @@ func (u *Unit) actUponState() {
 					if p.Target == u {
 						p.Target = nil
 						p.Mask = geometry.Area{}
-						p.SlotUI = UI.FreePickupSlot()
+						p.SlotUI = GameHUD.FreePickupSlot()
 						collection.Remove(Pickups, p)
-						UI.Pickups[p.SlotUI] = p
+						GameHUD.Pickups[p.SlotUI] = p
 						break
 					}
 				}
@@ -537,7 +537,7 @@ func (u *Unit) applyCollisions() {
 		}
 	}
 
-	if u.IsOffLaner() && UI.FreePickupSlot() >= 0 {
+	if u.IsOffLaner() && GameHUD.FreePickupSlot() >= 0 {
 		for _, p := range Pickups {
 			if p != nil && p.lane == u.Lane && p.Overlaps(hb) {
 				p.Target = u
@@ -565,6 +565,6 @@ func (u *Unit) draw() {
 	u.Width = crop.Width
 
 	if u.IsOutsideOwnBase() {
-		UI.TryShowTooltip(View, u.Object.Shape, cursor.Arrow)
+		GameHUD.TryShowTooltip(View, u.Object.Shape, cursor.Arrow)
 	}
 }

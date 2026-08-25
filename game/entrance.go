@@ -6,7 +6,6 @@ import (
 	"pure-game-kit/packages/graphics"
 	"pure-game-kit/packages/utility/number"
 	"pure-game-kit/packages/utility/random"
-	"pure-game-kit/packages/utility/time"
 )
 
 type EntranceKind uint8
@@ -147,7 +146,7 @@ func (e *Entrance) Update() {
 			if condition.JustTurnedTrue(e.IsOpen(), int(e.Tiles[0].X)) {
 				PlaySound(AudioDoorOpen)
 			}
-			if condition.JustTurnedTrue(!e.IsOpen(), int(e.Tiles[0].X)*30) && time.Frame() > 1 {
+			if condition.JustTurnedTrue(!e.IsOpen(), int(e.Tiles[0].X)*30) && InGameTimer > 1.0 {
 				PlaySound(AudioDoorClose)
 			}
 
@@ -156,7 +155,7 @@ func (e *Entrance) Update() {
 			if condition.JustTurnedTrue(e.openY > 0, int(e.Tiles[0].X)) {
 				PlaySound(AudioGateOpen)
 			}
-			if condition.JustTurnedTrue(e.openY == 0, int(e.Tiles[0].X*30)) && time.Frame() > 1 {
+			if condition.JustTurnedTrue(e.openY == 0, int(e.Tiles[0].X*30)) && InGameTimer > 1.0 {
 				PlaySound(AudioGateClose)
 			}
 

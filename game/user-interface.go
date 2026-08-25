@@ -16,7 +16,7 @@ import (
 )
 
 type Icon uint8
-type GUI struct {
+type HUD struct {
 	View                             *graphics.View
 	Top, ZoneInfo, Coins, UnitsPanel *graphics.Object
 	TeamGlory                        [TeamCount]*graphics.Object
@@ -38,9 +38,18 @@ type Tooltip struct {
 
 const IconHealth, IconCoin, IconGlory, IconDeath, IconCircle, IconCount Icon = 0, 1, 2, 3, 4, 5
 
+var ThemeUI assets.GUIThemeId
+var ButtonUpId, ButtonDownId assets.ImageId
+var GameHUD *HUD
 var Tags = [IconCount]string{IconHealth: "~", IconCoin: "$", IconGlory: "*"}
 
-func NewUI() *GUI {
+func NewHUD() *HUD {
+	ThemeUI = assets.LoadGUITheme("data/user-interface-theme.xml")
+
+	var btn = UserInterface.Crops("button")
+	ButtonUpId = assets.LoadImage9Patch(btn[0], 8, 8, 8, 8)
+	ButtonDownId = assets.LoadImage9Patch(btn[1], 8, 8, 8, 8)
+
 	var panelNinePatch = assets.LoadImage9Patch(UserInterface.Crops("panel")[0], 8, 8, 8, 8)
 	var view = graphics.NewView(1)
 	var top = graphics.NewSprite(0, 0, 1, UserInterface.Crops("hud-top")[0])
@@ -68,7 +77,7 @@ func NewUI() *GUI {
 	var ally, enemy = label, label
 	var glory = [TeamCount]*graphics.Object{&ally, &enemy}
 
-	return &GUI{
+	return &HUD{
 		View: &view, ZoneInfo: &info, Top: &top, TeamGlory: glory, Coins: &coins, UnitsPanel: &unitsPanel,
 		HoverHighlight: &highlight, SummonIndex: -1, Pickups: make([]*Pickup, 4),
 	}
@@ -76,93 +85,93 @@ func NewUI() *GUI {
 
 //=================================================================
 
-func (u *GUI) UnitIconPosition(index int) (x, y float32) {
+func (h *HUD) UnitIconPosition(index int) (x, y float32) {
 	var width, height = float32(TileSize) + 7, float32(TileSize) + 7
 	var offX, offY float32 = width/2 - width*2, height/2 - height
 	var i, j = index / 4, index % 4
-	return u.UnitsPanel.X + float32(j)*width + offX, u.UnitsPanel.Y + float32(i)*height + offY
+	return h.UnitsPanel.X + float32(j)*width + offX, h.UnitsPanel.Y + float32(i)*height + offY
 }
-func (u *GUI) FreePickupSlot() int {
-	for i, p := range u.Pickups {
+func (h *HUD) FreePickupSlot() int {
+	for i, p := range h.Pickups {
 		if p == nil {
 			return i
 		}
 	}
 	return -1
 }
-func (u *GUI) PickupSlotPosition(slot int) (x, y float32) {
+func (h *HUD) PickupSlotPosition(slot int) (x, y float32) {
 	switch slot {
 	case 0:
-		return u.Coins.X - 45, u.Coins.Y + 5
+		return h.Coins.X - 45, h.Coins.Y + 5
 	case 1:
-		return u.Coins.X - 28, u.Coins.Y + 3
+		return h.Coins.X - 28, h.Coins.Y + 3
 	case 2:
-		return u.Coins.X + 28, u.Coins.Y + 3
+		return h.Coins.X + 28, h.Coins.Y + 3
 	case 3:
-		return u.Coins.X + 45, u.Coins.Y + 5
+		return h.Coins.X + 45, h.Coins.Y + 5
 	}
 	return number.NaN(), number.NaN()
 }
 
-func (u *GUI) Update() {
+func (h *HUD) Update() {
 	const scale = 0.8
 	var sz float32 = TileSize
-	u.View.Zoom = scale * 5
+	h.View.Zoom = scale * 5
 
-	var tx, ty = u.View.PointFromEdge(0.5, 0)
-	u.UnitsPanel.Y = ty + u.Top.Height + u.UnitsPanel.Height/2 - sz - 2
-	u.View.DrawObject(u.UnitsPanel)
+	var tx, ty = h.View.PointFromEdge(0.5, 0)
+	h.UnitsPanel.Y = ty + h.Top.Height + h.UnitsPanel.Height/2 - sz - 2
+	h.View.DrawObject(h.UnitsPanel)
 
-	var lastSummonIndex = u.SummonIndex
+	var lastSummonIndex = h.SummonIndex
 	if mouse.IsAnyButtonJustPressed() {
-		u.SummonIndex = -1
+		h.SummonIndex = -1
 	}
 
-	u.drawUnitsBench(lastSummonIndex)
+	h.drawUnitsBench(lastSummonIndex)
 
-	u.Top.X, u.Top.Y = tx, ty+u.Top.Height/2
-	u.View.DrawObject(u.Top)
+	h.Top.X, h.Top.Y = tx, ty+h.Top.Height/2
+	h.View.DrawObject(h.Top)
 
-	u.ZoneInfo.Text = zoneInfos[CurrentZone.kind]
-	u.ZoneInfo.X, u.ZoneInfo.Y = u.Top.X, u.Top.Y-sz+4.5
-	u.View.DrawObject(u.ZoneInfo)
+	h.ZoneInfo.Text = zoneInfos[CurrentZone.kind]
+	h.ZoneInfo.X, h.ZoneInfo.Y = h.Top.X, h.Top.Y-sz+4.5
+	h.View.DrawObject(h.ZoneInfo)
 
-	u.Coins.X, u.Coins.Y = u.Top.X, u.Top.Y-9
-	u.View.DrawObject(u.Coins)
-	u.TryShowTooltip(u.View, u.Coins.Shape, cursor.Arrow)
+	h.Coins.X, h.Coins.Y = h.Top.X, h.Top.Y-9
+	h.View.DrawObject(h.Coins)
+	h.TryShowTooltip(h.View, h.Coins.Shape, cursor.Arrow)
 
-	u.TeamGlory[TeamAlly].X, u.TeamGlory[TeamAlly].Y = u.Top.X-sz*3.5, u.Top.Y-6
-	u.TeamGlory[TeamEnemy].X, u.TeamGlory[TeamEnemy].Y = u.Top.X+sz*3.5, u.Top.Y-6
-	u.View.DrawObject(u.TeamGlory[TeamAlly])
-	u.View.DrawObject(u.TeamGlory[TeamEnemy])
-	u.TryShowTooltip(u.View, u.TeamGlory[TeamAlly].Shape, cursor.Arrow)
-	u.TryShowTooltip(u.View, u.TeamGlory[TeamEnemy].Shape, cursor.Arrow)
+	h.TeamGlory[TeamAlly].X, h.TeamGlory[TeamAlly].Y = h.Top.X-sz*3.5, h.Top.Y-6
+	h.TeamGlory[TeamEnemy].X, h.TeamGlory[TeamEnemy].Y = h.Top.X+sz*3.5, h.Top.Y-6
+	h.View.DrawObject(h.TeamGlory[TeamAlly])
+	h.View.DrawObject(h.TeamGlory[TeamEnemy])
+	h.TryShowTooltip(h.View, h.TeamGlory[TeamAlly].Shape, cursor.Arrow)
+	h.TryShowTooltip(h.View, h.TeamGlory[TeamEnemy].Shape, cursor.Arrow)
 
-	iterateRemovable(&u.Pickups, func(p *Pickup) { p.Update() })
+	iterateRemovable(&h.Pickups, func(p *Pickup) { p.Update() })
 
-	u.trySummon(lastSummonIndex)
+	h.trySummon(lastSummonIndex)
 
-	if u.SummonIndex < 0 && u.Tooltip != nil {
-		mouse.SetCursor(u.Tooltip.cursor)
-		u.Highlight(u.Tooltip.view, u.Tooltip.shape, highlightCursorColors[u.Tooltip.cursor])
+	if h.SummonIndex < 0 && h.Tooltip != nil {
+		mouse.SetCursor(h.Tooltip.cursor)
+		h.Highlight(h.Tooltip.view, h.Tooltip.shape, highlightCursorColors[h.Tooltip.cursor])
 	}
 }
 
-func (u *GUI) TryShowTooltip(view *graphics.View, shape geometry.Shape, cursor int) {
+func (h *HUD) TryShowTooltip(view *graphics.View, shape geometry.Shape, cursor int) {
 	if !shape.ContainsPoint(view.MousePosition()) {
 		return
 	}
-	u.Tooltip = &Tooltip{view: view, shape: shape, cursor: cursor}
+	h.Tooltip = &Tooltip{view: view, shape: shape, cursor: cursor}
 }
-func (u *GUI) Highlight(view *graphics.View, shape geometry.Shape, color uint) {
+func (h *HUD) Highlight(view *graphics.View, shape geometry.Shape, color uint) {
 	shape.Width += 2
 	shape.Height += 2
-	u.HoverHighlight.Shape = shape
-	u.HoverHighlight.Effects.Tint = color
-	view.DrawObject(u.HoverHighlight)
+	h.HoverHighlight.Shape = shape
+	h.HoverHighlight.Effects.Tint = color
+	view.DrawObject(h.HoverHighlight)
 }
 
-func (u *GUI) DrawPath(view *graphics.View, fromX, fromY, toX, toY float32) {
+func (h *HUD) DrawPath(view *graphics.View, fromX, fromY, toX, toY float32) {
 	const size = 4.0
 	var count float32 = point.DistanceToPoint(fromX, fromY, toX, toY) / 15
 	for i := 1; i < int(count+2); i++ {
@@ -182,24 +191,24 @@ func (u *GUI) DrawPath(view *graphics.View, fromX, fromY, toX, toY float32) {
 
 // private ========================================================
 
-func (u *GUI) drawUnitsBench(lastSummonIndex int) {
+func (h *HUD) drawUnitsBench(lastSummonIndex int) {
 	var slotImageId = UserInterface.Crops("slot")[0]
 	var noMask geometry.Area
-	var drop = u.SummonIndex >= 0 && mouse.IsButtonJustReleased(button.Left)
+	var drop = h.SummonIndex >= 0 && mouse.IsButtonJustReleased(button.Left)
 	var click = mouse.IsButtonJustPressed(button.Left)
 	var sz float32 = TileSize
 
 	for index, unit := range Player.Units {
-		var x, y = u.UnitIconPosition(index)
+		var x, y = h.UnitIconPosition(index)
 		var shape = geometry.NewRoundedRectangle(x, y, sz, sz, 0, 0)
-		var hovered = shape.ContainsPoint(u.View.MousePosition())
-		u.View.DrawImage(x, y, sz, sz, 0, slotImageId, palette.White, noMask)
+		var hovered = shape.ContainsPoint(h.View.MousePosition())
+		h.View.DrawImage(x, y, sz, sz, 0, slotImageId, palette.White, noMask)
 
 		if hovered && lastSummonIndex >= 0 && index != lastSummonIndex {
-			u.Highlight(u.View, shape, palette.White)
+			h.Highlight(h.View, shape, palette.White)
 			if click || drop {
 				collection.Swap(Player.Units, lastSummonIndex, index)
-				u.SummonIndex = -1
+				h.SummonIndex = -1
 			}
 		}
 		if unit == nil {
@@ -213,10 +222,10 @@ func (u *GUI) drawUnitsBench(lastSummonIndex int) {
 			newCursor = cursor.NotAllowed
 		}
 		var tint = palette.White
-		if index == u.SummonIndex {
+		if index == h.SummonIndex {
 			tint = color.RGBA(255, 255, 255, 127)
 		}
-		u.View.DrawImage(x, y, sz, sz, 0, Characters[unit.Character].Icon, tint, noMask)
+		h.View.DrawImage(x, y, sz, sz, 0, Characters[unit.Character].Icon, tint, noMask)
 		if unit.State == StateDecaying {
 			var timerWidth = number.Map(unit.hurtTimer, 0, -unit.Stats.RespawnTimer, sz-4, 0)
 			var icon, col = IconDeath, palette.Red
@@ -224,47 +233,47 @@ func (u *GUI) drawUnitsBench(lastSummonIndex int) {
 				icon, col = IconGlory, teamColors[TeamAlly]
 			}
 
-			u.View.DrawShape(x, y, sz, sz, 0, 0, color.RGBA(0, 0, 0, 150), noMask)
-			u.View.DrawImage(x-sz/2+iSz/2, y+sz/2-iSz/2-3, iSz, iSz, 0, icons[icon], col, noMask)
-			u.View.DrawShape(x+sz/2-sz/2, y+sz/2-2, sz-2, 3, 0, 0, palette.Black, noMask)
-			u.View.DrawShape(x+timerWidth/2-sz/2+2, y+sz/2-2, timerWidth, 1, 0, 0, palette.White, noMask)
+			h.View.DrawShape(x, y, sz, sz, 0, 0, color.RGBA(0, 0, 0, 150), noMask)
+			h.View.DrawImage(x-sz/2+iSz/2, y+sz/2-iSz/2-3, iSz, iSz, 0, icons[icon], col, noMask)
+			h.View.DrawShape(x+sz/2-sz/2, y+sz/2-2, sz-2, 3, 0, 0, palette.Black, noMask)
+			h.View.DrawShape(x+timerWidth/2-sz/2+2, y+sz/2-2, timerWidth, 1, 0, 0, palette.White, noMask)
 		} else if unit.IsSummoned() {
 			var hp, maxHp = float32(unit.Stats.Health), float32(Characters[unit.Character].Stats.Health)
 			var hpWidth = number.Map(hp, 0, maxHp, 0, sz-4)
-			u.View.DrawShape(x, y, sz, sz, 0, 0, color.RGBA(0, 0, 0, 150), noMask)
-			u.View.DrawImage(x-sz/2+iSz/2, y+sz/2-iSz/2-2, iSz, iSz, 0, icons[IconHealth], teamColors[TeamAlly], noMask)
-			u.View.DrawShape(x+sz/2-sz/2, y+sz/2-2, sz-2, 3, 0, 0, palette.Black, noMask)
-			u.View.DrawShape(x+hpWidth/2-sz/2+2, y+sz/2-2, hpWidth, 1, 0, 0, teamColors[TeamAlly], noMask)
+			h.View.DrawShape(x, y, sz, sz, 0, 0, color.RGBA(0, 0, 0, 150), noMask)
+			h.View.DrawImage(x-sz/2+iSz/2, y+sz/2-iSz/2-2, iSz, iSz, 0, icons[IconHealth], teamColors[TeamAlly], noMask)
+			h.View.DrawShape(x+sz/2-sz/2, y+sz/2-2, sz-2, 3, 0, 0, palette.Black, noMask)
+			h.View.DrawShape(x+hpWidth/2-sz/2+2, y+sz/2-2, hpWidth, 1, 0, 0, teamColors[TeamAlly], noMask)
 		} else if hovered && click && lastSummonIndex < 0 {
-			u.SummonIndex = index
-			u.SummonDragX, u.SummonDragY = u.View.PointToView(View, x, y)
+			h.SummonIndex = index
+			h.SummonDragX, h.SummonDragY = h.View.PointToView(View, x, y)
 		}
 
-		u.TryShowTooltip(u.View, shape, newCursor)
+		h.TryShowTooltip(h.View, shape, newCursor)
 
-		if u.SummonIndex == index {
-			u.Highlight(u.View, shape, palette.White)
+		if h.SummonIndex == index {
+			h.Highlight(h.View, shape, palette.White)
 		}
 
-		if u.SummonIndex < 0 {
+		if h.SummonIndex < 0 {
 			if unit.IsSummoned() && hovered {
-				u.Highlight(View, unit.Shape, palette.LightGray)
+				h.Highlight(View, unit.Shape, palette.LightGray)
 			} else if unit.IsSummoned() && unit.Shape.ContainsPoint(View.MousePosition()) {
-				u.Highlight(u.View, shape, palette.LightGray)
+				h.Highlight(h.View, shape, palette.LightGray)
 			}
 		}
 	}
 }
-func (u *GUI) trySummon(lastSummonIndex int) {
+func (h *HUD) trySummon(lastSummonIndex int) {
 	if lastSummonIndex < 0 {
 		return
 	}
 
 	var unit = Player.Units[lastSummonIndex]
-	var unitX, unitY = u.UnitIconPosition(lastSummonIndex)
-	var mx, my = u.View.MousePosition()
-	mx, my = u.View.PointToView(View, mx, my)
-	unitX, unitY = u.View.PointToView(View, unitX, unitY)
+	var unitX, unitY = h.UnitIconPosition(lastSummonIndex)
+	var mx, my = h.View.MousePosition()
+	mx, my = h.View.PointToView(View, mx, my)
+	unitX, unitY = h.View.PointToView(View, unitX, unitY)
 
 	mouse.SetCursor(cursor.Move)
 
@@ -292,7 +301,7 @@ func (u *GUI) trySummon(lastSummonIndex int) {
 			lane = e.Lane
 		}
 		View.DrawShape(shape.X, shape.Y, shape.Width, shape.Height, 0, 0, color.RGBA(0, 255, 0, 80), geometry.Area{})
-		u.Highlight(View, shape, palette.Green)
+		h.Highlight(View, shape, palette.Green)
 	}
 
 	var from, to = int(LaneGarrison3 + Lane(Bases[TeamAlly].Garrison)), int(LaneGarrison1)
@@ -321,15 +330,15 @@ func (u *GUI) trySummon(lastSummonIndex int) {
 		}
 
 		View.DrawShape(shape.X, shape.Y, shape.Width, shape.Height, 0, 0, color.RGBA(0, 255, 0, 80), geometry.Area{})
-		u.Highlight(View, shape, palette.Green)
+		h.Highlight(View, shape, palette.Green)
 	}
 
 	if hoverShape != (geometry.Shape{}) {
-		u.Highlight(View, hoverShape, palette.White)
+		h.Highlight(View, hoverShape, palette.White)
 		targetX, targetY = hoverShape.X, hoverShape.Y
 
 		if click || drop {
-			u.SummonIndex = -1
+			h.SummonIndex = -1
 			Units = append(Units, unit)
 			unit.Lane = lane
 
@@ -340,9 +349,9 @@ func (u *GUI) trySummon(lastSummonIndex int) {
 		}
 	}
 
-	u.SummonDragX, u.SummonDragY = point.MoveToPointSmooth(u.SummonDragX, u.SummonDragY, targetX, targetY, 0.4)
+	h.SummonDragX, h.SummonDragY = point.MoveToPointSmooth(h.SummonDragX, h.SummonDragY, targetX, targetY, 0.4)
 
-	u.DrawPath(View, unitX, unitY, u.SummonDragX, u.SummonDragY)
+	h.DrawPath(View, unitX, unitY, h.SummonDragX, h.SummonDragY)
 	var icon = Characters[unit.Character].Icon
-	View.DrawImage(u.SummonDragX, u.SummonDragY, size, size, 0, icon, palette.White, geometry.Area{})
+	View.DrawImage(h.SummonDragX, h.SummonDragY, size, size, 0, icon, palette.White, geometry.Area{})
 }

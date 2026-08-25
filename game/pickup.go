@@ -47,7 +47,7 @@ func (p *Pickup) Update() {
 	var view = View
 	var cur = cursor.Arrow
 	if p.SlotUI >= 0 {
-		view = UI.View
+		view = GameHUD.View
 		cur = cursor.Hand
 	}
 
@@ -58,7 +58,7 @@ func (p *Pickup) Update() {
 	p.ImageId, p.Width, p.Height = frame, crop.Width, crop.Height
 
 	if p.SlotUI >= 0 {
-		var x, y = UI.PickupSlotPosition(p.SlotUI)
+		var x, y = GameHUD.PickupSlotPosition(p.SlotUI)
 		p.X, p.Y = point.MoveToPointSmooth(p.X, p.Y, x, y, 0.06)
 	} else if p.Target == nil {
 		DrawShadow(p.X, p.Z-0.1, p.Width*0.6, p.Height*0.15, 0, p.Mask)
@@ -69,7 +69,7 @@ func (p *Pickup) Update() {
 	}
 
 	view.DrawObject(&p.Object)
-	UI.TryShowTooltip(view, p.Object.Shape, cur)
+	GameHUD.TryShowTooltip(view, p.Object.Shape, cur)
 }
 
 // private ========================================================

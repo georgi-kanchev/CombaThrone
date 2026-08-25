@@ -4,6 +4,7 @@ import (
 	"pure-game-kit/packages/assets"
 	"pure-game-kit/packages/geometry"
 	"pure-game-kit/packages/graphics"
+	"pure-game-kit/packages/gui"
 	"pure-game-kit/packages/input/keyboard"
 	"pure-game-kit/packages/input/keyboard/key"
 	"pure-game-kit/packages/input/mouse"
@@ -14,6 +15,7 @@ import (
 	"pure-game-kit/packages/utility/number"
 	"pure-game-kit/packages/utility/text"
 	"pure-game-kit/packages/utility/time"
+	"pure-game-kit/packages/window"
 )
 
 const ( // lanes (collision layers)
@@ -35,6 +37,10 @@ const ( // lanes (collision layers)
 
 const TileSize, MapCount = 32.0, 4
 
+var TitleScreen assets.ImageId
+var InGame bool
+var InGameTimer float32
+
 var Decor, UserInterface assets.AtlasId
 
 var TimeScale float32 = 1
@@ -45,13 +51,13 @@ var SortedY []*graphics.Object // for units & pickups
 
 var Player *PlayerState
 
-var UI *GUI
-
 func InitScene() {
+	TitleScreen = assets.LoadImage("data/title-screen.png")
+
 	var view = graphics.NewView(1)
 	View = &view
 	UserInterface = assets.LoadAtlas(assets.LoadImage("data/user-interface.png"), "data/user-interface.xml")
-	UI = NewUI()
+	GameHUD = NewHUD()
 
 	var layers, decor = assets.LoadTileLayersFromTiled("data/map.tmx")
 	Layers = layers
@@ -94,8 +100,6 @@ func InitScene() {
 	Pickups = append(Pickups, NewPickup(0, PickupRelic, LaneMiddleOff))
 	Pickups = append(Pickups, NewPickup(0, PickupRelic, LaneUpperOff))
 
-	PlayAmbience(CurrentZone.kind)
-
 	Player = NewPlayer()
 
 	Player.Units[0] = NewUnit(CharWoman, TeamAlly, 0)
@@ -106,13 +110,37 @@ func InitScene() {
 
 //=================================================================
 
-func UpdateScene() {
-	var _, bly = CurrentZone.Ground.PointFromEdge(0.5, 1)
-	View.FitSize(CurrentZone.Ground.Width, 0)
-	var _, h = View.Size()
-	View.Y = (bly - h/2) - 2
+func UpdateTitleScreen() {
+	alignView()
 
-	UI.Tooltip = nil
+	var bgrCrop = TitleScreen.CropArea()
+	View.DrawColor(zoneSkyColors[ZoneDesert])
+	View.DrawImage(0, 0, bgrCrop.Width, bgrCrop.Height, 0, TitleScreen, palette.White, geometry.Area{})
+
+	var logo = UserInterface.Crops("logo")[0]
+	var logoCrop = logo.CropArea()
+	var x, y = PointAtCell(8.5, 2)
+	View.DrawImage(x, y, logoCrop.Width, logoCrop.Height, 0, logo, palette.White, geometry.Area{})
+
+	gui.Scale = View.Zoom
+	var hud = gui.AreaHUD(0.5, 1, 0, 0)
+	gui.Button("Campaign Mode", geometry.NewArea(hud.X, hud.Y-TileSize*5, 120, 28), geometry.Area{}, ThemeUI, true)
+	if gui.IsJustClicked() {
+		InGame = true
+		PlayAmbience(CurrentZone.kind)
+	}
+	gui.Button("Arena Mode", geometry.NewArea(hud.X, hud.Y-TileSize*4, 120, 28), geometry.Area{}, ThemeUI, true)
+	gui.Button("Settings", geometry.NewArea(hud.X, hud.Y-TileSize*2, 100, 28), geometry.Area{}, ThemeUI, true)
+	gui.Button("Exit", geometry.NewArea(hud.X, hud.Y-TileSize*1, 100, 28), geometry.Area{}, ThemeUI, true)
+	if gui.IsJustClicked() {
+		window.Close()
+	}
+}
+func UpdateScene() {
+	InGameTimer += DeltaTimeScaled()
+	alignView()
+
+	GameHUD.Tooltip = nil
 	mouse.SetCursor(cursor.Default)
 
 	if keyboard.IsKeyJustPressed(key.RightArrow) && CurrentZone.kind < ZoneHell {
@@ -154,7 +182,7 @@ func UpdateScene() {
 	Bases[TeamAlly].UpdateFront()
 	Bases[TeamEnemy].UpdateFront()
 
-	UI.Update()
+	GameHUD.Update()
 
 	iterateRemovable(&Projectiles, func(p *Projectile) { p.Update() })
 
@@ -236,4 +264,10 @@ func iterateRemovable[T any](things *[]*T, iteration func(*T)) {
 			i-- // was removed during update
 		}
 	}
+}
+func alignView() {
+	var _, bly = CurrentZone.Ground.PointFromEdge(0.5, 1)
+	View.FitSize(CurrentZone.Ground.Width, 0)
+	var _, h = View.Size()
+	View.Y = (bly - h/2) - 2
 }
