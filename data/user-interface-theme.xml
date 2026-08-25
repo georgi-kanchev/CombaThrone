@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <theme>
 	<button>
-		<body imageId="-88" roundness="0" color="#ffd569" borderSize="0" borderColor="#000000">
-			<disabled imageId="-88" color="#ffffff"/>
-			<focused imageId="-88" color="#ffd569"/>
-			<clicked imageId="-89" color="#f4bf38"/>
+		<body imageId="-88" color="#ffd569">
+			<disabled color="#9c7000"/>
+			<focused color="#f3c244"/>
+			<clicked imageId="-89" color="#e0ae2b"/>
 		</body>
-		<value fontId="0" gap="0 0" margin="0 0" align="0.5 0.3" weight="0" color="#ffffff" lineHeight="14"
-    	outlineSize="0.3" outlineColor="#523b40" shadowWeight="0" shadowColor="#00000000" shadowBlur="0" shadowOffset="0 0">
-			<disabled color="#ffffff"/>
-			<focused color="#ffffff"/>
+		<value color="#fcfefe" lineHeight="14" fontId="0" gap="10 0" align="0.5 0.3" weight="0.1" outlineSize="0.4" 
+		outlineColor="#2a304e">
+			<disabled color="#4c5684"/>
+			<focused />
 			<clicked align="0.5 0.5"/>
 		</value>
 	</button>

@@ -119,19 +119,22 @@ func UpdateTitleScreen() {
 
 	var logo = UserInterface.Crops("logo")[0]
 	var logoCrop = logo.CropArea()
-	var x, y = PointAtCell(8.5, 2)
+	var x, y = PointAtCell(8.5, 1.5)
 	View.DrawImage(x, y, logoCrop.Width, logoCrop.Height, 0, logo, palette.White, geometry.Area{})
 
 	gui.Scale = View.Zoom
 	var hud = gui.AreaHUD(0.5, 1, 0, 0)
-	gui.Button("Campaign Mode", geometry.NewArea(hud.X, hud.Y-TileSize*5, 120, 28), geometry.Area{}, ThemeUI, true)
+	gui.Button("Campaign Mode", geometry.NewArea(hud.X, hud.Y-TileSize*5.5, 120, 28), geometry.Area{}, ThemeUI, true)
 	if gui.IsJustClicked() {
 		InGame = true
 		PlayAmbience(CurrentZone.kind)
 	}
-	gui.Button("Arena Mode", geometry.NewArea(hud.X, hud.Y-TileSize*4, 120, 28), geometry.Area{}, ThemeUI, true)
-	gui.Button("Settings", geometry.NewArea(hud.X, hud.Y-TileSize*2, 100, 28), geometry.Area{}, ThemeUI, true)
-	gui.Button("Exit", geometry.NewArea(hud.X, hud.Y-TileSize*1, 100, 28), geometry.Area{}, ThemeUI, true)
+	gui.Button("Arena Mode", geometry.NewArea(hud.X, hud.Y-TileSize*4.5, 120, 28), geometry.Area{}, ThemeUI, false)
+	if gui.IsFocused() {
+		mouse.SetCursor(cursor.NotAllowed)
+	}
+	gui.Button("Settings", geometry.NewArea(hud.X, hud.Y-TileSize*3, 100, 28), geometry.Area{}, ThemeUI, true)
+	gui.Button("Exit", geometry.NewArea(hud.X, hud.Y-TileSize*2, 100, 28), geometry.Area{}, ThemeUI, true)
 	if gui.IsJustClicked() {
 		window.Close()
 	}
