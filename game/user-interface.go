@@ -13,6 +13,7 @@ import (
 	"pure-game-kit/packages/utility/easing"
 	"pure-game-kit/packages/utility/number"
 	"pure-game-kit/packages/utility/point"
+	"pure-game-kit/packages/utility/text"
 )
 
 type Icon uint8
@@ -31,33 +32,75 @@ type HUD struct {
 }
 
 type Tooltip struct {
-	view   *graphics.View
-	shape  geometry.Shape
-	cursor int
+	shape geometry.Shape
+	draw  func(shape geometry.Shape)
 }
 
-const IconHealth, IconCoin, IconGlory, IconDeath, IconCircle, IconCount Icon = 0, 1, 2, 3, 4, 5
+const (
+	IconHealth Icon = iota
+	IconCoin
+	IconGlory
+	IconTimer
+	IconTank
+	IconRanged
+	IconMelee
+	IconMage
+	IconRange
+	IconDeath
+	IconLocked
+	IconUnlocked
+	IconStory
+	IconHealer
+	IconCollector
+	IconSupplier
+	IconTrapper
+	IconMove
+	IconHome
+	IconLoop
+	IconCount
+)
+
+var Tags = []string{
+	IconHealth: "~", IconCoin: "$", IconGlory: "*", IconDeath: "`", IconStory: "@", IconMove: ">", IconRange: "#",
+	IconTimer: "^", IconMelee: "&", IconRanged: "<", IconHealer: "{", IconHome: "}", IconLoop: "[",
+}
 
 var ThemeUI assets.GUIThemeId
-var ButtonUpId, ButtonDownId assets.ImageId
+var UserInterface assets.AtlasId
+var SlotId, ButtonUpId, ButtonDownId assets.ImageId
+var PanelNinePatchId assets.ImageId
 var GameHUD *HUD
-var Tags = [IconCount]string{IconHealth: "~", IconCoin: "$", IconGlory: "*"}
+var TooltipLabel *graphics.Object
 
 func NewHUD() *HUD {
+	UserInterface = assets.LoadAtlas(assets.LoadImage("data/user-interface.png"), "data/user-interface.xml")
+
+	for i, t := range Tags {
+		if t != "" {
+			assets.FontId(0).EmbedImage(text.At(t, 0), UserInterface.Crops("text-icons")[i])
+		}
+	}
+
 	ThemeUI = assets.LoadGUITheme("data/user-interface-theme.xml")
+	SlotId = UserInterface.Crops("slot")[0]
+
+	TooltipLabel = new(graphics.NewTextbox(0, 0, 100, 100, 0))
+	TooltipLabel.Effects.FillColor, TooltipLabel.Effects.TextLineHeight = 0, 10
+	TooltipLabel.Effects.TextLineGap = -40
+	TooltipLabel.Effects.TextAlignX, TooltipLabel.Effects.TextAlignY = 0.5, 0.5
 
 	var btn = UserInterface.Crops("button")
 	ButtonUpId = assets.LoadImage9Patch(btn[0], 8, 8, 8, 8)
 	ButtonDownId = assets.LoadImage9Patch(btn[1], 8, 8, 8, 8)
+	PanelNinePatchId = assets.LoadImage9Patch(UserInterface.Crops("panel")[0], 8, 8, 8, 8)
 
-	var panelNinePatch = assets.LoadImage9Patch(UserInterface.Crops("panel")[0], 8, 8, 8, 8)
 	var view = graphics.NewView(1)
 	var top = graphics.NewSprite(0, 0, 1, UserInterface.Crops("hud-top")[0])
 
 	var highlightNinePatch = assets.LoadImage9Patch(UserInterface.Crops("highlight")[0], 4, 4, 4, 4)
 	var highlight = graphics.NewSprite(0, 0, 1, highlightNinePatch)
 
-	var unitsPanel = graphics.NewSprite(0, 0, 1, panelNinePatch)
+	var unitsPanel = graphics.NewSprite(0, 0, 1, PanelNinePatchId)
 	unitsPanel.Width, unitsPanel.Height = TileSize*5.5, TileSize*3
 
 	var label = graphics.NewTextbox(0, 0, TileSize+6, TileSize/2+2, 0)
@@ -113,8 +156,8 @@ func (h *HUD) PickupSlotPosition(slot int) (x, y float32) {
 	return number.NaN(), number.NaN()
 }
 
-func (h *HUD) Update() {
-	const scale = 0.8
+func (h *HUD) UpdateBack() {
+	const scale = 0.9
 	var sz float32 = TileSize
 	h.View.Zoom = scale * 5
 
@@ -138,30 +181,70 @@ func (h *HUD) Update() {
 
 	h.Coins.X, h.Coins.Y = h.Top.X, h.Top.Y-9
 	h.View.DrawObject(h.Coins)
-	h.TryShowTooltip(h.View, h.Coins.Shape, cursor.Arrow)
+	h.TryShowTooltip(h.View, h.Coins.Shape, false, func(shape geometry.Shape) {
+		const width, height = 80.0, 25.0
+		var col, noMask = palette.White, geometry.Area{}
+		h.View.DrawImage(shape.X, shape.Y+shape.Height/2+height/2, width, height, 0, PanelNinePatchId, col, noMask)
+
+		var x, y = shape.X, shape.Y + shape.Height/2 + height/2
+		TooltipLabel.Shape = geometry.NewRectangle(x, y, width-16, height, 0)
+		TooltipLabel.Effects.TextAlignX, TooltipLabel.Effects.TextAlignY = 0.5, 0.5
+		TooltipLabel.Text = text.New("Your 🟨", Tags[IconCoin], "Coins⬜.")
+		GameHUD.View.DrawObject(TooltipLabel)
+	})
 
 	h.TeamGlory[TeamAlly].X, h.TeamGlory[TeamAlly].Y = h.Top.X-sz*3.5, h.Top.Y-6
 	h.TeamGlory[TeamEnemy].X, h.TeamGlory[TeamEnemy].Y = h.Top.X+sz*3.5, h.Top.Y-6
 	h.View.DrawObject(h.TeamGlory[TeamAlly])
 	h.View.DrawObject(h.TeamGlory[TeamEnemy])
-	h.TryShowTooltip(h.View, h.TeamGlory[TeamAlly].Shape, cursor.Arrow)
-	h.TryShowTooltip(h.View, h.TeamGlory[TeamEnemy].Shape, cursor.Arrow)
+	h.TryShowTooltip(h.View, h.TeamGlory[TeamAlly].Shape, false, func(shape geometry.Shape) {
+		const width, height = 80.0, 25.0
+		var col, noMask = palette.White, geometry.Area{}
+		h.View.DrawImage(shape.X, shape.Y+shape.Height/2+height/2, width, height, 0, PanelNinePatchId, col, noMask)
+
+		var x, y = shape.X, shape.Y + shape.Height/2 + height/2
+		TooltipLabel.Shape = geometry.NewRectangle(x, y, width-16, height, 0)
+		TooltipLabel.Effects.TextAlignX, TooltipLabel.Effects.TextAlignY = 0.5, 0.5
+		TooltipLabel.Text = text.New("Your 🟩", Tags[IconGlory], "Glory⬜.")
+		GameHUD.View.DrawObject(TooltipLabel)
+	})
+	h.TryShowTooltip(h.View, h.TeamGlory[TeamEnemy].Shape, false, func(shape geometry.Shape) {
+		const width, height = 130.0, 25.0
+		var col, noMask = palette.White, geometry.Area{}
+		h.View.DrawImage(shape.X, shape.Y+shape.Height/2+height/2, width, height, 0, PanelNinePatchId, col, noMask)
+
+		var x, y = shape.X, shape.Y + shape.Height/2 + height/2
+		TooltipLabel.Shape = geometry.NewRectangle(x, y, width-16, height, 0)
+		TooltipLabel.Effects.TextAlignX, TooltipLabel.Effects.TextAlignY = 0.5, 0.5
+		TooltipLabel.Text = text.New("The 🟥", Tags[IconGlory], "Glory⬜ of the Enemy.")
+		GameHUD.View.DrawObject(TooltipLabel)
+	})
 
 	iterateRemovable(&h.Pickups, func(p *Pickup) { p.Update() })
 
 	h.trySummon(lastSummonIndex)
-
+}
+func (h *HUD) UpdateFront() {
 	if h.SummonIndex < 0 && h.Tooltip != nil {
-		mouse.SetCursor(h.Tooltip.cursor)
-		h.Highlight(h.Tooltip.view, h.Tooltip.shape, highlightCursorColors[h.Tooltip.cursor])
+		h.Tooltip.draw(h.Tooltip.shape)
 	}
 }
 
-func (h *HUD) TryShowTooltip(view *graphics.View, shape geometry.Shape, cursor int) {
-	if !shape.ContainsPoint(view.MousePosition()) {
+func (h *HUD) TryShowTooltip(view *graphics.View, shape geometry.Shape, force bool, draw func(shape geometry.Shape)) {
+	if PinnedUnit != nil && !force {
 		return
 	}
-	h.Tooltip = &Tooltip{view: view, shape: shape, cursor: cursor}
+
+	if force || shape.ContainsPoint(view.MousePosition()) {
+		var x, y = view.PointToView(GameHUD.View, shape.X, shape.Y)
+		var width, height = shape.Width, shape.Height
+		if view != h.View {
+			width *= view.Zoom / GameHUD.View.Zoom
+			height *= view.Zoom / GameHUD.View.Zoom
+		}
+
+		h.Tooltip = &Tooltip{shape: geometry.NewRectangle(x, y, width, height, 0), draw: draw}
+	}
 }
 func (h *HUD) Highlight(view *graphics.View, shape geometry.Shape, color uint) {
 	shape.Width += 2
@@ -192,7 +275,6 @@ func (h *HUD) DrawPath(view *graphics.View, fromX, fromY, toX, toY float32) {
 // private ========================================================
 
 func (h *HUD) drawUnitsBench(lastSummonIndex int) {
-	var slotImageId = UserInterface.Crops("slot")[0]
 	var noMask geometry.Area
 	var drop = h.SummonIndex >= 0 && mouse.IsButtonJustReleased(button.Left)
 	var click = mouse.IsButtonJustPressed(button.Left)
@@ -200,12 +282,13 @@ func (h *HUD) drawUnitsBench(lastSummonIndex int) {
 
 	for index, unit := range Player.Units {
 		var x, y = h.UnitIconPosition(index)
-		var shape = geometry.NewRoundedRectangle(x, y, sz, sz, 0, 0)
-		var hovered = shape.ContainsPoint(h.View.MousePosition())
-		h.View.DrawImage(x, y, sz, sz, 0, slotImageId, palette.White, noMask)
+		var unitShape = geometry.NewRoundedRectangle(x, y, sz, sz, 0, 0)
+		var hovered = unitShape.ContainsPoint(h.View.MousePosition())
+		h.View.DrawImage(x, y, sz, sz, 0, SlotId, palette.White, noMask)
 
 		if hovered && lastSummonIndex >= 0 && index != lastSummonIndex {
-			h.Highlight(h.View, shape, palette.White)
+			h.Highlight(h.View, unitShape, palette.White)
+
 			if click || drop {
 				collection.Swap(Player.Units, lastSummonIndex, index)
 				h.SummonIndex = -1
@@ -216,18 +299,14 @@ func (h *HUD) drawUnitsBench(lastSummonIndex int) {
 		}
 
 		var iSz = sz / 2.5
-		var icons = UserInterface.Crops("icons")
-		var newCursor = cursor.Hand
-		if unit.State == StateDecaying || unit.IsSummoned() {
-			newCursor = cursor.NotAllowed
-		}
+		var icons = UserInterface.Crops("text-icons")
 		var tint = palette.White
 		if index == h.SummonIndex {
 			tint = color.RGBA(255, 255, 255, 127)
 		}
 		h.View.DrawImage(x, y, sz, sz, 0, Characters[unit.Character].Icon, tint, noMask)
 		if unit.State == StateDecaying {
-			var timerWidth = number.Map(unit.hurtTimer, 0, -unit.Stats.RespawnTimer, sz-4, 0)
+			var timerWidth = number.Map(unit.hurtTimer, 0, -float32(unit.Stats.RespawnTimer)/10, sz-4, 0)
 			var icon, col = IconDeath, palette.Red
 			if unit.Stats.Health > 0 { // got into the enemy base
 				icon, col = IconGlory, teamColors[TeamAlly]
@@ -249,17 +328,30 @@ func (h *HUD) drawUnitsBench(lastSummonIndex int) {
 			h.SummonDragX, h.SummonDragY = h.View.PointToView(View, x, y)
 		}
 
-		h.TryShowTooltip(h.View, shape, newCursor)
+		h.TryShowTooltip(h.View, unitShape, false, func(shape geometry.Shape) {
+			const width, height = 200.0, 100.0
+			// var col, noMask = palette.White, geometry.Area{}
+
+			mouse.SetCursor(cursor.Hand)
+			if unit.State == StateDecaying || unit.IsSummoned() {
+				mouse.SetCursor(cursor.NotAllowed)
+			}
+
+			unit.drawTooltipInfo(shape, true)
+
+			// GameHUD.Highlight(GameHUD.View, shape, palette.White)
+			// h.View.DrawImage(shape.X, shape.Y+shape.Height/2+height/2+4, width, height, 0, PanelNinePatchId, col, noMask)
+		})
 
 		if h.SummonIndex == index {
-			h.Highlight(h.View, shape, palette.White)
+			h.Highlight(h.View, unitShape, palette.White)
 		}
 
 		if h.SummonIndex < 0 {
 			if unit.IsSummoned() && hovered {
 				h.Highlight(View, unit.Shape, palette.LightGray)
 			} else if unit.IsSummoned() && unit.Shape.ContainsPoint(View.MousePosition()) {
-				h.Highlight(h.View, shape, palette.LightGray)
+				h.Highlight(h.View, unitShape, palette.LightGray)
 			}
 		}
 	}
@@ -270,6 +362,10 @@ func (h *HUD) trySummon(lastSummonIndex int) {
 	}
 
 	var unit = Player.Units[lastSummonIndex]
+	if unit == nil {
+		return
+	}
+
 	var unitX, unitY = h.UnitIconPosition(lastSummonIndex)
 	var mx, my = h.View.MousePosition()
 	mx, my = h.View.PointToView(View, mx, my)
@@ -311,12 +407,13 @@ func (h *HUD) trySummon(lastSummonIndex int) {
 			takenGarrisons = append(takenGarrisons, pu.Lane)
 		}
 	}
-	if unit.Stats.ActRange > 1 && len(takenGarrisons) < 6 {
+	if unit.Stats.ActRange > 1 {
+		var garrisonsFull = len(takenGarrisons) == 6
 		var garrisonX, garrisonY = PointAtCell(0, 4)
 		var shape = geometry.NewRectangle(garrisonX, garrisonY, size, size, 0)
 
 		var dist = point.DistanceToPoint(shape.X, shape.Y, mx, my)
-		if dist < smallestDist && dist < TileSize*1.5 {
+		if !garrisonsFull && dist < smallestDist && dist < TileSize*1.5 {
 			smallestDist = dist
 			hoverShape = shape
 			lane = LaneGarrison1
@@ -329,8 +426,14 @@ func (h *HUD) trySummon(lastSummonIndex int) {
 			}
 		}
 
-		View.DrawShape(shape.X, shape.Y, shape.Width, shape.Height, 0, 0, color.RGBA(0, 255, 0, 80), geometry.Area{})
-		h.Highlight(View, shape, palette.Green)
+		var garrColBg = color.RGBA(0, 255, 0, 80)
+		var garrCol = palette.Green
+		if garrisonsFull {
+			garrColBg = color.RGBA(255, 0, 0, 80)
+			garrCol = palette.Red
+		}
+		View.DrawShape(shape.X, shape.Y, shape.Width, shape.Height, 0, 0, garrColBg, geometry.Area{})
+		h.Highlight(View, shape, garrCol)
 	}
 
 	if hoverShape != (geometry.Shape{}) {
@@ -342,7 +445,7 @@ func (h *HUD) trySummon(lastSummonIndex int) {
 			Units = append(Units, unit)
 			unit.Lane = lane
 
-			if Characters[unit.Character].Stats.IsOffLaner {
+			if unit.IsOffLaner() {
 				unit.Lane++
 			}
 			unit.PrepareSpawn()

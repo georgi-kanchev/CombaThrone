@@ -66,8 +66,8 @@ func NewZone(kind ZoneKind) *Zone {
 //=================================================================
 
 var zoneNames = [ZoneCount]string{
-	ZoneField: "field", ZoneRuins: "ruins", ZoneSwamp: "swamp", ZoneDesert: "desert", ZoneDocks: "docks",
-	ZoneGlacier: "glacier", ZoneCave: "cave", ZoneMine: "mine", ZoneHell: "hell",
+	ZoneField: "Field", ZoneRuins: "Ruins", ZoneSwamp: "Swamp", ZoneDesert: "Desert", ZoneDocks: "Docks",
+	ZoneGlacier: "Glacier", ZoneCave: "Cave", ZoneMine: "Mine", ZoneHell: "Hell",
 }
 var zoneSkyColors = [ZoneCount]uint{
 	ZoneField: color.TagRGBA("rgb(98, 171, 212)"), ZoneRuins: color.TagRGBA("rgb(98, 171, 212)"),

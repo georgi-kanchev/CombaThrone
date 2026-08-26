@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <theme>
 	<button>
-		<body imageId="-88" color="#ffd569">
+		<body imageId="-104" color="#ffd569">
 			<disabled color="#9c7000"/>
 			<focused color="#f3c244"/>
-			<clicked imageId="-89" color="#e0ae2b"/>
+			<clicked imageId="-105" color="#e0ae2b"/>
 		</body>
 		<value color="#fcfefe" lineHeight="14" fontId="0" gap="10 0" align="0.5 0.3" weight="0.1" outlineSize="0.4" 
 		outlineColor="#2a304e">

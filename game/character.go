@@ -10,13 +10,13 @@ import (
 type Stats struct {
 	Name string
 
-	Health, MoveSpeed, Wage int
+	Health, Speed, Wage int
 
-	ActValue, ActSpeed, ActRange int
+	ActValue, ActTime, ActRange, RespawnTimer int
 
-	HurtTime, RespawnTimer float32
+	HurtTime float32
 
-	IsOffLaner bool
+	Role Role
 }
 
 type CharacterKind uint8
@@ -27,8 +27,10 @@ type Character struct {
 	Animations struct {
 		Idle, Walk, ActionStart, ActionEnd, Hurt, Die []assets.ImageId
 	}
-	Sounds CharSounds
-	Icon   assets.ImageId
+	Sounds             CharSounds
+	Icon               assets.ImageId
+	Origin             ZoneKind
+	Info, ActValueName string
 
 	Behavior func(self *Unit)
 }
@@ -37,22 +39,28 @@ const CharMan, CharWoman, CharHunter CharacterKind = 0, 1, 2
 
 var Characters [3]*Character
 
-func NewCharacter(behavior func(self *Unit), stats Stats) *Character {
-	return &Character{Behavior: behavior, Stats: stats, Hitbox: geometry.NewRoundedRectangle(0, 7, 18, 35, 0, 1),
-		Sounds: CharSounds{HitFlesh: AudioHitFlesh, HitWood: AudioHitWood, HitMetal: AudioHitMetal}}
+func NewCharacter(behavior func(self *Unit), stats Stats, info, actValueName string, origin ZoneKind) *Character {
+	return &Character{
+		Behavior: behavior, Stats: stats, Hitbox: geometry.NewRoundedRectangle(0, 7, 18, 35, 0, 1),
+		Sounds: CharSounds{HitFlesh: AudioHitFlesh, HitWood: AudioHitWood, HitMetal: AudioHitMetal},
+		Info:   info, ActValueName: actValueName,
+	}
 }
 
 func InitCharacters() {
 	var atlas = assets.LoadAtlas(assets.LoadImage("data/units.png"), "data/units.xml")
 
-	Characters[CharMan] = NewCharacter(BehaviorMan, Stats{Name: "Man", Wage: 20,
-		Health: 20, MoveSpeed: 30, HurtTime: 0.5, ActValue: 2, ActSpeed: 15, ActRange: 1, RespawnTimer: 10})
+	Characters[CharMan] = NewCharacter(BehaviorMan, Stats{Name: "Man", Wage: 20, Role: RoleMelee,
+		Health: 20, Speed: 30, HurtTime: 0.5, ActValue: 2, ActTime: 15, ActRange: 1, RespawnTimer: 100},
+		"\nPunches.", "damage", ZoneField)
 
-	Characters[CharWoman] = NewCharacter(BehaviorMan, Stats{Name: "Woman", Wage: 10, IsOffLaner: true,
-		Health: 12, MoveSpeed: 20, HurtTime: 0.5, ActValue: 1, ActSpeed: 18, ActRange: 1, RespawnTimer: 10})
+	Characters[CharWoman] = NewCharacter(BehaviorMan, Stats{Name: "Woman", Wage: 10, Role: RoleHealer,
+		Health: 12, Speed: 20, HurtTime: 0.5, ActValue: 1, ActTime: 18, ActRange: 1, RespawnTimer: 100},
+		"\nPunches.", "heal", ZoneField)
 
-	Characters[CharHunter] = NewCharacter(BehaviorHunter, Stats{Name: "Hunter", Wage: 40,
-		Health: 20, MoveSpeed: 15, HurtTime: 0.5, ActValue: 4, ActSpeed: 20, ActRange: 6, RespawnTimer: 10})
+	Characters[CharHunter] = NewCharacter(BehaviorHunter, Stats{Name: "Hunter", Wage: 40, Role: RoleRanged,
+		Health: 20, Speed: 15, HurtTime: 0.5, ActValue: 4, ActTime: 20, ActRange: 6, RespawnTimer: 100},
+		"\nShoots arrows.", "damage", ZoneField)
 	Characters[CharHunter].Sounds = CharSounds{ActionTrigger: AudioBow, HitGround: AudioProjectileGround,
 		HitFlesh: AudioProjectileFlesh, HitWood: AudioProjectileWood, HitMetal: AudioProjectileMetal}
 
@@ -68,3 +76,9 @@ func InitCharacters() {
 		Characters[i] = c
 	}
 }
+
+// private ========================================================
+
+var roleNames = [RoleCount]string{"Melee", "Ranged", "Tank", "Mage", "Healer", "Collector", "Supplier", "Trapper"}
+var roleIcons = [RoleCount]Icon{
+	IconMelee, IconRanged, IconTank, IconMage, IconHealer, IconCollector, IconSupplier, IconTrapper}

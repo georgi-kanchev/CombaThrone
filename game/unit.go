@@ -4,6 +4,7 @@ import (
 	"pure-game-kit/packages/assets"
 	"pure-game-kit/packages/geometry"
 	"pure-game-kit/packages/graphics"
+	"pure-game-kit/packages/input/mouse"
 	"pure-game-kit/packages/input/mouse/cursor"
 	"pure-game-kit/packages/motion"
 	"pure-game-kit/packages/utility/collection"
@@ -11,11 +12,13 @@ import (
 	"pure-game-kit/packages/utility/color/palette"
 	"pure-game-kit/packages/utility/number"
 	"pure-game-kit/packages/utility/random"
+	"pure-game-kit/packages/utility/text"
 )
 
 type Team uint8
 type Lane uint8
 type State uint8
+type Role uint8
 type Unit struct {
 	graphics.Object
 	Stats     Stats
@@ -36,6 +39,8 @@ type Unit struct {
 	IsAtGarrison bool // cannot act before garrison position - once there, can never move again (only act)
 
 	UnitFront, UnitBehind, ClosestEnemyInRange *Unit
+
+	Carrying *Pickup
 
 	lastX, lastY, moveSpeedX float32
 	actionTimer, hurtTimer   float32 // negative values can be used for "time since last"
@@ -66,10 +71,14 @@ const ( // states
 
 const TeamAlly, TeamEnemy, TeamNeutral, TeamCount Team = 0, 1, 2, 3
 
+const RoleMelee, RoleRanged, RoleTank, RoleMage Role = 0, 1, 2, 3
+const RoleHealer, RoleCollector, RoleSupplier, RoleTrapper, RoleCount Role = 4, 5, 6, 7, 8
+
 const Gravity, GroundFrictionPercent, BloodMultiplier = 256.0, 15.0, 40.0
 
 var Units []*Unit = make([]*Unit, 0, 16)
 var Collisions = map[Lane][]geometry.Shape{}
+var PinnedUnit *Unit
 
 func NewUnit(character CharacterKind, team Team, lane Lane) *Unit {
 	var char = Characters[character]
@@ -187,7 +196,7 @@ func (u *Unit) Update() {
 	u.actionTimer -= DeltaTimeScaled()
 	u.hurtTimer -= DeltaTimeScaled()
 
-	if !u.IsSummoned() && (number.IsNaN(u.hurtTimer) || u.hurtTimer < -u.Stats.RespawnTimer) {
+	if !u.IsSummoned() && (number.IsNaN(u.hurtTimer) || u.hurtTimer < -float32(u.Stats.RespawnTimer)/10) {
 		u.State = StateWaitingToBeSummoned
 		return
 	}
@@ -208,6 +217,7 @@ func (u *Unit) Update() {
 		u.Behavior(u)
 	}
 	u.draw()
+	u.Carrying.Update()
 
 	if TimeScale > 0 {
 		u.Blood.Update()
@@ -391,7 +401,7 @@ func (u *Unit) actUponState() {
 			u.IsReturning = true
 		}
 
-		u.VelocityX = float32([TeamCount]int{u.Stats.MoveSpeed, -u.Stats.MoveSpeed}[u.Team])
+		u.VelocityX = float32([TeamCount]int{u.Stats.Speed, -u.Stats.Speed}[u.Team])
 		if u.IsReturning {
 			u.VelocityX = -u.VelocityX
 		}
@@ -400,21 +410,17 @@ func (u *Unit) actUponState() {
 			u.hurtTimer = 0 // no instant delete - to have time to play glory text animation etc
 			u.State = StateDecaying
 
-			if u.IsOffLaner() && u.IsReturning {
-				for _, p := range Pickups {
-					if p.Target == u {
-						p.Target = nil
-						p.Mask = geometry.Area{}
-						p.SlotUI = GameHUD.FreePickupSlot()
-						collection.Remove(Pickups, p)
-						GameHUD.Pickups[p.SlotUI] = p
-						break
-					}
-				}
+			if u.IsOffLaner() && u.IsReturning && u.Carrying != nil {
+				u.Carrying.Target = nil
+				u.Carrying.Mask = geometry.Area{}
+				u.Carrying.SlotUI = GameHUD.FreePickupSlot()
+				GameHUD.Pickups[u.Carrying.SlotUI] = u.Carrying
+				collection.Remove(Pickups, u.Carrying)
+				u.Carrying = nil
 			}
 		}
 	case StateActionStart: // random delay to balance same sided units melee VVVVVVV
-		u.actionTimer = float32(u.Stats.ActSpeed)/10 + random.Range[float32](0, 0.1)
+		u.actionTimer = float32(u.Stats.ActTime)/10 + random.Range[float32](0, 0.1)
 		u.Anim.Frames = Characters[u.Character].Animations.ActionStart
 		u.Anim.IsLooping, u.Anim.FPS, u.Anim.Time = false, 8, 0
 		u.VelocityX = 0
@@ -473,15 +479,19 @@ func (u *Unit) actUponState() {
 		u.Blood.EmitFromLine(BloodMultiplier, u.X, u.Y-6, u.X, u.Y+6)
 	case StateDying, StateDyingEnd: // empty
 	case StateDecaying:
-		if u.hurtTimer < -u.Stats.RespawnTimer || u.IsGarrisoner() {
+		var respawnTimer = -float32(u.Stats.RespawnTimer) / 10
+		if u.hurtTimer < respawnTimer || u.IsGarrisoner() {
 			Units = collection.Remove(Units, u)
+			if PinnedUnit == u {
+				PinnedUnit = nil
+			}
 
 			if u.Team == TeamAlly {
 				u.State = StateWaitingToBeSummoned
 				u.PrepareSpawn()
 			}
 		} else if u.hurtTimer < 0 {
-			u.Effects.Tint = color.RGBA(255, 255, 255, byte(number.Map(u.hurtTimer, 0, -u.Stats.RespawnTimer, 255, 0)))
+			u.Effects.Tint = color.RGBA(255, 255, 255, byte(number.Map(u.hurtTimer, 0, respawnTimer, 255, 0)))
 		}
 	}
 }
@@ -537,11 +547,13 @@ func (u *Unit) applyCollisions() {
 		}
 	}
 
-	if u.IsOffLaner() && GameHUD.FreePickupSlot() >= 0 {
+	if u.IsOffLaner() && GameHUD.FreePickupSlot() >= 0 && u.Carrying == nil {
 		for _, p := range Pickups {
-			if p != nil && p.lane == u.Lane && p.Overlaps(hb) {
+			if p != nil && p.Target == nil && p.lane == u.Lane && p.Overlaps(hb) {
+				u.Carrying = p
 				p.Target = u
 				u.IsReturning = true
+				collection.Remove(Pickups, p)
 			}
 		}
 	}
@@ -564,7 +576,74 @@ func (u *Unit) draw() {
 	View.DrawObject(&u.Object)
 	u.Width = crop.Width
 
-	if u.IsOutsideOwnBase() {
-		GameHUD.TryShowTooltip(View, u.Object.Shape, cursor.Arrow)
+	if !u.IsGarrisoner() && (!u.IsOutsideOwnBase() || u.IsInsideEnemyBase(0)) {
+		return
 	}
+
+	if u.Object.Shape.ContainsPoint(View.MousePosition()) {
+		mouse.SetCursor(cursor.Hand)
+	}
+
+	GameHUD.TryShowTooltip(View, u.Object.Shape, PinnedUnit == u, func(shape geometry.Shape) {
+		const width, height = 140.0, 94.0
+		var x, y = shape.X, shape.Y - shape.Height/2 - height/2
+		u.drawTooltipInfo(shape, false)
+
+		if PinnedUnit == u {
+			var pin = UserInterface.Crops("text-icons")[IconLocked]
+			var sz float32 = TileSize / 3
+			GameHUD.View.DrawImage(x+width/2-4, y-height/2+4, sz, sz, 0, pin, palette.White, geometry.Area{})
+		}
+
+		if mouse.IsAnyButtonJustPressed() {
+			PinnedUnit = u
+		}
+	})
+}
+
+func (u *Unit) drawTooltipInfo(shape geometry.Shape, down bool) {
+	const width, height = 140.0, 94.0
+	var col, noMask = palette.White, geometry.Area{}
+	var x, y = shape.X, shape.Y - shape.Height/2 - height/2
+	if down {
+		y = shape.Y + shape.Height/2 + height/2
+	}
+
+	GameHUD.Highlight(GameHUD.View, shape, palette.White)
+	GameHUD.View.DrawImage(x, y, width, height, 0, PanelNinePatchId, col, noMask)
+
+	var icon = Characters[u.Character].Icon
+	GameHUD.View.DrawImage(x+width/2-TileSize/2-6, y-height/2+TileSize/2+6, TileSize, TileSize, 0, SlotId, col, noMask)
+	GameHUD.View.DrawImage(x+width/2-TileSize/2-6, y-height/2+TileSize/2+6, -TileSize, TileSize, 0, icon, col, noMask)
+
+	var base = Characters[u.Character].Stats
+	var health, speed, actionTimer, respawnTimer = "", "", "", ""
+	if u.IsSummoned() && u.State != StateDecaying {
+		health = text.New(u.Stats.Health, "/")
+		speed = text.New(int(number.Round(u.moveSpeedX)), "/")
+
+		if u.actionTimer > 0 {
+			actionTimer = text.PadZeros(float32(u.actionTimer), 1) + "/"
+		}
+	}
+	if u.State == StateDecaying && u.hurtTimer > -float32(u.Stats.RespawnTimer)/10 {
+		respawnTimer = text.PadZeros(float32(-u.hurtTimer), 1) + "/"
+	}
+	TooltipLabel.Shape = geometry.NewRectangle(x, y, width-16, height-12, 0)
+	TooltipLabel.Effects.TextAlignX, TooltipLabel.Effects.TextAlignY = 0, 0.5
+	TooltipLabel.Text = text.New("🟩", Tags[IconHealth], health, base.Health, " health\n",
+		"🟨", Tags[IconMove], speed, u.Stats.Speed, " speed\n",
+		"🟥", Tags[roleIcons[u.Stats.Role]], u.Stats.ActValue, " ", Characters[u.Character].ActValueName, "\n",
+		"⬜", Tags[IconTimer], actionTimer, text.PadZeros(float32(u.Stats.ActTime)/10, 1), "s action\n",
+		"🟧", Tags[IconRange], u.Stats.ActRange, " range\n",
+		"🌗🟦", Tags[IconLoop], respawnTimer, text.PadZeros(float32(u.Stats.RespawnTimer)/10, 1), "s respawn\n",
+		"🌗🟫", Characters[u.Character].Info,
+	)
+	GameHUD.View.DrawObject(TooltipLabel)
+
+	TooltipLabel.Effects.TextAlignX, TooltipLabel.Effects.TextAlignY = 1, 1
+	TooltipLabel.Text = text.New(u.Stats.Name, "\n",
+		Tags[roleIcons[u.Stats.Role]], roleNames[u.Stats.Role], "\n\n\n",
+		Tags[IconHome], zoneNames[Characters[u.Character].Origin])
+	GameHUD.View.DrawObject(TooltipLabel)
 }

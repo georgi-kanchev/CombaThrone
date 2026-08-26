@@ -59,10 +59,16 @@ func NewBase(team Team, kind BaseKind, garrison Garrison, entrances [3]EntranceK
 	case BaseCamp:
 		var back = graphics.NewTilemap(Layers[BaseCamp-1])
 		b.Back = &back
+		if team == TeamEnemy {
+			b.Back.Width *= -1
+		}
 		return b
 	case BaseBarrack:
 		var barrack = graphics.NewTilemap(Layers[BaseBarrack-1])
 		b.Back = &barrack
+		if team == TeamEnemy {
+			b.Back.Width *= -1
+		}
 		return b
 	}
 
@@ -105,7 +111,7 @@ func (b *Base) UpdateBack() {
 	View.DrawObject(b.Back)
 	View.DrawObject(b.GarrisonBack)
 
-	var group = "flag-" + zoneNames[CurrentZone.kind]
+	var group = "flag-" + text.ToLowerCase(zoneNames[CurrentZone.kind])
 	var x, y = b.Flag.X, b.Flag.Y
 	if b.team == TeamAlly {
 		group = "flag-player"

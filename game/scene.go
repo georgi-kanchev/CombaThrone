@@ -41,7 +41,7 @@ var TitleScreen assets.ImageId
 var InGame bool
 var InGameTimer float32
 
-var Decor, UserInterface assets.AtlasId
+var Decor assets.AtlasId
 
 var TimeScale float32 = 1
 var View *graphics.View
@@ -56,16 +56,11 @@ func InitScene() {
 
 	var view = graphics.NewView(1)
 	View = &view
-	UserInterface = assets.LoadAtlas(assets.LoadImage("data/user-interface.png"), "data/user-interface.xml")
 	GameHUD = NewHUD()
 
 	var layers, decor = assets.LoadTileLayersFromTiled("data/map.tmx")
 	Layers = layers
 	Decor = assets.LoadAtlas(decor, "data/decor.xml")
-
-	assets.FontId(0).EmbedImage(text.At(Tags[IconGlory], 0), UserInterface.Crops("icons")[IconGlory])
-	assets.FontId(0).EmbedImage(text.At(Tags[IconHealth], 0), UserInterface.Crops("icons")[IconHealth])
-	assets.FontId(0).EmbedImage(text.At(Tags[IconCoin], 0), UserInterface.Crops("icons")[IconCoin])
 
 	for i := range LaneCount {
 		var tilemap = graphics.NewTilemap(layers[Lane(LaneLayerOffset)+i])
@@ -79,22 +74,22 @@ func InitScene() {
 		Clouds[CloudsNormal] = append(Clouds[CloudsNormal], assets.LoadImage(text.New("data/zones/sky-clouds", i, ".png")))
 	}
 	for i, name := range zoneNames {
-		ZoneBackgrounds[i] = assets.LoadImage("data/zones/background-" + name + ".png")
+		ZoneBackgrounds[i] = assets.LoadImage("data/zones/background-" + text.ToLowerCase(name) + ".png")
 		Zones[i] = NewZone(ZoneKind(i))
 	}
 	CurrentZone = Zones[ZoneField]
 
 	Bases[TeamAlly] = NewBase(TeamAlly, BaseFortress, Garrison3,
 		[3]EntranceKind{EntranceDoor, EntranceShortGate, EntranceTallGate})
-	Bases[TeamEnemy] = NewBase(TeamEnemy, BaseNone, Garrison3,
-		[3]EntranceKind{EntranceNone, EntranceNone, EntranceNone})
+	Bases[TeamEnemy] = NewBase(TeamEnemy, BaseBarrack, Garrison3,
+		[3]EntranceKind{EntranceDoor, EntranceNone, EntranceNone})
 
 	// Units = append(Units, NewUnit(CharWoman, TeamAlly, LaneMiddle))
 	// Units = append(Units, NewUnit(CharMan, TeamEnemy, LaneUpper))
 	// Units = append(Units, NewUnit(CharMan, TeamEnemy, LaneMiddle))
 	// Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneLower))
 	// Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneLower))
-	Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneMiddle))
+	// Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneMiddle))
 
 	Pickups = append(Pickups, NewPickup(0, PickupRelic, LaneLowerOff))
 	Pickups = append(Pickups, NewPickup(0, PickupRelic, LaneMiddleOff))
@@ -102,10 +97,9 @@ func InitScene() {
 
 	Player = NewPlayer()
 
-	Player.Units[0] = NewUnit(CharWoman, TeamAlly, 0)
+	Player.Units[0] = NewUnit(CharHunter, TeamAlly, 0)
 	Player.Units[1] = NewUnit(CharMan, TeamAlly, 0)
-	Player.Units[2] = NewUnit(CharMan, TeamAlly, 0)
-	Player.Units[3] = NewUnit(CharHunter, TeamAlly, 0)
+	Player.Units[2] = NewUnit(CharWoman, TeamAlly, 0)
 }
 
 //=================================================================
@@ -124,12 +118,12 @@ func UpdateTitleScreen() {
 
 	gui.Scale = View.Zoom
 	var hud = gui.AreaHUD(0.5, 1, 0, 0)
-	gui.Button("Campaign Mode", geometry.NewArea(hud.X, hud.Y-TileSize*5.5, 120, 28), geometry.Area{}, ThemeUI, true)
+	gui.Button("@ Story Mode", geometry.NewArea(hud.X, hud.Y-TileSize*5.5, 120, 28), geometry.Area{}, ThemeUI, true)
 	if gui.IsJustClicked() {
 		InGame = true
 		PlayAmbience(CurrentZone.kind)
 	}
-	gui.Button("Arena Mode", geometry.NewArea(hud.X, hud.Y-TileSize*4.5, 120, 28), geometry.Area{}, ThemeUI, false)
+	gui.Button("* Arena Mode", geometry.NewArea(hud.X, hud.Y-TileSize*4.5, 120, 28), geometry.Area{}, ThemeUI, false)
 	if gui.IsFocused() {
 		mouse.SetCursor(cursor.NotAllowed)
 	}
@@ -163,6 +157,10 @@ func UpdateScene() {
 	iterateRemovable(&ProjectilesBehind, func(p *Projectile) { p.Update() })
 	iterateRemovable(&Pickups, func(p *Pickup) { p.Update() })
 
+	if mouse.IsAnyButtonJustPressed() {
+		PinnedUnit = nil
+	}
+
 	iterateRemovable(&Player.Units, func(u *Unit) {
 		if !u.IsSummoned() {
 			u.Update()
@@ -185,7 +183,7 @@ func UpdateScene() {
 	Bases[TeamAlly].UpdateFront()
 	Bases[TeamEnemy].UpdateFront()
 
-	GameHUD.Update()
+	GameHUD.UpdateBack()
 
 	iterateRemovable(&Projectiles, func(p *Projectile) { p.Update() })
 
@@ -201,6 +199,7 @@ func UpdateScene() {
 		u.HealthBar.Update(hb, u.Stats.Health, Characters[u.Character].Stats.Health, u.Mask)
 	}
 
+	GameHUD.UpdateFront()
 	Player.Update()
 }
 func DrawShadow(x, z, width, height, angle float32, mask geometry.Area) {

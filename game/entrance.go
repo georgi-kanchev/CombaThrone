@@ -135,33 +135,33 @@ func (e *Entrance) Update() {
 			shakeOffsetX = random.Range[float32](-shakeForce, shakeForce) * e.shakeTimer
 			shakeOffsetY = random.Range[float32](-shakeForce, shakeForce) * e.shakeTimer
 		}
+	}
 
-		switch e.Kind {
-		case EntranceDoor:
-			var breakIndex = number.Map(e.Health, 0, e.MaxHealth, 5, 1)
-			if e.IsOpen() && e.Health > 0 {
-				breakIndex = 6
-			}
+	switch e.Kind {
+	case EntranceDoor:
+		var breakIndex = number.Map(e.Health, 0, e.MaxHealth, 5, 1)
+		if e.IsOpen() && e.Health > 0 {
+			breakIndex = 6
+		}
 
-			if condition.JustTurnedTrue(e.IsOpen(), int(e.Tiles[0].X)) {
-				PlaySound(AudioDoorOpen)
-			}
-			if condition.JustTurnedTrue(!e.IsOpen(), int(e.Tiles[0].X)*30) && InGameTimer > 1.0 {
-				PlaySound(AudioDoorClose)
-			}
+		if condition.JustTurnedTrue(e.IsOpen(), int(e.Tiles[0].X)) {
+			PlaySound(AudioDoorOpen)
+		}
+		if condition.JustTurnedTrue(!e.IsOpen(), int(e.Tiles[0].X)*30) && InGameTimer > 1.0 {
+			PlaySound(AudioDoorClose)
+		}
 
-			e.Tiles[0].ImageId = Decor.Crops("door")[breakIndex]
-		case EntranceShortGate, EntranceTallGate:
-			if condition.JustTurnedTrue(e.openY > 0, int(e.Tiles[0].X)) {
-				PlaySound(AudioGateOpen)
-			}
-			if condition.JustTurnedTrue(e.openY == 0, int(e.Tiles[0].X*30)) && InGameTimer > 1.0 {
-				PlaySound(AudioGateClose)
-			}
+		e.Tiles[0].ImageId = Decor.Crops("door")[breakIndex]
+	case EntranceShortGate, EntranceTallGate:
+		if condition.JustTurnedTrue(e.openY > 0, int(e.Tiles[0].X)) {
+			PlaySound(AudioGateOpen)
+		}
+		if condition.JustTurnedTrue(e.openY == 0, int(e.Tiles[0].X*30)) && InGameTimer > 1.0 {
+			PlaySound(AudioGateClose)
+		}
 
-			for i := len(e.Tiles) / 2; i < len(e.Tiles); i++ {
-				e.Tiles[i].Y = e.originalTileYs[i] + e.openY
-			}
+		for i := len(e.Tiles) / 2; i < len(e.Tiles); i++ {
+			e.Tiles[i].Y = e.originalTileYs[i] + e.openY
 		}
 	}
 
