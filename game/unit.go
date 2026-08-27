@@ -41,9 +41,9 @@ type Unit struct {
 
 	Carrying *Pickup
 
-	lastX, lastY, moveSpeedX float32
-	actionTimer, hurtTimer   float32 // negative values can be used for "time since last"
-	lastState                State
+	LastX, LastY, MoveSpeedX float32
+	ActionTimer, HurtTimer   float32 // negative values can be used for "time since last"
+	LastState                State
 }
 
 const ( // states
@@ -83,7 +83,7 @@ func NewUnit(character CharacterKind, team Team, lane Lane) *Unit {
 	var char = Characters[character]
 	var anim = motion.NewAnimation(0, false, char.Animations.Idle...)
 	var unit = Unit{Object: graphics.NewSprite(-2000, -2000, 1, 0), Character: character, Team: team, Lane: lane,
-		Behavior: char.Behavior, Anim: &anim, actionTimer: number.NaN(), hurtTimer: number.NaN()}
+		Behavior: char.Behavior, Anim: &anim, ActionTimer: number.NaN(), HurtTimer: number.NaN()}
 
 	if team == TeamAlly {
 		unit.State = StateWaitingToBeSummoned
@@ -159,7 +159,7 @@ func (u *Unit) IsOnScreen() bool {
 }
 
 func (u *Unit) PrepareSpawn() {
-	u.actionTimer, u.hurtTimer = number.NaN(), number.NaN()
+	u.ActionTimer, u.HurtTimer = number.NaN(), number.NaN()
 	u.Effects.Tint = palette.White
 	u.Stats = Characters[u.Character].Stats
 	u.IsReturning, u.Health = false, u.Stats.MaxHealth
@@ -204,10 +204,10 @@ func (u *Unit) Update() {
 		return
 	}
 
-	u.actionTimer -= DeltaTimeScaled()
-	u.hurtTimer -= DeltaTimeScaled()
+	u.ActionTimer -= DeltaTimeScaled()
+	u.HurtTimer -= DeltaTimeScaled()
 
-	if !u.IsSummoned() && (number.IsNaN(u.hurtTimer) || u.hurtTimer < -float32(u.Stats.RespawnTimer)/10) {
+	if !u.IsSummoned() && (number.IsNaN(u.HurtTimer) || u.HurtTimer < -float32(u.Stats.RespawnTimer)/10) {
 		u.State = StateWaitingToBeSummoned
 		return
 	}
@@ -233,14 +233,14 @@ func (u *Unit) Update() {
 	if TimeScale > 0 {
 		u.Blood.Update()
 
-		var speedX = number.Absolute(u.X-u.lastX) / DeltaTimeScaled() // smooth out for FPS dips
-		u.moveSpeedX = u.moveSpeedX + (speedX-u.moveSpeedX)*0.15      // 0.15 = how fast it catches up
-		if number.IsNaN(u.moveSpeedX) || u.moveSpeedX < 0.01 {
-			u.moveSpeedX = 0
+		var speedX = number.Absolute(u.X-u.LastX) / DeltaTimeScaled() // smooth out for FPS dips
+		u.MoveSpeedX = u.MoveSpeedX + (speedX-u.MoveSpeedX)*0.15      // 0.15 = how fast it catches up
+		if number.IsNaN(u.MoveSpeedX) || u.MoveSpeedX < 0.01 {
+			u.MoveSpeedX = 0
 		}
-		u.lastX, u.lastY = u.X, u.Y
+		u.LastX, u.LastY = u.X, u.Y
 	}
-	u.lastState = u.State
+	u.LastState = u.State
 }
 func (u *Unit) DrawTooltip(shape geometry.Shape, bench bool) {
 	var tsz float32 = TileSize
@@ -251,6 +251,7 @@ func (u *Unit) DrawTooltip(shape geometry.Shape, bench bool) {
 		x, y = 0, GameHUD.UnitsPanel.Y+GameHUD.UnitsPanel.Height/2+height/2
 	}
 	var area = geometry.NewArea(x, y, width, height).Inside(GameHUD.View.Bounds())
+	area = area.Outside(GameHUD.UnitsPanel.Shape.Bounds(), true, false)
 	x, y = area.X, area.Y
 
 	GameHUD.Highlight(GameHUD.View, shape, palette.White)
@@ -279,30 +280,30 @@ func (u *Unit) DrawTooltip(shape geometry.Shape, bench bool) {
 		if s.ActRange != b.ActRange {
 			rng = statEquation(s.ActRange, b.ActRange, TooltipTexts[4])
 		}
-		if u.actionTimer > 0 {
-			actionTimer = TooltipTexts[5].Set(number.Round(u.actionTimer, 1), "/")
+		if u.ActionTimer > 0 {
+			actionTimer = TooltipTexts[5].Set(number.Round(u.ActionTimer, 1), "/")
 		}
 	}
-	if u.State == StateDecaying && u.hurtTimer > -float32(s.RespawnTimer)/10 {
-		respawnTimer = TooltipTexts[6].Set(number.Round(float32(s.RespawnTimer)/10+u.hurtTimer, 1), "/")
+	if u.State == StateDecaying && u.HurtTimer > -float32(s.RespawnTimer)/10 {
+		respawnTimer = TooltipTexts[6].Set(number.Round(float32(s.RespawnTimer)/10+u.HurtTimer, 1), "/")
 	}
 	TooltipLabel.Shape = geometry.NewRectangle(x, y, width-16, height-12, 0)
 	TooltipLabel.Effects.TextAlignX, TooltipLabel.Effects.TextAlignY = 0, 0.5
 	TooltipLabel.Text = TooltipTexts[7].Set(
 		"🟩", Tags[IconHealth], health1, b.MaxHealth, " health ", health2, "\n",
 		"🟨", Tags[IconMove], s.Speed, " speed ", speed, "\n",
-		"🟥", Tags[roleIcons[s.Role]], s.ActValue, " ", char.ActValueName, " ", val, "\n",
+		"🟥", Tags[char.RoleIcon], s.ActValue, " ", char.ActValueName, " ", val, "\n",
 		"🟧", Tags[IconRange], s.ActRange, " range ", rng, "\n",
 		"🌗🟪", Tags[IconTimer], actionTimer, number.Round(float32(b.ActTime)/10, 1), "s action\n",
-		"🌗🟦", Tags[IconLoop], respawnTimer, number.Round(float32(b.RespawnTimer)/10, 1), "s respawn\n",
+		"🌗🟦", Tags[IconRespawn], respawnTimer, number.Round(float32(b.RespawnTimer)/10, 1), "s respawn\n",
 		"⬜", char.Info,
 	)
 	GameHUD.View.DrawObject(TooltipLabel)
 
 	TooltipLabel.Effects.TextAlignX, TooltipLabel.Effects.TextAlignY = 1, 1
 	TooltipLabel.Text = TooltipTexts[8].Set(s.Name, "\n",
-		Tags[roleIcons[s.Role]], roleNames[s.Role], "\n\n\n",
-		Tags[IconHome], zoneNames[char.Origin])
+		Tags[char.RoleIcon], char.RoleName, "\n\n\n",
+		Tags[IconHome], Zones[char.Origin].Name)
 	GameHUD.View.DrawObject(TooltipLabel)
 
 	if PinnedUnit == u {
@@ -315,7 +316,7 @@ func (u *Unit) DrawTooltip(shape geometry.Shape, bench bool) {
 func (u *Unit) TakeDamage(damage int) {
 	if u.Health > 0 {
 		u.Health -= damage
-		u.hurtTimer = u.Stats.HurtTime
+		u.HurtTimer = u.Stats.HurtTime
 	}
 }
 
@@ -369,7 +370,7 @@ func (u *Unit) particlesBlood(p *motion.Particle) (alive bool) {
 
 func (u *Unit) applyState() {
 	var canBeActedUpon, entrance = u.EnemyEntrance()
-	var canAct = u.actionTimer < 0 || number.IsNaN(u.actionTimer)
+	var canAct = u.ActionTimer < 0 || number.IsNaN(u.ActionTimer)
 	var enemyEntranceInRange = canBeActedUpon && entrance != nil
 	var hasMeleeTarget = u.UnitFront != nil && u.Team != u.UnitFront.Team
 	var melee = canAct && (hasMeleeTarget || enemyEntranceInRange) && u.Stats.ActRange == 1
@@ -405,13 +406,13 @@ func (u *Unit) applyState() {
 		canShoot = true
 	}
 
-	if u.State == StateWalking && u.Health > 0 && (!u.IsGrounded || u.moveSpeedX < 0.01) {
+	if u.State == StateWalking && u.Health > 0 && (!u.IsGrounded || u.MoveSpeedX < 0.01) {
 		u.State = StateIdling
 	} else if u.State == StateIdling && u.UnitFront == nil && !u.IsAtWall && u.IsGrounded && u.Health > 0 && !canBeActedUpon {
 		u.State = StateWalking
 	}
 
-	if u.State == StateSummoned && u.lastState == StateSummoned {
+	if u.State == StateSummoned && u.LastState == StateSummoned {
 		u.State = StateWalking // first frame is event, second frame (now) starts walking
 	}
 
@@ -437,13 +438,13 @@ func (u *Unit) applyState() {
 
 	if u.State == StateHurting && u.Health <= 0 {
 		u.State = StateDyingStart // bug fix for units sometimes staying alive
-	} else if u.State == StateHurting && u.hurtTimer < 0 && u.Health > 0 {
+	} else if u.State == StateHurting && u.HurtTimer < 0 && u.Health > 0 {
 		u.State = StateIdling
 	} else if u.State == StateHurtStart {
 		u.State = StateHurting
 	}
 	if u.State != StateDyingStart && u.State != StateDying && u.State != StateDecaying &&
-		u.State != StateHurting && u.hurtTimer > 0 {
+		u.State != StateHurting && u.HurtTimer > 0 {
 		u.State = StateHurtStart // can interupt other states
 	}
 
@@ -467,14 +468,14 @@ func (u *Unit) actUponState() {
 		u.VelocityX = 0
 	case StateWalking:
 		u.Anim.Frames = Characters[u.Character].Animations.Walk
-		u.Anim.IsLooping, u.Anim.FPS = true, u.moveSpeedX*0.25
+		u.Anim.IsLooping, u.Anim.FPS = true, u.MoveSpeedX*0.25
 
 		if u.IsLaner() && u.IsInsideEnemyBase(TileSize/1.5) {
 			u.HealthBar.MoveToGlory(2.5)
 		} else if u.IsOffLaner() && u.IsInsideEnemyBase(-TileSize) {
 			u.IsReturning = true
 		}
-		if (u.IsInsideEnemyBase(0) || !u.IsOutsideOwnBase()) && u == PinnedUnit && !u.IsGarrisoner() {
+		if u == PinnedUnit && !View.IsAreaVisible(u.Bounds()) {
 			PinnedUnit = nil
 		}
 
@@ -487,20 +488,19 @@ func (u *Unit) actUponState() {
 		}
 
 		if u.X < -CurrentZone.Ground.Width/2-u.Width*2 || u.X > CurrentZone.Ground.Width/2+u.Width*2 {
-			u.hurtTimer = 0 // no instant delete - to have time to play glory text animation etc
+			u.HurtTimer = 0 // no instant delete - to have time to play glory text animation etc
 			u.State = StateDecaying
-
-			if u.IsOffLaner() && u.IsReturning && u.Carrying != nil {
-				u.Carrying.Target = nil
-				u.Carrying.Mask = geometry.Area{}
-				u.Carrying.SlotUI = GameHUD.FreePickupSlot()
-				GameHUD.Pickups[u.Carrying.SlotUI] = u.Carrying
-				collection.Remove(Pickups, u.Carrying)
-				u.Carrying = nil
-			}
+		}
+		if u.IsOffLaner() && u.IsReturning && u.Carrying != nil && !u.IsOutsideOwnBase() {
+			u.Carrying.Target = nil
+			u.Carrying.Mask = geometry.Area{}
+			u.Carrying.SlotUI = GameHUD.FreePickupSlot()
+			GameHUD.Pickups[u.Carrying.SlotUI] = u.Carrying
+			collection.Remove(Pickups, u.Carrying)
+			u.Carrying = nil
 		}
 	case StateActionStart: // random delay to balance same sided units melee VVVVVVV
-		u.actionTimer = float32(u.Stats.ActTime)/10 + random.Range[float32](0, 0.1)
+		u.ActionTimer = float32(u.Stats.ActTime)/10 + random.Range[float32](0, 0.1)
 		u.Anim.Frames = Characters[u.Character].Animations.ActionStart
 		u.Anim.IsLooping, u.Anim.FPS, u.Anim.Time = false, 8, 0
 		u.VelocityX = 0
@@ -560,7 +560,7 @@ func (u *Unit) actUponState() {
 	case StateDying, StateDyingEnd: // empty
 	case StateDecaying:
 		var respawnTimer = -float32(u.Stats.RespawnTimer) / 10
-		if u.hurtTimer < respawnTimer || u.IsGarrisoner() {
+		if u.HurtTimer < respawnTimer || u.IsGarrisoner() {
 			Units = collection.Remove(Units, u)
 			if PinnedUnit == u {
 				PinnedUnit = nil
@@ -570,8 +570,8 @@ func (u *Unit) actUponState() {
 				u.State = StateWaitingToBeSummoned
 				u.PrepareSpawn()
 			}
-		} else if u.hurtTimer < 0 {
-			u.Effects.Tint = color.RGBA(255, 255, 255, byte(number.Map(u.hurtTimer, 0, respawnTimer, 255, 0)))
+		} else if u.HurtTimer < 0 {
+			u.Effects.Tint = color.RGBA(255, 255, 255, byte(number.Map(u.HurtTimer, 0, respawnTimer, 255, 0)))
 		}
 	}
 }
@@ -630,7 +630,7 @@ func (u *Unit) applyCollisions() {
 
 	if u.IsOffLaner() && GameHUD.FreePickupSlot() >= 0 && u.Carrying == nil {
 		for _, p := range Pickups {
-			if p != nil && p.Target == nil && p.lane == u.Lane && p.Overlaps(hb) {
+			if p != nil && p.Target == nil && p.Lane == u.Lane && p.Overlaps(hb) {
 				u.Carrying = p
 				p.Target = u
 				u.IsReturning = true
@@ -656,10 +656,6 @@ func (u *Unit) draw() {
 	}
 	View.DrawObject(&u.Object)
 	u.Width = crop.Width
-
-	if !u.IsGarrisoner() && (!u.IsOutsideOwnBase() || u.IsInsideEnemyBase(0)) {
-		return
-	}
 
 	if u.Object.ContainsPoint(View.MousePosition()) {
 		mouse.SetCursor(cursor.Hand)

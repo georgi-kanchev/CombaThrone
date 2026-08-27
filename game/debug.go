@@ -67,10 +67,10 @@ func UpdateDebug() {
 		if hovered != nil {
 			if condition.TrueEvery(0.1, -111) {
 				debugInfo = text.New("\nstate: ", debugStates[hovered.State], "\n",
-					"action timer: ", number.Round(hovered.actionTimer, 1), "\n",
-					"hurt timer: ", number.Round(hovered.hurtTimer, 1), "\n",
+					"action timer: ", number.Round(hovered.ActionTimer, 1), "\n",
+					"hurt timer: ", number.Round(hovered.HurtTimer, 1), "\n",
 					"velocity: ", number.Round(hovered.VelocityX, 1), " | ", number.Round(hovered.VelocityY, 1), "\n",
-					"move speed: ", number.Round(hovered.moveSpeedX, 1), "\n",
+					"move speed: ", number.Round(hovered.MoveSpeedX, 1), "\n",
 					"returning: ", hovered.IsReturning, "\n",
 				)
 			}

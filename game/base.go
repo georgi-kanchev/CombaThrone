@@ -10,20 +10,18 @@ import (
 type BaseKind uint8
 type Garrison uint8
 type Base struct {
-	Kind          BaseKind
-	Garrison      Garrison
+	Kind     BaseKind
+	Team     Team
+	Garrison Garrison
+
 	EntranceKinds [3]EntranceKind
+	Entrances     []*Entrance
 
-	Entrances []*Entrance
-
-	Glory int
+	Glory, LastGlory int
 
 	Back, Front, GarrisonBack, GarrisonFront, Flag *graphics.Object
 
 	FlagAnim *motion.Animation[assets.ImageId]
-
-	team      Team
-	lastGlory int
 }
 
 const (
@@ -38,7 +36,7 @@ const GarrisonNone, Garrison1, Garrison2, Garrison3 Garrison = 0, 1, 2, 3
 var Bases [TeamCount]*Base
 
 func NewBase(team Team, kind BaseKind, garrison Garrison, entrances [3]EntranceKind) *Base {
-	var b = &Base{team: team, Kind: kind, Garrison: garrison, Glory: baseGlory[kind]}
+	var b = &Base{Team: team, Kind: kind, Garrison: garrison, Glory: baseGlory[kind]}
 	b.Entrances = make([]*Entrance, 3)
 	b.Entrances[LaneLower/2] = NewEntrance(entrances[LaneLower/2], b.Kind, team, LaneLower)
 	b.Entrances[LaneMiddle/2] = NewEntrance(entrances[LaneMiddle/2], b.Kind, team, LaneMiddle)
@@ -112,11 +110,11 @@ func (b *Base) UpdateBack() {
 	View.DrawObject(b.GarrisonBack)
 
 	var x, y = b.Flag.X, b.Flag.Y
-	b.FlagAnim.Frames = CurrentZone.flagFrames
-	if b.team == TeamAlly {
+	b.FlagAnim.Frames = CurrentZone.FlagFrames
+	if b.Team == TeamAlly {
 		b.FlagAnim.Frames = Decor.Crops("flag-player")
 	} else {
-		if CurrentZone.kind == ZoneDocks {
+		if CurrentZone.Kind == ZoneDocks {
 			x, y = PointAtCell(13.85, -0.15)
 			b.FlagAnim.FPS = 5
 		} else {
@@ -138,12 +136,12 @@ func (b *Base) UpdateFront() {
 		//TimeScale = 0 // game over
 	}
 
-	if b.team == TeamAlly && Player.CoinsJustChanged() {
+	if b.Team == TeamAlly && Player.CoinsJustChanged() {
 		GameHUD.Coins.Text = text.New(Player.Coins, "$")
 	}
-	if b.Glory != b.lastGlory {
-		GameHUD.TeamGlory[b.team].Text = text.New(Tags[IconGlory], b.Glory)
-		b.lastGlory = b.Glory
+	if b.Glory != b.LastGlory {
+		GameHUD.TeamGlory[b.Team].Text = text.New(Tags[IconGlory], b.Glory)
+		b.LastGlory = b.Glory
 	}
 
 	View.DrawObject(b.Front)

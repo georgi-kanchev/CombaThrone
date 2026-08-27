@@ -73,9 +73,9 @@ func InitScene() {
 	for i := 1; i <= 4; i++ {
 		Clouds[CloudsNormal] = append(Clouds[CloudsNormal], assets.LoadImage(text.New("data/zones/sky-clouds", i, ".png")))
 	}
-	for i, name := range zoneNames {
-		ZoneBackgrounds[i] = assets.LoadImage("data/zones/background-" + text.ToLowerCase(name) + ".png")
+	for i := range ZoneCount {
 		Zones[i] = NewZone(ZoneKind(i))
+		ZoneBackgrounds[i] = assets.LoadImage("data/zones/background-" + text.ToLowerCase(Zones[i].Name) + ".png")
 	}
 	CurrentZone = Zones[ZoneField]
 
@@ -114,7 +114,7 @@ func UpdateTitleScreen() {
 	alignView()
 
 	var bgrCrop = TitleScreen.CropArea()
-	View.DrawColor(zoneSkyColors[ZoneDesert])
+	View.DrawColor(Zones[ZoneDesert].SkyColor)
 	View.DrawImage(0, 0, bgrCrop.Width, bgrCrop.Height, 0, TitleScreen, palette.White, geometry.Area{})
 
 	var logo = UserInterface.Crops("logo")[0]
@@ -127,7 +127,7 @@ func UpdateTitleScreen() {
 	gui.Button("@ Story Mode", geometry.NewArea(hud.X, hud.Y-TileSize*5.5, 120, 28), geometry.Area{}, ThemeUI, true)
 	if gui.IsJustClicked() {
 		InGame = true
-		PlayAmbience(CurrentZone.kind)
+		PlayAmbience(CurrentZone.Kind)
 	}
 	gui.Button("* Arena Mode", geometry.NewArea(hud.X, hud.Y-TileSize*4.5, 120, 28), geometry.Area{}, ThemeUI, false)
 	if gui.IsFocused() {
@@ -145,11 +145,11 @@ func UpdateScene() {
 
 	mouse.SetCursor(cursor.Default)
 
-	if keyboard.IsKeyJustPressed(key.RightArrow) && CurrentZone.kind < ZoneHell {
-		CurrentZone = Zones[CurrentZone.kind+1]
+	if keyboard.IsKeyJustPressed(key.RightArrow) && CurrentZone.Kind < ZoneHell {
+		CurrentZone = Zones[CurrentZone.Kind+1]
 	}
-	if keyboard.IsKeyJustPressed(key.LeftArrow) && CurrentZone.kind > ZoneField {
-		CurrentZone = Zones[CurrentZone.kind-1]
+	if keyboard.IsKeyJustPressed(key.LeftArrow) && CurrentZone.Kind > ZoneField {
+		CurrentZone = Zones[CurrentZone.Kind-1]
 	}
 
 	CurrentZone.UpdateBack()

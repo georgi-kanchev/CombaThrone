@@ -18,14 +18,14 @@ type Entrance struct {
 
 	MaxHealth, Health int
 
-	originalTileYs              []float32
-	openY, maxOpenY, shakeTimer float32
+	OriginalTileYs              []float32
+	OpenY, MaxOpenY, ShakeTimer float32
 }
 
 const EntranceNone, EntranceDoor, EntranceShortGate, EntranceTallGate EntranceKind = 0, 1, 2, 3
 
 func NewEntrance(entry EntranceKind, base BaseKind, team Team, lane Lane) *Entrance {
-	var data = Entrance{Kind: entry, Team: team, Lane: lane, maxOpenY: TileSize + (TileSize * (float32(entry) - 1))}
+	var data = Entrance{Kind: entry, Team: team, Lane: lane, MaxOpenY: TileSize + (TileSize * (float32(entry) - 1))}
 	var x, y float32 = -208, 48 // ally upper lane by default
 
 	if entry != EntranceNone {
@@ -76,7 +76,7 @@ func NewEntrance(entry EntranceKind, base BaseKind, team Team, lane Lane) *Entra
 	}
 
 	for _, t := range data.Tiles {
-		data.originalTileYs = append(data.originalTileYs, t.Y)
+		data.OriginalTileYs = append(data.OriginalTileYs, t.Y)
 		if team == TeamEnemy {
 			t.X *= -1
 			t.Width *= -1
@@ -104,11 +104,11 @@ func (e *Entrance) Shape() geometry.Shape {
 }
 
 func (e *Entrance) IsOpen() bool {
-	return number.IsWithin(e.openY, e.maxOpenY, 0.1) || e.Health <= 0
+	return number.IsWithin(e.OpenY, e.MaxOpenY, 0.1) || e.Health <= 0
 }
 
 func (e *Entrance) Update() {
-	e.shakeTimer -= DeltaTimeScaled()
+	e.ShakeTimer -= DeltaTimeScaled()
 
 	var gate = e.Kind == EntranceShortGate || e.Kind == EntranceTallGate
 	var shakeOffsetX, shakeOffsetY float32 = 0, 0
@@ -128,12 +128,12 @@ func (e *Entrance) Update() {
 		}
 		var holdOpenDistance float32 = sensorDistance / 2
 		var distance = number.Limit(shortestDistance-holdOpenDistance, 0, sensorDistance-holdOpenDistance)
-		e.openY = number.Map(distance, sensorDistance-holdOpenDistance, 0, 0, e.maxOpenY)
+		e.OpenY = number.Map(distance, sensorDistance-holdOpenDistance, 0, 0, e.MaxOpenY)
 
 		const shakeForce = 3.0
-		if e.shakeTimer > 0 {
-			shakeOffsetX = random.Range[float32](-shakeForce, shakeForce) * e.shakeTimer
-			shakeOffsetY = random.Range[float32](-shakeForce, shakeForce) * e.shakeTimer
+		if e.ShakeTimer > 0 {
+			shakeOffsetX = random.Range[float32](-shakeForce, shakeForce) * e.ShakeTimer
+			shakeOffsetY = random.Range[float32](-shakeForce, shakeForce) * e.ShakeTimer
 		}
 	}
 
@@ -153,15 +153,15 @@ func (e *Entrance) Update() {
 
 		e.Tiles[0].ImageId = Decor.Crops("door")[breakIndex]
 	case EntranceShortGate, EntranceTallGate:
-		if condition.JustTurnedTrue(e.openY > 0, int(e.Tiles[0].X)) {
+		if condition.JustTurnedTrue(e.OpenY > 0, int(e.Tiles[0].X)) {
 			PlaySound(AudioGateOpen)
 		}
-		if condition.JustTurnedTrue(e.openY == 0, int(e.Tiles[0].X*30)) && InGameTimer > 1.0 {
+		if condition.JustTurnedTrue(e.OpenY == 0, int(e.Tiles[0].X*30)) && InGameTimer > 1.0 {
 			PlaySound(AudioGateClose)
 		}
 
 		for i := len(e.Tiles) / 2; i < len(e.Tiles); i++ {
-			e.Tiles[i].Y = e.originalTileYs[i] + e.openY
+			e.Tiles[i].Y = e.OriginalTileYs[i] + e.OpenY
 		}
 	}
 
@@ -180,7 +180,7 @@ func (e *Entrance) TakeDamage(damage int) {
 	}
 
 	e.Health -= damage
-	e.shakeTimer = number.Map(float32(damage), 1, 20, 0.1, 0.5)
+	e.ShakeTimer = number.Map(float32(damage), 1, 20, 0.1, 0.5)
 
 	if e.Health <= 0 {
 		e.HealthBar.FadeOut(1.5)

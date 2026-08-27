@@ -13,14 +13,16 @@ type PickupKind uint8
 type Pickup struct {
 	graphics.Object
 
-	Kind   PickupKind
-	Z      float32
+	Description string
+	Lane        Lane
+	Kind        PickupKind
+	Z           float32
+
 	Anim   *motion.Animation[assets.ImageId]
 	Target *Unit
 
 	SlotUI int
-
-	lane Lane
+	Effect func()
 }
 
 const (
@@ -38,12 +40,37 @@ const (
 var Pickups []*Pickup = make([]*Pickup, 0, 32)
 
 func NewPickup(x float32, kind PickupKind, lane Lane) *Pickup {
+	var pickupGroups = [PickupCount]string{"coin", "gem", "crystal", "relic", "rune", "snowflake", "star", "key"}
 	var anim = motion.NewAnimation(6, true, Decor.Crops("pickup-"+pickupGroups[kind])...)
-	var data = &Pickup{Object: graphics.NewSprite(x, 0, 1, 0), Z: laneZs[lane], Kind: kind, Anim: &anim, lane: lane}
+	var data = &Pickup{Object: graphics.NewSprite(x, 0, 1, 0), Z: laneZs[lane], Kind: kind, Anim: &anim, Lane: lane}
 	var collision = Collisions[lane][0]
 	data.SlotUI = -1
 	data.Update()
 	data.Y = collision.Y - collision.Height/2 - data.Height/2 // taller pickups go below their shadows - pivot bottom
+
+	switch kind {
+	case PickupCoin:
+		data.Description = "Gives you 🟨" + Tags[IconCoin] + "10 coins⬜.\nNot bad for a single coin, eh?"
+		data.Effect = func() { Player.Coins += 10 }
+	case PickupGem:
+		data.Description = "Gives 🟩" + Tags[IconHealth] + "x2 health⬜ to all of your units."
+	case PickupCrystal:
+		data.Description = "Gives 🟥" + "x2 action points " +
+			Tags[IconMelee] + Tags[IconRanged] + Tags[IconTank] + Tags[IconMage] +
+			Tags[IconHealer] + Tags[IconCollector] + Tags[IconSupplier] + Tags[IconTrapper] + "⬜ to all of your units."
+	case PickupRelic:
+		data.Description = "Revives all 🟥" + Tags[IconDeath] +
+			"dead⬜ units and gives them 🟩" + Tags[IconHealth] + "full health⬜."
+	case PickupRune:
+		data.Description = "Prevents any enemy units from appearing for 20s."
+	case PickupSnowflake:
+		data.Description = "Prevents all enemy units from moving (they can still act)."
+	case PickupStar:
+		data.Description = "Gives you 🟩" + Tags[IconGlory] + "100 Glory⬜. So glorious!"
+	case PickupKey:
+		data.Description = "Unlocks a treasure chest for you\n(if owned)."
+	}
+
 	return data
 }
 
@@ -94,29 +121,7 @@ func (p *Pickup) DrawTooltip(bench bool) {
 	GameHUD.View.DrawImage(x+width/2-TileSize/2-6, y, -TileSize, TileSize, 0, icon, col, noMask)
 
 	TooltipLabel.Shape = geometry.NewRectangle(x-TileSize/2, y, width-TileSize-12, height-12, 0)
-	TooltipLabel.Text = pickupDescription[p.Kind]
+	TooltipLabel.Text = p.Description
 	TooltipLabel.Effects.TextAlignX, TooltipLabel.Effects.TextAlignY = 0.5, 0.5
 	GameHUD.View.DrawObject(TooltipLabel)
 }
-
-// private ========================================================
-
-var pickupGroups = [PickupCount]string{"coin", "gem", "crystal", "relic", "rune", "snowflake", "star", "key"}
-var pickupDescription = [PickupCount]string{
-	PickupCoin: "Gives you 🟨" + Tags[IconCoin] + "10 coins⬜.\nNot bad for a single coin, eh?",
-	PickupGem:  "Gives 🟩" + Tags[IconHealth] + "x2 health⬜ to all of your units.",
-	PickupCrystal: "Gives 🟥" + "x2 action points " +
-		Tags[IconMelee] + Tags[IconRanged] + Tags[IconTank] + Tags[IconMage] +
-		Tags[IconHealer] + Tags[IconCollector] + Tags[IconSupplier] + Tags[IconTrapper] +
-		"⬜ to all of your units.",
-	PickupRelic: "Revives all 🟥" + Tags[IconDeath] + "dead⬜ units and gives them 🟩" +
-		Tags[IconHealth] + "full health⬜.",
-	PickupRune:      "Prevents any enemy units from appearing for 20s.",
-	PickupSnowflake: "Prevents all enemy units from moving (they can still act).",
-	PickupStar:      "Gives you 🟩" + Tags[IconGlory] + "100 Glory⬜. So glorious!",
-	PickupKey:       "Unlocks a treasure chest for you\n(if owned).",
-}
-var pickupEffects = [PickupCount]func(pickedUpBy *Unit){
-	PickupCoin: func(pickedUpBy *Unit) { Player.Coins += 10 },
-}
-var pickupKindTooltip PickupKind

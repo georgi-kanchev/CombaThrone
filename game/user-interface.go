@@ -50,13 +50,13 @@ const (
 	IconTrapper
 	IconMove
 	IconHome
-	IconLoop
+	IconRespawn
 	IconCount
 )
 
 var Tags = []string{
 	IconHealth: "~", IconCoin: "$", IconGlory: "*", IconDeath: "`", IconStory: "@", IconMove: ">", IconRange: "#",
-	IconTimer: "^", IconLoop: "[", IconHome: "]",
+	IconTimer: "^", IconRespawn: "[", IconHome: "]",
 	IconMelee: "&", IconRanged: "<", IconHealer: "{", IconMage: "}", IconTank: ";", IconCollector: "\\", IconTrapper: "_",
 	IconSupplier: "=",
 }
@@ -171,7 +171,7 @@ func (h *HUD) UpdateBack() {
 	h.Top.X, h.Top.Y = tx, ty+h.Top.Height/2
 	h.View.DrawObject(h.Top)
 
-	h.ZoneInfo.Text = zoneInfos[CurrentZone.kind]
+	h.ZoneInfo.Text = CurrentZone.Info
 	h.ZoneInfo.X, h.ZoneInfo.Y = h.Top.X, h.Top.Y-TileSize+4.5
 	h.View.DrawObject(h.ZoneInfo)
 
@@ -179,13 +179,37 @@ func (h *HUD) UpdateBack() {
 		p.Update()
 
 		if p != nil && p.ContainsPoint(h.View.MousePosition()) {
+			mouse.SetCursor(cursor.Hand)
 			p.DrawTooltip(true)
+
+			if mouse.IsAnyButtonJustPressed() {
+				p.Effect()
+			}
 		}
 	})
 
 	h.trySummon(lastSummonIndex)
 }
 func (h *HUD) UpdateFront() {
+	var icons = UserInterface.Crops("icons-hud")
+	h.Coins.X, h.Coins.Y = h.Top.X, h.Top.Y-9
+	h.View.DrawObject(h.Coins)
+	if h.Coins.ContainsPoint(h.View.MousePosition()) {
+		h.DrawTooltip(h.Coins.Shape, TooltipTexts[0].Set("Your\n🟨", Tags[IconCoin], "Coins⬜"), icons[0])
+	}
+
+	var ally, enemy = h.TeamGlory[TeamAlly], h.TeamGlory[TeamEnemy]
+	ally.X, ally.Y = h.Top.X-TileSize*3.5, h.Top.Y-6
+	enemy.X, enemy.Y = h.Top.X+TileSize*3.5, h.Top.Y-6
+	h.View.DrawObject(ally)
+	h.View.DrawObject(enemy)
+
+	if ally.ContainsPoint(h.View.MousePosition()) {
+		h.DrawTooltip(ally.Shape, TooltipTexts[0].Set("Your\n🟩", Tags[IconGlory], "Glory⬜"), icons[1])
+	} else if enemy.ContainsPoint(h.View.MousePosition()) {
+		h.DrawTooltip(enemy.Shape, TooltipTexts[0].Set("Enemy\n🟥", Tags[IconGlory], "Glory⬜"), icons[1])
+	}
+
 	if h.SummonIndex < 0 {
 		var unitHovered = false
 		for _, u := range Units {
@@ -204,25 +228,6 @@ func (h *HUD) UpdateFront() {
 		if PinnedUnit != nil {
 			PinnedUnit.DrawTooltip(h.ShapeToUI(PinnedUnit.Shape), false)
 		}
-	}
-
-	var icons = UserInterface.Crops("icons-hud")
-	h.Coins.X, h.Coins.Y = h.Top.X, h.Top.Y-9
-	h.View.DrawObject(h.Coins)
-	if h.Coins.ContainsPoint(h.View.MousePosition()) {
-		h.DrawTooltip(h.Coins.Shape, TooltipTexts[0].Set("Your\n🟨", Tags[IconCoin], "Coins⬜"), icons[0])
-	}
-
-	var ally, enemy = h.TeamGlory[TeamAlly], h.TeamGlory[TeamEnemy]
-	ally.X, ally.Y = h.Top.X-TileSize*3.5, h.Top.Y-6
-	enemy.X, enemy.Y = h.Top.X+TileSize*3.5, h.Top.Y-6
-	h.View.DrawObject(ally)
-	h.View.DrawObject(enemy)
-
-	if ally.ContainsPoint(h.View.MousePosition()) {
-		h.DrawTooltip(ally.Shape, TooltipTexts[0].Set("Your\n🟩", Tags[IconGlory], "Glory⬜"), icons[1])
-	} else if enemy.ContainsPoint(h.View.MousePosition()) {
-		h.DrawTooltip(enemy.Shape, TooltipTexts[0].Set("Enemy\n🟥", Tags[IconGlory], "Glory⬜"), icons[1])
 	}
 }
 
@@ -303,28 +308,31 @@ func (h *HUD) drawBenchUnits(lastSummonIndex int) {
 		var iSz = sz / 2.5
 		var icons = UserInterface.Crops("icons-text")
 		var tint = palette.White
+		var roleIcon = icons[Characters[unit.Character].RoleIcon]
 		if index == h.SummonIndex {
 			tint = color.RGBA(255, 255, 255, 127)
 		}
 		h.View.DrawImage(x, y, sz, sz, 0, Characters[unit.Character].Icon, tint, noMask)
+		h.View.DrawImage(x+sz/2-iSz/2, y+sz/2-iSz/2, iSz, iSz, 0, roleIcon, tint, noMask)
 		if unit.State == StateDecaying {
-			var timerWidth = number.Map(unit.hurtTimer, 0, -float32(unit.Stats.RespawnTimer)/10, sz-4, 0)
-			var icon, col = IconDeath, palette.Red
-			if unit.Health > 0 { // got into the enemy base
-				icon, col = IconGlory, teamColors[TeamAlly]
-			}
+			var timerWidth = number.Map(unit.HurtTimer, 0, -float32(unit.Stats.RespawnTimer)/10, sz-2, 0)
+			var icon, col = IconRespawn, color.RGB(102, 102, 255)
 
 			h.View.DrawShape(x, y, sz, sz, 0, 0, color.RGBA(0, 0, 0, 150), noMask)
-			h.View.DrawImage(x-sz/2+iSz/2, y+sz/2-iSz/2-3, iSz, iSz, 0, icons[icon], col, noMask)
-			h.View.DrawShape(x+sz/2-sz/2, y+sz/2-2, sz-2, 3, 0, 0, palette.Black, noMask)
-			h.View.DrawShape(x+timerWidth/2-sz/2+2, y+sz/2-2, timerWidth, 1, 0, 0, palette.White, noMask)
+			h.View.DrawImage(x-sz/2+iSz/2, y+sz/2-iSz/2, iSz, iSz, 0, icons[icon], col, noMask)
+			h.View.DrawShape(x-sz/2+sz/2, y+sz/2+2, sz, 3, 0, 0, palette.Black, noMask)
+			h.View.DrawShape(x+timerWidth/2-sz/2+1, y+sz/2+2, timerWidth, 1, 0, 0, col, noMask)
 		} else if unit.IsSummoned() {
-			var hp, maxHp = float32(unit.Health), float32(unit.Stats.MaxHealth)
-			var hpWidth = number.Map(hp, 0, maxHp, 0, sz-4)
+			var hp, maxHp = float32(max(unit.Health, 0)), float32(unit.Stats.MaxHealth)
+			var hpWidth = number.Map(hp, 0, maxHp, 0, sz-2)
+			var icon, col = IconHealth, palette.Green
+			if hp == 0 {
+				icon, col = IconDeath, palette.Red
+			}
 			h.View.DrawShape(x, y, sz, sz, 0, 0, color.RGBA(0, 0, 0, 150), noMask)
-			h.View.DrawImage(x-sz/2+iSz/2, y+sz/2-iSz/2-2, iSz, iSz, 0, icons[IconHealth], teamColors[TeamAlly], noMask)
-			h.View.DrawShape(x+sz/2-sz/2, y+sz/2-2, sz-2, 3, 0, 0, palette.Black, noMask)
-			h.View.DrawShape(x+hpWidth/2-sz/2+2, y+sz/2-2, hpWidth, 1, 0, 0, teamColors[TeamAlly], noMask)
+			h.View.DrawImage(x-sz/2+iSz/2, y+sz/2-iSz/2, iSz, iSz, 0, icons[icon], col, noMask)
+			h.View.DrawShape(x-sz/2+sz/2, y+sz/2+2, sz, 3, 0, 0, palette.Black, noMask)
+			h.View.DrawShape(x+hpWidth/2-sz/2+1, y+sz/2+2, hpWidth, 1, 0, 0, col, noMask)
 		} else if hovered && click && lastSummonIndex < 0 {
 			h.SummonIndex = index
 			h.SummonDragX, h.SummonDragY = h.View.PointToView(View, x, y)
@@ -341,9 +349,9 @@ func (h *HUD) drawBenchUnits(lastSummonIndex int) {
 
 		if h.SummonIndex < 0 {
 			if unit.IsSummoned() && hovered {
-				h.Highlight(View, unit.Shape, palette.LightGray)
+				h.Highlight(View, unit.Shape, palette.White)
 			} else if unit.IsSummoned() && unit.ContainsPoint(View.MousePosition()) {
-				h.Highlight(h.View, benchUnitShape, palette.LightGray)
+				h.Highlight(h.View, benchUnitShape, palette.White)
 			}
 		}
 	}
@@ -351,7 +359,7 @@ func (h *HUD) drawBenchUnits(lastSummonIndex int) {
 	if hoveredUnit != nil {
 		mouse.SetCursor(cursor.Hand)
 		if hoveredUnit.State == StateDecaying || hoveredUnit.IsSummoned() {
-			mouse.SetCursor(cursor.NotAllowed)
+			mouse.SetCursor(cursor.Arrow)
 		}
 		hoveredUnit.DrawTooltip(hoveredShape, true)
 	}

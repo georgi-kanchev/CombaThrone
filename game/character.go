@@ -31,6 +31,8 @@ type Character struct {
 	Icon               assets.ImageId
 	Origin             ZoneKind
 	Info, ActValueName string
+	RoleIcon           Icon
+	RoleName           string
 
 	Behavior func(self *Unit)
 }
@@ -40,10 +42,14 @@ const CharMan, CharWoman, CharHunter CharacterKind = 0, 1, 2
 var Characters [3]*Character
 
 func NewCharacter(behavior func(self *Unit), stats Stats, info, actValueName string, origin ZoneKind) *Character {
+	var roleIcons = [RoleCount]Icon{
+		IconMelee, IconRanged, IconTank, IconMage, IconHealer, IconCollector, IconSupplier, IconTrapper}
+	var roleNames = [RoleCount]string{"Melee", "Ranged", "Tank", "Mage", "Healer", "Collector", "Supplier", "Trapper"}
+
 	return &Character{
 		Behavior: behavior, Stats: stats, Hitbox: geometry.NewRoundedRectangle(0, 7, 18, 35, 0, 1),
 		Sounds: CharSounds{HitFlesh: AudioHitFlesh, HitWood: AudioHitWood, HitMetal: AudioHitMetal},
-		Info:   info, ActValueName: actValueName,
+		Info:   info, ActValueName: actValueName, RoleIcon: roleIcons[stats.Role], RoleName: roleNames[stats.Role],
 	}
 }
 
@@ -55,11 +61,11 @@ func InitCharacters() {
 		"\nPunches.", "damage", ZoneField)
 
 	Characters[CharWoman] = NewCharacter(BehaviorMan, Stats{Name: "Woman", Wage: 10, Role: RoleHealer,
-		MaxHealth: 12, Speed: 20, HurtTime: 0.5, ActValue: 1, ActTime: 18, ActRange: 1, RespawnTimer: 100},
+		MaxHealth: 1, Speed: 20, HurtTime: 0.5, ActValue: 1, ActTime: 18, ActRange: 1, RespawnTimer: 100},
 		"\nPunches.", "heal", ZoneField)
 
 	Characters[CharHunter] = NewCharacter(BehaviorHunter, Stats{Name: "Hunter", Wage: 40, Role: RoleRanged,
-		MaxHealth: 20, Speed: 15, HurtTime: 0.5, ActValue: 4, ActTime: 20, ActRange: 6, RespawnTimer: 100},
+		MaxHealth: 14, Speed: 15, HurtTime: 0.5, ActValue: 4, ActTime: 20, ActRange: 6, RespawnTimer: 100},
 		"\nShoots arrows.", "damage", ZoneField)
 	Characters[CharHunter].Sounds = CharSounds{ActionTrigger: AudioBow, HitGround: AudioProjectileGround,
 		HitFlesh: AudioProjectileFlesh, HitWood: AudioProjectileWood, HitMetal: AudioProjectileMetal}
@@ -76,9 +82,3 @@ func InitCharacters() {
 		Characters[i] = c
 	}
 }
-
-// private ========================================================
-
-var roleNames = [RoleCount]string{"Melee", "Ranged", "Tank", "Mage", "Healer", "Collector", "Supplier", "Trapper"}
-var roleIcons = [RoleCount]Icon{
-	IconMelee, IconRanged, IconTank, IconMage, IconHealer, IconCollector, IconSupplier, IconTrapper}
