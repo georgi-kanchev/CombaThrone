@@ -10,7 +10,7 @@ import (
 type Stats struct {
 	Name string
 
-	Health, Speed, Wage int
+	MaxHealth, Speed, Wage int
 
 	ActValue, ActTime, ActRange, RespawnTimer int
 
@@ -51,15 +51,15 @@ func InitCharacters() {
 	var atlas = assets.LoadAtlas(assets.LoadImage("data/units.png"), "data/units.xml")
 
 	Characters[CharMan] = NewCharacter(BehaviorMan, Stats{Name: "Man", Wage: 20, Role: RoleMelee,
-		Health: 20, Speed: 30, HurtTime: 0.5, ActValue: 2, ActTime: 15, ActRange: 1, RespawnTimer: 100},
+		MaxHealth: 20, Speed: 30, HurtTime: 0.5, ActValue: 2, ActTime: 15, ActRange: 1, RespawnTimer: 100},
 		"\nPunches.", "damage", ZoneField)
 
 	Characters[CharWoman] = NewCharacter(BehaviorMan, Stats{Name: "Woman", Wage: 10, Role: RoleHealer,
-		Health: 12, Speed: 20, HurtTime: 0.5, ActValue: 1, ActTime: 18, ActRange: 1, RespawnTimer: 100},
+		MaxHealth: 12, Speed: 20, HurtTime: 0.5, ActValue: 1, ActTime: 18, ActRange: 1, RespawnTimer: 100},
 		"\nPunches.", "heal", ZoneField)
 
 	Characters[CharHunter] = NewCharacter(BehaviorHunter, Stats{Name: "Hunter", Wage: 40, Role: RoleRanged,
-		Health: 20, Speed: 15, HurtTime: 0.5, ActValue: 4, ActTime: 20, ActRange: 6, RespawnTimer: 100},
+		MaxHealth: 20, Speed: 15, HurtTime: 0.5, ActValue: 4, ActTime: 20, ActRange: 6, RespawnTimer: 100},
 		"\nShoots arrows.", "damage", ZoneField)
 	Characters[CharHunter].Sounds = CharSounds{ActionTrigger: AudioBow, HitGround: AudioProjectileGround,
 		HitFlesh: AudioProjectileFlesh, HitWood: AudioProjectileWood, HitMetal: AudioProjectileMetal}

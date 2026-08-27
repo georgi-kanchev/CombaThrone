@@ -111,20 +111,21 @@ func (b *Base) UpdateBack() {
 	View.DrawObject(b.Back)
 	View.DrawObject(b.GarrisonBack)
 
-	var group = "flag-" + text.ToLowerCase(zoneNames[CurrentZone.kind])
 	var x, y = b.Flag.X, b.Flag.Y
+	b.FlagAnim.Frames = CurrentZone.flagFrames
 	if b.team == TeamAlly {
-		group = "flag-player"
-	} else if CurrentZone.kind == ZoneDocks {
-		x, y = PointAtCell(13.85, -0.15)
-		b.FlagAnim.FPS = 5
+		b.FlagAnim.Frames = Decor.Crops("flag-player")
 	} else {
-		x, y = PointAtCell(14, 5.5)
-		b.FlagAnim.FPS = 2
+		if CurrentZone.kind == ZoneDocks {
+			x, y = PointAtCell(13.85, -0.15)
+			b.FlagAnim.FPS = 5
+		} else {
+			x, y = PointAtCell(14, 5.5)
+			b.FlagAnim.FPS = 2
+		}
 	}
 	b.Flag.X, b.Flag.Y = x, y
 	b.FlagAnim.TimeScale = TimeScale * CurrentZone.WindSpeed
-	b.FlagAnim.Frames = Decor.Crops(group)
 	var frame = b.FlagAnim.Frame()
 	var crop = frame.CropArea()
 	b.Flag.ImageId, b.Flag.Width, b.Flag.Height = frame, crop.Width, crop.Height
@@ -141,7 +142,7 @@ func (b *Base) UpdateFront() {
 		GameHUD.Coins.Text = text.New(Player.Coins, "$")
 	}
 	if b.Glory != b.lastGlory {
-		GameHUD.TeamGlory[b.team].Text = text.New(b.Glory, Tags[IconGlory])
+		GameHUD.TeamGlory[b.team].Text = text.New(Tags[IconGlory], b.Glory)
 		b.lastGlory = b.Glory
 	}
 

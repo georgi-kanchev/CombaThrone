@@ -76,36 +76,47 @@ func (p *Pickup) Update() {
 	}
 
 	view.DrawObject(&p.Object)
+}
 
-	GameHUD.TryShowTooltip(view, p.Object.Shape, false, func(shape geometry.Shape) {
-		const width, height = 130.0, 35.0
-		var tooltip = geometry.NewRectangle(shape.X, shape.Y-shape.Height/2-height, width, height, 0)
-		var col, noMask = palette.White, geometry.Area{}
-		GameHUD.Highlight(GameHUD.View, shape, palette.White)
-		GameHUD.View.DrawImage(tooltip.X, tooltip.Y, width, height, 0, PanelNinePatchId, col, noMask)
+func (p *Pickup) DrawTooltip(bench bool) {
+	const width, height = 140.0, TileSize + 12
+	var shape = GameHUD.ShapeToUI(p.Object.Shape)
+	var col, noMask = palette.White, geometry.Area{}
+	var icon = UserInterface.Crops("icons-pickup")[p.Kind]
+	var x, y = shape.X, shape.Y - shape.Height/2 - height/2
+	if bench {
+		shape = p.Object.Shape
+		x, y = shape.X, shape.Y+shape.Height/2+height/2
+	}
 
-		tooltip.Width -= 12
-		tooltip.Height -= 12
-		TooltipLabel.Shape = tooltip
-		TooltipLabel.Text = pickupDescription[p.Kind]
-		TooltipLabel.Effects.TextAlignX, TooltipLabel.Effects.TextAlignY = 0.5, 0.5
-		GameHUD.View.DrawObject(TooltipLabel)
-	})
+	GameHUD.Highlight(GameHUD.View, shape, palette.White)
+	GameHUD.View.DrawImage(x, y, width, height, 0, PanelNinePatchId, col, noMask)
+	GameHUD.View.DrawImage(x+width/2-TileSize/2-6, y, -TileSize, TileSize, 0, icon, col, noMask)
+
+	TooltipLabel.Shape = geometry.NewRectangle(x-TileSize/2, y, width-TileSize-12, height-12, 0)
+	TooltipLabel.Text = pickupDescription[p.Kind]
+	TooltipLabel.Effects.TextAlignX, TooltipLabel.Effects.TextAlignY = 0.5, 0.5
+	GameHUD.View.DrawObject(TooltipLabel)
 }
 
 // private ========================================================
 
 var pickupGroups = [PickupCount]string{"coin", "gem", "crystal", "relic", "rune", "snowflake", "star", "key"}
 var pickupDescription = [PickupCount]string{
-	PickupCoin:      "A coin with a value of 10.",
-	PickupGem:       "gem",
-	PickupCrystal:   "crystal",
-	PickupRelic:     "Revives all of your 🟥" + Tags[IconDeath] + "dead⬜ units with 🟩" + Tags[IconHealth] + "50% health⬜.",
-	PickupRune:      "rune",
-	PickupSnowflake: "snowflake",
-	PickupStar:      "star",
-	PickupKey:       "key",
+	PickupCoin: "Gives you 🟨" + Tags[IconCoin] + "10 coins⬜.\nNot bad for a single coin, eh?",
+	PickupGem:  "Gives 🟩" + Tags[IconHealth] + "x2 health⬜ to all of your units.",
+	PickupCrystal: "Gives 🟥" + "x2 action points " +
+		Tags[IconMelee] + Tags[IconRanged] + Tags[IconTank] + Tags[IconMage] +
+		Tags[IconHealer] + Tags[IconCollector] + Tags[IconSupplier] + Tags[IconTrapper] +
+		"⬜ to all of your units.",
+	PickupRelic: "Revives all 🟥" + Tags[IconDeath] + "dead⬜ units and gives them 🟩" +
+		Tags[IconHealth] + "full health⬜.",
+	PickupRune:      "Prevents any enemy units from appearing for 20s.",
+	PickupSnowflake: "Prevents all enemy units from moving (they can still act).",
+	PickupStar:      "Gives you 🟩" + Tags[IconGlory] + "100 Glory⬜. So glorious!",
+	PickupKey:       "Unlocks a treasure chest for you\n(if owned).",
 }
 var pickupEffects = [PickupCount]func(pickedUpBy *Unit){
 	PickupCoin: func(pickedUpBy *Unit) { Player.Coins += 10 },
 }
+var pickupKindTooltip PickupKind

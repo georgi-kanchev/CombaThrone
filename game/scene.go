@@ -88,18 +88,24 @@ func InitScene() {
 	// Units = append(Units, NewUnit(CharMan, TeamEnemy, LaneUpper))
 	// Units = append(Units, NewUnit(CharMan, TeamEnemy, LaneMiddle))
 	// Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneLower))
-	// Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneLower))
+	Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneLower))
 	// Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneMiddle))
 
-	Pickups = append(Pickups, NewPickup(0, PickupRelic, LaneLowerOff))
-	Pickups = append(Pickups, NewPickup(0, PickupRelic, LaneMiddleOff))
-	Pickups = append(Pickups, NewPickup(0, PickupRelic, LaneUpperOff))
+	Pickups = append(Pickups, NewPickup(-200, PickupRelic, LaneLowerOff))
+	Pickups = append(Pickups, NewPickup(0, PickupGem, LaneMiddleOff))
+	Pickups = append(Pickups, NewPickup(0, PickupCoin, LaneUpperOff))
+	Pickups = append(Pickups, NewPickup(100, PickupSnowflake, LaneLowerOff))
+	Pickups = append(Pickups, NewPickup(100, PickupCrystal, LaneMiddleOff))
+	Pickups = append(Pickups, NewPickup(100, PickupRune, LaneUpperOff))
+	Pickups = append(Pickups, NewPickup(150, PickupKey, LaneLowerOff))
+	Pickups = append(Pickups, NewPickup(150, PickupStar, LaneMiddleOff))
 
 	Player = NewPlayer()
 
 	Player.Units[0] = NewUnit(CharHunter, TeamAlly, 0)
-	Player.Units[1] = NewUnit(CharMan, TeamAlly, 0)
+	Player.Units[1] = NewUnit(CharHunter, TeamAlly, 0)
 	Player.Units[2] = NewUnit(CharWoman, TeamAlly, 0)
+	Player.Units[3] = NewUnit(CharMan, TeamAlly, 0)
 }
 
 //=================================================================
@@ -137,7 +143,6 @@ func UpdateScene() {
 	InGameTimer += DeltaTimeScaled()
 	alignView()
 
-	GameHUD.Tooltip = nil
 	mouse.SetCursor(cursor.Default)
 
 	if keyboard.IsKeyJustPressed(key.RightArrow) && CurrentZone.kind < ZoneHell {
@@ -167,7 +172,7 @@ func UpdateScene() {
 		}
 	})
 	collection.SortByField(Units, func(u *Unit) float32 {
-		if u.Stats.Health <= 0 { // dead units go behind all alive units
+		if u.Health <= 0 { // dead units go behind all alive units
 			return number.NegativeInfinity()
 		}
 		return u.Y // fall back to Y sort
@@ -176,7 +181,6 @@ func UpdateScene() {
 		if u.State == StateWaitingToBeSummoned {
 			u.State = StateSummoned
 		}
-
 		u.Update()
 	})
 
@@ -184,7 +188,6 @@ func UpdateScene() {
 	Bases[TeamEnemy].UpdateFront()
 
 	GameHUD.UpdateBack()
-
 	iterateRemovable(&Projectiles, func(p *Projectile) { p.Update() })
 
 	for _, g := range Bases[TeamAlly].Entrances {
@@ -196,7 +199,7 @@ func UpdateScene() {
 	for _, u := range Units { // health bars take the Z order of the units
 		var hb = u.Hitbox()
 		hb.Height += 8
-		u.HealthBar.Update(hb, u.Stats.Health, Characters[u.Character].Stats.Health, u.Mask)
+		u.HealthBar.Update(hb, u.Health, u.Stats.MaxHealth, u.Mask)
 	}
 
 	GameHUD.UpdateFront()
@@ -272,4 +275,11 @@ func alignView() {
 	View.FitSize(CurrentZone.Ground.Width, 0)
 	var _, h = View.Size()
 	View.Y = (bly - h/2) - 2
+}
+
+func statEquation(current, base int, dynamic text.Dynamic) string {
+	if current-base > 0 {
+		return dynamic.Set("(", base, "+", current-base, ")")
+	}
+	return dynamic.Set("(", base, current-base, ")")
 }

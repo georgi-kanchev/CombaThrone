@@ -112,7 +112,7 @@ func (p *Projectile) Update() {
 	}
 
 	for _, u := range Units {
-		if u.Stats.Health <= 0 || enemyTeam != u.Team {
+		if u.Health <= 0 || enemyTeam != u.Team {
 			continue
 		}
 

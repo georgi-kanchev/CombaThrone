@@ -8,6 +8,7 @@ import (
 	"pure-game-kit/packages/utility/color"
 	"pure-game-kit/packages/utility/color/palette"
 	"pure-game-kit/packages/utility/random"
+	"pure-game-kit/packages/utility/text"
 )
 
 type CloudsKind uint8
@@ -17,8 +18,9 @@ type Zone struct {
 
 	WindSpeed float32
 
-	kind     ZoneKind
-	skyColor uint
+	kind       ZoneKind
+	skyColor   uint
+	flagFrames []assets.ImageId
 }
 
 const CloudsNone, CloudsNormal, CloudsWindy, CloudsCount CloudsKind = 0, 1, 2, 3
@@ -49,6 +51,7 @@ func NewZone(kind ZoneKind) *Zone {
 	var cloud = random.Pick(randomClouds...)
 	var clouds = graphics.NewSprite(0, 0, 1, cloud)
 	var windSpeed float32
+	var flagGroup = "flag-" + text.ToLowerCase(zoneNames[kind])
 	switch cloudsKind {
 	case CloudsNone:
 		windSpeed = random.Range[float32](0.2, 0.7)
@@ -60,7 +63,7 @@ func NewZone(kind ZoneKind) *Zone {
 	}
 	clouds.ImageCrop = cloud.CropArea()
 	return &Zone{Ground: &ground, Buildings: &buildings, skyColor: zoneSkyColors[kind], kind: kind, Clouds: &clouds,
-		WindSpeed: windSpeed}
+		WindSpeed: windSpeed, flagFrames: Decor.Crops(flagGroup)}
 }
 
 //=================================================================
@@ -101,7 +104,7 @@ func (z *Zone) UpdateBack() {
 	if z.kind == ZoneHell {
 		buildingWind = 0
 	}
-	z.Buildings.Effects.TileTimeScale = TimeScale + buildingWind
+	z.Buildings.Effects.TileTimeScale = TimeScale * buildingWind
 	View.DrawObject(z.Buildings)
 }
 func (z *Zone) UpdateFront() {
