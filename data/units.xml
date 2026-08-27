@@ -34,6 +34,7 @@
     <group name="hunter-hurt" cropIndexes="59 60"/>
     <group name="hunter-death" cropIndexes="61 62 63 64"/>
     <group name="dummy-icon" cropIndexes="65"/>
+    <group name="dummy-walk" cropIndexes="66"/>
     <group name="dummy-idle" cropIndexes="66"/>
     <group name="dummy-hurt" cropIndexes="67 68 69 70 71"/>
   </groups>

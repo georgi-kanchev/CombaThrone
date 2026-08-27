@@ -213,9 +213,15 @@ func (h *HUD) UpdateFront() {
 	if h.SummonIndex < 0 {
 		var unitHovered = false
 		for _, u := range Units {
-			if u != nil && u.ContainsPoint(View.MousePosition()) {
-				u.DrawTooltip(h.ShapeToUI(u.Shape), false)
+			if u != nil && u.Hitbox(TileSize/3).ContainsPoint(View.MousePosition()) {
+				mouse.SetCursor(cursor.Hand)
+				u.DrawTooltip(h.ShapeToUI(u.Hitbox(TileSize/3)), false)
 				unitHovered = true
+
+				if mouse.IsAnyButtonJustPressed() {
+					PinnedUnit = u
+				}
+				break
 			}
 		}
 		if !unitHovered {
@@ -226,7 +232,7 @@ func (h *HUD) UpdateFront() {
 			}
 		}
 		if PinnedUnit != nil {
-			PinnedUnit.DrawTooltip(h.ShapeToUI(PinnedUnit.Shape), false)
+			PinnedUnit.DrawTooltip(h.ShapeToUI(PinnedUnit.Hitbox(TileSize/3)), false)
 		}
 	}
 }
@@ -350,7 +356,7 @@ func (h *HUD) drawBenchUnits(lastSummonIndex int) {
 		if h.SummonIndex < 0 {
 			if unit.IsSummoned() && hovered {
 				h.Highlight(View, unit.Shape, palette.White)
-			} else if unit.IsSummoned() && unit.ContainsPoint(View.MousePosition()) {
+			} else if unit.IsSummoned() && unit.Hitbox(TileSize/3).ContainsPoint(View.MousePosition()) {
 				h.Highlight(h.View, benchUnitShape, palette.White)
 			}
 		}
@@ -417,7 +423,7 @@ func (h *HUD) trySummon(lastSummonIndex int) {
 	}
 	if unit.Stats.ActRange > 1 {
 		var garrisonsFull = len(takenGarrisons) == 6
-		var garrisonX, garrisonY = PointAtCell(0, 4)
+		var garrisonX, garrisonY = PointAtCell(0.5, 4)
 		var shape = geometry.NewRectangle(garrisonX, garrisonY, size, size, 0)
 
 		var dist = point.DistanceToPoint(shape.X, shape.Y, mx, my)

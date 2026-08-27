@@ -4,8 +4,6 @@ import (
 	"pure-game-kit/packages/assets"
 	"pure-game-kit/packages/geometry"
 	"pure-game-kit/packages/graphics"
-	"pure-game-kit/packages/input/mouse"
-	"pure-game-kit/packages/input/mouse/cursor"
 	"pure-game-kit/packages/motion"
 	"pure-game-kit/packages/utility/collection"
 	"pure-game-kit/packages/utility/color"
@@ -83,7 +81,7 @@ func NewUnit(character CharacterKind, team Team, lane Lane) *Unit {
 	var char = Characters[character]
 	var anim = motion.NewAnimation(0, false, char.Animations.Idle...)
 	var unit = Unit{Object: graphics.NewSprite(-2000, -2000, 1, 0), Character: character, Team: team, Lane: lane,
-		Behavior: char.Behavior, Anim: &anim, ActionTimer: number.NaN(), HurtTimer: number.NaN()}
+		Behavior: char.Behavior, Anim: &anim, ActionTimer: number.NaN(), HurtTimer: number.NaN(), LastState: StateWaitingToBeSummoned}
 
 	if team == TeamAlly {
 		unit.State = StateWaitingToBeSummoned
@@ -98,10 +96,13 @@ func NewUnit(character CharacterKind, team Team, lane Lane) *Unit {
 
 //=================================================================
 
-func (u *Unit) Hitbox() geometry.Shape {
+func (u *Unit) Hitbox(additionalWidth ...float32) geometry.Shape {
 	var char = Characters[u.Character]
 	var hitbox = char.Hitbox
 	hitbox.X, hitbox.Y = u.X+hitbox.X, u.Y+hitbox.Y
+	if len(additionalWidth) == 1 {
+		hitbox.Width += additionalWidth[0]
+	}
 	return hitbox
 }
 func (u *Unit) MyEntrance() (entrance *Entrance) {
@@ -222,10 +223,10 @@ func (u *Unit) Update() {
 
 	if TimeScale > 0 {
 		u.applyState()
+		u.Behavior(u)
 		u.actUponState()
 		u.applyPhysics()
 		u.applyCollisions()
-		u.Behavior(u)
 	}
 	u.draw()
 	u.Carrying.Update()
@@ -252,10 +253,13 @@ func (u *Unit) DrawTooltip(shape geometry.Shape, bench bool) {
 	}
 	var area = geometry.NewArea(x, y, width, height).Inside(GameHUD.View.Bounds())
 	area = area.Outside(GameHUD.UnitsPanel.Shape.Bounds(), true, false)
+	area = area.Outside(GameHUD.TeamGlory[TeamAlly].Shape.Bounds(), true, false)
+	area = area.Outside(GameHUD.TeamGlory[TeamEnemy].Shape.Bounds(), true, false)
 	x, y = area.X, area.Y
 
 	GameHUD.Highlight(GameHUD.View, shape, palette.White)
 	GameHUD.View.DrawImage(x, y, width, height, 0, PanelNinePatchId, col, noMask)
+	GameHUD.View.DrawShape(x, y+height/2-tsz/2, width-10, 20, 0, 0, color.RGB(61, 37, 59), noMask)
 
 	var char = Characters[u.Character]
 	var icon = char.Icon
@@ -294,16 +298,15 @@ func (u *Unit) DrawTooltip(shape geometry.Shape, bench bool) {
 		"🟨", Tags[IconMove], s.Speed, " speed ", speed, "\n",
 		"🟥", Tags[char.RoleIcon], s.ActValue, " ", char.ActValueName, " ", val, "\n",
 		"🟧", Tags[IconRange], s.ActRange, " range ", rng, "\n",
-		"🌗🟪", Tags[IconTimer], actionTimer, number.Round(float32(b.ActTime)/10, 1), "s action\n",
+		"🌗🟪", Tags[IconTimer], actionTimer, number.Round(float32(b.ActTime)/10, 1), "s rest\n",
 		"🌗🟦", Tags[IconRespawn], respawnTimer, number.Round(float32(b.RespawnTimer)/10, 1), "s respawn\n",
 		"⬜", char.Info,
 	)
 	GameHUD.View.DrawObject(TooltipLabel)
 
 	TooltipLabel.Effects.TextAlignX, TooltipLabel.Effects.TextAlignY = 1, 1
-	TooltipLabel.Text = TooltipTexts[8].Set(s.Name, "\n",
-		Tags[char.RoleIcon], char.RoleName, "\n\n\n",
-		Tags[IconHome], Zones[char.Origin].Name)
+	TooltipLabel.Text = TooltipTexts[8].Set(s.Name, "\n", Tags[IconHome], Zones[char.Origin].Name, "\n",
+		Tags[char.RoleIcon], char.RoleName, "\n\n\n")
 	GameHUD.View.DrawObject(TooltipLabel)
 
 	if PinnedUnit == u {
@@ -316,7 +319,7 @@ func (u *Unit) DrawTooltip(shape geometry.Shape, bench bool) {
 func (u *Unit) TakeDamage(damage int) {
 	if u.Health > 0 {
 		u.Health -= damage
-		u.HurtTimer = u.Stats.HurtTime
+		u.HurtTimer = 0.5
 	}
 }
 
@@ -628,7 +631,7 @@ func (u *Unit) applyCollisions() {
 		}
 	}
 
-	if u.IsOffLaner() && GameHUD.FreePickupSlot() >= 0 && u.Carrying == nil {
+	if u.Stats.Role == RoleCollector && GameHUD.FreePickupSlot() >= 0 && u.Carrying == nil {
 		for _, p := range Pickups {
 			if p != nil && p.Target == nil && p.Lane == u.Lane && p.Overlaps(hb) {
 				u.Carrying = p
@@ -656,12 +659,4 @@ func (u *Unit) draw() {
 	}
 	View.DrawObject(&u.Object)
 	u.Width = crop.Width
-
-	if u.Object.ContainsPoint(View.MousePosition()) {
-		mouse.SetCursor(cursor.Hand)
-
-		if mouse.IsAnyButtonJustPressed() {
-			PinnedUnit = u
-		}
-	}
 }

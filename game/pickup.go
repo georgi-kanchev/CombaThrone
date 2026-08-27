@@ -53,18 +53,19 @@ func NewPickup(x float32, kind PickupKind, lane Lane) *Pickup {
 		data.Description = "Gives you 🟨" + Tags[IconCoin] + "10 coins⬜.\nNot bad for a single coin, eh?"
 		data.Effect = func() { Player.Coins += 10 }
 	case PickupGem:
-		data.Description = "Gives 🟩" + Tags[IconHealth] + "x2 health⬜ to all of your units."
+		data.Description = "🟩" + Tags[IconHealth] + "Doubles health⬜ of all your units."
 	case PickupCrystal:
-		data.Description = "Gives 🟥" + "x2 action points " +
-			Tags[IconMelee] + Tags[IconRanged] + Tags[IconTank] + Tags[IconMage] +
-			Tags[IconHealer] + Tags[IconCollector] + Tags[IconSupplier] + Tags[IconTrapper] + "⬜ to all of your units."
+		data.Description = "🟥" + Tags[IconMelee] + Tags[IconRanged] + Tags[IconTank] + Tags[IconMage] +
+			Tags[IconHealer] + Tags[IconCollector] + Tags[IconSupplier] + Tags[IconTrapper] +
+			"\nDoubles action points\n" +
+			"⬜of all your units."
 	case PickupRelic:
 		data.Description = "Revives all 🟥" + Tags[IconDeath] +
 			"dead⬜ units and gives them 🟩" + Tags[IconHealth] + "full health⬜."
 	case PickupRune:
 		data.Description = "Prevents any enemy units from appearing for 20s."
 	case PickupSnowflake:
-		data.Description = "Prevents all enemy units from moving (they can still act)."
+		data.Description = "Prevents all enemy units from moving. They can still act."
 	case PickupStar:
 		data.Description = "Gives you 🟩" + Tags[IconGlory] + "100 Glory⬜. So glorious!"
 	case PickupKey:
@@ -115,6 +116,8 @@ func (p *Pickup) DrawTooltip(bench bool) {
 		shape = p.Object.Shape
 		x, y = shape.X, shape.Y+shape.Height/2+height/2
 	}
+	var area = geometry.NewArea(x, y, width, height).Inside(GameHUD.View.Bounds())
+	x, y = area.X, area.Y
 
 	GameHUD.Highlight(GameHUD.View, shape, palette.White)
 	GameHUD.View.DrawImage(x, y, width, height, 0, PanelNinePatchId, col, noMask)
