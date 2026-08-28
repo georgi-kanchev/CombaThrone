@@ -1,9 +1,18 @@
 package game
 
+import (
+	"pure-game-kit/packages/input/keyboard"
+	"pure-game-kit/packages/input/keyboard/key"
+)
+
 func BehaviorMan(self *Unit) {
 }
 
 func BehaviorWoman(self *Unit) {
+	if keyboard.IsKeyJustPressed(key.A) {
+		self.VelocityX = 0
+		self.State = StateActionStart
+	}
 }
 
 func BehaviorHunter(self *Unit) {
