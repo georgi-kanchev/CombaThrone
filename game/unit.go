@@ -66,10 +66,9 @@ const ( // states
 	StateActionEnd        // single frame
 )
 
-const TeamAlly, TeamEnemy, TeamNeutral, TeamCount Team = 0, 1, 2, 3
+const TeamAlly, TeamEnemy, TeamCount Team = 0, 1, 2
 
-const RoleMelee, RoleRanged, RoleTank, RoleMage Role = 0, 1, 2, 3
-const RoleHealer, RoleCollector, RoleSupplier, RoleTrapper, RoleCount Role = 4, 5, 6, 7, 8
+const RoleFighter, RoleRanger, RoleTank, RoleGriefer, RoleSupport, RoleCollector, RoleCount Role = 0, 1, 2, 3, 4, 5, 6
 
 const Gravity, GroundFrictionPercent, BloodMultiplier = 256.0, 15.0, 40.0
 
@@ -110,7 +109,7 @@ func (u *Unit) MyEntrance() (entrance *Entrance) {
 }
 func (u *Unit) EnemyEntrance() (canBeActedUpon bool, entrance *Entrance) {
 	var e *Entrance
-	if u.Team != TeamNeutral && (u.IsLaner() || u.IsOffLaner()) {
+	if u.IsLaner() || u.IsOffLaner() {
 		e = Bases[1-u.Team].Entrances[u.Lane/2]
 		var actionRange = float32(u.Stats.ActRange) * TileSize
 		var melee = u.Stats.ActRange == 1 && number.IsWithin(u.X, e.Tiles[0].X, TileSize/2)
@@ -338,7 +337,7 @@ var laneMasks = map[Lane]geometry.Area{
 	LaneUpper:     geometry.NewArea(0, 0, 428, 1000),
 	LaneUpperOff:  geometry.NewArea(0, 0, 428, 1000),
 }
-var teamColors = [TeamCount]uint{TeamAlly: palette.Green, TeamEnemy: palette.Red, TeamNeutral: palette.Orange}
+var teamColors = [TeamCount]uint{TeamAlly: palette.Green, TeamEnemy: palette.Red}
 
 func (u *Unit) particlesBlood(p *motion.Particle) (alive bool) {
 	if p.Age == 0 {

@@ -47,7 +47,7 @@ const (
 	IconHealer
 	IconCollector
 	IconSupplier
-	IconTrapper
+	IconGriefer
 	IconMove
 	IconHome
 	IconRespawn
@@ -57,7 +57,7 @@ const (
 var Tags = []string{
 	IconHealth: "~", IconCoin: "$", IconGlory: "*", IconDeath: "`", IconStory: "@", IconMove: ">", IconRange: "#",
 	IconTimer: "^", IconRespawn: "[", IconHome: "]",
-	IconMelee: "&", IconRanged: "<", IconHealer: "{", IconMage: "}", IconTank: ";", IconCollector: "\\", IconTrapper: "_",
+	IconMelee: "&", IconRanged: "<", IconHealer: "{", IconMage: "}", IconTank: ";", IconCollector: "\\", IconGriefer: "_",
 	IconSupplier: "=",
 }
 
@@ -459,7 +459,8 @@ func (h *HUD) trySummon(lastSummonIndex int) {
 			Units = append(Units, unit)
 			unit.Lane = lane
 
-			if unit.Stats.Role >= RoleHealer {
+			switch unit.Stats.Role {
+			case RoleGriefer, RoleSupport, RoleCollector:
 				unit.Lane++
 			}
 			unit.PrepareSpawn()

@@ -56,7 +56,7 @@ func NewPickup(x float32, kind PickupKind, lane Lane) *Pickup {
 		data.Description = "🟩" + Tags[IconHealth] + "Doubles health⬜ of all your units."
 	case PickupCrystal:
 		data.Description = "🟥" + Tags[IconMelee] + Tags[IconRanged] + Tags[IconTank] + Tags[IconMage] +
-			Tags[IconHealer] + Tags[IconCollector] + Tags[IconSupplier] + Tags[IconTrapper] +
+			Tags[IconHealer] + Tags[IconCollector] + Tags[IconSupplier] + Tags[IconGriefer] +
 			"\nDoubles action points\n" +
 			"⬜of all your units."
 	case PickupRelic:
