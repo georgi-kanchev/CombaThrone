@@ -74,7 +74,7 @@ func InitCharacters() {
 		HitFlesh: AudioProjectileFlesh, HitWood: AudioProjectileWood, HitMetal: AudioProjectileMetal}
 
 	for i, c := range Characters {
-		var prefix = text.ToLowerCase(c.Stats.Name)
+		var prefix = text.Replace(text.ToLowerCase(c.Stats.Name), " ", "-")
 		c.Animations.Idle = atlas.Crops(prefix + "-idle")
 		c.Animations.Walk = atlas.Crops(prefix + "-walk")
 		c.Animations.ActionStart = atlas.Crops(prefix + "-action-start")

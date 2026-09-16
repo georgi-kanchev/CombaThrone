@@ -29,6 +29,13 @@ func UpdateDebug() {
 		DebugMode = number.Wrap(DebugMode+1, 0, 3)
 	}
 
+	if keyboard.IsKeyJustPressed(key.RightArrow) && CurrentZone.Kind < ZoneHell {
+		CurrentZone = Zones[CurrentZone.Kind+1]
+	}
+	if keyboard.IsKeyJustPressed(key.LeftArrow) && CurrentZone.Kind > ZoneField {
+		CurrentZone = Zones[CurrentZone.Kind-1]
+	}
+
 	for i := range 10 {
 		if keyboard.IsKeyJustPressed(key.Number0 + i) {
 			if keyboard.IsKeyPressed(key.Dot) {

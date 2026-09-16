@@ -5,8 +5,6 @@ import (
 	"pure-game-kit/packages/geometry"
 	"pure-game-kit/packages/graphics"
 	"pure-game-kit/packages/gui"
-	"pure-game-kit/packages/input/keyboard"
-	"pure-game-kit/packages/input/keyboard/key"
 	"pure-game-kit/packages/input/mouse"
 	"pure-game-kit/packages/input/mouse/cursor"
 	"pure-game-kit/packages/utility/collection"
@@ -32,7 +30,7 @@ const ( // lanes (collision layers)
 	LaneGarrisonPlus2
 	LaneGarrisonPlus3
 	LaneCount
-	LaneLayerOffset = 28
+	LaneLayerOffset = 32
 )
 
 const TileSize, MapCount = 32.0, 4
@@ -56,7 +54,6 @@ func InitScene() {
 
 	var view = graphics.NewView(1)
 	View = &view
-	GameHUD = NewHUD()
 
 	var layers, decor = assets.LoadTileLayersFromTiled("data/map.tmx")
 	Layers = layers
@@ -79,10 +76,10 @@ func InitScene() {
 	}
 	CurrentZone = Zones[ZoneField]
 
-	Bases[TeamAlly] = NewBase(TeamAlly, BaseFortress, Garrison3,
-		[3]EntranceKind{EntranceDoor, EntranceShortGate, EntranceTallGate})
-	Bases[TeamEnemy] = NewBase(TeamEnemy, BaseBarrack, Garrison3,
-		[3]EntranceKind{EntranceDoor, EntranceNone, EntranceNone})
+	Bases[TeamAlly] = NewBase(TeamAlly, BaseNone, Garrison3,
+		[3]EntranceKind{EntranceNone, EntranceNone, EntranceNone})
+	Bases[TeamEnemy] = NewBase(TeamEnemy, BaseNone, Garrison3,
+		[3]EntranceKind{EntranceNone, EntranceNone, EntranceNone})
 
 	// Units = append(Units, NewUnit(CharWoman, TeamAlly, LaneMiddle))
 	// Units = append(Units, NewUnit(CharMan, TeamEnemy, LaneUpper))
@@ -146,13 +143,6 @@ func UpdateScene() {
 	alignView()
 
 	mouse.SetCursor(cursor.Default)
-
-	if keyboard.IsKeyJustPressed(key.RightArrow) && CurrentZone.Kind < ZoneHell {
-		CurrentZone = Zones[CurrentZone.Kind+1]
-	}
-	if keyboard.IsKeyJustPressed(key.LeftArrow) && CurrentZone.Kind > ZoneField {
-		CurrentZone = Zones[CurrentZone.Kind-1]
-	}
 
 	CurrentZone.UpdateBack()
 	Bases[TeamAlly].UpdateBack()

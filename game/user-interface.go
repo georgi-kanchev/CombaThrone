@@ -57,7 +57,7 @@ const (
 var Tags = []string{
 	IconHealth: "~", IconCoin: "$", IconGlory: "*", IconDeath: "`", IconStory: "@", IconMove: ">", IconRange: "#",
 	IconTimer: "^", IconRespawn: "[", IconHome: "]",
-	IconMelee: "&", IconRanged: "<", IconHealer: "{", IconMage: "}", IconTank: ";", IconCollector: "\\", IconGriefer: "_",
+	IconMelee: "/", IconRanged: "<", IconHealer: "{", IconMage: "}", IconTank: ";", IconCollector: "\\", IconGriefer: "_",
 	IconSupplier: "=",
 }
 
@@ -69,6 +69,9 @@ var GameHUD *HUD
 var TooltipLabel *graphics.Object
 var TooltipTexts [9]text.Dynamic
 
+func InitUI() {
+	GameHUD = NewHUD()
+}
 func NewHUD() *HUD {
 	UserInterface = assets.LoadAtlas(assets.LoadImage("data/user-interface.png"), "data/user-interface.xml")
 

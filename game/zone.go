@@ -30,9 +30,11 @@ const CloudsNone, CloudsNormal, CloudsWindy, CloudsCount CloudsKind = 0, 1, 2, 3
 const (
 	ZoneField ZoneKind = iota
 	ZoneRuins
+	ZoneForest
 	ZoneSwamp
 	ZoneDesert
 	ZoneDocks
+	ZoneOcean
 	ZoneGlacier
 	ZoneCave
 	ZoneMine
@@ -46,21 +48,25 @@ var ZoneBackgrounds [ZoneCount]assets.ImageId
 var Zones [ZoneCount]*Zone
 
 func NewZone(kind ZoneKind) *Zone {
-	var names = [ZoneCount]string{"Field", "Ruins", "Swamp", "Desert", "Docks", "Glacier", "Cave", "Mine", "Hell"}
+	var names = [ZoneCount]string{
+		"Field", "Ruins", "Forest", "Swamp", "Desert", "Docks", "Ocean", "Glacier", "Cave", "Mine", "Hell"}
 	var skyColors = [ZoneCount]uint{
 		ZoneField: color.TagRGBA("rgb(98, 171, 212)"), ZoneRuins: color.TagRGBA("rgb(98, 171, 212)"),
-		ZoneSwamp: color.TagRGBA("rgb(37, 65, 61)"), ZoneDesert: color.TagRGBA("rgb(155, 240, 253)"),
-		ZoneDocks: color.TagRGBA("rgb(98, 171, 212)"), ZoneGlacier: color.TagRGBA("rgb(155, 240, 253)"),
+		ZoneForest: color.TagRGBA("rgb(31, 55, 54)"), ZoneSwamp: color.TagRGBA("rgb(92, 107, 83)"),
+		ZoneDesert: color.TagRGBA("rgb(155, 240, 253)"), ZoneDocks: color.TagRGBA("rgb(98, 171, 212)"),
+		ZoneOcean: color.TagRGBA("rgb(98, 171, 212)"), ZoneGlacier: color.TagRGBA("rgb(155, 240, 253)"),
 		ZoneCave: color.TagRGBA("rgb(72, 54, 59)"), ZoneMine: color.TagRGBA("rgb(61, 36, 59)"),
 		ZoneHell: color.TagRGBA("rgb(227, 177, 109)"),
 	}
 	var infos = [ZoneCount]string{"1. The Field of the Vanilla-gers", "2. The Ruins of the Robbing Hoods",
-		"3. The Swamp of the Abomi Nation", "4. The Desert of the Sarcopha-guys",
-		"5. The Docks of the Plank-ton Pirates", "6. The Glacier of the Satan Claws & Co.",
-		"7. The Cave of the Troglo-bites", "8. The Mine of the Avant Guards", "9. The Hell of the Demons-trosities"}
-	var cloudPerZone = [ZoneCount]CloudsKind{ZoneField: CloudsNormal, ZoneRuins: CloudsNormal, ZoneSwamp: CloudsNone,
-		ZoneDesert: CloudsNone, ZoneDocks: CloudsWindy, ZoneGlacier: CloudsWindy, ZoneCave: CloudsNone,
-		ZoneMine: CloudsNone, ZoneHell: CloudsNone}
+		"3. The Forest of the Cast-aways & Potion-eers", "4. The Swamp of the Abomi Nation",
+		"5. The Desert of the Sarcopha-guys", "6. The Docks of the Plank-ton Squid-iots",
+		"7. The Cliff of the Balloon-a-ticks", "8. The Glacier of the Satan Claws & Co.",
+		"9. The Cave of the Troglo-bites", "10. The Mine of the ???????-????", /*Masquer-oids*/
+		"11. The Hell of the Demons-trosities"}
+	var cloudPerZone = [ZoneCount]CloudsKind{ZoneField: CloudsNormal, ZoneRuins: CloudsNormal, ZoneForest: CloudsNone,
+		ZoneSwamp: CloudsNone, ZoneDesert: CloudsNone, ZoneDocks: CloudsWindy, ZoneOcean: CloudsWindy,
+		ZoneGlacier: CloudsWindy, ZoneCave: CloudsNone, ZoneMine: CloudsNone, ZoneHell: CloudsNone}
 	var ground = graphics.NewTilemap(Layers[ZoneLayerOffset+int(kind)*2])
 	var buildings = graphics.NewTilemap(Layers[ZoneLayerOffset+int(kind)*2+1])
 	var randomClouds = Clouds[cloudPerZone[kind]]
@@ -74,8 +80,11 @@ func NewZone(kind ZoneKind) *Zone {
 	case CloudsNormal:
 		collection.Remove(randomClouds, cloud) // field and ruins shouldn't have the same clouds
 		windSpeed = random.Range[float32](0.5, 2.0)
-	case CloudsWindy:
+	}
+	if cloudPerZone[kind] == CloudsWindy || kind == ZoneDesert {
 		windSpeed = random.Range[float32](2.0, 5.0)
+	} else if kind == ZoneHell {
+		windSpeed = 1
 	}
 	clouds.ImageCrop = cloud.CropArea()
 
@@ -94,9 +103,6 @@ func (z *Zone) UpdateBack() {
 	View.DrawImage(0, 0, z.Ground.Width, z.Ground.Height, 0, ZoneBackgrounds[z.Kind], palette.White, geometry.Area{})
 
 	var buildingWind = z.WindSpeed
-	if z.Kind == ZoneHell {
-		buildingWind = 0
-	}
 	z.Buildings.Effects.TileTimeScale = TimeScale * buildingWind
 	View.DrawObject(z.Buildings)
 }

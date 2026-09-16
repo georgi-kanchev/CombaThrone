@@ -12,6 +12,7 @@ func main() {
 	window.SetTargetFPS(0)
 
 	game.LoadAudio()
+	game.InitUI() // needs to be before all other img loads since it relies on IDs
 	game.InitCharacters()
 	game.InitScene()
 	for window.KeepOpen() {
