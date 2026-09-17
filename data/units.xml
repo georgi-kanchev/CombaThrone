@@ -238,12 +238,12 @@
     <group name="kid-icon" cropIndexes="115"/>
     <group name="kid-idle" cropIndexes="116 117 118 119"/>
     <group name="kid-move" cropIndexes="120 121 122 123 124 125"/>
-    <group name="brown-bunny-icon" cropIndexes="126"/>
-    <group name="brown-bunny-idle" cropIndexes="127 128"/>
-    <group name="brown-bunny-move" cropIndexes="129 130 131 132"/>
-    <group name="white-bunny-icon" cropIndexes="133"/>
-    <group name="white-bunny-idle" cropIndexes="134 135"/>
-    <group name="white-bunny-move" cropIndexes="136 137 138 139"/>
+    <group name="bunny-(brown)-icon" cropIndexes="126"/>
+    <group name="bunny-(brown)-idle" cropIndexes="127 128"/>
+    <group name="bunny-(brown)-move" cropIndexes="129 130 131 132"/>
+    <group name="bunny-(white)-icon" cropIndexes="133"/>
+    <group name="bunny-(white)-bunny-idle" cropIndexes="134 135"/>
+    <group name="bunny-(white)-move" cropIndexes="136 137 138 139"/>
     <group name="troll-icon" cropIndexes="140"/>
     <group name="troll-idle" cropIndexes="141 142 143 144"/>
     <group name="troll-move" cropIndexes="145 146 147 148 149 150"/>
@@ -278,8 +278,53 @@
     <group name="vulture-move" cropIndexes="246 247 248 249"/>
     <group name="raven-icon" cropIndexes="250"/>
     <group name="raven-move" cropIndexes="251 252 253 254"/>
-    <group name="red-snake-icon" cropIndexes="255"/>
-    <group name="red-snake-idle" cropIndexes="256 257 258 259"/>
-    <group name="red-snake-move" cropIndexes="260 261 262 263"/>
+    <group name="snake-(red)-icon" cropIndexes="255"/>
+    <group name="snake-(red)-idle" cropIndexes="256 257 258 259"/>
+    <group name="snake-(red)-move" cropIndexes="260 261 262 263"/>
+    <group name="alchemist-(fire)-icon" cropIndexes="264"/>
+    <group name="alchemist-(fire)-idle" cropIndexes="265 266 267 268"/>
+    <group name="alchemist-(fire)-move" cropIndexes="269 270 271 272 273 274"/>
+    <group name="alchemist-(fire)-act" cropIndexes="275 276 277 278 279 280"/>
+    <group name="alchemist-(fire)-hurt" cropIndexes="281 282"/>
+    <group name="alchemist-(fire)-death" cropIndexes="283 284 285"/>
+    <group name="wizard-(wind)-icon" cropIndexes="286"/>
+    <group name="wizard-(wind)-idle" cropIndexes="287 288 289 290"/>
+    <group name="wizard-(wind)-move" cropIndexes="291 292 293 294 295 296"/>
+    <group name="wizard-(wind)-act" cropIndexes="297 298 299 300"/>
+    <group name="wizard-(wind)-hurt" cropIndexes="301 302"/>
+    <group name="wizard-(wind)-death" cropIndexes="303 304 305"/>
+    <group name="alchemist-(heal)-icon" cropIndexes="306"/>
+    <group name="alchemist-(heal)-idle" cropIndexes="307 308 309 310"/>
+    <group name="alchemist-(heal)-move" cropIndexes="311 312 313 314 315 316"/>
+    <group name="alchemist-(heal)-act" cropIndexes="317 318 319 320 321 322"/>
+    <group name="alchemist-(heal)-hurt" cropIndexes="323 324"/>
+    <group name="alchemist-(heal)-death" cropIndexes="325 326 327"/>
+    <group name="wizard-(aura)-icon" cropIndexes="328"/>
+    <group name="wizard-(aura)-idle" cropIndexes="329 330 331 332"/>
+    <group name="wizard-(aura)-move" cropIndexes="333 334 335 336 337 338"/>
+    <group name="wizard-(aura)-act" cropIndexes="339 340 341 342"/>
+    <group name="wizard-(aura)-hurt" cropIndexes="343 344"/>
+    <group name="wizard-(aura)-death" cropIndexes="345 346 347"/>
+    <group name="alchemist-(poison)-icon" cropIndexes="348"/>
+    <group name="alchemist-(poison)-idle" cropIndexes="349 350 351 352"/>
+    <group name="alchemist-(poison)-move" cropIndexes="353 354 355 356 357 358"/>
+    <group name="alchemist-(poison)-act" cropIndexes="359 360 361 362 363 364"/>
+    <group name="alchemist-(poison)-hurt" cropIndexes="365 366"/>
+    <group name="alchemist-(poison)-death" cropIndexes="367 368 369"/>
+    <group name="wizard-(lightning)-icon" cropIndexes="370"/>
+    <group name="wizard-(lightning)-idle" cropIndexes="371 372 373 374"/>
+    <group name="wizard-(lightning)-move" cropIndexes="375 376 377 378 379 380"/>
+    <group name="wizard-(lightning)-act" cropIndexes="381 382 383 384"/>
+    <group name="wizard-(lightning)-hurt" cropIndexes="385 386"/>
+    <group name="wizard-(lightning)-death" cropIndexes="387 388 389"/>
+    <group name="bear-icon" cropIndexes="390"/>
+    <group name="bear-idle" cropIndexes="391 392 393 394"/>
+    <group name="bear-move" cropIndexes="395 396 397 398 399 400"/>
+    <group name="wolf-icon" cropIndexes="401"/>
+    <group name="wolf-idle" cropIndexes="402 403 404 405"/>
+    <group name="wolf-move" cropIndexes="406 407 408 409 410 411"/>
+    <group name="boar-icon" cropIndexes="412"/>
+    <group name="boar-idle" cropIndexes="413 414 415 416"/>
+    <group name="boar-move" cropIndexes="417 418 419 420 421 422"/>
   </groups>
 </data>
