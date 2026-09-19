@@ -317,9 +317,9 @@
     <group name="electric-wizard-act" cropIndexes="381 382 383 384"/>
     <group name="electric-wizard-hurt" cropIndexes="385 386"/>
     <group name="electric-wizard-die" cropIndexes="387 388 389"/>
-    <group name="bear-icon" cropIndexes="390"/>
-    <group name="bear-idle" cropIndexes="391 392 393 394"/>
-    <group name="bear-move" cropIndexes="395 396 397 398 399 400"/>
+    <group name="brown-bear-icon" cropIndexes="390"/>
+    <group name="brown-bear-idle" cropIndexes="391 392 393 394"/>
+    <group name="brown-bear-move" cropIndexes="395 396 397 398 399 400"/>
     <group name="wolf-icon" cropIndexes="401"/>
     <group name="wolf-idle" cropIndexes="402 403 404 405"/>
     <group name="wolf-move" cropIndexes="406 407 408 409 410 411"/>
@@ -449,5 +449,84 @@
     <group name="black-bird-move" cropIndexes="850 851 852 853"/>
     <group name="yellow-bird-icon" cropIndexes="854"/>
     <group name="yellow-bird-move" cropIndexes="855 856 857 858"/>
+    <group name="mech-icon" cropIndexes="859"/>
+    <group name="mech-idle" cropIndexes="860 861 862 863"/>
+    <group name="mech-move" cropIndexes="864 865 866 867 868 869"/>
+    <group name="mech-act" cropIndexes="870 871 872 873 874"/>
+    <group name="mech-hurt" cropIndexes="875 876"/>
+    <group name="mech-die" cropIndexes="877 878 879 880"/>
+    <group name="turret-bot-icon" cropIndexes="881"/>
+    <group name="turret-bot-idle" cropIndexes="882 883 884 885"/>
+    <group name="turret-bot-move" cropIndexes="886 887 888 889"/>
+    <group name="turret-bot-act" cropIndexes="890 891 892 893"/>
+    <group name="turret-bot-hurt" cropIndexes="894 895"/>
+    <group name="turret-bot-die" cropIndexes="896 897 898 899"/>
+    <group name="barrel-bot-icon" cropIndexes="900"/>
+    <group name="barrel-bot-idle" cropIndexes="901 902 903 904"/>
+    <group name="barrel-bot-move" cropIndexes="905 906 907 908"/>
+    <group name="spear-bot-icon" cropIndexes="909"/>
+    <group name="spear-bot-idle" cropIndexes="910 911 912 913"/>
+    <group name="spear-bot-move" cropIndexes="914 915 916 917"/>
+    <group name="spear-bot-act" cropIndexes="918 919 920"/>
+    <group name="spear-bot-hurt" cropIndexes="921 922"/>
+    <group name="spear-bot-die" cropIndexes="923 924 925 926"/>
+    <group name="trap-agent-icon" cropIndexes="927"/>
+    <group name="trap-agent-idle" cropIndexes="928 929 930 931"/>
+    <group name="trap-agent-move" cropIndexes="932 933 934 935 936 937"/>
+    <group name="trap-agent-act" cropIndexes="938 939 940 941 942 943 944"/>
+    <group name="engineer-icon" cropIndexes="945"/>
+    <group name="engineer-idle" cropIndexes="946 947 948 949"/>
+    <group name="engineer-move" cropIndexes="950 951 952 953 954 955"/>
+    <group name="engineer-act" cropIndexes="956 957 958 959 960 961"/>
+    <group name="giga-bot-icon" cropIndexes="962"/>
+    <group name="giga-bot-idle" cropIndexes="963 964 965 966"/>
+    <group name="giga-bot-move" cropIndexes="967 968 969 970 971 972"/>
+    <group name="giga-bot-act" cropIndexes="973 974 975"/>
+    <group name="giga-bot-hurt" cropIndexes="976 977"/>
+    <group name="giga-bot-die" cropIndexes="978 979 980 981"/>
+    <group name="collector-bot-icon" cropIndexes="982"/>
+    <group name="collector-bot-idle" cropIndexes="983 984 985 986"/>
+    <group name="collector-bot-move" cropIndexes="987 988 989 990"/>
+    <group name="collector-bot-act" cropIndexes="991 992 993 994 995"/>
+    <group name="barrelcopter-bot-icon" cropIndexes="996"/>
+    <group name="barrelcopter-bot-move" cropIndexes="997 998 999 1000"/>
+    <group name="polar-bear-icon" cropIndexes="1001"/>
+    <group name="polar-bear-idle" cropIndexes="1002 1003 1004 1005"/>
+    <group name="polar-bear-move" cropIndexes="1006 1007 1008 1009 1010 1011"/>
+    <group name="polar-bear-act" cropIndexes="1012 1013 1014 1015 1016 1017"/>
+    <group name="frosty-icon" cropIndexes="1018"/>
+    <group name="frosty-idle" cropIndexes="1019 1020 1021 1022"/>
+    <group name="frosty-move" cropIndexes="1023 1024 1025 1026 1027 1028"/>
+    <group name="frosty-act" cropIndexes="1029 1030 1031"/>
+    <group name="frosty-hurt" cropIndexes="1032 1033"/>
+    <group name="frosty-die" cropIndexes="1034 1035 1036 1037 1038"/>
+    <group name="presents-bag-icon" cropIndexes="1039"/>
+    <group name="presents-bag-idle" cropIndexes="1040 1041 1042 1043"/>
+    <group name="presents-bag-move" cropIndexes="1044 1045 1046 1047"/>
+    <group name="presents-bag-act" cropIndexes="1048 1049 1050"/>
+    <group name="presents-bag-hurt" cropIndexes="1051 1052"/>
+    <group name="presents-bag-die" cropIndexes="1053 1054 1055 1056 1057"/>
+    <group name="satan-claws-icon" cropIndexes="1058"/>
+    <group name="satan-claws-idle" cropIndexes="1059 1060 1061 1062"/>
+    <group name="satan-claws-move" cropIndexes="1063 1064 1065 1066 1067 1068"/>
+    <group name="satan-claws-act" cropIndexes="1069 1070 1071 1072 1073"/>
+    <group name="Seq 1074-1074" cropIndexes="1074"/>
+    <group name="Seq 1075-1078" cropIndexes="1075 1076 1077 1078"/>
+    <group name="Seq 1079-1082" cropIndexes="1079 1080 1081 1082"/>
+    <group name="Seq 1083-1085" cropIndexes="1083 1084 1085"/>
+    <group name="Seq 1086-1087" cropIndexes="1086 1087"/>
+    <group name="Seq 1088-1091" cropIndexes="1088 1089 1090 1091"/>
+    <group name="Seq 1092-1092" cropIndexes="1092"/>
+    <group name="Seq 1093-1096" cropIndexes="1093 1094 1095 1096"/>
+    <group name="Seq 1097-1100" cropIndexes="1097 1098 1099 1100"/>
+    <group name="Seq 1101-1104" cropIndexes="1101 1102 1103 1104"/>
+    <group name="Seq 1105-1106" cropIndexes="1105 1106"/>
+    <group name="Seq 1107-1111" cropIndexes="1107 1108 1109 1110 1111"/>
+    <group name="Seq 1112-1112" cropIndexes="1112"/>
+    <group name="Seq 1113-1116" cropIndexes="1113 1114 1115 1116"/>
+    <group name="Seq 1117-1120" cropIndexes="1117 1118 1119 1120"/>
+    <group name="Seq 1121-1121" cropIndexes="1121"/>
+    <group name="Seq 1122-1125" cropIndexes="1122 1123 1124 1125"/>
+    <group name="Seq 1126-1131" cropIndexes="1126 1127 1128 1129 1130 1131"/>
   </groups>
 </data>
