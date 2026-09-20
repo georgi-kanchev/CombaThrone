@@ -209,13 +209,15 @@
     <group name="miner-icon" cropIndexes="7"/>
     <group name="miner-idle" cropIndexes="8 9 10 11"/>
     <group name="miner-move" cropIndexes="12 13 14 15 16 17"/>
-    <group name="miner-act" cropIndexes="18 19 20 21 22"/>
+    <group name="miner-prepare" cropIndexes="18 19 20"/>
+    <group name="miner-recover" cropIndexes="21 22"/>
     <group name="miner-hurt" cropIndexes="23 24"/>
     <group name="miner-die" cropIndexes="25 26 27 28"/>
     <group name="bowyer-icon" cropIndexes="29"/>
     <group name="bowyer-idle" cropIndexes="30 31 32 33"/>
     <group name="bowyer-move" cropIndexes="34 35 36 37 38 39"/>
-    <group name="bowyer-act" cropIndexes="40 41 42 43 44 45"/>
+    <group name="bowyer-prepare" cropIndexes="40 41 42 43"/>
+    <group name="bowyer-recover" cropIndexes="44 45"/>
     <group name="bowyer-hurt" cropIndexes="46 47"/>
     <group name="bowyer-die" cropIndexes="48 49 50"/>
     <group name="fisherman-icon" cropIndexes="51"/>

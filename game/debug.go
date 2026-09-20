@@ -74,7 +74,7 @@ func UpdateDebug() {
 		if hovered != nil {
 			if condition.TrueEvery(0.1, -111) {
 				debugInfo = text.New("\nstate: ", debugStates[hovered.State], "\n",
-					"action timer: ", number.Round(hovered.ActionTimer, 1), "\n",
+					"act timer: ", number.Round(hovered.ActTimer, 1), "\n",
 					"hurt timer: ", number.Round(hovered.HurtTimer, 1), "\n",
 					"velocity: ", number.Round(hovered.VelocityX, 1), " | ", number.Round(hovered.VelocityY, 1), "\n",
 					"move speed: ", number.Round(hovered.MoveSpeedX, 1), "\n",
@@ -96,6 +96,6 @@ var debugStates = []string{
 	StateIdling: "idle", StateWalking: "walk",
 	StateHurtStart: "hurt", StateHurting: "hurt",
 	StateDyingStart: "dying", StateDying: "dying", StateDyingEnd: "dying", StateDecaying: "dead",
-	StateActionStart: "action charge", StateActionCharging: "action charge", StateActionTrigger: "action charge",
-	StateActionRecovering: "action recover", StateActionEnd: "action recover"}
+	StateActStart: "act charge", StateActCharging: "act charge", StateActTrigger: "act charge",
+	StateActRecovering: "act recover", StateActEnd: "act recover"}
 var debugInfo = ""

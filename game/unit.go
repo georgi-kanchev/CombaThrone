@@ -40,7 +40,7 @@ type Unit struct {
 	Carrying *Pickup
 
 	LastX, LastY, MoveSpeedX float32
-	ActionTimer, HurtTimer   float32 // negative values can be used for "time since last"
+	ActTimer, HurtTimer      float32 // negative values can be used for "time since last"
 	LastState                State
 }
 
@@ -59,11 +59,11 @@ const ( // states
 	StateDyingEnd   // single frame
 	StateDecaying   // continuous
 
-	StateActionStart      // single frame
-	StateActionCharging   // continuous
-	StateActionTrigger    // single frame
-	StateActionRecovering // continuous
-	StateActionEnd        // single frame
+	StateActStart      // single frame
+	StateActCharging   // continuous
+	StateActTrigger    // single frame
+	StateActRecovering // continuous
+	StateActEnd        // single frame
 )
 
 const TeamAlly, TeamEnemy, TeamCount Team = 0, 1, 2
@@ -80,7 +80,7 @@ func NewUnit(character CharacterKind, team Team, lane Lane) *Unit {
 	var char = Characters[character]
 	var anim = motion.NewAnimation(0, false, char.Animations.Idle...)
 	var unit = Unit{Object: graphics.NewSprite(-2000, -2000, 1, 0), Character: character, Team: team, Lane: lane,
-		Behavior: char.Behavior, Anim: &anim, ActionTimer: number.NaN(), HurtTimer: number.NaN(), LastState: StateWaitingToBeSummoned}
+		Behavior: char.Behavior, Anim: &anim, ActTimer: number.NaN(), HurtTimer: number.NaN(), LastState: StateWaitingToBeSummoned}
 
 	if team == TeamAlly {
 		unit.State = StateWaitingToBeSummoned
@@ -111,9 +111,9 @@ func (u *Unit) EnemyEntrance() (canBeActedUpon bool, entrance *Entrance) {
 	var e *Entrance
 	if u.IsLaner() || u.IsOffLaner() {
 		e = Bases[1-u.Team].Entrances[u.Lane/2]
-		var actionRange = float32(u.Stats.ActRange) * TileSize
+		var actRange = float32(u.Stats.ActRange) * TileSize
 		var melee = u.Stats.ActRange == 1 && number.IsWithin(u.X, e.Tiles[0].X, TileSize/2)
-		var ranged = u.Stats.ActRange > 1 && number.Absolute(u.X-e.Tiles[0].X) < actionRange
+		var ranged = u.Stats.ActRange > 1 && number.Absolute(u.X-e.Tiles[0].X) < actRange
 		canBeActedUpon = !e.IsOpen() && e.Health > 0 && (melee || ranged)
 	}
 	return canBeActedUpon, e
@@ -159,7 +159,7 @@ func (u *Unit) IsOnScreen() bool {
 }
 
 func (u *Unit) PrepareSpawn() {
-	u.ActionTimer, u.HurtTimer = number.NaN(), number.NaN()
+	u.ActTimer, u.HurtTimer = number.NaN(), number.NaN()
 	u.Effects.Tint = palette.White
 	u.Stats = Characters[u.Character].Stats
 	u.IsReturning, u.Health = false, u.Stats.MaxHealth
@@ -204,7 +204,7 @@ func (u *Unit) Update() {
 		return
 	}
 
-	u.ActionTimer -= DeltaTimeScaled()
+	u.ActTimer -= DeltaTimeScaled()
 	u.HurtTimer -= DeltaTimeScaled()
 
 	if !u.IsSummoned() && (number.IsNaN(u.HurtTimer) || u.HurtTimer < -float32(u.Stats.RespawnTimer)/10) {
@@ -266,7 +266,7 @@ func (u *Unit) DrawTooltip(shape geometry.Shape, bench bool) {
 	GameHUD.View.DrawImage(x+width/2-tsz/2-6, y-height/2+tsz/2+6, -tsz, tsz, 0, icon, col, noMask)
 
 	var b, s = char.Stats, u.Stats
-	var health1, health2, speed, val, rng, actionTimer, respawnTimer string
+	var health1, health2, speed, val, rng, actTimer, respawnTimer string
 	if u.IsSummoned() {
 		if u.Health != b.MaxHealth {
 			health1 = TooltipTexts[0].Set(u.Health, "/")
@@ -283,8 +283,8 @@ func (u *Unit) DrawTooltip(shape geometry.Shape, bench bool) {
 		if s.ActRange != b.ActRange {
 			rng = statEquation(s.ActRange, b.ActRange, TooltipTexts[4])
 		}
-		if u.ActionTimer > 0 {
-			actionTimer = TooltipTexts[5].Set(number.Round(u.ActionTimer, 1), "/")
+		if u.ActTimer > 0 {
+			actTimer = TooltipTexts[5].Set(number.Round(u.ActTimer, 1), "/")
 		}
 	}
 	if u.State == StateDecaying && u.HurtTimer > -float32(s.RespawnTimer)/10 {
@@ -297,7 +297,7 @@ func (u *Unit) DrawTooltip(shape geometry.Shape, bench bool) {
 		"🟨", Tags[IconMove], s.Speed, " speed ", speed, "\n",
 		"🟥", Tags[char.RoleIcon], s.ActValue, " ", char.ActValueName, " ", val, "\n",
 		"🟧", Tags[IconRange], s.ActRange, " range ", rng, "\n",
-		"🌗🟪", Tags[IconTimer], actionTimer, number.Round(float32(b.ActTime)/10, 1), "s rest\n",
+		"🌗🟪", Tags[IconTimer], actTimer, number.Round(float32(b.ActTime)/10, 1), "s rest\n",
 		"🌗🟦", Tags[IconRespawn], respawnTimer, number.Round(float32(b.RespawnTimer)/10, 1), "s respawn\n",
 		"⬜", char.Info,
 	)
@@ -372,13 +372,13 @@ func (u *Unit) particlesBlood(p *motion.Particle) (alive bool) {
 
 func (u *Unit) applyState() {
 	var canBeActedUpon, entrance = u.EnemyEntrance()
-	var canAct = u.ActionTimer < 0 || number.IsNaN(u.ActionTimer)
+	var canAct = u.ActTimer < 0 || number.IsNaN(u.ActTimer)
 	var enemyEntranceInRange = canBeActedUpon && entrance != nil
 	var hasMeleeTarget = u.UnitFront != nil && u.Team != u.UnitFront.Team
 	var melee = canAct && (hasMeleeTarget || enemyEntranceInRange) && u.Stats.ActRange == 1
 
 	var closestDistX = number.ValueBiggest[float32]()
-	var actionRange = float32(u.Stats.ActRange) * TileSize
+	var actRange = float32(u.Stats.ActRange) * TileSize
 	u.ClosestEnemyInRange = nil
 	for _, t := range Units {
 		if u == t || t.Health <= 0 || t.IsOffLaner() {
@@ -389,7 +389,7 @@ func (u *Unit) applyState() {
 		var allyEnemy, enemyAlly = u.Team == TeamAlly && t.Team == TeamEnemy, u.Team == TeamEnemy && t.Team == TeamAlly
 		var isEnemy = allyEnemy || enemyAlly
 		var isInFront = (allyEnemy && u.X < t.X) || (enemyAlly && u.X > t.X)
-		var closeEnough = distX < actionRange
+		var closeEnough = distX < actRange
 		if isInFront && isEnemy && distX < closestDistX && closeEnough {
 			closestDistX = distX
 			u.ClosestEnemyInRange = t
@@ -418,23 +418,23 @@ func (u *Unit) applyState() {
 		u.State = StateWalking // first frame is event, second frame (now) starts walking
 	}
 
-	if u.State == StateActionEnd && u.Health > 0 {
+	if u.State == StateActEnd && u.Health > 0 {
 		u.State = StateIdling
-	} else if u.State == StateActionRecovering && u.Anim.IsJustFinished() {
-		u.State = StateActionEnd
-	} else if u.State == StateActionTrigger {
-		u.State = StateActionRecovering
-	} else if u.State == StateActionCharging && u.Anim.IsJustFinished() {
-		u.State = StateActionTrigger
-	} else if u.State == StateActionStart {
-		u.State = StateActionCharging
+	} else if u.State == StateActRecovering && u.Anim.IsJustFinished() {
+		u.State = StateActEnd
+	} else if u.State == StateActTrigger {
+		u.State = StateActRecovering
+	} else if u.State == StateActCharging && u.Anim.IsJustFinished() {
+		u.State = StateActTrigger
+	} else if u.State == StateActStart {
+		u.State = StateActCharging
 	} else if (u.State == StateIdling || u.State == StateWalking) && melee {
-		u.State = StateActionStart
+		u.State = StateActStart
 	} else if (u.State == StateIdling || u.State == StateWalking) && ranged && garrisonOrNot && canShoot {
 		if canAct {
-			u.State = StateActionStart
+			u.State = StateActStart
 		} else if u.Health > 0 && u.IsLaner() { // no shoot-move-shoot-move for laners - but garrisoners should
-			u.State = StateIdling // enemy in range but waiting for action timer (stay in one place, don't keep walking)
+			u.State = StateIdling // enemy in range but waiting for act timer (stay in one place, don't keep walking)
 		}
 	}
 
@@ -501,14 +501,14 @@ func (u *Unit) actUponState() {
 			collection.Remove(Pickups, u.Carrying)
 			u.Carrying = nil
 		}
-	case StateActionStart: // random delay to balance same sided units melee VVVVVVV
-		u.ActionTimer = float32(u.Stats.ActTime)/10 + random.Range[float32](0, 0.1)
-		u.Anim.Frames = Characters[u.Character].Animations.ActionStart
+	case StateActStart: // random delay to balance same sided units melee VVVVVVV
+		u.ActTimer = float32(u.Stats.ActTime)/10 + random.Range[float32](0, 0.1)
+		u.Anim.Frames = Characters[u.Character].Animations.ActStart
 		u.Anim.IsLooping, u.Anim.FPS, u.Anim.Time = false, 8, 0
 		u.VelocityX = 0
-		PlaySound(Characters[u.Character].Sounds.ActionStart)
-	case StateActionTrigger:
-		u.Anim.Frames = Characters[u.Character].Animations.ActionEnd
+		PlaySound(Characters[u.Character].Sounds.ActStart)
+	case StateActTrigger:
+		u.Anim.Frames = Characters[u.Character].Animations.ActEnd
 		u.Anim.IsLooping, u.Anim.FPS, u.Anim.Time = false, 8, 0
 
 		var dmg = u.Stats.ActValue
@@ -536,16 +536,16 @@ func (u *Unit) actUponState() {
 			}
 			var proj = u.NewProjectile(u.X, u.Y, u.Z, t.X+prediction, t.Y+t.Height/2-8, t.Z, dmg, ProjectileArrow, nil)
 			Projectiles = append(Projectiles, proj)
-			PlaySound(Characters[u.Character].Sounds.ActionTrigger)
+			PlaySound(Characters[u.Character].Sounds.ActTrigger)
 		} else if canBeActedUpon && e != nil {
 			var x, y = e.Tiles[0].X, e.Tiles[0].Y
 			if e.Kind == EntranceTallGate {
 				y += TileSize
 			}
 			Projectiles = append(Projectiles, u.NewProjectile(u.X, u.Y, u.Z, x, y, laneZs[e.Lane], dmg, ProjectileArrow, e))
-			PlaySound(Characters[u.Character].Sounds.ActionTrigger)
+			PlaySound(Characters[u.Character].Sounds.ActTrigger)
 		}
-	case StateActionCharging, StateActionRecovering, StateActionEnd: // empty
+	case StateActCharging, StateActRecovering, StateActEnd: // empty
 	case StateHurtStart:
 		u.Anim.Frames = Characters[u.Character].Animations.Hurt
 		u.Anim.IsLooping, u.Anim.FPS, u.Anim.Time = false, 5, 0

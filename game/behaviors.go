@@ -11,7 +11,7 @@ func BehaviorMan(self *Unit) {
 func BehaviorWoman(self *Unit) {
 	if keyboard.IsKeyJustPressed(key.A) {
 		self.VelocityX = 0
-		self.State = StateActionStart
+		self.State = StateActStart
 	}
 }
 
@@ -24,11 +24,13 @@ func BehaviorHunter(self *Unit) {
 }
 
 func BehaviorDummy(self *Unit) {
-	if self.State == StateDyingStart {
+	switch self.State {
+	case StateDyingStart:
 		self.State = StateIdling
 		self.Health = 1
-	}
-	if self.State == StateSummoned {
+	case StateSummoned:
 		self.X, self.Y = TileSize*5, -TileSize*6
+	case StateWalking:
+		self.State = StateIdling
 	}
 }
