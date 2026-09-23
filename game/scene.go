@@ -102,7 +102,7 @@ func InitScene() {
 	Player = NewPlayer()
 
 	Player.Units[0] = NewUnit(CharBowyer, TeamAlly, 0)
-	Player.Units[1] = NewUnit(CharBowyer, TeamAlly, 0)
+	Player.Units[1] = NewUnit(CharMiner, TeamAlly, 0)
 	// Player.Units[2] = NewUnit(CharCook, TeamAlly, 0)
 	// Player.Units[3] = NewUnit(CharMiner, TeamAlly, 0)
 }
@@ -123,17 +123,17 @@ func UpdateTitleScreen() {
 
 	gui.Scale = View.Zoom
 	var hud = gui.AreaHUD(0.5, 1, 0, 0)
-	gui.Button("@ Story Mode", geometry.NewArea(hud.X, hud.Y-TileSize*5.5, 120, 28), geometry.Area{}, ThemeUI, true)
+	gui.Button(storyMode, geometry.NewArea(hud.X, hud.Y-TileSize*5.5, 120, 28), geometry.Area{}, ThemeUI, true)
 	if gui.IsJustClicked() {
 		InGame = true
 		PlayAmbience(CurrentZone.Kind)
 	}
-	gui.Button("* Arena Mode", geometry.NewArea(hud.X, hud.Y-TileSize*4.5, 120, 28), geometry.Area{}, ThemeUI, false)
+	gui.Button(arenaMode, geometry.NewArea(hud.X, hud.Y-TileSize*4.5, 120, 28), geometry.Area{}, ThemeUI, false)
 	if gui.IsFocused() {
 		mouse.SetCursor(cursor.NotAllowed)
 	}
-	gui.Button("Settings", geometry.NewArea(hud.X, hud.Y-TileSize*3, 100, 28), geometry.Area{}, ThemeUI, true)
-	gui.Button("Exit", geometry.NewArea(hud.X, hud.Y-TileSize*2, 100, 28), geometry.Area{}, ThemeUI, true)
+	gui.Button(settings, geometry.NewArea(hud.X, hud.Y-TileSize*3, 100, 28), geometry.Area{}, ThemeUI, true)
+	gui.Button(exit, geometry.NewArea(hud.X, hud.Y-TileSize*2, 100, 28), geometry.Area{}, ThemeUI, true)
 	if gui.IsJustClicked() {
 		window.Close()
 	}
@@ -225,6 +225,8 @@ func DeltaTimeScaled() float32 {
 var highlightCursorColors = map[int]uint{
 	cursor.Arrow: palette.LightGray, cursor.Hand: palette.White, cursor.NotAllowed: palette.Red,
 }
+var storyMode, arenaMode = Tags[IconBook] + "Story Mode", Tags[IconTower] + "Arena Mode"
+var settings, exit = Tags[IconGear] + "Settings", Tags[IconDoor] + "Exit"
 
 func mirrorGarrisonLanes() {
 	for i := LaneGarrison1; i < LaneGarrisonPlus3+1; i++ {

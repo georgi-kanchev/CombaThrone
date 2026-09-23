@@ -91,7 +91,7 @@ func (hb *HealthBar) Update(target geometry.Shape, health, maxHealth int, mask g
 	}
 
 	var border float32 = 2
-	hb.Background.X, hb.Background.Y = target.X, target.Y-target.Height/2
+	hb.Background.X, hb.Background.Y = target.X, target.Y-target.Height/2-4
 
 	hb.Fill.Width = number.Map(float32(max(health, 0)), 0, float32(maxHealth), 0, hb.Background.Width-border)
 	hb.Fill.Height = hb.Background.Height - border

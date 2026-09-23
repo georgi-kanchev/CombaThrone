@@ -31,22 +31,20 @@ type Character struct {
 	Info, ActValueName string
 	RoleIcon           Icon
 	RoleName           string
-
-	Behavior func(self *Unit)
 }
 
 const CharMiner, CharCook, CharBowyer, CharDummy, CharCount CharacterKind = 0, 1, 2, 3, 4
 
 var Characters [4]*Character
 
-func NewCharacter(behavior func(self *Unit), origin ZoneKind, stats Stats, info string) *Character {
+func NewCharacter(origin ZoneKind, stats Stats, info string) *Character {
 	var roleIcons = [RoleCount]Icon{
-		IconMelee, IconRanged, IconTank, IconCollector, IconSupplier, IconGriefer}
+		IconSword, IconBow, IconShield, IconBag, IconHand, IconDebuff}
 	var roleNames = [RoleCount]string{"Melee", "Ranged", "Tank", "Collector", "Support", "Griefer"}
 	var actNames = [RoleCount]string{"damage", "damage", "block", "carry", "buff", "grief"}
 
 	return &Character{
-		Behavior: behavior, Stats: stats, Hitbox: geometry.NewRoundedRectangle(0, 7, 18, 35, 0, 1),
+		Stats: stats, Hitbox: geometry.NewRoundedRectangle(0, 7, 18, 35, 0, 1),
 		Sounds: CharSounds{HitFlesh: AudioHitFlesh, HitWood: AudioHitWood, HitMetal: AudioHitMetal},
 		Info:   info, ActValueName: actNames[stats.Role], RoleIcon: roleIcons[stats.Role], RoleName: roleNames[stats.Role],
 	}
@@ -55,21 +53,19 @@ func NewCharacter(behavior func(self *Unit), origin ZoneKind, stats Stats, info 
 func InitCharacters() {
 	var atlas = assets.LoadAtlas(assets.LoadImage("data/units.png"), "data/units.xml")
 
-	Characters[CharMiner] = NewCharacter(BehaviorMan, ZoneField, Stats{Name: "Miner", Wage: 20, Role: RoleFighter,
-		MaxHealth: 20, Speed: 30, ActValue: 2, ActTime: 15, ActRange: 1, RespawnTimer: 100},
-		"When close to a Woman:\n🌗🟪"+Tags[IconTimer]+"loses 0.5s rest⬜")
-
-	Characters[CharCook] = NewCharacter(BehaviorWoman, ZoneField, Stats{Name: "Cook", Wage: 10, Role: RoleSupport,
-		MaxHealth: 1, Speed: 20, ActValue: 1, ActTime: 18, ActRange: 1, RespawnTimer: 100},
-		"When in front of a Man:\n🌗🟨"+Tags[IconMove]+"gains 10 speed⬜")
-
-	Characters[CharDummy] = NewCharacter(BehaviorDummy, ZoneField, Stats{Name: "Dummy", Role: RoleTank,
+	Characters[CharDummy] = NewCharacter(ZoneField, Stats{Name: "Dummy", Role: RoleTank,
 		MaxHealth: 1, Speed: 0, ActValue: 0, ActTime: 0, ActRange: 0, RespawnTimer: 0},
-		"Cannot die.\nAlthough, it would like to.")
-
-	Characters[CharBowyer] = NewCharacter(BehaviorHunter, ZoneField, Stats{Name: "Bowyer", Wage: 40, Role: RoleRanger,
+		"Cannot 🟥"+Tags[IconSkull]+"die⬜. Even though it really wants to.")
+	Characters[CharDummy].Hitbox.Width += 4
+	Characters[CharMiner] = NewCharacter(ZoneField, Stats{Name: "Miner", Wage: 20, Role: RoleFighter,
+		MaxHealth: 20, Speed: 20, ActValue: 2, ActTime: 15, ActRange: 1, RespawnTimer: 100},
+		"Gains 🟥"+Tags[IconSword]+"8 damage⬜ against "+Tags[IconDoor]+"entrances.")
+	Characters[CharCook] = NewCharacter(ZoneField, Stats{Name: "Cook", Wage: 10, Role: RoleSupport,
+		MaxHealth: 1, Speed: 15, ActValue: 1, ActTime: 18, ActRange: 1, RespawnTimer: 100},
+		"When in front of a Man:\n🌗🟨"+Tags[IconLeftRight]+"gains 10 speed⬜")
+	Characters[CharBowyer] = NewCharacter(ZoneField, Stats{Name: "Bowyer", Wage: 40, Role: RoleRanger,
 		MaxHealth: 14, Speed: 15, ActValue: 4, ActTime: 20, ActRange: 6, RespawnTimer: 100},
-		"When not garrison: \n🟧"+Tags[IconRange]+"gains 2 range⬜")
+		"Gains 🟧"+Tags[IconRange]+"2 range⬜ when not garrison.")
 	Characters[CharBowyer].Sounds = CharSounds{ActTrigger: AudioBow, HitGround: AudioProjectileGround,
 		HitFlesh: AudioProjectileFlesh, HitWood: AudioProjectileWood, HitMetal: AudioProjectileMetal}
 

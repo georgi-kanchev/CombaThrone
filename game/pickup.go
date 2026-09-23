@@ -53,14 +53,13 @@ func NewPickup(x float32, kind PickupKind, lane Lane) *Pickup {
 		data.Description = "Gives you 🟨" + Tags[IconCoin] + "10 coins⬜.\nNot bad for a single coin, eh?"
 		data.Effect = func() { Player.Coins += 10 }
 	case PickupGem:
-		data.Description = "🟩" + Tags[IconHealth] + "Doubles health⬜ of all your units."
+		data.Description = "All of your units gain\n🟩" + Tags[IconHealth] + "double health⬜."
 	case PickupCrystal:
-		data.Description = "🟥" + Tags[IconMelee] + Tags[IconRanged] + Tags[IconTank] + Tags[IconMage] +
-			Tags[IconHealer] + Tags[IconCollector] + Tags[IconSupplier] + Tags[IconGriefer] +
-			"\nDoubles action points\n" +
-			"⬜of all your units."
+		data.Description = "All of your units gain\n🟥" + Tags[IconSword] + Tags[IconBow] + Tags[IconShield] +
+			Tags[IconBag] + Tags[IconHand] + Tags[IconDebuff] +
+			"\ndouble action points⬜."
 	case PickupRelic:
-		data.Description = "Revives all 🟥" + Tags[IconDeath] +
+		data.Description = "Revives all 🟥" + Tags[IconSkull] +
 			"dead⬜ units and gives them 🟩" + Tags[IconHealth] + "full health⬜."
 	case PickupRune:
 		data.Description = "Prevents any enemy units from appearing for 20s."

@@ -35,30 +35,34 @@ const (
 	IconCoin
 	IconGlory
 	IconTimer
-	IconTank
-	IconRanged
-	IconMelee
-	IconMage
+	IconShield
+	IconBow
+	IconSword
+	IconFlag
 	IconRange
-	IconDeath
+	IconSkull
 	IconLocked
 	IconUnlocked
-	IconStory
-	IconHealer
-	IconCollector
-	IconSupplier
-	IconGriefer
-	IconMove
-	IconHome
-	IconRespawn
+	IconBook
+	IconPlus
+	IconBag
+	IconHand
+	IconDebuff
+	IconLeftRight
+	IconHouse
+	IconLoop
+	IconDoor
+	IconGear
+	IconTower
 	IconCount
 )
 
+// ①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳⑴⑵⑶⑷⑸⑹⑺⑻⑼⑽⑾⑿⒀⒁⒂⒃⒄⒅⒆⒇⒈⒉⒊⒋⒌⒍⒎⒏⒐⒑⒒⒓⒔⒕⒖⒗⒘⒙⒚⒛
+// ⓐⓑⓒⓓⓔⓕⓖⓗⓘⓙⓚⓛⓜⓝⓞⓟⓠⓡⓢⓣⓤⓥⓦⓧⓨⓩⒶⒷⒸⒹⒺⒻⒼⒽⒾⒿⓀⓁⓂⓃⓄⓅⓆⓇⓈⓉⓊⓋⓌⓍⓎⓏ⓪⓫⓬⓭⓮⓯⓰⓱⓲⓳⓴
 var Tags = []string{
-	IconHealth: "~", IconCoin: "$", IconGlory: "*", IconDeath: "`", IconStory: "@", IconMove: ">", IconRange: "#",
-	IconTimer: "^", IconRespawn: "[", IconHome: "]",
-	IconMelee: "/", IconRanged: "<", IconHealer: "{", IconMage: "}", IconTank: ";", IconCollector: "\\", IconGriefer: "_",
-	IconSupplier: "=",
+	IconHealth: "①", IconCoin: "②", IconGlory: "③", IconSkull: "④", IconBook: "⑤", IconLeftRight: "⑥", IconRange: "⑦",
+	IconTimer: "⑧", IconLoop: "⑨", IconHouse: "⑩", IconSword: "⑪", IconBow: "⑫", IconPlus: "⑬", IconFlag: "⑭",
+	IconShield: "⑮", IconBag: "⑯", IconDebuff: "⑰", IconHand: "⑱", IconDoor: "⑲", IconGear: "⑳", IconTower: "⑴",
 }
 
 var ThemeUI assets.GUIThemeId
@@ -86,7 +90,7 @@ func NewHUD() *HUD {
 
 	TooltipLabel = new(graphics.NewTextbox(0, 0, 100, 100, 0))
 	TooltipLabel.Effects.FillColor, TooltipLabel.Effects.TextLineHeight = 0, 10
-	TooltipLabel.Effects.TextLineGap = -40
+	TooltipLabel.Effects.TextLineGap = -30
 	TooltipLabel.Effects.TextAlignX, TooltipLabel.Effects.TextAlignY = 0.5, 0.5
 
 	var btn = UserInterface.Crops("button")
@@ -157,7 +161,7 @@ func (h *HUD) PickupSlotPosition(slot int) (x, y float32) {
 }
 
 func (h *HUD) UpdateBack() {
-	const scale = 0.6
+	const scale = 0.9
 	h.View.Zoom = scale * 5
 
 	var tx, ty = h.View.PointFromEdge(0.5, 0)
@@ -325,7 +329,7 @@ func (h *HUD) drawBenchUnits(lastSummonIndex int) {
 		h.View.DrawImage(x+sz/2-iSz/2, y+sz/2-iSz/2, iSz, iSz, 0, roleIcon, tint, noMask)
 		if unit.State == StateDecaying {
 			var timerWidth = number.Map(unit.HurtTimer, 0, -float32(unit.Stats.RespawnTimer)/10, sz-2, 0)
-			var icon, col = IconRespawn, color.RGB(102, 102, 255)
+			var icon, col = IconLoop, color.RGB(102, 102, 255)
 
 			h.View.DrawShape(x, y, sz, sz, 0, 0, color.RGBA(0, 0, 0, 150), noMask)
 			h.View.DrawImage(x-sz/2+iSz/2, y+sz/2-iSz/2, iSz, iSz, 0, icons[icon], col, noMask)
@@ -336,7 +340,7 @@ func (h *HUD) drawBenchUnits(lastSummonIndex int) {
 			var hpWidth = number.Map(hp, 0, maxHp, 0, sz-2)
 			var icon, col = IconHealth, palette.Green
 			if hp == 0 {
-				icon, col = IconDeath, palette.Red
+				icon, col = IconSkull, palette.Red
 			}
 			h.View.DrawShape(x, y, sz, sz, 0, 0, color.RGBA(0, 0, 0, 150), noMask)
 			h.View.DrawImage(x-sz/2+iSz/2, y+sz/2-iSz/2, iSz, iSz, 0, icons[icon], col, noMask)
@@ -424,7 +428,7 @@ func (h *HUD) trySummon(lastSummonIndex int) {
 			takenGarrisons = append(takenGarrisons, pu.Lane)
 		}
 	}
-	if unit.Stats.ActRange > 1 {
+	if unit.Stats.ActRange > 1 && Bases[TeamAlly].Kind >= BaseFort {
 		var garrisonsFull = len(takenGarrisons) == 6
 		var garrisonX, garrisonY = PointAtCell(0.5, 4)
 		var shape = geometry.NewRectangle(garrisonX, garrisonY, size, size, 0)

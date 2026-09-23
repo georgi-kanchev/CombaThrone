@@ -44,7 +44,7 @@ func NewBase(team Team, kind BaseKind, garrison Garrison, entrances [3]EntranceK
 
 	var x, y = PointAtCell(14, 5.5)
 	if team == TeamAlly {
-		x, _ = PointAtCell(3, 5.5)
+		x, y = PointAtCell(3, 6)
 	}
 
 	var flag = graphics.NewSprite(x, y, 1, 0)
@@ -113,9 +113,10 @@ func (b *Base) UpdateBack() {
 	b.FlagAnim.Frames = CurrentZone.FlagFrames
 	if b.Team == TeamAlly {
 		b.FlagAnim.Frames = Decor.Crops("flag-player")
+		b.FlagAnim.FPS = 6
 	} else {
 		if CurrentZone.Kind == ZoneDocks {
-			x, y = PointAtCell(13.85, -0.15)
+			x, y = PointAtCell(13.85, 0.31)
 			b.FlagAnim.FPS = 5
 		} else {
 			x, y = PointAtCell(14, 5.5)
@@ -124,6 +125,7 @@ func (b *Base) UpdateBack() {
 	}
 	b.Flag.X, b.Flag.Y = x, y
 	b.FlagAnim.TimeScale = TimeScale * CurrentZone.WindSpeed
+
 	var frame = b.FlagAnim.Frame()
 	var crop = frame.CropArea()
 	b.Flag.ImageId, b.Flag.Width, b.Flag.Height = frame, crop.Width, crop.Height

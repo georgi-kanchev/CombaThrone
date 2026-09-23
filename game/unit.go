@@ -23,7 +23,6 @@ type Unit struct {
 	Character CharacterKind
 	Lane      Lane
 	Team      Team
-	Behavior  func(self *Unit)
 	Anim      *motion.Animation[assets.ImageId]
 	HealthBar *HealthBar
 	State     State
@@ -80,7 +79,7 @@ func NewUnit(character CharacterKind, team Team, lane Lane) *Unit {
 	var char = Characters[character]
 	var anim = motion.NewAnimation(0, false, char.Animations.Idle...)
 	var unit = Unit{Object: graphics.NewSprite(-2000, -2000, 1, 0), Character: character, Team: team, Lane: lane,
-		Behavior: char.Behavior, Anim: &anim, ActTimer: number.NaN(), HurtTimer: number.NaN(), LastState: StateWaitingToBeSummoned}
+		Anim: &anim, ActTimer: number.NaN(), HurtTimer: number.NaN(), LastState: StateWaitingToBeSummoned}
 
 	if team == TeamAlly {
 		unit.State = StateWaitingToBeSummoned
@@ -222,7 +221,7 @@ func (u *Unit) Update() {
 
 	if TimeScale > 0 {
 		u.applyState()
-		u.Behavior(u)
+		Behaviors[u.Character](u)
 		u.actUponState()
 		u.applyPhysics()
 		u.applyCollisions()
@@ -290,21 +289,21 @@ func (u *Unit) DrawTooltip(shape geometry.Shape, bench bool) {
 	if u.State == StateDecaying && u.HurtTimer > -float32(s.RespawnTimer)/10 {
 		respawnTimer = TooltipTexts[6].Set(number.Round(float32(s.RespawnTimer)/10+u.HurtTimer, 1), "/")
 	}
-	TooltipLabel.Shape = geometry.NewRectangle(x, y, width-16, height-12, 0)
+	TooltipLabel.Shape = geometry.NewRectangle(x, y, width-14, height-12, 0)
 	TooltipLabel.Effects.TextAlignX, TooltipLabel.Effects.TextAlignY = 0, 0.5
 	TooltipLabel.Text = TooltipTexts[7].Set(
 		"🟩", Tags[IconHealth], health1, b.MaxHealth, " health ", health2, "\n",
-		"🟨", Tags[IconMove], s.Speed, " speed ", speed, "\n",
+		"🟨", Tags[IconLeftRight], s.Speed, " speed ", speed, "\n",
 		"🟥", Tags[char.RoleIcon], s.ActValue, " ", char.ActValueName, " ", val, "\n",
 		"🟧", Tags[IconRange], s.ActRange, " range ", rng, "\n",
 		"🌗🟪", Tags[IconTimer], actTimer, number.Round(float32(b.ActTime)/10, 1), "s rest\n",
-		"🌗🟦", Tags[IconRespawn], respawnTimer, number.Round(float32(b.RespawnTimer)/10, 1), "s respawn\n",
+		"🌗🟦", Tags[IconLoop], respawnTimer, number.Round(float32(b.RespawnTimer)/10, 1), "s respawn\n",
 		"⬜", char.Info,
 	)
 	GameHUD.View.DrawObject(TooltipLabel)
 
 	TooltipLabel.Effects.TextAlignX, TooltipLabel.Effects.TextAlignY = 1, 1
-	TooltipLabel.Text = TooltipTexts[8].Set(s.Name, "\n", Tags[IconHome], Zones[char.Origin].Name, "\n",
+	TooltipLabel.Text = TooltipTexts[8].Set(s.Name, "\n", Tags[IconHouse], Zones[char.Origin].Name, "\n",
 		Tags[char.RoleIcon], char.RoleName, "\n\n\n")
 	GameHUD.View.DrawObject(TooltipLabel)
 
@@ -647,7 +646,8 @@ func (u *Unit) draw() {
 	u.ImageId, u.Width, u.Height = frame, crop.Width, crop.Height
 
 	if u.Health > 0 && !u.IsGarrisoner() {
-		DrawShadow(u.X, u.Z, u.Width*0.6, u.Height*0.1, 0, u.Mask)
+		var hb = u.Hitbox()
+		DrawShadow(u.X, u.Z, hb.Width, hb.Height*0.1, 0, u.Mask)
 	}
 
 	if u.Team == TeamEnemy {
