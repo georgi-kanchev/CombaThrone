@@ -76,10 +76,8 @@ func InitScene() {
 	}
 	CurrentZone = Zones[ZoneField]
 
-	Bases[TeamAlly] = NewBase(TeamAlly, BaseNone, Garrison3,
-		[3]EntranceKind{EntranceNone, EntranceNone, EntranceNone})
-	Bases[TeamEnemy] = NewBase(TeamEnemy, BaseNone, Garrison3,
-		[3]EntranceKind{EntranceNone, EntranceNone, EntranceNone})
+	Bases[TeamAlly] = NewBase(TeamAlly, BaseNone, Garrison3, [3]EntranceKind{EntranceNone, EntranceNone, EntranceNone})
+	Bases[TeamEnemy] = NewBase(TeamEnemy, BaseFortress, Garrison3, [3]EntranceKind{EntranceDoor, EntranceNone, EntranceNone})
 
 	// Units = append(Units, NewUnit(CharWoman, TeamAlly, LaneMiddle))
 	// Units = append(Units, NewUnit(CharMan, TeamEnemy, LaneUpper))
@@ -88,7 +86,7 @@ func InitScene() {
 	// Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneLower))
 
 	Units = append(Units, NewUnit(CharDummy, TeamEnemy, LaneMiddle))
-	// Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneMiddle))
+	Units = append(Units, NewUnit(CharMiner, TeamEnemy, LaneGarrisonPlus3))
 
 	Pickups = append(Pickups, NewPickup(-240, PickupRelic, LaneLowerOff))
 	Pickups = append(Pickups, NewPickup(0, PickupGem, LaneMiddleOff))
@@ -191,7 +189,7 @@ func UpdateScene() {
 	for _, u := range Units { // health bars take the Z order of the units
 		var hb = u.Hitbox()
 		hb.Height += 8
-		u.HealthBar.Update(hb, u.Health, u.Stats.MaxHealth, u.Mask)
+		u.HealthBar.Update(hb, u.Health, u.Values.MaxHealth, u.Mask)
 	}
 
 	GameHUD.UpdateFront()
@@ -269,11 +267,4 @@ func alignView() {
 	View.FitSize(CurrentZone.Ground.Width, 0)
 	var _, h = View.Size()
 	View.Y = (bly - h/2) - 2
-}
-
-func statEquation(current, base int, dynamic text.Dynamic) string {
-	if current-base > 0 {
-		return dynamic.Set("(", base, "+", current-base, ")")
-	}
-	return dynamic.Set("(", base, current-base, ")")
 }

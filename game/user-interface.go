@@ -71,7 +71,7 @@ var SlotId, ButtonUpId, ButtonDownId assets.ImageId
 var PanelNinePatchId assets.ImageId
 var GameHUD *HUD
 var TooltipLabel *graphics.Object
-var TooltipTexts [9]text.Dynamic
+var TooltipTexts [7]text.Dynamic
 
 func InitUI() {
 	GameHUD = NewHUD()
@@ -89,9 +89,9 @@ func NewHUD() *HUD {
 	SlotId = UserInterface.Crops("slot")[0]
 
 	TooltipLabel = new(graphics.NewTextbox(0, 0, 100, 100, 0))
-	TooltipLabel.Effects.FillColor, TooltipLabel.Effects.TextLineHeight = 0, 10
-	TooltipLabel.Effects.TextLineGap = -30
-	TooltipLabel.Effects.TextAlignX, TooltipLabel.Effects.TextAlignY = 0.5, 0.5
+	TooltipLabel.Details.FillColor, TooltipLabel.Details.TextLineHeight = 0, 10
+	TooltipLabel.Details.TextLineGap = -30
+	TooltipLabel.Details.TextAlignX, TooltipLabel.Details.TextAlignY = 0.5, 0.5
 
 	var btn = UserInterface.Crops("button")
 	ButtonUpId = assets.LoadImage9Patch(btn[0], 8, 8, 8, 8)
@@ -108,18 +108,18 @@ func NewHUD() *HUD {
 	unitsPanel.Width, unitsPanel.Height = TileSize*5.5, TileSize*3
 
 	var label = graphics.NewTextbox(0, 0, TileSize+6, TileSize/2+2, 0)
-	label.Effects.FillColor, label.Effects.TextLineHeight = 0, 14
-	label.Effects.TextAlignX, label.Effects.TextAlignY = 0.5, 0.5
-	label.Effects.TextShadowColor, label.Effects.TextShadowWeight = 0, 0
-	label.Effects.OutlineSize, label.Effects.OutlineColor = 0.4, palette.Black
+	label.Details.FillColor, label.Details.TextLineHeight = 0, 14
+	label.Details.TextAlignX, label.Details.TextAlignY = 0.5, 0.5
+	label.Details.TextShadowColor, label.Details.TextShadowWeight = 0, 0
+	label.Details.OutlineSize, label.Details.OutlineColor = 0.4, palette.Black
 
 	var coins = label
-	coins.Effects.TextLineHeight, coins.Effects.Tint = 10, palette.White
+	coins.Details.TextLineHeight, coins.Details.Tint = 10, palette.White
 	coins.Text, coins.Height = Tags[IconCoin]+"0", coins.Height-8
 
 	var info = label
-	info.Width, info.Effects.TextLineHeight = TileSize*8.5, 8
-	info.Effects.TextSymbolGap, info.Effects.TextColor = 10, palette.Gold
+	info.Width, info.Details.TextLineHeight = TileSize*8.5, 8
+	info.Details.TextSymbolGap, info.Details.TextColor = 10, palette.Gold
 
 	var ally, enemy = label, label
 	var glory = [TeamCount]*graphics.Object{&ally, &enemy}
@@ -248,7 +248,7 @@ func (h *HUD) Highlight(view *graphics.View, shape geometry.Shape, color uint) {
 	shape.Width += 2
 	shape.Height += 2
 	h.HoverHighlight.Shape = shape
-	h.HoverHighlight.Effects.Tint = color
+	h.HoverHighlight.Details.Tint = color
 	view.DrawObject(h.HoverHighlight)
 }
 
@@ -285,7 +285,7 @@ func (h *HUD) DrawTooltip(shape geometry.Shape, text string, icon assets.ImageId
 	h.View.DrawImage(x+width/2-TileSize/2-6, y, -TileSize, TileSize, 0, icon, col, noMask)
 
 	TooltipLabel.Shape = geometry.NewRectangle(x-width/4+4, y, width/2, height, 0)
-	TooltipLabel.Effects.TextAlignX, TooltipLabel.Effects.TextAlignY = 0.5, 0.5
+	TooltipLabel.Details.TextAlignX, TooltipLabel.Details.TextAlignY = 0.5, 0.5
 	TooltipLabel.Text = text
 	GameHUD.View.DrawObject(TooltipLabel)
 }
@@ -328,7 +328,7 @@ func (h *HUD) drawBenchUnits(lastSummonIndex int) {
 		h.View.DrawImage(x, y, sz, sz, 0, Characters[unit.Character].Icon, tint, noMask)
 		h.View.DrawImage(x+sz/2-iSz/2, y+sz/2-iSz/2, iSz, iSz, 0, roleIcon, tint, noMask)
 		if unit.State == StateDecaying {
-			var timerWidth = number.Map(unit.HurtTimer, 0, -float32(unit.Stats.RespawnTimer)/10, sz-2, 0)
+			var timerWidth = number.Map(unit.HurtTimer, 0, -unit.Values.RespawnTimer, sz-2, 0)
 			var icon, col = IconLoop, color.RGB(102, 102, 255)
 
 			h.View.DrawShape(x, y, sz, sz, 0, 0, color.RGBA(0, 0, 0, 150), noMask)
@@ -336,7 +336,7 @@ func (h *HUD) drawBenchUnits(lastSummonIndex int) {
 			h.View.DrawShape(x-sz/2+sz/2, y+sz/2+2, sz, 3, 0, 0, palette.Black, noMask)
 			h.View.DrawShape(x+timerWidth/2-sz/2+1, y+sz/2+2, timerWidth, 1, 0, 0, col, noMask)
 		} else if unit.IsSummoned() {
-			var hp, maxHp = float32(max(unit.Health, 0)), float32(unit.Stats.MaxHealth)
+			var hp, maxHp = float32(max(unit.Health, 0)), float32(unit.Values.MaxHealth)
 			var hpWidth = number.Map(hp, 0, maxHp, 0, sz-2)
 			var icon, col = IconHealth, palette.Green
 			if hp == 0 {
@@ -428,7 +428,7 @@ func (h *HUD) trySummon(lastSummonIndex int) {
 			takenGarrisons = append(takenGarrisons, pu.Lane)
 		}
 	}
-	if unit.Stats.ActRange > 1 && Bases[TeamAlly].Kind >= BaseFort {
+	if unit.Values.ActRange > 1 && Bases[TeamAlly].Kind >= BaseFort {
 		var garrisonsFull = len(takenGarrisons) == 6
 		var garrisonX, garrisonY = PointAtCell(0.5, 4)
 		var shape = geometry.NewRectangle(garrisonX, garrisonY, size, size, 0)
@@ -466,8 +466,8 @@ func (h *HUD) trySummon(lastSummonIndex int) {
 			Units = append(Units, unit)
 			unit.Lane = lane
 
-			switch unit.Stats.Role {
-			case RoleGriefer, RoleSupport, RoleCollector:
+			switch unit.Values.Role {
+			case RoleGriefer, RoleSupplier, RoleCollector:
 				unit.Lane++
 			}
 			unit.PrepareSpawn()

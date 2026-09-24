@@ -124,6 +124,6 @@ func (p *Pickup) DrawTooltip(bench bool) {
 
 	TooltipLabel.Shape = geometry.NewRectangle(x-TileSize/2, y, width-TileSize-12, height-12, 0)
 	TooltipLabel.Text = p.Description
-	TooltipLabel.Effects.TextAlignX, TooltipLabel.Effects.TextAlignY = 0.5, 0.5
+	TooltipLabel.Details.TextAlignX, TooltipLabel.Details.TextAlignY = 0.5, 0.5
 	GameHUD.View.DrawObject(TooltipLabel)
 }

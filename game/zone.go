@@ -103,7 +103,7 @@ func (z *Zone) UpdateBack() {
 	View.DrawImage(0, 0, z.Ground.Width, z.Ground.Height, 0, ZoneBackgrounds[z.Kind], palette.White, geometry.Area{})
 
 	var buildingWind = z.WindSpeed
-	z.Buildings.Effects.TileTimeScale = TimeScale * buildingWind
+	z.Buildings.Details.TileTimeScale = TimeScale * buildingWind
 	View.DrawObject(z.Buildings)
 }
 func (z *Zone) UpdateFront() {

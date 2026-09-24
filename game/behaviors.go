@@ -13,15 +13,18 @@ var Behaviors = map[CharacterKind]func(self *Unit){
 		}
 	},
 	CharMiner: func(self *Unit) {
-
+		var attackable, entrance = self.EnemyEntrance()
+		if attackable && entrance != nil && self.UnitFront == nil {
+			self.AddEffect(EffectMoreDmgVsEntrances)
+		} else {
+			self.RemoveEffect(EffectMoreDmgVsEntrances)
+		}
 	},
 	CharCook: func(self *Unit) {
 	},
 	CharBowyer: func(self *Unit) {
-		if self.State == StateSummoned {
-			if !self.IsGarrisoner() {
-				self.Stats.ActRange += 2
-			}
+		if self.State == StateSummoned && !self.IsGarrisoner() {
+			self.AddEffect(EffectMoreRangeOnGround)
 		}
 	},
 }

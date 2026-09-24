@@ -47,7 +47,7 @@ func NewEntrance(entry EntranceKind, base BaseKind, team Team, lane Lane) *Entra
 		var hole = graphics.NewSprite(x, y, 1, Decor.Crops("hole")[0])
 		if base < BaseBarrack {
 			hole.X = -CurrentZone.Ground.Width / 2 // pull back entrance to edge of scene (valid playfield)
-			hole.Effects.Tint = 0                  // and hide the hole
+			hole.Details.Tint = 0                  // and hide the hole
 		}
 
 		data.Tiles = []*graphics.Object{&hole}
@@ -144,11 +144,13 @@ func (e *Entrance) Update() {
 			breakIndex = 6
 		}
 
-		if condition.JustTurnedTrue(e.IsOpen(), int(e.Tiles[0].X)) {
-			PlaySound(AudioDoorOpen)
-		}
-		if condition.JustTurnedTrue(!e.IsOpen(), int(e.Tiles[0].X)*30) && InGameTimer > 1.0 {
-			PlaySound(AudioDoorClose)
+		if e.Health > 0 {
+			if condition.JustTurnedTrue(e.IsOpen(), int(e.Tiles[0].X)) {
+				PlaySound(AudioDoorOpen)
+			}
+			if condition.JustTurnedTrue(!e.IsOpen(), int(e.Tiles[0].X)*30) && InGameTimer > 1.0 {
+				PlaySound(AudioDoorClose)
+			}
 		}
 
 		e.Tiles[0].ImageId = Decor.Crops("door")[breakIndex]

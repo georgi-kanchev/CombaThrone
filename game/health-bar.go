@@ -28,20 +28,20 @@ func NewHealthBar(width float32, team Team, offLane bool) *HealthBar {
 	var bgr = graphics.NewShapeRectangle(0, 0, width, height, 0)
 	var fill = graphics.NewShapeRectangle(0, 0, 0, 0, 0)
 	var data = HealthBar{Team: team, Background: &bgr, Fill: &fill}
-	bgr.Effects.FillColor, bgr.Effects.BorderSize = color.Darken(fill.Effects.FillColor, 0.9), 0
-	fill.Effects.FillColor, fill.Effects.BorderSize = teamColors[team], 0
+	bgr.Details.FillColor, bgr.Details.BorderSize = color.Darken(fill.Details.FillColor, 0.9), 0
+	fill.Details.FillColor, fill.Details.BorderSize = teamColors[team], 0
 
 	if !offLane {
 		var label = graphics.NewTextbox(0, 0, 50, 24, 0)
-		label.Effects.TextLineHeight, label.Effects.FillColor = 6, 0
-		label.Effects.TextWeight, label.Effects.TextSymbolGap = 0.15, 20
-		label.Effects.TextShadowColor, label.Effects.TextShadowWeight = 0, 0
-		label.Effects.OutlineSize, label.Effects.OutlineColor = 0.65, palette.Black
-		label.Effects.TextAlignX, label.Effects.TextAlignY = 0.5, 0.5
+		label.Details.TextLineHeight, label.Details.FillColor = 6, 0
+		label.Details.TextWeight, label.Details.TextSymbolGap = 0.15, 20
+		label.Details.TextShadowColor, label.Details.TextShadowWeight = 0, 0
+		label.Details.OutlineSize, label.Details.OutlineColor = 0.65, palette.Black
+		label.Details.TextAlignX, label.Details.TextAlignY = 0.5, 0.5
 		var glory, dmg = label, fill // copy
-		glory.Effects.TextLineHeight, glory.Effects.OutlineSize = 10, 0.45
+		glory.Details.TextLineHeight, glory.Details.OutlineSize = 10, 0.45
 		glory.Height = 20
-		glory.Effects.Tint = teamColors[team]
+		glory.Details.Tint = teamColors[team]
 
 		data.Label, data.Glory, data.Damage = &label, &glory, &dmg
 	}
@@ -78,10 +78,10 @@ func (hb *HealthBar) Update(target geometry.Shape, health, maxHealth int, mask g
 	if hb.Timer > 0 {
 		var alpha = uint8(number.Map(hb.Timer, hb.Duration, 0, 255, 0))
 		hb.Timer -= DeltaTimeScaled()
-		hb.Background.Effects.Tint = color.RGBA(255, 255, 255, alpha)
-		hb.Fill.Effects.Tint = color.RGBA(255, 255, 255, alpha)
-		hb.Damage.Effects.Tint = color.RGBA(255, 255, 255, alpha)
-		hb.Label.Effects.Tint = color.RGBA(255, 255, 255, alpha)
+		hb.Background.Details.Tint = color.RGBA(255, 255, 255, alpha)
+		hb.Fill.Details.Tint = color.RGBA(255, 255, 255, alpha)
+		hb.Damage.Details.Tint = color.RGBA(255, 255, 255, alpha)
+		hb.Label.Details.Tint = color.RGBA(255, 255, 255, alpha)
 	} else if hb.Timer < 0 {
 		if hb.ToGlory && !hb.SubtractedGlory {
 			hb.SubtractedGlory = true
@@ -110,9 +110,9 @@ func (hb *HealthBar) Update(target geometry.Shape, health, maxHealth int, mask g
 		hb.Damage.X, hb.Damage.Y = hb.Background.X-hb.Background.Width/2+hb.Damage.Width/2+border/2, hb.Background.Y
 
 		if hb.Team == TeamAlly {
-			hb.Damage.Effects.FillColor = palette.Red
+			hb.Damage.Details.FillColor = palette.Red
 		} else {
-			hb.Damage.Effects.FillColor = palette.Orange
+			hb.Damage.Details.FillColor = palette.Orange
 		}
 		hb.Damage.Mask = mask
 		View.DrawObject(hb.Damage)
@@ -140,20 +140,20 @@ func (hb *HealthBar) Update(target geometry.Shape, health, maxHealth int, mask g
 		if progress < riseEnd { // smooth rise in
 			var t = number.Map(progress, 0, riseEnd, 0, 1)
 			var alpha = byte(number.Map(easing.CubicOut(t), 0, 1, 0, 255))
-			var r, g, b, _ = color.Channels(hb.Glory.Effects.Tint)
-			hb.Glory.Effects.TextLineHeight = number.Map(easing.CubicOut(t), 0, 1, 4, 16)
-			hb.Glory.Effects.Tint = color.RGBA(r, g, b, alpha)
+			var r, g, b, _ = color.Channels(hb.Glory.Details.Tint)
+			hb.Glory.Details.TextLineHeight = number.Map(easing.CubicOut(t), 0, 1, 4, 16)
+			hb.Glory.Details.Tint = color.RGBA(r, g, b, alpha)
 		} else if progress < fallStart { // breathing hang
 			var t = number.Map(progress, riseEnd, fallStart, 0, 1)
 			var microFloat = number.Sine(t*3.14159) * 2.0 // adds pulsing 16 -> 18 -> 16...
-			hb.Glory.Effects.TextLineHeight = 16 + microFloat
+			hb.Glory.Details.TextLineHeight = 16 + microFloat
 
 		} else { // faster fall
 			var t = number.Map(progress, fallStart, 1, 0, 1)
 			var alpha = byte(number.Map(easing.CubicIn(t), 0, 1, 255, 0))
-			var r, g, b, _ = color.Channels(hb.Glory.Effects.Tint)
-			hb.Glory.Effects.TextLineHeight = number.Map(easing.CubicIn(t), 0, 1, 16, 12)
-			hb.Glory.Effects.Tint = color.RGBA(r, g, b, alpha)
+			var r, g, b, _ = color.Channels(hb.Glory.Details.Tint)
+			hb.Glory.Details.TextLineHeight = number.Map(easing.CubicIn(t), 0, 1, 16, 12)
+			hb.Glory.Details.Tint = color.RGBA(r, g, b, alpha)
 		}
 
 		View.DrawObject(hb.Glory)

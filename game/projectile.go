@@ -101,7 +101,7 @@ func (p *Projectile) Update() {
 
 		var alpha = min(255, number.Map(p.Age, p.TravelTime, p.TravelTime+p.FadeOutTime, 255, 0))
 		var entranceDestroyed = e != nil && (e.IsOpen() || e.OpenY > 0 || e.Health <= 0)
-		p.Effects.Tint = color.RGBA(255, 255, 255, byte(alpha))
+		p.Details.Tint = color.RGBA(255, 255, 255, byte(alpha))
 
 		if p.Age > p.TravelTime+p.FadeOutTime || entranceDestroyed {
 			Projectiles = collection.Remove(Projectiles, p)
