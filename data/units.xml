@@ -236,7 +236,8 @@
     <group name="cook-icon" cropIndexes="99"/>
     <group name="cook-idle" cropIndexes="100 101 102 103"/>
     <group name="cook-move" cropIndexes="104 105 106 107 108 109"/>
-    <group name="cook-act" cropIndexes="110 111 112 113 114"/>
+    <group name="cook-prepare" cropIndexes="110 111 112"/>
+    <group name="cook-recover" cropIndexes="113 114"/>
     <group name="kid-icon" cropIndexes="115"/>
     <group name="kid-idle" cropIndexes="116 117 118 119"/>
     <group name="kid-move" cropIndexes="120 121 122 123 124 125"/>

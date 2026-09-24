@@ -71,7 +71,7 @@ var SlotId, ButtonUpId, ButtonDownId assets.ImageId
 var PanelNinePatchId assets.ImageId
 var GameHUD *HUD
 var TooltipLabel *graphics.Object
-var TooltipTexts [7]text.Dynamic
+var TooltipTexts [9]text.Dynamic
 
 func InitUI() {
 	GameHUD = NewHUD()

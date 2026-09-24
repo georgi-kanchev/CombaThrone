@@ -101,7 +101,8 @@ func NewUnit(character CharacterKind, team Team, lane Lane) *Unit {
 func (u *Unit) Hitbox(additionalWidth ...float32) geometry.Shape {
 	var char = Characters[u.Character]
 	var hitbox = char.Hitbox
-	hitbox.X, hitbox.Y = u.X+hitbox.X, u.Y+hitbox.Y
+	var offsetY = (u.Height - 48) / 2
+	hitbox.X, hitbox.Y = u.X+hitbox.X, u.Y+hitbox.Y+offsetY
 	if len(additionalWidth) == 1 {
 		hitbox.Width += additionalWidth[0]
 	}
@@ -174,14 +175,14 @@ func (u *Unit) PrepareSpawn() {
 	}
 
 	var col = Collisions[u.Lane]
-	var laneX, laneY = col[0].X + col[0].Width/2, col[0].Y - col[0].Height/2 - u.Height/2
+	var laneY = col[0].Y - col[0].Height/2 - u.Height/2 - 8
 	switch u.Lane {
 	case LaneLower, LaneLowerOff:
-		u.X, u.Y = laneX-40, laneY
+		u.X, u.Y = TileSize*9.5, laneY
 	case LaneMiddle, LaneMiddleOff:
-		u.X, u.Y = laneX-72, laneY
+		u.X, u.Y = TileSize*8.5, laneY
 	case LaneUpper, LaneUpperOff:
-		u.X, u.Y = laneX-104, laneY
+		u.X, u.Y = TileSize*7.5, laneY
 	case LaneGarrison1, LaneGarrison2, LaneGarrison3:
 		u.X, u.Y = CurrentZone.Ground.Width/2+u.Width/2, laneY
 	case LaneGarrisonPlus1, LaneGarrisonPlus2, LaneGarrisonPlus3:
@@ -250,24 +251,41 @@ func (u *Unit) Update() {
 func (u *Unit) DrawTooltip(shape geometry.Shape, bench bool) {
 	var tsz float32 = TileSize
 	var col, noMask = palette.White, geometry.Area{}
-	const width, height, effWidth = 130.0, 94.0, 90.0
+	const width, height, effWidth = 130.0, 94.0, 105.0
+	var extraWidth float32
 	var x, y = shape.X, shape.Y - shape.Height/2 - height/2 - 14
 	if bench {
 		x, y = 0, GameHUD.UnitsPanel.Y+GameHUD.UnitsPanel.Height/2+height/2
 	}
 
-	var area = geometry.NewArea(x, y, width, height).Inside(GameHUD.View.Bounds())
+	if len(u.Effects) > 0 {
+		extraWidth = effWidth
+		x += effWidth / 2
+	}
+
+	var area = geometry.NewArea(x, y, width+extraWidth, height).Inside(GameHUD.View.Bounds())
 	area = area.Outside(GameHUD.UnitsPanel.Shape.Bounds(), true, false)
 	area = area.Outside(GameHUD.TeamGlory[TeamAlly].Shape.Bounds(), true, false)
 	area = area.Outside(GameHUD.TeamGlory[TeamEnemy].Shape.Bounds(), true, false)
 	x, y = area.X, area.Y
 
-	GameHUD.View.DrawImage(x+width/2+effWidth/2-6, y, effWidth, height, 0, PanelNinePatchId, col, noMask)
-	TooltipLabel.Shape = geometry.NewRectangle(x+width/2+effWidth/2+2, y+6, effWidth, height, 0)
 	TooltipLabel.Details.TextAlignX, TooltipLabel.Details.TextAlignY = 0, 0
-	TooltipLabel.Details.TextLineHeight = 8
-	TooltipLabel.Text = TooltipTexts[0].Set("self: " + Tags[IconPlus] + "2 damage")
-	GameHUD.View.DrawObject(TooltipLabel)
+	if len(u.Effects) > 0 {
+		x -= effWidth / 2
+		var effHeight, effX = float32(len(u.Effects))*9 + 12, x + width/2 + effWidth/2 - 6
+		GameHUD.View.DrawImage(effX, y-height/2+effHeight/2, effWidth, effHeight, 0, PanelNinePatchId, col, noMask)
+		TooltipLabel.Shape = geometry.NewRectangle(x+width/2+effWidth/2+2, y+6, effWidth, height, 0)
+		TooltipLabel.Details.TextLineHeight = 8
+		TooltipTexts[0].Set()
+
+		var keys = collection.MapKeys(u.Effects)
+		collection.SortByField(keys, func(k Effect) uint8 { return uint8(k) })
+		for _, k := range keys {
+			var t = TooltipTexts[0].Get()
+			TooltipLabel.Text = TooltipTexts[0].Set(t, u.Effects[k].EffectInfo, "\n")
+		}
+		GameHUD.View.DrawObject(TooltipLabel)
+	}
 
 	GameHUD.Highlight(GameHUD.View, shape, palette.White)
 	GameHUD.View.DrawImage(x, y, width, height, 0, PanelNinePatchId, col, noMask)
@@ -323,6 +341,13 @@ func (u *Unit) TakeDamage(damage int) {
 		u.HurtTimer = 0.5
 	}
 }
+func (u *Unit) Heal(health int) {
+	if u.Health > 0 {
+		u.Health = min(u.Health+health, u.Values.MaxHealth)
+		// TODO: particles
+	}
+}
+
 func (u *Unit) AddEffect(effect Effect) {
 	var _, has = u.Effects[effect]
 	if has {

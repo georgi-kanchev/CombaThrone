@@ -8,7 +8,7 @@ import (
 )
 
 type Values struct {
-	Name string
+	Name, EffectInfo string
 
 	MaxHealth, MoveSpeed, Wage int
 	ActPoints, ActRange        int
@@ -61,11 +61,11 @@ func InitCharacters() {
 		MaxHealth: 20, MoveSpeed: 20, ActPoints: 2, ActTimer: 2.0, ActRange: 1, RespawnTimer: 10.0},
 		"🟩"+Tags[IconPlus]+"🟧"+Tags[IconSword]+"8 damage ⬜against "+Tags[IconDoor]+"entrances.")
 	Characters[CharCook] = NewCharacter(ZoneField, Values{Name: "Cook", Wage: 10, Role: RoleSupplier,
-		MaxHealth: 1, MoveSpeed: 15, ActPoints: 1, ActTimer: 1.8, ActRange: 1, RespawnTimer: 10.0},
-		"When in front of a Man:\n🌗🟨"+Tags[IconLeftRight]+"gains 10 speed⬜")
+		MaxHealth: 1, MoveSpeed: 15, ActPoints: 4, ActTimer: 10.0, ActRange: 1, RespawnTimer: 10.0},
+		"🟩"+Tags[IconPlus]+"🌗🟩"+Tags[IconHealth]+"4 health ⬜to an 🟩ally ⬜passing by.")
 	Characters[CharBowyer] = NewCharacter(ZoneField, Values{Name: "Bowyer", Wage: 40, Role: RoleRanger,
 		MaxHealth: 14, MoveSpeed: 15, ActPoints: 4, ActTimer: 2.0, ActRange: 6, RespawnTimer: 10.0},
-		"🟩"+Tags[IconPlus]+"🌗🟧"+Tags[IconRange]+"2 range ⬜when not garrison.\n")
+		"🟩"+Tags[IconPlus]+"🌗🟧"+Tags[IconRange]+"2 range ⬜when grounded.")
 	Characters[CharBowyer].Sounds = CharSounds{ActTrigger: AudioBow, HitGround: AudioProjectileGround,
 		HitFlesh: AudioProjectileFlesh, HitWood: AudioProjectileWood, HitMetal: AudioProjectileMetal}
 
