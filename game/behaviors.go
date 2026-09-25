@@ -48,4 +48,18 @@ var Behaviors = map[CharacterKind]func(self *Unit){
 			self.AddEffect(EffectMoreRangeOnGround)
 		}
 	},
+	CharSmith: func(self *Unit) {
+		var canAct = number.IsNaN(self.ActTimer) || self.ActTimer < 0
+		if self.State == StateIdling && self.UnitFront != nil && canAct {
+			self.State = StateActStart
+		} else if self.State == StateActTrigger && self.UnitFront != nil {
+			self.UnitFront.VelocityY = -10
+			self.UnitFront.Values.SleepTimer = 1.5
+			if self.Team == TeamAlly {
+				self.UnitFront.VelocityX = 50
+			} else {
+				self.UnitFront.VelocityX = -50
+			}
+		}
+	},
 }

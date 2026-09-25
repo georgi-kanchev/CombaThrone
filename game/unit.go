@@ -71,7 +71,7 @@ const TeamAlly, TeamEnemy, TeamCount Team = 0, 1, 2
 
 const RoleFighter, RoleRanger, RoleDefender, RoleGriefer, RoleSupplier, RoleCollector, RoleCount Role = 0, 1, 2, 3, 4, 5, 6
 
-const Gravity, GroundFrictionPercent, BloodMultiplier = 256.0, 15.0, 40.0
+const Gravity, GroundFriction, BloodMultiplier = 256.0, 400.0, 40.0
 
 var Units []*Unit = make([]*Unit, 0, 16)
 var Collisions = map[Lane][]geometry.Shape{}
@@ -101,8 +101,7 @@ func NewUnit(character CharacterKind, team Team, lane Lane) *Unit {
 func (u *Unit) Hitbox(additionalWidth ...float32) geometry.Shape {
 	var char = Characters[u.Character]
 	var hitbox = char.Hitbox
-	var offsetY = (u.Height - 48) / 2
-	hitbox.X, hitbox.Y = u.X+hitbox.X, u.Y+hitbox.Y+offsetY
+	hitbox.X, hitbox.Y = u.X+hitbox.X, u.Y+hitbox.Y
 	if len(additionalWidth) == 1 {
 		hitbox.Width += additionalWidth[0]
 	}
@@ -211,6 +210,7 @@ func (u *Unit) Update() {
 
 	u.ActTimer -= DeltaTimeScaled()
 	u.HurtTimer -= DeltaTimeScaled()
+	u.Values.SleepTimer -= DeltaTimeScaled()
 
 	if !u.IsSummoned() && (number.IsNaN(u.HurtTimer) || u.HurtTimer < -u.Values.RespawnTimer) {
 		u.State = StateWaitingToBeSummoned
@@ -336,6 +336,10 @@ func (u *Unit) DrawTooltip(shape geometry.Shape, bench bool) {
 }
 
 func (u *Unit) TakeDamage(damage int) {
+	if u.Values.Role == RoleDefender {
+		damage = max(damage-u.Values.ActPoints, 0)
+	}
+
 	if u.Health > 0 {
 		u.Health -= damage
 		u.HurtTimer = 0.5
@@ -463,6 +467,7 @@ func (u *Unit) applyState() {
 	var sameLaneWithTarget = u.ClosestEnemyInRange != nil && u.Lane == u.ClosestEnemyInRange.Lane
 	var openDoorShoot = u.IsLaner() && !u.IsOutsideOwnBase() && myEntrance.IsOpen() && sameLaneWithTarget
 	var canShoot = u.IsOutsideOwnBase() || openDoorShoot
+	var isDefender = u.Values.Role == RoleDefender
 	if u.IsGarrisoner() {
 		canShoot = true
 	}
@@ -487,7 +492,7 @@ func (u *Unit) applyState() {
 		u.State = StateActTrigger
 	} else if u.State == StateActStart {
 		u.State = StateActCharging
-	} else if (u.State == StateIdling || u.State == StateWalking) && melee {
+	} else if (u.State == StateIdling || u.State == StateWalking) && melee && !isDefender {
 		u.State = StateActStart
 	} else if (u.State == StateIdling || u.State == StateWalking) && ranged && garrisonOrNot && canShoot {
 		if canAct {
@@ -495,6 +500,10 @@ func (u *Unit) applyState() {
 		} else if u.Health > 0 && u.IsLaner() { // no shoot-move-shoot-move for laners - but garrisoners should
 			u.State = StateIdling // enemy in range but waiting for act timer (stay in one place, don't keep walking)
 		}
+	}
+
+	if u.Values.SleepTimer > 0 {
+		u.State = StateIdling
 	}
 
 	if u.State == StateHurting && u.Health <= 0 {
@@ -526,7 +535,10 @@ func (u *Unit) actUponState() {
 	case StateIdling:
 		u.Anim.Frames = Characters[u.Character].Animations.Idle
 		u.Anim.IsLooping, u.Anim.FPS = true, 3
-		u.VelocityX = 0
+
+		if number.IsNaN(u.Values.SleepTimer) || u.Values.SleepTimer < 0 {
+			u.VelocityX = 0
+		}
 	case StateWalking:
 		u.Anim.Frames = Characters[u.Character].Animations.Walk
 		u.Anim.IsLooping, u.Anim.FPS = true, u.MoveSpeedX*0.25
@@ -569,6 +581,10 @@ func (u *Unit) actUponState() {
 	case StateActTrigger:
 		u.Anim.Frames = Characters[u.Character].Animations.ActEnd
 		u.Anim.IsLooping, u.Anim.FPS, u.Anim.Time = false, 8, 0
+
+		if u.Values.Role == RoleDefender {
+			return // defenders cannot deal damage
+		}
 
 		var dmg = u.Values.ActPoints
 		var canBeActedUpon, e = u.EnemyEntrance()
@@ -657,7 +673,7 @@ func (u *Unit) updateEffects() {
 
 func (u *Unit) applyPhysics() {
 	if u.IsGrounded {
-		u.VelocityX *= 1.0 - (GroundFrictionPercent/100)*DeltaTimeScaled()
+		u.VelocityX *= 1.0 - (GroundFriction/100)*DeltaTimeScaled()
 	}
 	var canBeActedUpon, entry = u.EnemyEntrance()
 	if canBeActedUpon && entry != nil {
@@ -688,14 +704,18 @@ func (u *Unit) applyCollisions() {
 		}
 	}
 
+	if u.IsInsideEnemyBase(TileSize / 2) {
+		return
+	}
+
 	u.UnitBehind, u.UnitFront = nil, nil
 	for _, other := range Units {
 		var ohb = other.Hitbox()
 		var anyoneDead = u.Health <= 0 || other.Health <= 0
 		var isGarrison = other.IsGarrisoner() || u.IsGarrisoner()
 		var isOffLaner = other.IsOffLaner() || u.IsOffLaner()
-		if other == u || u.Lane != other.Lane || anyoneDead || isGarrison || isOffLaner || !hb.Overlaps(ohb) ||
-			other.IsInsideEnemyBase(TileSize/2) {
+		var insideBase = other.IsInsideEnemyBase(TileSize / 2)
+		if other == u || u.Lane != other.Lane || anyoneDead || isGarrison || isOffLaner || !hb.Overlaps(ohb) || insideBase {
 			continue
 		}
 		hb = hb.Collide(ohb)

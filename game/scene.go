@@ -85,7 +85,7 @@ func InitScene() {
 	// Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneLower))
 	// Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneLower))
 
-	Units = append(Units, NewUnit(CharDummy, TeamEnemy, LaneMiddle))
+	// Units = append(Units, NewUnit(CharDummy, TeamEnemy, LaneMiddle))
 	Units = append(Units, NewUnit(CharMiner, TeamEnemy, LaneUpper))
 
 	Pickups = append(Pickups, NewPickup(-240, PickupRelic, LaneLowerOff))
@@ -102,7 +102,7 @@ func InitScene() {
 	Player.Units[0] = NewUnit(CharBowyer, TeamAlly, 0)
 	Player.Units[1] = NewUnit(CharMiner, TeamAlly, 0)
 	Player.Units[2] = NewUnit(CharCook, TeamAlly, 0)
-	// Player.Units[3] = NewUnit(CharMiner, TeamAlly, 0)
+	Player.Units[3] = NewUnit(CharSmith, TeamAlly, 0)
 }
 
 //=================================================================
