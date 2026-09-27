@@ -5,7 +5,9 @@ import (
 	"pure-game-kit/packages/geometry"
 	"pure-game-kit/packages/graphics"
 	"pure-game-kit/packages/motion"
+	"pure-game-kit/packages/utility/collection"
 	"pure-game-kit/packages/utility/color/palette"
+	"pure-game-kit/packages/utility/number"
 	"pure-game-kit/packages/utility/point"
 )
 
@@ -93,6 +95,17 @@ func (p *Pickup) Update() {
 
 	if p.SlotUI >= 0 {
 		var x, y = GameHUD.PickupSlotPosition(p.SlotUI)
+
+		if p.Kind == PickupCoin {
+			x, y = GameHUD.Coins.X, GameHUD.Coins.Y
+			p.X, p.Y = point.MoveToPointSmooth(p.X, p.Y, x, y, 0.06)
+
+			if p.SlotUI >= 0 && number.IsWithin(p.X, x, 3) && number.IsWithin(p.Y, y, 3) {
+				p.Effect()
+				GameHUD.Pickups = collection.Remove(GameHUD.Pickups, p)
+			}
+		}
+
 		p.X, p.Y = point.MoveToPointSmooth(p.X, p.Y, x, y, 0.06)
 	} else if p.Target == nil {
 		DrawShadow(p.X, p.Z-0.1, p.Width*0.6, p.Height*0.15, 0, p.Mask)

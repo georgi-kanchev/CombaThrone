@@ -40,16 +40,16 @@ const (
 	CharCook
 	CharBowyer
 	CharSmith
+	CharKid
 	CharCount
 )
 
 var Characters [CharCount]*Character
 
 func NewCharacter(origin ZoneKind, stats Values, info string) *Character {
-	var roleIcons = [RoleCount]Icon{
-		IconSword, IconBow, IconShield, IconBag, IconHand, IconDebuff}
-	var roleNames = [RoleCount]string{"Fighter", "Ranger", "Defender", "Collector", "Supplier", "Griefer"}
-	var actNames = [RoleCount]string{"damage", "damage", "block", "carry", "buff", "grief"}
+	var roleIcons = [RoleCount]Icon{IconSword, IconBow, IconShield, IconDebuff, IconHand, IconBag}
+	var roleNames = [RoleCount]string{"Fighter", "Ranger", "Defender", "Griefer", "Supplier", "Collector"}
+	var actNames = [RoleCount]string{"damage", "damage", "block", "grief", "buff", "carry"}
 
 	return &Character{
 		Values: stats, Hitbox: geometry.NewRoundedRectangle(0, 0, 18, 35, 0, 1),
@@ -86,6 +86,12 @@ func InitCharacters() {
 		MaxHealth: 40, MoveSpeed: 12, ActPoints: 1, ActTimer: 5.0, ActRange: 1, RespawnTimer: 20.0},
 		"Pushes the 🟥enemy ⬜in front.")
 	Characters[CharSmith].Hitbox = geometry.NewRoundedRectangle(0, 0, 24, 48, 0, 1)
+
+	Characters[CharKid] = NewCharacter(ZoneField, Values{Name: "Kid", Wage: 20, Role: RoleCollector,
+		MaxHealth: 1, MoveSpeed: 30, ActPoints: 1, ActTimer: 0.0, ActRange: 1, RespawnTimer: 10.0},
+		"🟩"+Tags[IconPlus]+"🌗🟨"+Tags[IconLeftRight]+"10 speed ⬜not carrying.\n"+
+			"🟥"+Tags[IconMinus]+"🌗🟨"+Tags[IconLeftRight]+"10 speed ⬜carrying.")
+	Characters[CharKid].Hitbox = geometry.NewRoundedRectangle(0, 4, 12, 24, 0, 1)
 
 	for i, c := range Characters {
 		var prefix = text.Replace(text.ToLowerCase(c.Values.Name), " ", "-")

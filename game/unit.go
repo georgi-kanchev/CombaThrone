@@ -228,7 +228,10 @@ func (u *Unit) Update() {
 	if TimeScale > 0 {
 		u.updateEffects()
 		u.applyState()
-		Behaviors[u.Character](u)
+		var behavior = Behaviors[u.Character]
+		if behavior != nil {
+			behavior(u)
+		}
 		u.actUponState()
 		u.applyPhysics()
 		u.applyCollisions()
@@ -568,6 +571,9 @@ func (u *Unit) actUponState() {
 			u.Carrying.Target = nil
 			u.Carrying.Mask = geometry.Area{}
 			u.Carrying.SlotUI = GameHUD.FreePickupSlot()
+			if u.Carrying.Kind == PickupCoin {
+				u.Carrying.SlotUI = 0
+			}
 			GameHUD.Pickups[u.Carrying.SlotUI] = u.Carrying
 			collection.Remove(Pickups, u.Carrying)
 			u.Carrying = nil

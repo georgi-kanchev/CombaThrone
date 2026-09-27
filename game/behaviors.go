@@ -62,4 +62,13 @@ var Behaviors = map[CharacterKind]func(self *Unit){
 			}
 		}
 	},
+	CharKid: func(self *Unit) {
+		if self.Carrying != nil {
+			self.AddEffect(EffectLessSpeedWhenCarrying)
+			self.RemoveEffect(EffectMoreSpeedWhenCarrying)
+		} else {
+			self.AddEffect(EffectMoreSpeedWhenCarrying)
+			self.RemoveEffect(EffectLessSpeedWhenCarrying)
+		}
+	},
 }

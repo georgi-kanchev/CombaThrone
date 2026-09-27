@@ -54,6 +54,7 @@ const (
 	IconDoor
 	IconGear
 	IconTower
+	IconMinus
 	IconCount
 )
 
@@ -63,6 +64,7 @@ var Tags = []string{
 	IconHealth: "①", IconCoin: "②", IconGlory: "③", IconSkull: "④", IconBook: "⑤", IconLeftRight: "⑥", IconRange: "⑦",
 	IconTimer: "⑧", IconLoop: "⑨", IconHouse: "⑩", IconSword: "⑪", IconBow: "⑫", IconPlus: "⑬", IconFlag: "⑭",
 	IconShield: "⑮", IconBag: "⑯", IconDebuff: "⑰", IconHand: "⑱", IconDoor: "⑲", IconGear: "⑳", IconTower: "⑴",
+	IconMinus: "⑵",
 }
 
 var ThemeUI assets.GUIThemeId
@@ -72,6 +74,7 @@ var PanelNinePatchId assets.ImageId
 var GameHUD *HUD
 var TooltipLabel *graphics.Object
 var TooltipTexts [9]text.Dynamic
+var CoinsText text.Dynamic
 
 func InitUI() {
 	GameHUD = NewHUD()
@@ -185,7 +188,7 @@ func (h *HUD) UpdateBack() {
 	iterateRemovable(&h.Pickups, func(p *Pickup) {
 		p.Update()
 
-		if p != nil && p.ContainsPoint(h.View.MousePosition()) {
+		if p != nil && p.Kind != PickupCoin && p.ContainsPoint(h.View.MousePosition()) {
 			mouse.SetCursor(cursor.Hand)
 			p.DrawTooltip(true)
 
@@ -200,6 +203,7 @@ func (h *HUD) UpdateBack() {
 func (h *HUD) UpdateFront() {
 	var icons = UserInterface.Crops("icons-hud")
 	h.Coins.X, h.Coins.Y = h.Top.X, h.Top.Y-9
+	h.Coins.Text = CoinsText.Set(Tags[IconCoin], Player.Coins)
 	h.View.DrawObject(h.Coins)
 	if h.Coins.ContainsPoint(h.View.MousePosition()) {
 		h.DrawTooltip(h.Coins.Shape, TooltipTexts[0].Set("Your\n🟨", Tags[IconCoin], "Coins⬜"), icons[0])
