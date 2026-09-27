@@ -31,7 +31,7 @@ type HUD struct {
 }
 
 const (
-	IconHealth Icon = iota
+	IconHeart Icon = iota
 	IconCoin
 	IconGlory
 	IconTimer
@@ -55,16 +55,17 @@ const (
 	IconGear
 	IconTower
 	IconMinus
+	IconUnit
 	IconCount
 )
 
 // ①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳⑴⑵⑶⑷⑸⑹⑺⑻⑼⑽⑾⑿⒀⒁⒂⒃⒄⒅⒆⒇⒈⒉⒊⒋⒌⒍⒎⒏⒐⒑⒒⒓⒔⒕⒖⒗⒘⒙⒚⒛
 // ⓐⓑⓒⓓⓔⓕⓖⓗⓘⓙⓚⓛⓜⓝⓞⓟⓠⓡⓢⓣⓤⓥⓦⓧⓨⓩⒶⒷⒸⒹⒺⒻⒼⒽⒾⒿⓀⓁⓂⓃⓄⓅⓆⓇⓈⓉⓊⓋⓌⓍⓎⓏ⓪⓫⓬⓭⓮⓯⓰⓱⓲⓳⓴
 var Tags = []string{
-	IconHealth: "①", IconCoin: "②", IconGlory: "③", IconSkull: "④", IconBook: "⑤", IconLeftRight: "⑥", IconRange: "⑦",
+	IconHeart: "①", IconCoin: "②", IconGlory: "③", IconSkull: "④", IconBook: "⑤", IconLeftRight: "⑥", IconRange: "⑦",
 	IconTimer: "⑧", IconLoop: "⑨", IconHouse: "⑩", IconSword: "⑪", IconBow: "⑫", IconPlus: "⑬", IconFlag: "⑭",
 	IconShield: "⑮", IconBag: "⑯", IconDebuff: "⑰", IconHand: "⑱", IconDoor: "⑲", IconGear: "⑳", IconTower: "⑴",
-	IconMinus: "⑵",
+	IconMinus: "⑵", IconUnit: "⑶",
 }
 
 var ThemeUI assets.GUIThemeId
@@ -341,8 +342,11 @@ func (h *HUD) drawBenchUnits(lastSummonIndex int) {
 			h.View.DrawShape(x+timerWidth/2-sz/2+1, y+sz/2+2, timerWidth, 1, 0, 0, col, noMask)
 		} else if unit.IsSummoned() {
 			var hp, maxHp = float32(max(unit.Health, 0)), float32(unit.Values.MaxHealth)
+			if unit.Values.MaxHealth == 0 { // unit doesn't use health
+				hp, maxHp = 1, 1
+			}
 			var hpWidth = number.Map(hp, 0, maxHp, 0, sz-2)
-			var icon, col = IconHealth, palette.Green
+			var icon, col = IconHeart, palette.Green
 			if hp == 0 {
 				icon, col = IconSkull, palette.Red
 			}
@@ -428,7 +432,7 @@ func (h *HUD) trySummon(lastSummonIndex int) {
 	var from, to = int(LaneGarrison3 + Lane(Bases[TeamAlly].Garrison)), int(LaneGarrison1)
 	var takenGarrisons = make([]Lane, 0, 8)
 	for _, pu := range Player.Units {
-		if pu != nil && pu.IsSummoned() && pu.IsGarrisoner() && pu.Health > 0 {
+		if pu != nil && pu.IsSummoned() && pu.IsGarrisoner() && pu.IsAlive() {
 			takenGarrisons = append(takenGarrisons, pu.Lane)
 		}
 	}

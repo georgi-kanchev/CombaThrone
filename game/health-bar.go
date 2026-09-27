@@ -75,6 +75,10 @@ func (hb *HealthBar) Update(target geometry.Shape, health, maxHealth int, mask g
 		return
 	}
 
+	if maxHealth == 0 { // unit doesn't use health
+		health, maxHealth = 1, 1
+	}
+
 	if hb.Timer > 0 {
 		var alpha = uint8(number.Map(hb.Timer, hb.Duration, 0, 255, 0))
 		hb.Timer -= DeltaTimeScaled()

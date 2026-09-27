@@ -104,6 +104,7 @@ func InitScene() {
 	Player.Units[2] = NewUnit(CharCook, TeamAlly, 0)
 	Player.Units[3] = NewUnit(CharSmith, TeamAlly, 0)
 	Player.Units[4] = NewUnit(CharKid, TeamAlly, 0)
+	Player.Units[5] = NewUnit(CharDummy, TeamAlly, 0)
 }
 
 //=================================================================

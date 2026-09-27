@@ -27,8 +27,8 @@ var Behaviors = map[CharacterKind]func(self *Unit){
 		var targetUnit *Unit
 		for _, u := range Units {
 			var isClose = number.IsWithin(u.X, self.X, TileSize*0.5)
-			var isAlive, isMaxHp = u.Health > 0, u.Health == u.Values.MaxHealth
-			if u.Team == self.Team && u != self && u.Lane == self.Lane-1 && isClose && !isMaxHp && isAlive {
+			var isMaxHp = u.Health == u.Values.MaxHealth
+			if u.Team == self.Team && u != self && u.Lane == self.Lane-1 && isClose && !isMaxHp && u.IsAlive() {
 				targetUnit = u
 				if canAct {
 					self.State = StateActStart
@@ -37,8 +37,7 @@ var Behaviors = map[CharacterKind]func(self *Unit){
 			}
 		}
 		if self.State == StateActTrigger && targetUnit != nil {
-			var isAlive, isMaxHp = targetUnit.Health > 0, targetUnit.Health == targetUnit.Values.MaxHealth
-			if isAlive && !isMaxHp {
+			if targetUnit.IsAlive() && targetUnit.Health != targetUnit.Values.MaxHealth {
 				targetUnit.Heal(4)
 			}
 		}
@@ -64,11 +63,9 @@ var Behaviors = map[CharacterKind]func(self *Unit){
 	},
 	CharKid: func(self *Unit) {
 		if self.Carrying != nil {
-			self.AddEffect(EffectLessSpeedWhenCarrying)
-			self.RemoveEffect(EffectMoreSpeedWhenCarrying)
+			self.RemoveEffect(EffectMoreSpeedWhenNotCarrying)
 		} else {
-			self.AddEffect(EffectMoreSpeedWhenCarrying)
-			self.RemoveEffect(EffectLessSpeedWhenCarrying)
+			self.AddEffect(EffectMoreSpeedWhenNotCarrying)
 		}
 	},
 }
