@@ -93,7 +93,7 @@ func UpdateDebug() {
 // private ========================================================
 
 var debugStates = []string{
-	StateIdling: "idle", StateWalking: "walk",
+	StateIdling: "idle", StateMoving: "walk",
 	StateHurtStart: "hurt", StateHurting: "hurt",
 	StateDyingStart: "dying", StateDying: "dying", StateDyingEnd: "dying", StateDecaying: "dead",
 	StateActStart: "act charge", StateActCharging: "act charge", StateActTrigger: "act charge",

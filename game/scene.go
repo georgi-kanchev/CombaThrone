@@ -5,6 +5,8 @@ import (
 	"pure-game-kit/packages/geometry"
 	"pure-game-kit/packages/graphics"
 	"pure-game-kit/packages/gui"
+	"pure-game-kit/packages/input/keyboard"
+	"pure-game-kit/packages/input/keyboard/key"
 	"pure-game-kit/packages/input/mouse"
 	"pure-game-kit/packages/input/mouse/cursor"
 	"pure-game-kit/packages/utility/collection"
@@ -79,14 +81,7 @@ func InitScene() {
 	Bases[TeamAlly] = NewBase(TeamAlly, BaseNone, Garrison3, [3]EntranceKind{EntranceNone, EntranceNone, EntranceNone})
 	Bases[TeamEnemy] = NewBase(TeamEnemy, BaseFortress, Garrison3, [3]EntranceKind{EntranceDoor, EntranceNone, EntranceNone})
 
-	// Units = append(Units, NewUnit(CharWoman, TeamAlly, LaneMiddle))
-	// Units = append(Units, NewUnit(CharMan, TeamEnemy, LaneUpper))
-	// Units = append(Units, NewUnit(CharMan, TeamEnemy, LaneMiddle))
-	// Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneLower))
-	// Units = append(Units, NewUnit(CharHunter, TeamEnemy, LaneLower))
-
-	// Units = append(Units, NewUnit(CharDummy, TeamEnemy, LaneMiddle))
-	Units = append(Units, NewUnit(CharMiner, TeamEnemy, LaneUpper))
+	Units = append(Units, NewUnit(CharSmith, TeamEnemy, LaneMiddle))
 
 	Pickups = append(Pickups, NewPickup(-240, PickupRelic, LaneLowerOff))
 	Pickups = append(Pickups, NewPickup(0, PickupGem, LaneMiddleOff))
@@ -105,6 +100,8 @@ func InitScene() {
 	Player.Units[3] = NewUnit(CharSmith, TeamAlly, 0)
 	Player.Units[4] = NewUnit(CharKid, TeamAlly, 0)
 	Player.Units[5] = NewUnit(CharDummy, TeamAlly, 0)
+	Player.Units[6] = NewUnit(CharHorse, TeamAlly, 0)
+	Player.Units[7] = NewUnit(CharFisherman, TeamAlly, 0)
 }
 
 //=================================================================
@@ -144,6 +141,10 @@ func UpdateScene() {
 
 	mouse.SetCursor(cursor.Default)
 
+	if keyboard.IsKeyJustPressed(key.A) {
+		Units = append(Units, NewUnit(CharHorse, TeamEnemy, LaneMiddleOff))
+	}
+
 	CurrentZone.UpdateBack()
 	Bases[TeamAlly].UpdateBack()
 	Bases[TeamEnemy].UpdateBack()
@@ -164,10 +165,10 @@ func UpdateScene() {
 		}
 	})
 	collection.SortByField(Units, func(u *Unit) float32 {
-		if u.Health <= 0 { // dead units go behind all alive units
+		if u.Health <= 0 && u.Values.MaxHealth > 0 { // dead units go behind all alive units
 			return number.NegativeInfinity()
 		}
-		return u.Y // fall back to Y sort
+		return -u.Z
 	})
 	iterateRemovable(&Units, func(u *Unit) {
 		if u.State == StateWaitingToBeSummoned {

@@ -1,6 +1,10 @@
 package game
 
-import "pure-game-kit/packages/utility/number"
+import (
+	"pure-game-kit/packages/geometry"
+	"pure-game-kit/packages/utility/color"
+	"pure-game-kit/packages/utility/number"
+)
 
 var Behaviors = map[CharacterKind]func(self *Unit){
 	CharDummy: func(self *Unit) {
@@ -10,16 +14,16 @@ var Behaviors = map[CharacterKind]func(self *Unit){
 			self.Health = 1
 		case StateSummoned:
 			self.X, self.Y = TileSize*5, -TileSize*6
-		case StateWalking:
+		case StateMoving:
 			self.State = StateIdling
 		}
 	},
 	CharMiner: func(self *Unit) {
 		var attackable, entrance = self.EnemyEntrance()
 		if attackable && entrance != nil && self.UnitFront == nil {
-			self.AddEffect(EffectMoreDmgVsEntrances)
+			self.AddEffect(EffectMiner)
 		} else {
-			self.RemoveEffect(EffectMoreDmgVsEntrances)
+			self.RemoveEffect(EffectMiner)
 		}
 	},
 	CharCook: func(self *Unit) {
@@ -44,7 +48,7 @@ var Behaviors = map[CharacterKind]func(self *Unit){
 	},
 	CharBowyer: func(self *Unit) {
 		if self.State == StateSummoned && !self.IsGarrisoner() {
-			self.AddEffect(EffectMoreRangeOnGround)
+			self.AddEffect(EffectBowyer)
 		}
 	},
 	CharSmith: func(self *Unit) {
@@ -63,9 +67,76 @@ var Behaviors = map[CharacterKind]func(self *Unit){
 	},
 	CharKid: func(self *Unit) {
 		if self.Carrying != nil {
-			self.RemoveEffect(EffectMoreSpeedWhenNotCarrying)
+			self.RemoveEffect(EffectKid)
 		} else {
-			self.AddEffect(EffectMoreSpeedWhenNotCarrying)
+			self.AddEffect(EffectKid)
+		}
+	},
+	CharHorse: func(self *Unit) {
+		for _, u := range Units {
+			if self == u || self.Team != u.Team {
+				continue
+			}
+
+			var affectedLane = self.Lane == u.Lane || self.Lane == u.Lane+1
+			if affectedLane && number.IsWithin(u.X, self.X, float32(self.Values.ActRange)*TileSize) {
+				u.AddEffect(EffectHorse)
+			} else {
+				u.RemoveEffect(EffectHorse)
+			}
+		}
+	},
+	CharFisherman: func(self *Unit) {
+		if self.State == StateSummoned {
+			self.ActTimer = self.Values.ActTimer
+		}
+
+		var offset float32 = TileSize / 2
+		if self.IsReturning {
+			offset = -TileSize / 2
+		}
+		if self.LastState == StateActTrigger { // is fishing
+			for _, u := range Units {
+				if self == u || self.Team == u.Team {
+					continue
+				}
+				var hb = u.Hitbox()
+				var closeEnough = number.IsWithin(self.X+offset, hb.X, hb.Width/2)
+				if !closeEnough {
+					continue
+				}
+
+				var correctLane = self.Lane == u.Lane+3
+				if closeEnough && correctLane {
+					u.VelocityY = -150
+					u.Lane += 2
+					self.ActTimer = -1 // trigger act
+					break
+				}
+			}
+			var height float32 = TileSize * 1.35
+			var x, y = self.X + 18.5, self.Y + height
+			if (self.Team == TeamAlly && self.IsReturning) || (self.Team == TeamEnemy && !self.IsReturning) {
+				x = self.X - 18.5
+			}
+			View.DrawShape(x, y, 3, height, 0, 0, color.RGB(37, 19, 26), geometry.Area{})
+			View.DrawShape(x, y, 1, height, 0, 0, color.RGB(167, 172, 186), geometry.Area{})
+			View.DrawShape(x, y+height/2, 5, 5, 0, 0.8, color.RGB(37, 19, 26), geometry.Area{})
+			View.DrawShape(x, y+height/2, 3, 3, 0, 0.8, color.RGB(208, 25, 80), geometry.Area{})
+		}
+
+		if self.ActTimer < 0 {
+			if self.LastState == StateActTrigger {
+				self.ActTimer = self.Values.ActTimer // consume act to hook up
+				self.State = StateActRecovering      // and keep moving
+				self.LastState = StateActRecovering
+				// self.Anim.Frames = Characters[self.Character].Animations.Recover
+			} else {
+				self.State = StateActStart
+			}
+		}
+		if self.LastState == StateActTrigger {
+			self.State = StateActTrigger // force keep StateActEnd
 		}
 	},
 }

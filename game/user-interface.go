@@ -410,6 +410,10 @@ func (h *HUD) trySummon(lastSummonIndex int) {
 	var lane Lane
 
 	for _, e := range Bases[TeamAlly].Entrances {
+		if unit.Character == CharFisherman && e.Lane == LaneLower {
+			continue // special case
+		}
+
 		var shape = e.Shape()
 		if Bases[TeamAlly].Kind < BaseBarrack {
 			shape.X += TileSize / 1.5

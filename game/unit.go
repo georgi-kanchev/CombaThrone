@@ -49,8 +49,8 @@ const ( // states
 	StateSummoned            State = iota // single frame
 	StateWaitingToBeSummoned              // continuous
 
-	StateIdling  // continuous
-	StateWalking // continuous
+	StateIdling // continuous
+	StateMoving // continuous
 
 	StateHurtStart // single frame
 	StateHurting   // continuous
@@ -232,7 +232,7 @@ func (u *Unit) Update() {
 		u.updateEffects()
 		u.applyState()
 		var behavior = Behaviors[u.Character]
-		if behavior != nil {
+		if behavior != nil && u.State != StateDecaying {
 			behavior(u)
 		}
 		u.actUponState()
@@ -312,16 +312,16 @@ func (u *Unit) DrawTooltip(shape geometry.Shape, bench bool) {
 		}
 	}
 	if u.Values.MoveSpeed > 0 {
-
+		TooltipTexts[1].Append("🌗🟨", Tags[IconLeftRight], u.Values.MoveSpeed, " speed\n")
 	}
 	if u.Values.ActPoints > 0 {
 		TooltipTexts[1].Append("🟧", Tags[char.RoleIcon], u.Values.ActPoints, " ", char.ActPointsName, "\n")
 	}
-	if !u.IsOffLaner() && u.Values.ActRange > 0 {
+	if u.Values.ActRange > 0 {
 		TooltipTexts[1].Append("🌗🟧", Tags[IconRange], u.Values.ActRange, " range\n")
 	}
 	if u.Values.ActTimer > 0 {
-		if !u.IsSummoned() || u.ActTimer == u.Values.ActTimer || number.IsNaN(u.ActTimer) {
+		if !u.IsSummoned() || u.ActTimer > u.Values.ActTimer || number.IsNaN(u.ActTimer) || u.State == StateDecaying {
 			TooltipTexts[1].Append("🌗🟪", Tags[IconTimer], number.Round(u.Values.ActTimer, 1), "s rest\n")
 		} else if u.IsSummoned() {
 			TooltipTexts[1].Append("🌗🟪", Tags[IconTimer], number.Round(u.ActTimer, 1), "/",
@@ -329,7 +329,7 @@ func (u *Unit) DrawTooltip(shape geometry.Shape, bench bool) {
 		}
 	}
 	if u.Values.RespawnTimer > 0 {
-		if !u.IsSummoned() {
+		if !u.IsSummoned() || u.State != StateDecaying {
 			TooltipTexts[1].Append("🌗🟦", Tags[IconLoop], number.Round(u.Values.RespawnTimer, 1), "s respawn\n")
 		} else if u.Values.RespawnTimer > 0 && u.State == StateDecaying && u.HurtTimer > -u.Values.RespawnTimer {
 			TooltipTexts[1].Append("🌗🟦", Tags[IconLoop], number.Round(u.Values.RespawnTimer+u.HurtTimer, 1), "/",
@@ -341,11 +341,11 @@ func (u *Unit) DrawTooltip(shape geometry.Shape, bench bool) {
 	TooltipLabel.Text = TooltipTexts[1].Get()
 	GameHUD.View.DrawObject(TooltipLabel)
 
-	TooltipLabel.Text = TooltipTexts[2].Set("\n\n\n\n\n\n", char.Info)
+	TooltipLabel.Text = TooltipTexts[2].Set("\n\n\n\n\n\n⬜", char.Info)
 	GameHUD.View.DrawObject(TooltipLabel)
 
 	TooltipLabel.Details.TextAlignX = 1
-	TooltipLabel.Text = TooltipTexts[3].Set("\n\n\n", u.Values.Name, "\n", Tags[char.RoleIcon], char.RoleName)
+	TooltipLabel.Text = TooltipTexts[3].Set("\n\n\n⬜", u.Values.Name, "\n", Tags[char.RoleIcon], char.RoleName)
 	GameHUD.View.DrawObject(TooltipLabel)
 
 	if PinnedUnit == u {
@@ -487,19 +487,18 @@ func (u *Unit) applyState() {
 	var sameLaneWithTarget = u.ClosestEnemyInRange != nil && u.Lane == u.ClosestEnemyInRange.Lane
 	var openDoorShoot = u.IsLaner() && !u.IsOutsideOwnBase() && myEntrance.IsOpen() && sameLaneWithTarget
 	var canShoot = u.IsOutsideOwnBase() || openDoorShoot
-	var isDefender = u.Values.Role == RoleDefender
 	if u.IsGarrisoner() {
 		canShoot = true
 	}
 
-	if u.State == StateWalking && u.IsAlive() && (!u.IsGrounded || u.MoveSpeedX < 0.01) {
+	if u.State == StateMoving && u.IsAlive() && (!u.IsGrounded || u.MoveSpeedX < 0.01) {
 		u.State = StateIdling
 	} else if u.State == StateIdling && u.UnitFront == nil && !u.IsAtWall && u.IsGrounded && u.IsAlive() && !canBeActedUpon {
-		u.State = StateWalking
+		u.State = StateMoving
 	}
 
 	if u.State == StateSummoned && u.LastState == StateSummoned {
-		u.State = StateWalking // first frame is event, second frame (now) starts walking
+		u.State = StateMoving // first frame is event, second frame (now) starts walking
 	}
 
 	if u.State == StateActEnd && u.IsAlive() {
@@ -512,9 +511,9 @@ func (u *Unit) applyState() {
 		u.State = StateActTrigger
 	} else if u.State == StateActStart {
 		u.State = StateActCharging
-	} else if (u.State == StateIdling || u.State == StateWalking) && melee && !isDefender {
+	} else if (u.State == StateIdling || u.State == StateMoving) && melee && !u.IsOffLaner() {
 		u.State = StateActStart
-	} else if (u.State == StateIdling || u.State == StateWalking) && ranged && garrisonOrNot && canShoot {
+	} else if (u.State == StateIdling || u.State == StateMoving) && ranged && garrisonOrNot && canShoot && !u.IsOffLaner() {
 		if canAct {
 			u.State = StateActStart
 		} else if u.IsAlive() && u.IsLaner() { // no shoot-move-shoot-move for laners - but garrisoners should
@@ -559,7 +558,7 @@ func (u *Unit) actUponState() {
 		if number.IsNaN(u.Values.SleepTimer) || u.Values.SleepTimer < 0 {
 			u.VelocityX = 0
 		}
-	case StateWalking:
+	case StateMoving:
 		u.Anim.Frames = Characters[u.Character].Animations.Walk
 		u.Anim.IsLooping, u.Anim.FPS = true, u.MoveSpeedX*0.25
 
@@ -597,12 +596,12 @@ func (u *Unit) actUponState() {
 		}
 	case StateActStart: // random delay to balance same sided units melee VVVVVVV
 		u.ActTimer = u.Values.ActTimer + random.Range[float32](0, 0.1)
-		u.Anim.Frames = Characters[u.Character].Animations.ActStart
+		u.Anim.Frames = Characters[u.Character].Animations.Prepare
 		u.Anim.IsLooping, u.Anim.FPS, u.Anim.Time = false, 8, 0
 		u.VelocityX = 0
 		PlaySound(Characters[u.Character].Sounds.ActStart)
 	case StateActTrigger:
-		u.Anim.Frames = Characters[u.Character].Animations.ActEnd
+		u.Anim.Frames = Characters[u.Character].Animations.Recover
 		u.Anim.IsLooping, u.Anim.FPS, u.Anim.Time = false, 8, 0
 
 		if u.Values.Role == RoleDefender {
@@ -734,13 +733,18 @@ func (u *Unit) applyCollisions() {
 	u.UnitBehind, u.UnitFront = nil, nil
 	for _, other := range Units {
 		var ohb = other.Hitbox()
-		var anyoneDead = u.Health <= 0 || other.Health <= 0
+		var anyoneDead = !u.IsAlive() || !other.IsAlive()
 		var isGarrison = other.IsGarrisoner() || u.IsGarrisoner()
-		var isOffLaner = other.IsOffLaner() || u.IsOffLaner()
+		// var isOffLaner = other.IsOffLaner() || u.IsOffLaner()
 		var insideBase = other.IsInsideEnemyBase(TileSize / 2)
-		if other == u || u.Lane != other.Lane || anyoneDead || isGarrison || isOffLaner || !hb.Overlaps(ohb) || insideBase {
+		var onField = u.IsOutsideOwnBase() && other.IsOutsideOwnBase()
+		if other == u || u.Lane != other.Lane || anyoneDead || isGarrison || !hb.Overlaps(ohb) || insideBase || !onField {
 			continue
 		}
+		if (!u.IsReturning && other.IsReturning) || (u.Team != other.Team) {
+			u.IsReturning = true // face to face, gotta return to base
+		}
+
 		hb = hb.Collide(ohb)
 		u.X, u.Y = hb.X+diffX, hb.Y+diffY
 		if (u.Team == TeamAlly && u.X < other.X) || (u.Team == TeamEnemy && u.X > other.X) {
