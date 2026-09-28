@@ -4,6 +4,7 @@ import (
 	"pure-game-kit/packages/assets"
 	"pure-game-kit/packages/audio"
 	"pure-game-kit/packages/geometry"
+	"pure-game-kit/packages/utility/number"
 	"pure-game-kit/packages/utility/text"
 )
 
@@ -45,6 +46,16 @@ const (
 	CharHorse
 	CharBrownBunny
 	CharWhiteBunny
+
+	CharTroll
+	CharArbalestierGoblin
+	CharSkirmisherGoblin
+	CharStabberBandit
+	CharGunnerBandit
+	CharVulture
+	CharRaven
+	CharRedSnake
+
 	CharCount
 )
 
@@ -103,7 +114,7 @@ func InitCharacters() {
 
 	Characters[CharHorse] = NewCharacter(ZoneField, Values{Name: "Horse", Wage: 20, Role: RoleSupplier,
 		MaxHealth: 0, MoveSpeed: 60, ActPoints: 20, ActTimer: 0.0, ActRange: 3, RespawnTimer: 20.0},
-		"🟧"+Tags[IconHand]+"Speeds up 🌗🟧"+Tags[IconRange]+"closeby 🟩"+Tags[IconUnit]+"allies⬜.")
+		"🟧"+Tags[IconHand]+"Speeds up 🌗🟧"+Tags[IconRange]+"nearby 🟩"+Tags[IconUnit]+"allies⬜.")
 	Characters[CharHorse].Hitbox = geometry.NewRoundedRectangle(0, 8, 48, 32, 0, 0.5)
 
 	Characters[CharBrownBunny] = NewCharacter(ZoneField, Values{Name: "Brown Bunny", Wage: 20, Role: RoleCollector,
@@ -116,7 +127,17 @@ func InitCharacters() {
 		"Very cute and soft.")
 	Characters[CharWhiteBunny].Hitbox = geometry.NewRoundedRectangle(0, 0, 16, 16, 0, 1)
 
+	//=================================================================
+
+	Characters[CharTroll] = NewCharacter(ZoneRuins, Values{Name: "Troll", Wage: 20, Role: RoleDefender,
+		MaxHealth: 60, MoveSpeed: 10, ActPoints: 2, ActTimer: 8, ActRange: 1, RespawnTimer: number.NaN()},
+		"Cannot 🌗🟦"+Tags[IconLoop]+"respawn⬜. Pushes 🌗🟧"+Tags[IconRange]+"nearby 🟥"+Tags[IconUnit]+"enemies⬜ away.")
+	Characters[CharTroll].Hitbox = geometry.NewRoundedRectangle(0, 6, 32, 52, 0, 1)
+
 	for i, c := range Characters {
+		if c == nil {
+			continue
+		}
 		var prefix = text.Replace(text.ToLowerCase(c.Values.Name), " ", "-")
 		c.Animations.Idle = atlas.Crops(prefix + "-idle")
 		c.Animations.Walk = atlas.Crops(prefix + "-move")

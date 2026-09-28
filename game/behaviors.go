@@ -3,6 +3,7 @@ package game
 import (
 	"pure-game-kit/packages/geometry"
 	"pure-game-kit/packages/utility/color"
+	"pure-game-kit/packages/utility/direction"
 	"pure-game-kit/packages/utility/number"
 )
 
@@ -130,13 +131,26 @@ var Behaviors = map[CharacterKind]func(self *Unit){
 				self.ActTimer = self.Values.ActTimer // consume act to hook up
 				self.State = StateActRecovering      // and keep moving
 				self.LastState = StateActRecovering
-				// self.Anim.Frames = Characters[self.Character].Animations.Recover
 			} else {
 				self.State = StateActStart
 			}
 		}
 		if self.LastState == StateActTrigger {
 			self.State = StateActTrigger // force keep StateActEnd
+		}
+	},
+	CharTroll: func(self *Unit) {
+		if self.State == StateActTrigger {
+			for _, u := range Units {
+				if self.Team == u.Team {
+					continue
+				}
+				if number.IsWithin(self.X, u.X, TileSize*2) {
+					var dirX, dirY = direction.BetweenPoints(self.X, self.Y+self.Height/2, u.X, u.Y)
+					u.VelocityX, u.VelocityY = dirX*100, dirY*100
+					u.Values.SleepTimer = 1.5
+				}
+			}
 		}
 	},
 }

@@ -12,9 +12,9 @@
     176,48,32,48|208,48,32,48|240,48,32,48|272,48,32,48|304,48,32,48|336,48,32,48|384,48,48,48|
     432,48,48,48|480,48,48,48|528,48,48,48|576,48,48,48|624,48,48,48|672,48,48,48|720,48,48,48|
     768,48,48,48|816,64,32,32|848,48,48,48|896,48,48,48|944,48,48,48|992,48,48,48|1056,48,48,48|
-    1104,48,48,48|1152,48,48,48|1200,48,48,48|1248,48,48,48|1296,48,48,48|1360,48,48,48|1408,48,64,48|
-    1472,48,80,48|1552,48,48,48|1616,48,48,48|1664,48,48,48|1728,48,48,48|1776,48,48,48|1824,48,48,48|
-    1872,48,48,48|0,112,32,32|32,96,64,48|96,96,64,48|160,96,64,48|224,96,64,48|304,96,64,48|
+    1104,48,48,48|1152,48,48,48|1200,48,48,48|1248,48,48,48|1296,48,48,48|1360,48,48,48|1408,48,80,48|
+    1488,48,80,48|1568,48,48,48|1632,48,48,48|1680,48,48,48|1744,48,48,48|1792,48,48,48|1840,48,48,48|
+    1888,48,48,48|0,112,32,32|32,96,64,48|96,96,64,48|160,96,64,48|224,96,64,48|304,96,64,48|
     368,96,64,48|432,96,64,48|496,96,64,48|560,96,64,48|624,96,64,48|688,96,32,32|720,96,16,32|
     736,96,16,32|752,96,16,32|768,96,16,32|800,96,16,32|816,96,16,32|832,96,16,32|848,96,16,32|
     864,96,16,32|880,96,16,32|912,96,16,32|928,96,16,32|944,96,16,32|960,96,16,32|976,96,16,32|
@@ -253,31 +253,36 @@
     <group name="troll-icon" cropIndexes="144"/>
     <group name="troll-idle" cropIndexes="145 146 147 148"/>
     <group name="troll-move" cropIndexes="149 150 151 152 153 154"/>
-    <group name="troll-act" cropIndexes="155 156 157"/>
+    <group name="troll-prepare" cropIndexes="155 156"/>
+    <group name="troll-recover" cropIndexes="157"/>
     <group name="troll-hurt" cropIndexes="158 159"/>
     <group name="troll-die" cropIndexes="160 161 162 163 164"/>
     <group name="gunner-bandit-icon" cropIndexes="165"/>
     <group name="gunner-bandit-idle" cropIndexes="166 167 168 169"/>
     <group name="gunner-bandit-move" cropIndexes="170 171 172 173 174 175"/>
-    <group name="gunner-bandit-act" cropIndexes="176 177 178 179"/>
+    <group name="gunner-bandit-prepare" cropIndexes="176 177"/>
+    <group name="gunner-bandit-recover" cropIndexes="178 179"/>
     <group name="gunner-bandit-hurt" cropIndexes="180 181"/>
     <group name="gunner-bandit-die" cropIndexes="182 183 184 185"/>
     <group name="stabber-bandit-icon" cropIndexes="208"/>
     <group name="stabber-bandit-idle" cropIndexes="209 210 211 212"/>
     <group name="stabber-bandit-move" cropIndexes="213 214 215 216 217 218"/>
-    <group name="stabber-bandit-act" cropIndexes="219 220 221 222"/>
+    <group name="stabber-bandit-prepare" cropIndexes="219 220"/>
+    <group name="stabber-bandit-recover" cropIndexes="221 222"/>
     <group name="stabber-bandit-hurt" cropIndexes="223 224"/>
     <group name="stabber-bandit-die" cropIndexes="225 226 227 228"/>
     <group name="arbalestier-goblin-icon" cropIndexes="186"/>
     <group name="arbalestier-goblin-idle" cropIndexes="187 188 189 190"/>
     <group name="arbalestier-goblin-move" cropIndexes="191 192 193 194 195 196"/>
-    <group name="arbalestier-goblin-act" cropIndexes="197 198 199 200 201"/>
+    <group name="arbalestier-goblin-prepare" cropIndexes="197 198 199"/>
+    <group name="arbalestier-goblin-recover" cropIndexes="200 201"/>
     <group name="arbalestier-goblin-hurt" cropIndexes="202 203"/>
     <group name="arbalestier-goblin-die" cropIndexes="204 205 206 207"/>
     <group name="skirmisher-goblin-icon" cropIndexes="229"/>
     <group name="skirmisher-goblin-idle" cropIndexes="230 231 232 233"/>
     <group name="skirmisher-goblin-move" cropIndexes="234 235 236 237 238 239"/>
-    <group name="skirmisher-goblin-act" cropIndexes="240 241 242"/>
+    <group name="skirmisher-goblin-prepare" cropIndexes="240 241"/>
+    <group name="skirmisher-goblin-recover" cropIndexes="242"/>
     <group name="skirmisher-goblin-hurt" cropIndexes="243 244"/>
     <group name="skirmisher-goblin-die" cropIndexes="245 246 247 248"/>
     <group name="vulture-icon" cropIndexes="249"/>

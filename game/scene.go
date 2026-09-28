@@ -81,7 +81,7 @@ func InitScene() {
 	Bases[TeamAlly] = NewBase(TeamAlly, BaseNone, Garrison3, [3]EntranceKind{EntranceNone, EntranceNone, EntranceNone})
 	Bases[TeamEnemy] = NewBase(TeamEnemy, BaseFortress, Garrison3, [3]EntranceKind{EntranceDoor, EntranceNone, EntranceNone})
 
-	Units = append(Units, NewUnit(CharSmith, TeamEnemy, LaneMiddle))
+	// Units = append(Units, NewUnit(CharMiner, TeamEnemy, LaneMiddle))
 
 	Pickups = append(Pickups, NewPickup(-240, PickupRelic, LaneLowerOff))
 	Pickups = append(Pickups, NewPickup(0, PickupGem, LaneMiddleOff))
@@ -94,7 +94,7 @@ func InitScene() {
 
 	Player = NewPlayer()
 
-	Player.Units[0] = NewUnit(CharBowyer, TeamAlly, 0)
+	Player.Units[0] = NewUnit(CharTroll, TeamAlly, 0)
 	Player.Units[1] = NewUnit(CharMiner, TeamAlly, 0)
 	Player.Units[2] = NewUnit(CharCook, TeamAlly, 0)
 	Player.Units[3] = NewUnit(CharSmith, TeamAlly, 0)
@@ -142,7 +142,7 @@ func UpdateScene() {
 	mouse.SetCursor(cursor.Default)
 
 	if keyboard.IsKeyJustPressed(key.A) {
-		Units = append(Units, NewUnit(CharHorse, TeamEnemy, LaneMiddleOff))
+		Units = append(Units, NewUnit(CharMiner, TeamEnemy, LaneMiddle))
 	}
 
 	CurrentZone.UpdateBack()

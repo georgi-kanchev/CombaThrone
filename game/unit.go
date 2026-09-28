@@ -321,10 +321,11 @@ func (u *Unit) DrawTooltip(shape geometry.Shape, bench bool) {
 		TooltipTexts[1].Append("🌗🟧", Tags[IconRange], u.Values.ActRange, " range\n")
 	}
 	if u.Values.ActTimer > 0 {
-		if !u.IsSummoned() || u.ActTimer > u.Values.ActTimer || number.IsNaN(u.ActTimer) || u.State == StateDecaying {
+		var canAct = u.ActTimer < 0 || u.ActTimer > u.Values.ActTimer
+		if !u.IsSummoned() || canAct || number.IsNaN(u.ActTimer) || u.State == StateDecaying {
 			TooltipTexts[1].Append("🌗🟪", Tags[IconTimer], number.Round(u.Values.ActTimer, 1), "s rest\n")
 		} else if u.IsSummoned() {
-			TooltipTexts[1].Append("🌗🟪", Tags[IconTimer], number.Round(u.ActTimer, 1), "/",
+			TooltipTexts[1].Append("🌗🟪", Tags[IconTimer], max(number.Round(u.ActTimer, 1), 0), "/",
 				number.Round(u.Values.ActTimer, 1), "s rest\n")
 		}
 	}
@@ -332,7 +333,7 @@ func (u *Unit) DrawTooltip(shape geometry.Shape, bench bool) {
 		if !u.IsSummoned() || u.State != StateDecaying {
 			TooltipTexts[1].Append("🌗🟦", Tags[IconLoop], number.Round(u.Values.RespawnTimer, 1), "s respawn\n")
 		} else if u.Values.RespawnTimer > 0 && u.State == StateDecaying && u.HurtTimer > -u.Values.RespawnTimer {
-			TooltipTexts[1].Append("🌗🟦", Tags[IconLoop], number.Round(u.Values.RespawnTimer+u.HurtTimer, 1), "/",
+			TooltipTexts[1].Append("🌗🟦", Tags[IconLoop], max(number.Round(u.Values.RespawnTimer+u.HurtTimer, 1), 0), "/",
 				number.Round(char.Values.RespawnTimer, 1), "s respawn\n")
 		}
 	}
@@ -360,7 +361,7 @@ func (u *Unit) TakeDamage(damage int) {
 		damage = max(damage-u.Values.ActPoints, 0)
 	}
 
-	if u.IsAlive() {
+	if u.IsAlive() && u.State != StateDecaying {
 		u.Health -= damage
 		u.HurtTimer = 0.5
 	}
@@ -473,7 +474,7 @@ func (u *Unit) applyState() {
 		var isEnemy = allyEnemy || enemyAlly
 		var isInFront = (allyEnemy && u.X < t.X) || (enemyAlly && u.X > t.X)
 		var closeEnough = distX < actRange
-		if isInFront && isEnemy && distX < closestDistX && closeEnough {
+		if isInFront && isEnemy && distX < closestDistX && closeEnough && !t.IsInsideEnemyBase(TileSize) {
 			closestDistX = distX
 			u.ClosestEnemyInRange = t
 		}
@@ -735,13 +736,12 @@ func (u *Unit) applyCollisions() {
 		var ohb = other.Hitbox()
 		var anyoneDead = !u.IsAlive() || !other.IsAlive()
 		var isGarrison = other.IsGarrisoner() || u.IsGarrisoner()
-		// var isOffLaner = other.IsOffLaner() || u.IsOffLaner()
-		var insideBase = other.IsInsideEnemyBase(TileSize / 2)
-		var onField = u.IsOutsideOwnBase() && other.IsOutsideOwnBase()
-		if other == u || u.Lane != other.Lane || anyoneDead || isGarrison || !hb.Overlaps(ohb) || insideBase || !onField {
+		var intruder = !u.IsOutsideOwnBase() && other.IsInsideEnemyBase(TileSize/2)
+		if other == u || u.Lane != other.Lane || anyoneDead || isGarrison || !hb.Overlaps(ohb) || intruder {
 			continue
 		}
-		if (!u.IsReturning && other.IsReturning) || (u.Team != other.Team) {
+		var opposite = (!u.IsReturning && other.IsReturning) || (u.Team != other.Team)
+		if u.IsOffLaner() && other.IsOffLaner() && opposite {
 			u.IsReturning = true // face to face, gotta return to base
 		}
 
