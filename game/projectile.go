@@ -34,21 +34,23 @@ var Projectiles, ProjectilesBehind []*Projectile = make([]*Projectile, 0, 32), m
 
 func (u *Unit) NewProjectile(x, y, z, targetX, targetY, targetZ float32, value int,
 	kind ProjectileKind, enemyEntrance *Entrance) *Projectile {
-	const speed float32 = 100
+	var speed float32 = 100 * Characters[u.Character].ProjectileSpeed
 	var accuracyMultiplier float32 = 1
 	if enemyEntrance != nil { // should not miss the entrances
 		accuracyMultiplier = 0
 		targetY += TileSize / 2
 	}
+
 	var dist = point.DistanceToPoint(x, y, targetX, targetY)
 	var totalTime = max(dist/speed, 0.01) // prevent division by zero
+	var parabola = Characters[u.Character].ProjectileParabolaMultiplier
 	var proj = &Projectile{Owner: u, Kind: kind,
 		Object: graphics.NewSprite(x, y, 1, Decor.Crops("projectiles")[0]),
 		StartX: x, StartY: y, StartZ: z, Z: z,
 		TargetX:    targetX + random.Range[float32](-12, 12)*accuracyMultiplier,
 		TargetY:    targetY + random.Range[float32](-12, 12),
 		TargetZ:    targetZ + random.Range[float32](-0.35, 0.35)*accuracyMultiplier,
-		TravelTime: totalTime, ArcHeight: dist / 3, Value: value, EnemyEntrance: enemyEntrance,
+		TravelTime: totalTime, ArcHeight: dist / 3 * parabola, Value: value, EnemyEntrance: enemyEntrance,
 		FadeOutTime: 10,
 	}
 	return proj

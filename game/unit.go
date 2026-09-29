@@ -101,6 +101,9 @@ func NewUnit(character CharacterKind, team Team, lane Lane) *Unit {
 func (u *Unit) Hitbox(additionalWidth ...float32) geometry.Shape {
 	var char = Characters[u.Character]
 	var hitbox = char.Hitbox
+	if u.Team == TeamEnemy {
+		hitbox.X *= -1
+	}
 	hitbox.X, hitbox.Y = u.X+hitbox.X, u.Y+hitbox.Y
 	if len(additionalWidth) == 1 {
 		hitbox.Width += additionalWidth[0]
@@ -188,7 +191,7 @@ func (u *Unit) PrepareSpawn() {
 	case LaneGarrison1, LaneGarrison2, LaneGarrison3:
 		u.X, u.Y = CurrentZone.Ground.Width/2+u.Width/2, laneY
 	case LaneGarrisonPlus1, LaneGarrisonPlus2, LaneGarrisonPlus3:
-		u.X, u.Y = PointAtCell(18, 3)
+		u.X, u.Y = PointAtCell(18.5, 3)
 	}
 	if u.IsOffLaner() {
 		u.Y += TileSize / 2
@@ -632,7 +635,11 @@ func (u *Unit) actUponState() {
 			if number.Absolute(t.X-u.X) < TileSize*3 {
 				prediction = 0 // target is too close - don't predict movement to not shoot behind self
 			}
-			var proj = u.NewProjectile(u.X, u.Y, u.Z, t.X+prediction, t.Y+t.Height/2-8, t.Z, dmg, ProjectileArrow, nil)
+			var offsetX = u.Width / 3
+			if u.Team == TeamEnemy {
+				offsetX = -u.Width / 3
+			}
+			var proj = u.NewProjectile(u.X+offsetX, u.Y, u.Z, t.X+prediction, t.Y+t.Height/2-8, t.Z, dmg, ProjectileArrow, nil)
 			Projectiles = append(Projectiles, proj)
 			PlaySound(Characters[u.Character].Sounds.ActTrigger)
 		} else if canBeActedUpon && e != nil {

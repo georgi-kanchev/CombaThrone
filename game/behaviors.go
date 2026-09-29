@@ -153,4 +153,20 @@ var Behaviors = map[CharacterKind]func(self *Unit){
 			}
 		}
 	},
+	CharSkirmisherGoblin:  behaviorGoblin,
+	CharArbalestierGoblin: behaviorGoblin,
+}
+
+func behaviorGoblin(self *Unit) {
+	if self.UnitFront != nil && self.UnitFront.Values.Role == RoleDefender {
+		self.AddEffect(EffectGoblin)
+	} else {
+		self.RemoveEffect(EffectGoblin)
+	}
+
+	if self.ClosestEnemyInRange != nil && self.ClosestEnemyInRange.Values.Role == RoleDefender {
+		self.AddEffect(EffectGoblin)
+	} else {
+		self.RemoveEffect(EffectGoblin)
+	}
 }

@@ -10,6 +10,7 @@ const (
 	EffectMiner
 	EffectKid
 	EffectHorse
+	EffectGoblin
 	EffectCount
 )
 
@@ -24,4 +25,6 @@ var Effects = [EffectCount]Values{
 		EffectInfo: "🟩" + Tags[IconPlus] + "🌗🟨" + Tags[IconLeftRight] + "20 speed ⬜(Self)"},
 	EffectHorse: Values{MoveSpeed: 20, EffectTimer: number.Infinity(),
 		EffectInfo: "🟩" + Tags[IconPlus] + "🌗🟨" + Tags[IconLeftRight] + "20 speed ⬜(Horse)"},
+	EffectGoblin: Values{ActPoints: 2, EffectTimer: number.Infinity(),
+		EffectInfo: "🟩" + Tags[IconPlus] + "🟧" + Tags[IconSword] + "2 damage ⬜(Self)"},
 }

@@ -2,13 +2,13 @@
 <theme>
 	<button>
 		<body imageId="-51" color="#ffd569">
-			<disabled color="#9c7000"/>
+			<disabled color="#ffd5697f"/>
 			<focused color="#f3c244"/>
 			<clicked imageId="-52" color="#e0ae2b"/>
 		</body>
 		<value color="#fcfefe" lineHeight="14" fontId="0" gap="10 0" align="0.5 0.3" weight="0.1" outlineSize="0.4" 
 		outlineColor="#2a304e">
-			<disabled color="#4c5684"/>
+			<disabled color="#fbfefe80" outlineColor="#2b315078"/>
 			<focused />
 			<clicked align="0.5 0.5"/>
 		</value>

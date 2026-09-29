@@ -78,10 +78,10 @@ func InitScene() {
 	}
 	CurrentZone = Zones[ZoneField]
 
-	Bases[TeamAlly] = NewBase(TeamAlly, BaseNone, Garrison3, [3]EntranceKind{EntranceNone, EntranceNone, EntranceNone})
+	Bases[TeamAlly] = NewBase(TeamAlly, BaseFort, Garrison3, [3]EntranceKind{EntranceNone, EntranceNone, EntranceNone})
 	Bases[TeamEnemy] = NewBase(TeamEnemy, BaseFortress, Garrison3, [3]EntranceKind{EntranceDoor, EntranceNone, EntranceNone})
 
-	// Units = append(Units, NewUnit(CharMiner, TeamEnemy, LaneMiddle))
+	Units = append(Units, NewUnit(CharArbalestierGoblin, TeamEnemy, LaneMiddle))
 
 	Pickups = append(Pickups, NewPickup(-240, PickupRelic, LaneLowerOff))
 	Pickups = append(Pickups, NewPickup(0, PickupGem, LaneMiddleOff))
@@ -96,11 +96,11 @@ func InitScene() {
 
 	Player.Units[0] = NewUnit(CharTroll, TeamAlly, 0)
 	Player.Units[1] = NewUnit(CharMiner, TeamAlly, 0)
-	Player.Units[2] = NewUnit(CharCook, TeamAlly, 0)
+	Player.Units[2] = NewUnit(CharBowyer, TeamAlly, 0)
 	Player.Units[3] = NewUnit(CharSmith, TeamAlly, 0)
 	Player.Units[4] = NewUnit(CharKid, TeamAlly, 0)
-	Player.Units[5] = NewUnit(CharDummy, TeamAlly, 0)
-	Player.Units[6] = NewUnit(CharHorse, TeamAlly, 0)
+	Player.Units[5] = NewUnit(CharSkirmisherGoblin, TeamAlly, 0)
+	Player.Units[6] = NewUnit(CharArbalestierGoblin, TeamAlly, 0)
 	Player.Units[7] = NewUnit(CharFisherman, TeamAlly, 0)
 }
 
@@ -120,17 +120,22 @@ func UpdateTitleScreen() {
 
 	gui.Scale = View.Zoom
 	var hud = gui.AreaHUD(0.5, 1, 0, 0)
-	gui.Button(storyMode, geometry.NewArea(hud.X, hud.Y-TileSize*5.5, 120, 28), geometry.Area{}, ThemeUI, true)
+	gui.Button(part1, geometry.NewArea(hud.X-72, hud.Y-TileSize*5.5, 140, 28), geometry.Area{}, ThemeUI, true)
 	if gui.IsJustClicked() {
 		InGame = true
 		PlayAmbience(CurrentZone.Kind)
 	}
-	gui.Button(arenaMode, geometry.NewArea(hud.X, hud.Y-TileSize*4.5, 120, 28), geometry.Area{}, ThemeUI, false)
+	gui.Button(part2, geometry.NewArea(hud.X+72, hud.Y-TileSize*5.5, 140, 28), geometry.Area{}, ThemeUI, false)
+	if gui.IsFocused() {
+		mouse.SetCursor(cursor.NotAllowed)
+	}
+	gui.Button(arena, geometry.NewArea(hud.X, hud.Y-TileSize*4.5, 100, 28), geometry.Area{}, ThemeUI, false)
 	if gui.IsFocused() {
 		mouse.SetCursor(cursor.NotAllowed)
 	}
 	gui.Button(settings, geometry.NewArea(hud.X, hud.Y-TileSize*3, 100, 28), geometry.Area{}, ThemeUI, true)
-	gui.Button(exit, geometry.NewArea(hud.X, hud.Y-TileSize*2, 100, 28), geometry.Area{}, ThemeUI, true)
+	gui.Button(credits, geometry.NewArea(hud.X, hud.Y-TileSize*2, 100, 28), geometry.Area{}, ThemeUI, true)
+	gui.Button(exit, geometry.NewArea(hud.X, hud.Y-TileSize*1, 100, 28), geometry.Area{}, ThemeUI, true)
 	if gui.IsJustClicked() {
 		window.Close()
 	}
@@ -226,8 +231,8 @@ func DeltaTimeScaled() float32 {
 var highlightCursorColors = map[int]uint{
 	cursor.Arrow: palette.LightGray, cursor.Hand: palette.White, cursor.NotAllowed: palette.Red,
 }
-var storyMode, arenaMode = Tags[IconBook] + "Story Mode", Tags[IconTower] + "Arena Mode"
-var settings, exit = Tags[IconGear] + "Settings", Tags[IconDoor] + "Exit"
+var part1, part2, arena = Tags[IconBook] + "Chapter 1: South", Tags[IconBook] + "Chapter 2: North", Tags[IconTower] + "Arena"
+var settings, credits, exit = Tags[IconGear] + "Settings", Tags[IconHand] + "Credits", Tags[IconDoor] + "Exit"
 
 func mirrorGarrisonLanes() {
 	for i := LaneGarrison1; i < LaneGarrisonPlus3+1; i++ {
