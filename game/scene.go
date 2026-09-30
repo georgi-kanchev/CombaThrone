@@ -5,8 +5,6 @@ import (
 	"pure-game-kit/packages/geometry"
 	"pure-game-kit/packages/graphics"
 	"pure-game-kit/packages/gui"
-	"pure-game-kit/packages/input/keyboard"
-	"pure-game-kit/packages/input/keyboard/key"
 	"pure-game-kit/packages/input/mouse"
 	"pure-game-kit/packages/input/mouse/cursor"
 	"pure-game-kit/packages/utility/collection"
@@ -81,7 +79,8 @@ func InitScene() {
 	Bases[TeamAlly] = NewBase(TeamAlly, BaseFort, Garrison3, [3]EntranceKind{EntranceNone, EntranceNone, EntranceNone})
 	Bases[TeamEnemy] = NewBase(TeamEnemy, BaseFortress, Garrison3, [3]EntranceKind{EntranceDoor, EntranceNone, EntranceNone})
 
-	Units = append(Units, NewUnit(CharArbalestierGoblin, TeamEnemy, LaneMiddle))
+	Units = append(Units, NewUnit(CharStabberBandit, TeamEnemy, LaneMiddle))
+	// Units = append(Units, NewUnit(CharMiner, TeamEnemy, LaneMiddle))
 
 	Pickups = append(Pickups, NewPickup(-240, PickupRelic, LaneLowerOff))
 	Pickups = append(Pickups, NewPickup(0, PickupGem, LaneMiddleOff))
@@ -94,14 +93,14 @@ func InitScene() {
 
 	Player = NewPlayer()
 
-	Player.Units[0] = NewUnit(CharTroll, TeamAlly, 0)
-	Player.Units[1] = NewUnit(CharMiner, TeamAlly, 0)
-	Player.Units[2] = NewUnit(CharBowyer, TeamAlly, 0)
+	Player.Units[0] = NewUnit(CharRaven, TeamAlly, 0)
+	Player.Units[1] = NewUnit(CharRedSnake, TeamAlly, 0)
+	Player.Units[2] = NewUnit(CharVulture, TeamAlly, 0)
 	Player.Units[3] = NewUnit(CharSmith, TeamAlly, 0)
-	Player.Units[4] = NewUnit(CharKid, TeamAlly, 0)
+	Player.Units[4] = NewUnit(CharStabberBandit, TeamAlly, 0)
 	Player.Units[5] = NewUnit(CharSkirmisherGoblin, TeamAlly, 0)
 	Player.Units[6] = NewUnit(CharArbalestierGoblin, TeamAlly, 0)
-	Player.Units[7] = NewUnit(CharFisherman, TeamAlly, 0)
+	Player.Units[7] = NewUnit(CharGunnerBandit, TeamAlly, 0)
 }
 
 //=================================================================
@@ -145,10 +144,6 @@ func UpdateScene() {
 	alignView()
 
 	mouse.SetCursor(cursor.Default)
-
-	if keyboard.IsKeyJustPressed(key.A) {
-		Units = append(Units, NewUnit(CharMiner, TeamEnemy, LaneMiddle))
-	}
 
 	CurrentZone.UpdateBack()
 	Bases[TeamAlly].UpdateBack()
@@ -231,7 +226,8 @@ func DeltaTimeScaled() float32 {
 var highlightCursorColors = map[int]uint{
 	cursor.Arrow: palette.LightGray, cursor.Hand: palette.White, cursor.NotAllowed: palette.Red,
 }
-var part1, part2, arena = Tags[IconBook] + "Chapter 1: South", Tags[IconBook] + "Chapter 2: North", Tags[IconTower] + "Arena"
+var part1, part2 = Tags[IconBook] + "Part 1: Southward", Tags[IconBook] + "Part 2: Northward"
+var arena = Tags[IconTower] + "Arena"
 var settings, credits, exit = Tags[IconGear] + "Settings", Tags[IconHand] + "Credits", Tags[IconDoor] + "Exit"
 
 func mirrorGarrisonLanes() {

@@ -28,14 +28,17 @@ type Projectile struct {
 	Trigger       bool
 }
 
-const ProjectileArrow ProjectileKind = 0
+const (
+	ProjectileArrow, ProjectileBullet, ProjectileCount ProjectileKind = 0, 1, 2
+)
 
 var Projectiles, ProjectilesBehind []*Projectile = make([]*Projectile, 0, 32), make([]*Projectile, 0, 32)
+var ProjectilesFadeOutTimes = [ProjectileCount]float32{ProjectileArrow: 10, ProjectileBullet: 0.1}
 
 func (u *Unit) NewProjectile(x, y, z, targetX, targetY, targetZ float32, value int,
 	kind ProjectileKind, enemyEntrance *Entrance) *Projectile {
-	var speed float32 = 100 * Characters[u.Character].ProjectileSpeed
-	var accuracyMultiplier float32 = 1
+	var speed float32 = 100 * Characters[u.Character].Projectile.Speed
+	var accuracyMultiplier float32 = 1 / Characters[u.Character].Projectile.Speed
 	if enemyEntrance != nil { // should not miss the entrances
 		accuracyMultiplier = 0
 		targetY += TileSize / 2
@@ -43,15 +46,15 @@ func (u *Unit) NewProjectile(x, y, z, targetX, targetY, targetZ float32, value i
 
 	var dist = point.DistanceToPoint(x, y, targetX, targetY)
 	var totalTime = max(dist/speed, 0.01) // prevent division by zero
-	var parabola = Characters[u.Character].ProjectileParabolaMultiplier
+	var parabola = Characters[u.Character].Projectile.ParabolaMultiplier
 	var proj = &Projectile{Owner: u, Kind: kind,
-		Object: graphics.NewSprite(x, y, 1, Decor.Crops("projectiles")[0]),
+		Object: graphics.NewSprite(x, y, 1, Decor.Crops("projectiles")[kind]),
 		StartX: x, StartY: y, StartZ: z, Z: z,
 		TargetX:    targetX + random.Range[float32](-12, 12)*accuracyMultiplier,
 		TargetY:    targetY + random.Range[float32](-12, 12),
 		TargetZ:    targetZ + random.Range[float32](-0.35, 0.35)*accuracyMultiplier,
 		TravelTime: totalTime, ArcHeight: dist / 3 * parabola, Value: value, EnemyEntrance: enemyEntrance,
-		FadeOutTime: 10,
+		FadeOutTime: ProjectilesFadeOutTimes[kind],
 	}
 	return proj
 }
@@ -126,7 +129,7 @@ func (p *Projectile) Update() {
 
 		if p.Shape.Overlaps(hb) && number.IsWithin(p.Z, u.Z, 0.2) {
 			p.Trigger = true
-			u.TakeDamage(p.Value)
+			u.AffectHealth(-p.Value)
 			Projectiles = collection.Remove(Projectiles, p)
 			ProjectilesBehind = collection.Remove(ProjectilesBehind, p)
 			PlaySound(Characters[p.Owner.Character].Sounds.HitFlesh)

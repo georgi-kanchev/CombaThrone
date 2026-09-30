@@ -33,6 +33,7 @@ const (
 	ZoneForest
 	ZoneSwamp
 	ZoneDesert
+
 	ZoneDocks
 	ZoneOcean
 	ZoneGlacier

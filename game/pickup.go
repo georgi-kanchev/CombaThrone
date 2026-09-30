@@ -2,11 +2,9 @@ package game
 
 import (
 	"pure-game-kit/packages/assets"
-	"pure-game-kit/packages/geometry"
 	"pure-game-kit/packages/graphics"
 	"pure-game-kit/packages/motion"
 	"pure-game-kit/packages/utility/collection"
-	"pure-game-kit/packages/utility/color/palette"
 	"pure-game-kit/packages/utility/number"
 	"pure-game-kit/packages/utility/point"
 )
@@ -61,7 +59,7 @@ func NewPickup(x float32, kind PickupKind, lane Lane) *Pickup {
 			Tags[IconBag] + Tags[IconHand] + Tags[IconDebuff] +
 			"\ndouble action points⬜."
 	case PickupRelic:
-		data.Description = "Revives all 🟥" + Tags[IconSkull] +
+		data.Description = "🌗🟦" + Tags[IconLoop] + "Revives⬜ all 🟥" + Tags[IconSkull] +
 			"dead⬜ units and gives them 🟩" + Tags[IconHeart] + "full health⬜."
 	case PickupRune:
 		data.Description = "Prevents any enemy units from appearing for 20s."
@@ -116,27 +114,4 @@ func (p *Pickup) Update() {
 	}
 
 	view.DrawObject(&p.Object)
-}
-
-func (p *Pickup) DrawTooltip(bench bool) {
-	const width, height = 140.0, TileSize + 12
-	var shape = GameHUD.ShapeToUI(p.Object.Shape)
-	var col, noMask = palette.White, geometry.Area{}
-	var icon = UserInterface.Crops("icons-pickup")[p.Kind]
-	var x, y = shape.X, shape.Y - shape.Height/2 - height/2
-	if bench {
-		shape = p.Object.Shape
-		x, y = shape.X, shape.Y+shape.Height/2+height/2
-	}
-	var area = geometry.NewArea(x, y, width, height).Inside(GameHUD.View.Bounds())
-	x, y = area.X, area.Y
-
-	GameHUD.Highlight(GameHUD.View, shape, palette.White)
-	GameHUD.View.DrawImage(x, y, width, height, 0, PanelNinePatchId, col, noMask)
-	GameHUD.View.DrawImage(x+width/2-TileSize/2-6, y, -TileSize, TileSize, 0, icon, col, noMask)
-
-	TooltipLabel.Shape = geometry.NewRectangle(x-TileSize/2, y, width-TileSize-12, height-12, 0)
-	TooltipLabel.Text = p.Description
-	TooltipLabel.Details.TextAlignX, TooltipLabel.Details.TextAlignY = 0.5, 0.5
-	GameHUD.View.DrawObject(TooltipLabel)
 }

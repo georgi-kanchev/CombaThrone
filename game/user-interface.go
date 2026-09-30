@@ -295,6 +295,132 @@ func (h *HUD) DrawTooltip(shape geometry.Shape, text string, icon assets.ImageId
 	GameHUD.View.DrawObject(TooltipLabel)
 }
 
+//=================================================================
+
+func (u *Unit) DrawTooltip(shape geometry.Shape, bench bool) {
+	var tsz float32 = TileSize
+	var col, noMask = palette.White, geometry.Area{}
+	const width, height, effWidth = 130.0, 94.0, 105.0
+	var extraWidth float32
+	var x, y = shape.X, shape.Y - shape.Height/2 - height/2 - 14
+	if bench {
+		x, y = 0, GameHUD.UnitsPanel.Y+GameHUD.UnitsPanel.Height/2+height/2
+	}
+
+	if len(u.Effects) > 0 {
+		extraWidth = effWidth
+		x += effWidth / 2
+	}
+
+	var area = geometry.NewArea(x, y, width+extraWidth, height).Inside(GameHUD.View.Bounds())
+	area = area.Outside(GameHUD.UnitsPanel.Shape.Bounds(), true, false)
+	area = area.Outside(GameHUD.TeamGlory[TeamAlly].Shape.Bounds(), true, false)
+	area = area.Outside(GameHUD.TeamGlory[TeamEnemy].Shape.Bounds(), true, false)
+	x, y = area.X, area.Y
+
+	TooltipLabel.Details.TextAlignX, TooltipLabel.Details.TextAlignY = 0, 0
+	if len(u.Effects) > 0 {
+		x -= effWidth / 2
+		var effHeight, effX = float32(len(u.Effects))*9 + 12, x + width/2 + effWidth/2 - 6
+		GameHUD.View.DrawImage(effX, y-height/2+effHeight/2, effWidth, effHeight, 0, PanelNinePatchId, col, noMask)
+		TooltipLabel.Shape = geometry.NewRectangle(x+width/2+effWidth/2+2, y+6, effWidth, height, 0)
+		TooltipLabel.Details.TextLineHeight = 8
+		TooltipTexts[0].Set()
+
+		var keys = collection.MapKeys(u.Effects)
+		collection.SortByField(keys, func(k Effect) uint8 { return uint8(k) })
+		for _, k := range keys {
+			TooltipLabel.Text = TooltipTexts[0].Append(u.Effects[k].EffectInfo, "\n")
+		}
+		GameHUD.View.DrawObject(TooltipLabel)
+	}
+
+	GameHUD.Highlight(GameHUD.View, shape, palette.White)
+	GameHUD.View.DrawImage(x, y, width, height, 0, PanelNinePatchId, col, noMask)
+	GameHUD.View.DrawShape(x, y+height/2-tsz/2, width-10, 20, 0, 0, color.RGB(61, 37, 59), noMask)
+
+	var char = Characters[u.Character]
+	var icon = char.Icon
+	GameHUD.View.DrawImage(x+width/2-tsz/2-6, y-height/2+tsz/2+6, tsz, tsz, 0, SlotId, col, noMask)
+	GameHUD.View.DrawImage(x+width/2-tsz/2-6, y-height/2+tsz/2+6, -tsz, tsz, 0, icon, col, noMask)
+
+	TooltipTexts[1].Set()
+	if !u.IsOffLaner() {
+		if u.Values.MaxHealth > 0 {
+			if !u.IsSummoned() || u.Health == u.Values.MaxHealth {
+				TooltipTexts[1].Append("🌗🟩", Tags[IconHeart], u.Values.MaxHealth, " health\n")
+			} else if u.IsSummoned() {
+				TooltipTexts[1].Append("🌗🟩", Tags[IconHeart], max(u.Health, 0), "/", u.Values.MaxHealth, " health\n")
+			}
+		}
+	}
+	if u.Values.MoveSpeed > 0 {
+		TooltipTexts[1].Append("🌗🟨", Tags[IconLeftRight], u.Values.MoveSpeed, " speed\n")
+	}
+	if u.Values.ActPoints > 0 {
+		TooltipTexts[1].Append("🟧", Tags[char.RoleIcon], u.Values.ActPoints, " ", char.ActPointsName, "\n")
+	}
+	if u.Values.ActRange > 0 {
+		TooltipTexts[1].Append("🌗🟧", Tags[IconRange], u.Values.ActRange, " range\n")
+	}
+	if u.Values.ActTimer > 0 {
+		var canAct = u.ActTimer < 0 || u.ActTimer > u.Values.ActTimer
+		if !u.IsSummoned() || canAct || number.IsNaN(u.ActTimer) || u.State == StateDecaying {
+			TooltipTexts[1].Append("🌗🟪", Tags[IconTimer], number.Round(u.Values.ActTimer, 1), "s rest\n")
+		} else if u.IsSummoned() {
+			TooltipTexts[1].Append("🌗🟪", Tags[IconTimer], max(number.Round(u.ActTimer, 1), 0), "/",
+				number.Round(u.Values.ActTimer, 1), "s rest\n")
+		}
+	}
+	if u.Values.ReviveTimer > 0 {
+		if !u.IsSummoned() || u.State != StateDecaying {
+			TooltipTexts[1].Append("🌗🟦", Tags[IconLoop], number.Round(u.Values.ReviveTimer, 1), "s revive\n")
+		} else if u.Values.ReviveTimer > 0 && u.State == StateDecaying && u.HurtTimer > -u.Values.ReviveTimer {
+			TooltipTexts[1].Append("🌗🟦", Tags[IconLoop], max(number.Round(u.Values.ReviveTimer+u.HurtTimer, 1), 0), "/",
+				number.Round(char.Values.ReviveTimer, 1), "s revive\n")
+		}
+	}
+	TooltipLabel.Shape = geometry.NewRectangle(x, y+6, width-14, height, 0)
+	TooltipLabel.Details.TextAlignX, TooltipLabel.Details.TextLineHeight = 0, 10
+	TooltipLabel.Text = TooltipTexts[1].Get()
+	GameHUD.View.DrawObject(TooltipLabel)
+
+	TooltipLabel.Text = TooltipTexts[2].Set("\n\n\n\n\n\n⬜", char.Info)
+	GameHUD.View.DrawObject(TooltipLabel)
+
+	TooltipLabel.Details.TextAlignX = 1
+	TooltipLabel.Text = TooltipTexts[3].Set("\n\n\n⬜", u.Values.Name, "\n", Tags[char.RoleIcon], char.RoleName)
+	GameHUD.View.DrawObject(TooltipLabel)
+
+	if PinnedUnit == u {
+		var pin = UserInterface.Crops("icons-text")[IconLocked]
+		var sz float32 = TileSize / 2
+		GameHUD.View.DrawImage(x-width/2+3, y-height/2+3, sz*0.8, sz*0.8, 0, pin, palette.White, geometry.Area{})
+	}
+}
+func (p *Pickup) DrawTooltip(bench bool) {
+	const width, height = 140.0, TileSize + 12
+	var shape = GameHUD.ShapeToUI(p.Object.Shape)
+	var col, noMask = palette.White, geometry.Area{}
+	var icon = UserInterface.Crops("icons-pickup")[p.Kind]
+	var x, y = shape.X, shape.Y - shape.Height/2 - height/2
+	if bench {
+		shape = p.Object.Shape
+		x, y = shape.X, shape.Y+shape.Height/2+height/2
+	}
+	var area = geometry.NewArea(x, y, width, height).Inside(GameHUD.View.Bounds())
+	x, y = area.X, area.Y
+
+	GameHUD.Highlight(GameHUD.View, shape, palette.White)
+	GameHUD.View.DrawImage(x, y, width, height, 0, PanelNinePatchId, col, noMask)
+	GameHUD.View.DrawImage(x+width/2-TileSize/2-6, y, -TileSize, TileSize, 0, icon, col, noMask)
+
+	TooltipLabel.Shape = geometry.NewRectangle(x-TileSize/2, y, width-TileSize-12, height-12, 0)
+	TooltipLabel.Text = p.Description
+	TooltipLabel.Details.TextAlignX, TooltipLabel.Details.TextAlignY = 0.5, 0.5
+	GameHUD.View.DrawObject(TooltipLabel)
+}
+
 // private ========================================================
 
 func (h *HUD) drawBenchUnits(lastSummonIndex int) {
@@ -333,7 +459,7 @@ func (h *HUD) drawBenchUnits(lastSummonIndex int) {
 		h.View.DrawImage(x, y, sz, sz, 0, Characters[unit.Character].Icon, tint, noMask)
 		h.View.DrawImage(x+sz/2-iSz/2, y+sz/2-iSz/2, iSz, iSz, 0, roleIcon, tint, noMask)
 		if unit.State == StateDecaying {
-			var timerWidth = number.Map(unit.HurtTimer, 0, -unit.Values.RespawnTimer, sz-2, 0)
+			var timerWidth = number.Map(unit.HurtTimer, 0, -unit.Values.ReviveTimer, sz-2, 0)
 			var icon, col = IconLoop, color.RGB(102, 102, 255)
 
 			h.View.DrawShape(x, y, sz, sz, 0, 0, color.RGBA(0, 0, 0, 150), noMask)
@@ -410,10 +536,6 @@ func (h *HUD) trySummon(lastSummonIndex int) {
 	var lane Lane
 
 	for _, e := range Bases[TeamAlly].Entrances {
-		if unit.Character == CharFisherman && e.Lane == LaneLower {
-			continue // special case
-		}
-
 		var shape = e.Shape()
 		if Bases[TeamAlly].Kind < BaseBarrack {
 			shape.X += TileSize / 1.5

@@ -85,6 +85,10 @@ func NewUnit(character CharacterKind, team Team, lane Lane) *Unit {
 		Effects: make(map[Effect]Values, 4),
 	}
 
+	if len(anim.Frames) == 0 {
+		anim.Frames = char.Animations.Move
+	}
+
 	if team == TeamAlly {
 		unit.State = StateWaitingToBeSummoned
 	}
@@ -101,7 +105,7 @@ func NewUnit(character CharacterKind, team Team, lane Lane) *Unit {
 func (u *Unit) Hitbox(additionalWidth ...float32) geometry.Shape {
 	var char = Characters[u.Character]
 	var hitbox = char.Hitbox
-	if u.Team == TeamEnemy {
+	if (u.Team == TeamEnemy && !u.IsReturning) || (u.Team == TeamAlly && u.IsReturning) {
 		hitbox.X *= -1
 	}
 	hitbox.X, hitbox.Y = u.X+hitbox.X, u.Y+hitbox.Y
@@ -180,7 +184,8 @@ func (u *Unit) PrepareSpawn() {
 	}
 
 	var col = Collisions[u.Lane]
-	var laneY = col[0].Y - col[0].Height/2 - u.Height/2 - 8
+	var hb = u.Hitbox()
+	var laneY = col[0].Y - col[0].Height/2 - hb.Height
 	switch u.Lane {
 	case LaneLower, LaneLowerOff:
 		u.X, u.Y = TileSize*9.5, laneY
@@ -206,7 +211,6 @@ func (u *Unit) PrepareSpawn() {
 		u.X = CurrentZone.Ground.Width / 2
 	}
 
-	var hb = u.Hitbox()
 	u.HealthBar = NewHealthBar(hb.Width-1, u.Team, u.IsOffLaner())
 }
 func (u *Unit) Update() {
@@ -218,7 +222,7 @@ func (u *Unit) Update() {
 	u.HurtTimer -= DeltaTimeScaled()
 	u.Values.SleepTimer -= DeltaTimeScaled()
 
-	if !u.IsSummoned() && (number.IsNaN(u.HurtTimer) || u.HurtTimer < -u.Values.RespawnTimer) {
+	if !u.IsSummoned() && (number.IsNaN(u.HurtTimer) || u.HurtTimer < -u.Values.ReviveTimer) {
 		u.State = StateWaitingToBeSummoned
 		return
 	}
@@ -257,139 +261,53 @@ func (u *Unit) Update() {
 	}
 	u.LastState = u.State
 }
-func (u *Unit) DrawTooltip(shape geometry.Shape, bench bool) {
-	var tsz float32 = TileSize
-	var col, noMask = palette.White, geometry.Area{}
-	const width, height, effWidth = 130.0, 94.0, 105.0
-	var extraWidth float32
-	var x, y = shape.X, shape.Y - shape.Height/2 - height/2 - 14
-	if bench {
-		x, y = 0, GameHUD.UnitsPanel.Y+GameHUD.UnitsPanel.Height/2+height/2
-	}
 
-	if len(u.Effects) > 0 {
-		extraWidth = effWidth
-		x += effWidth / 2
+func (u *Unit) ProjectHealth(value int) (remainingHealth int) {
+	if !u.IsAlive() || u.State == StateDecaying {
+		return u.Health
 	}
-
-	var area = geometry.NewArea(x, y, width+extraWidth, height).Inside(GameHUD.View.Bounds())
-	area = area.Outside(GameHUD.UnitsPanel.Shape.Bounds(), true, false)
-	area = area.Outside(GameHUD.TeamGlory[TeamAlly].Shape.Bounds(), true, false)
-	area = area.Outside(GameHUD.TeamGlory[TeamEnemy].Shape.Bounds(), true, false)
-	x, y = area.X, area.Y
-
-	TooltipLabel.Details.TextAlignX, TooltipLabel.Details.TextAlignY = 0, 0
-	if len(u.Effects) > 0 {
-		x -= effWidth / 2
-		var effHeight, effX = float32(len(u.Effects))*9 + 12, x + width/2 + effWidth/2 - 6
-		GameHUD.View.DrawImage(effX, y-height/2+effHeight/2, effWidth, effHeight, 0, PanelNinePatchId, col, noMask)
-		TooltipLabel.Shape = geometry.NewRectangle(x+width/2+effWidth/2+2, y+6, effWidth, height, 0)
-		TooltipLabel.Details.TextLineHeight = 8
-		TooltipTexts[0].Set()
-
-		var keys = collection.MapKeys(u.Effects)
-		collection.SortByField(keys, func(k Effect) uint8 { return uint8(k) })
-		for _, k := range keys {
-			TooltipLabel.Text = TooltipTexts[0].Append(u.Effects[k].EffectInfo, "\n")
-		}
-		GameHUD.View.DrawObject(TooltipLabel)
+	if u.Values.Role <= RoleDefender && value > 0 {
+		return min(u.Health+value, u.Values.MaxHealth)
 	}
-
-	GameHUD.Highlight(GameHUD.View, shape, palette.White)
-	GameHUD.View.DrawImage(x, y, width, height, 0, PanelNinePatchId, col, noMask)
-	GameHUD.View.DrawShape(x, y+height/2-tsz/2, width-10, 20, 0, 0, color.RGB(61, 37, 59), noMask)
-
-	var char = Characters[u.Character]
-	var icon = char.Icon
-	GameHUD.View.DrawImage(x+width/2-tsz/2-6, y-height/2+tsz/2+6, tsz, tsz, 0, SlotId, col, noMask)
-	GameHUD.View.DrawImage(x+width/2-tsz/2-6, y-height/2+tsz/2+6, -tsz, tsz, 0, icon, col, noMask)
-
-	TooltipTexts[1].Set()
-	if !u.IsOffLaner() {
-		if u.Values.MaxHealth > 0 {
-			if !u.IsSummoned() || u.Health == u.Values.MaxHealth {
-				TooltipTexts[1].Append("🌗🟩", Tags[IconHeart], u.Values.MaxHealth, " health\n")
-			} else if u.IsSummoned() {
-				TooltipTexts[1].Append("🌗🟩", Tags[IconHeart], u.Health, "/", u.Values.MaxHealth, " health\n")
-			}
-		}
+	if u.Values.Role >= RoleDefender && value < 0 {
+		value = min(value+u.Values.ActPoints, 0)
 	}
-	if u.Values.MoveSpeed > 0 {
-		TooltipTexts[1].Append("🌗🟨", Tags[IconLeftRight], u.Values.MoveSpeed, " speed\n")
-	}
-	if u.Values.ActPoints > 0 {
-		TooltipTexts[1].Append("🟧", Tags[char.RoleIcon], u.Values.ActPoints, " ", char.ActPointsName, "\n")
-	}
-	if u.Values.ActRange > 0 {
-		TooltipTexts[1].Append("🌗🟧", Tags[IconRange], u.Values.ActRange, " range\n")
-	}
-	if u.Values.ActTimer > 0 {
-		var canAct = u.ActTimer < 0 || u.ActTimer > u.Values.ActTimer
-		if !u.IsSummoned() || canAct || number.IsNaN(u.ActTimer) || u.State == StateDecaying {
-			TooltipTexts[1].Append("🌗🟪", Tags[IconTimer], number.Round(u.Values.ActTimer, 1), "s rest\n")
-		} else if u.IsSummoned() {
-			TooltipTexts[1].Append("🌗🟪", Tags[IconTimer], max(number.Round(u.ActTimer, 1), 0), "/",
-				number.Round(u.Values.ActTimer, 1), "s rest\n")
-		}
-	}
-	if u.Values.RespawnTimer > 0 {
-		if !u.IsSummoned() || u.State != StateDecaying {
-			TooltipTexts[1].Append("🌗🟦", Tags[IconLoop], number.Round(u.Values.RespawnTimer, 1), "s respawn\n")
-		} else if u.Values.RespawnTimer > 0 && u.State == StateDecaying && u.HurtTimer > -u.Values.RespawnTimer {
-			TooltipTexts[1].Append("🌗🟦", Tags[IconLoop], max(number.Round(u.Values.RespawnTimer+u.HurtTimer, 1), 0), "/",
-				number.Round(char.Values.RespawnTimer, 1), "s respawn\n")
-		}
-	}
-	TooltipLabel.Shape = geometry.NewRectangle(x, y+6, width-14, height, 0)
-	TooltipLabel.Details.TextAlignX, TooltipLabel.Details.TextLineHeight = 0, 10
-	TooltipLabel.Text = TooltipTexts[1].Get()
-	GameHUD.View.DrawObject(TooltipLabel)
-
-	TooltipLabel.Text = TooltipTexts[2].Set("\n\n\n\n\n\n⬜", char.Info)
-	GameHUD.View.DrawObject(TooltipLabel)
-
-	TooltipLabel.Details.TextAlignX = 1
-	TooltipLabel.Text = TooltipTexts[3].Set("\n\n\n⬜", u.Values.Name, "\n", Tags[char.RoleIcon], char.RoleName)
-	GameHUD.View.DrawObject(TooltipLabel)
-
-	if PinnedUnit == u {
-		var pin = UserInterface.Crops("icons-text")[IconLocked]
-		var sz float32 = TileSize / 2
-		GameHUD.View.DrawImage(x-width/2+3, y-height/2+3, sz*0.8, sz*0.8, 0, pin, palette.White, geometry.Area{})
-	}
+	return u.Health + value
 }
+func (u *Unit) AffectHealth(value int) {
+	var newHealth = u.ProjectHealth(value)
+	if newHealth != u.Health {
+		u.Health = newHealth
 
-func (u *Unit) TakeDamage(damage int) {
-	if u.Values.Role >= RoleDefender {
-		damage = max(damage-u.Values.ActPoints, 0)
-	}
-
-	if u.IsAlive() && u.State != StateDecaying {
-		u.Health -= damage
-		u.HurtTimer = 0.5
-	}
-}
-func (u *Unit) Heal(health int) {
-	if u.Values.Role <= RoleDefender && u.IsAlive() {
-		u.Health = min(u.Health+health, u.Values.MaxHealth)
-		// TODO: particles
+		if value < 0 {
+			u.HurtTimer = 0.5
+		} else if value > 0 {
+			// TODO: particles
+		}
 	}
 }
 
 func (u *Unit) AddEffect(effect Effect) {
 	var _, has = u.Effects[effect]
-	if has {
+	if !has {
+		u.Effects[effect] = Effects[effect]
+		u.TickEffect(effect)
+	}
+}
+func (u *Unit) TickEffect(effect Effect) {
+	var _, has = u.Effects[effect]
+	if !has {
 		return
 	}
-	var values = Effects[effect]
-	u.Effects[effect] = values
-
+	var values = u.Effects[effect]
 	u.Values.MaxHealth += values.MaxHealth
-	u.Values.RespawnTimer += values.RespawnTimer
+	u.Values.ReviveTimer += values.ReviveTimer
 	u.Values.MoveSpeed += values.MoveSpeed
 	u.Values.ActPoints += values.ActPoints
 	u.Values.ActRange += values.ActRange
 	u.Values.ActTimer += values.ActTimer
+
+	u.AffectHealth(-values.EffectTickDamage)
 }
 func (u *Unit) RemoveEffect(effect Effect) {
 	var _, has = u.Effects[effect]
@@ -397,9 +315,9 @@ func (u *Unit) RemoveEffect(effect Effect) {
 		return
 	}
 
-	var values = Effects[effect]
+	var values = u.Effects[effect]
 	u.Values.MaxHealth -= values.MaxHealth
-	u.Values.RespawnTimer -= values.RespawnTimer
+	u.Values.ReviveTimer -= values.ReviveTimer
 	u.Values.MoveSpeed -= values.MoveSpeed
 	u.Values.ActPoints -= values.ActPoints
 	u.Values.ActRange -= values.ActRange
@@ -463,6 +381,7 @@ func (u *Unit) applyState() {
 	var enemyEntranceInRange = canBeActedUpon && entrance != nil
 	var hasMeleeTarget = u.UnitFront != nil && u.Team != u.UnitFront.Team
 	var melee = canAct && (hasMeleeTarget || enemyEntranceInRange) && u.Values.ActRange == 1
+	var canMove = !u.IsAtWall && u.IsGrounded
 
 	var closestDistX = number.ValueBiggest[float32]()
 	var actRange = float32(u.Values.ActRange) * TileSize
@@ -497,7 +416,7 @@ func (u *Unit) applyState() {
 
 	if u.State == StateMoving && u.IsAlive() && (!u.IsGrounded || u.MoveSpeedX < 0.01) {
 		u.State = StateIdling
-	} else if u.State == StateIdling && u.UnitFront == nil && !u.IsAtWall && u.IsGrounded && u.IsAlive() && !canBeActedUpon {
+	} else if u.State == StateIdling && u.UnitFront == nil && canMove && u.IsAlive() && !canBeActedUpon {
 		u.State = StateMoving
 	}
 
@@ -563,7 +482,7 @@ func (u *Unit) actUponState() {
 			u.VelocityX = 0
 		}
 	case StateMoving:
-		u.Anim.Frames = Characters[u.Character].Animations.Walk
+		u.Anim.Frames = Characters[u.Character].Animations.Move
 		u.Anim.IsLooping, u.Anim.FPS = true, u.MoveSpeedX*0.25
 
 		if u.IsLaner() && u.IsInsideEnemyBase(TileSize/1.5) {
@@ -612,11 +531,11 @@ func (u *Unit) actUponState() {
 			return // defenders cannot deal damage
 		}
 
-		var dmg = u.Values.ActPoints
+		var dmg = max(u.Values.ActPoints, 0)
 		var canBeActedUpon, e = u.EnemyEntrance()
 		if u.Values.ActRange == 1 {
 			if u.UnitFront != nil {
-				u.UnitFront.TakeDamage(dmg)
+				u.UnitFront.AffectHealth(-dmg)
 				PlaySound(Characters[u.Character].Sounds.HitFlesh)
 			} else if canBeActedUpon && e != nil {
 				e.TakeDamage(dmg)
@@ -629,6 +548,7 @@ func (u *Unit) actUponState() {
 			break
 		}
 
+		var projectileKind = Characters[u.Character].Projectile.Kind
 		var t = u.ClosestEnemyInRange
 		if t != nil && !t.IsOffLaner() {
 			var prediction = t.VelocityX
@@ -639,7 +559,7 @@ func (u *Unit) actUponState() {
 			if u.Team == TeamEnemy {
 				offsetX = -u.Width / 3
 			}
-			var proj = u.NewProjectile(u.X+offsetX, u.Y, u.Z, t.X+prediction, t.Y+t.Height/2-8, t.Z, dmg, ProjectileArrow, nil)
+			var proj = u.NewProjectile(u.X+offsetX, u.Y, u.Z, t.X+prediction, t.Y+t.Height/2-8, t.Z, dmg, projectileKind, nil)
 			Projectiles = append(Projectiles, proj)
 			PlaySound(Characters[u.Character].Sounds.ActTrigger)
 		} else if canBeActedUpon && e != nil {
@@ -647,7 +567,7 @@ func (u *Unit) actUponState() {
 			if e.Kind == EntranceTallGate {
 				y += TileSize
 			}
-			Projectiles = append(Projectiles, u.NewProjectile(u.X, u.Y, u.Z, x, y, laneZs[e.Lane], dmg, ProjectileArrow, e))
+			Projectiles = append(Projectiles, u.NewProjectile(u.X, u.Y, u.Z, x, y, laneZs[e.Lane], dmg, projectileKind, e))
 			PlaySound(Characters[u.Character].Sounds.ActTrigger)
 		}
 	case StateActCharging, StateActRecovering, StateActEnd: // empty
@@ -666,8 +586,7 @@ func (u *Unit) actUponState() {
 		u.Blood.EmitFromLine(BloodMultiplier, u.X, u.Y-6, u.X, u.Y+6)
 	case StateDying, StateDyingEnd: // empty
 	case StateDecaying:
-		var respawnTimer = -u.Values.RespawnTimer
-		if u.HurtTimer < respawnTimer || u.IsGarrisoner() {
+		if u.HurtTimer < -u.Values.ReviveTimer || u.IsGarrisoner() {
 			Units = collection.Remove(Units, u)
 			if PinnedUnit == u {
 				PinnedUnit = nil
@@ -678,7 +597,7 @@ func (u *Unit) actUponState() {
 				u.PrepareSpawn()
 			}
 		} else if u.HurtTimer < 0 {
-			u.Details.Tint = color.RGBA(255, 255, 255, byte(number.Map(u.HurtTimer, 0, respawnTimer, 255, 0)))
+			u.Details.Tint = color.RGBA(255, 255, 255, byte(number.Map(u.HurtTimer, 0, -u.Values.ReviveTimer, 255, 0)))
 		}
 	}
 }
@@ -773,13 +692,17 @@ func (u *Unit) applyCollisions() {
 	}
 }
 func (u *Unit) draw() {
+	if len(u.Anim.Frames) == 0 {
+		return
+	}
+
 	var frame = u.Anim.Frame()
 	var crop = frame.CropArea()
 	u.ImageId, u.Width, u.Height = frame, crop.Width, crop.Height
 
 	if u.IsAlive() && !u.IsGarrisoner() {
 		var hb = u.Hitbox()
-		DrawShadow(u.X, u.Z, hb.Width, hb.Height*0.1, 0, u.Mask)
+		DrawShadow(hb.X, u.Z, hb.Width, hb.Height*0.1, 0, u.Mask)
 	}
 
 	if u.Team == TeamEnemy {
