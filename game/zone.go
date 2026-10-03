@@ -30,6 +30,7 @@ const CloudsNone, CloudsNormal, CloudsWindy, CloudsCount CloudsKind = 0, 1, 2, 3
 const (
 	ZoneField ZoneKind = iota
 	ZoneRuins
+
 	ZoneForest
 	ZoneSwamp
 	ZoneDesert
@@ -37,9 +38,11 @@ const (
 	ZoneDocks
 	ZoneOcean
 	ZoneGlacier
+
 	ZoneCave
 	ZoneMine
 	ZoneHell
+
 	ZoneCount
 	ZoneLayerOffset = 10
 )

@@ -55,7 +55,7 @@ func InitScene() {
 	var view = graphics.NewView(1)
 	View = &view
 
-	var layers, decor = assets.LoadTileLayersFromTiled("data/map.tmx")
+	var layers, decor = assets.LoadTileLayersFromTiled("data/decor.tmx")
 	Layers = layers
 	Decor = assets.LoadAtlas(decor, "data/decor.xml")
 
@@ -119,16 +119,12 @@ func UpdateTitleScreen() {
 
 	gui.Scale = View.Zoom
 	var hud = gui.AreaHUD(0.5, 1, 0, 0)
-	gui.Button(part1, geometry.NewArea(hud.X-72, hud.Y-TileSize*5.5, 140, 28), geometry.Area{}, ThemeUI, true)
+	gui.Button(story, geometry.NewArea(hud.X, hud.Y-TileSize*5.5, 120, 28), geometry.Area{}, ThemeUI, true)
 	if gui.IsJustClicked() {
 		InGame = true
 		PlayAmbience(CurrentZone.Kind)
 	}
-	gui.Button(part2, geometry.NewArea(hud.X+72, hud.Y-TileSize*5.5, 140, 28), geometry.Area{}, ThemeUI, false)
-	if gui.IsFocused() {
-		mouse.SetCursor(cursor.NotAllowed)
-	}
-	gui.Button(arena, geometry.NewArea(hud.X, hud.Y-TileSize*4.5, 100, 28), geometry.Area{}, ThemeUI, false)
+	gui.Button(arena, geometry.NewArea(hud.X, hud.Y-TileSize*4.5, 120, 28), geometry.Area{}, ThemeUI, false)
 	if gui.IsFocused() {
 		mouse.SetCursor(cursor.NotAllowed)
 	}
@@ -226,8 +222,7 @@ func DeltaTimeScaled() float32 {
 var highlightCursorColors = map[int]uint{
 	cursor.Arrow: palette.LightGray, cursor.Hand: palette.White, cursor.NotAllowed: palette.Red,
 }
-var part1, part2 = Tags[IconBook] + "Part 1: Southward", Tags[IconBook] + "Part 2: Northward"
-var arena = Tags[IconTower] + "Arena"
+var story, arena = Tags[IconBook] + "Story Mode", Tags[IconTower] + "Arena Mode"
 var settings, credits, exit = Tags[IconGear] + "Settings", Tags[IconHand] + "Credits", Tags[IconDoor] + "Exit"
 
 func mirrorGarrisonLanes() {

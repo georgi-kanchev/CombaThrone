@@ -147,7 +147,7 @@ func InitCharacters() {
 		"🟩"+Tags[IconPlus]+"🟧"+"1 "+Tags[IconSword]+"damage ⬜upon killing an 🟥"+Tags[IconUnit]+"enemy⬜.")
 	Characters[CharGunnerBandit] = NewCharacter(ZoneRuins, geometry.NewRoundedRectangle(-1, 7, 20, 33, 0, 1),
 		Values{Name: "Gunner\nBandit", Wage: 20, Role: RoleRanger,
-			MaxHealth: 14, MoveSpeed: 20, ActPoints: 8, ActTimer: 5.0, ActRange: 8, ReviveTimer: 30.0},
+			MaxHealth: 14, MoveSpeed: 20, ActPoints: 8, ActTimer: 8.0, ActRange: 8, ReviveTimer: 30.0},
 		"🟩"+Tags[IconPlus]+"🟧"+"4 "+Tags[IconSword]+"damage⬜ 🟥"+Tags[IconPlus]+"🌗🟪3s "+Tags[IconTimer]+"rest⬜"+
 			" when melee vs 🟥"+Tags[IconUnit]+"enemy⬜.",
 		CharProjectile{ParabolaMultiplier: 0.05, Speed: 3.5, Kind: ProjectileBullet})
