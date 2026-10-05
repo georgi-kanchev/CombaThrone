@@ -24,7 +24,8 @@ type HUD struct {
 
 	HoverHighlight *graphics.Object
 
-	Pickups []*Pickup
+	Pickups         []*Pickup // only 4 slots are for the UI pickups, rest of the slots are for coins (during animation, not UI)
+	PickupsCarrying int
 
 	SummonIndex              int
 	SummonDragX, SummonDragY float32
@@ -130,7 +131,7 @@ func NewHUD() *HUD {
 
 	return &HUD{
 		View: &view, ZoneInfo: &info, Top: &top, TeamGlory: glory, Coins: &coins, UnitsPanel: &unitsPanel,
-		HoverHighlight: &highlight, SummonIndex: -1, Pickups: make([]*Pickup, 4),
+		HoverHighlight: &highlight, SummonIndex: -1,
 	}
 }
 
@@ -143,12 +144,16 @@ func (h *HUD) UnitIconPosition(index int) (x, y float32) {
 	return h.UnitsPanel.X + float32(j)*width + offX, h.UnitsPanel.Y + float32(i)*height + offY
 }
 func (h *HUD) FreePickupSlot() int {
-	for i, p := range h.Pickups {
-		if p == nil {
-			return i
+	var freeSlot = 0
+	for _, p := range h.Pickups {
+		if p.Kind != PickupCoin && p.SlotUI == freeSlot {
+			freeSlot = p.SlotUI + 1
 		}
 	}
-	return -1
+	if freeSlot >= 4 {
+		return -1
+	}
+	return freeSlot
 }
 func (h *HUD) PickupSlotPosition(slot int) (x, y float32) {
 	switch slot {
@@ -358,7 +363,12 @@ func (u *Unit) DrawTooltip(shape geometry.Shape, bench bool) {
 		TooltipTexts[1].Append("🌗🟨", Tags[IconLeftRight], u.Values.MoveSpeed, " speed\n")
 	}
 	if u.Values.ActPoints > 0 {
-		TooltipTexts[1].Append("🟧", Tags[char.RoleIcon], u.Values.ActPoints, " ", char.ActPointsName, "\n")
+		if u.Values.Role == RoleCollector && u.IsSummoned() {
+			var name = char.ActPointsName
+			TooltipTexts[1].Append("🟧", Tags[char.RoleIcon], len(u.Carrying), "/", u.Values.ActPoints, " ", name, "\n")
+		} else {
+			TooltipTexts[1].Append("🟧", Tags[char.RoleIcon], u.Values.ActPoints, " ", char.ActPointsName, "\n")
+		}
 	}
 	if u.Values.ActRange > 0 {
 		TooltipTexts[1].Append("🌗🟧", Tags[IconRange], u.Values.ActRange, " range\n")

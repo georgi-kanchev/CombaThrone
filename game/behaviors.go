@@ -68,10 +68,10 @@ var Behaviors = map[CharacterKind]func(self *Unit){
 		}
 	},
 	CharKid: func(self *Unit) {
-		if self.Carrying != nil {
-			self.RemoveEffect(EffectKid)
-		} else {
+		if len(self.Carrying) == 0 {
 			self.AddEffect(EffectKid)
+		} else {
+			self.RemoveEffect(EffectKid)
 		}
 	},
 	CharHorse: func(self *Unit) {

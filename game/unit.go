@@ -9,6 +9,7 @@ import (
 	"pure-game-kit/packages/utility/color"
 	"pure-game-kit/packages/utility/color/palette"
 	"pure-game-kit/packages/utility/number"
+	"pure-game-kit/packages/utility/point"
 	"pure-game-kit/packages/utility/random"
 )
 
@@ -38,7 +39,7 @@ type Unit struct {
 
 	UnitFront, UnitBehind, ClosestEnemyInRange *Unit
 
-	Carrying *Pickup
+	Carrying []*Pickup
 
 	LastX, LastY, MoveSpeedX float32
 	ActTimer, HurtTimer      float32 // negative values can be used for "time since last"
@@ -105,7 +106,7 @@ func NewUnit(character CharacterKind, team Team, lane Lane) *Unit {
 func (u *Unit) Hitbox(additionalWidth ...float32) geometry.Shape {
 	var char = Characters[u.Character]
 	var hitbox = char.Hitbox
-	if (u.Team == TeamEnemy && !u.IsReturning) || (u.Team == TeamAlly && u.IsReturning) {
+	if u.IsFacingLeft() {
 		hitbox.X *= -1
 	}
 	hitbox.X, hitbox.Y = u.X+hitbox.X, u.Y+hitbox.Y
@@ -169,6 +170,9 @@ func (u *Unit) IsOnScreen() bool {
 }
 func (u *Unit) IsAlive() bool {
 	return u.Values.MaxHealth == 0 || u.Health > 0
+}
+func (u *Unit) IsFacingLeft() bool {
+	return (u.Team == TeamEnemy && !u.IsReturning) || (u.Team == TeamAlly && u.IsReturning)
 }
 
 func (u *Unit) PrepareSpawn() {
@@ -247,7 +251,17 @@ func (u *Unit) Update() {
 		u.applyCollisions()
 	}
 	u.draw()
-	u.Carrying.Update()
+	for i, p := range u.Carrying {
+		p.Update()
+		var hb = u.Hitbox()
+		var offsetX = hb.Width/2 + TileSize/3
+		if u.IsFacingLeft() {
+			offsetX *= -1
+		}
+
+		p.Mask = u.Mask
+		p.X, p.Y = point.MoveToPointSmooth(p.X, p.Y, hb.X+offsetX, hb.Y-float32(i)*TileSize/2, 0.4)
+	}
 
 	if TimeScale > 0 {
 		u.Blood.Update()
@@ -506,16 +520,19 @@ func (u *Unit) actUponState() {
 			u.HurtTimer = 0 // no instant delete - to have time to play glory text animation etc
 			u.State = StateDecaying
 		}
-		if u.IsOffLaner() && u.IsReturning && u.Carrying != nil && !u.IsOutsideOwnBase() {
-			u.Carrying.Target = nil
-			u.Carrying.Mask = geometry.Area{}
-			u.Carrying.SlotUI = GameHUD.FreePickupSlot()
-			if u.Carrying.Kind == PickupCoin {
-				u.Carrying.SlotUI = 0
+		if u.IsOffLaner() && u.IsReturning && !u.IsOutsideOwnBase() {
+			for _, c := range u.Carrying {
+				c.Mask = geometry.Area{}
+				c.SlotUI = GameHUD.FreePickupSlot()
+				if c.Kind == PickupCoin {
+					c.SlotUI = len(GameHUD.Pickups)
+				} else {
+					GameHUD.PickupsCarrying--
+				}
+				GameHUD.Pickups = collection.Add(GameHUD.Pickups, c)
+				Pickups = collection.Remove(Pickups, c)
 			}
-			GameHUD.Pickups[u.Carrying.SlotUI] = u.Carrying
-			collection.Remove(Pickups, u.Carrying)
-			u.Carrying = nil
+			u.Carrying = collection.Clear(u.Carrying)
 		}
 	case StateActStart: // random delay to balance same sided units melee VVVVVVV
 		u.ActTimer = u.Values.ActTimer + random.Range[float32](0, 0.1)
@@ -680,13 +697,24 @@ func (u *Unit) applyCollisions() {
 		}
 	}
 
-	if u.Values.Role == RoleCollector && GameHUD.FreePickupSlot() >= 0 && u.Carrying == nil {
-		for _, p := range Pickups {
-			if p != nil && p.Target == nil && p.Lane == u.Lane && p.Overlaps(hb) {
-				u.Carrying = p
-				p.Target = u
+	if u.Values.Role != RoleCollector {
+		return
+	}
+
+	var canCarry = len(u.Carrying) < u.Values.ActPoints
+	var emptySlot = GameHUD.FreePickupSlot() >= 0
+	var canFitNext = len(GameHUD.Pickups)+GameHUD.PickupsCarrying+1 <= 4
+	var allowed = emptySlot && canCarry && canFitNext
+	for _, p := range Pickups {
+		if p != nil && p.Lane == u.Lane && p.Overlaps(hb) && (allowed || p.Kind == PickupCoin) {
+			p.HasShadow = false
+			u.Carrying = collection.Add(u.Carrying, p)
+			Pickups = collection.Remove(Pickups, p)
+			if p.Kind != PickupCoin {
+				GameHUD.PickupsCarrying++
+			}
+			if len(u.Carrying) >= u.Values.ActPoints {
 				u.IsReturning = true
-				collection.Remove(Pickups, p)
 			}
 		}
 	}
@@ -705,11 +733,8 @@ func (u *Unit) draw() {
 		DrawShadow(hb.X, u.Z, hb.Width, hb.Height*0.1, 0, u.Mask)
 	}
 
-	if u.Team == TeamEnemy {
+	if u.IsFacingLeft() {
 		u.Width = -crop.Width
-	}
-	if u.IsReturning {
-		u.Width = -u.Width
 	}
 	View.DrawObject(&u.Object)
 	u.Width = crop.Width

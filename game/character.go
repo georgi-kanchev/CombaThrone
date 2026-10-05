@@ -75,7 +75,7 @@ var CharactersFlying = map[CharacterKind]struct{}{CharVulture: {}, CharRaven: {}
 func NewCharacter(origin ZoneKind, hitbox geometry.Shape, stats Values, info string, proj ...CharProjectile) *Character {
 	var roleIcons = [RoleCount]Icon{IconSword, IconBow, IconShield, IconDebuff, IconHand, IconBag}
 	var roleNames = [RoleCount]string{"Fighter", "Ranger", "Defender", "Griefer", "Supplier", "Collector"}
-	var actNames = [RoleCount]string{"damage", "damage", "block", "grief", "buff", "pickup"}
+	var actNames = [RoleCount]string{"damage", "damage", "block", "grief", "buff", "pickups"}
 
 	if len(proj) == 0 {
 		proj = []CharProjectile{CharProjectile{ParabolaMultiplier: 1, Speed: 1}}
@@ -111,9 +111,9 @@ func InitCharacters() {
 	Characters[CharSmith] = NewCharacter(ZoneField, geometry.NewRoundedRectangle(0, 0, 24, 48, 0, 1),
 		Values{Name: "Smith", Wage: 20, Role: RoleDefender, MaxHealth: 40, MoveSpeed: 12,
 			ActPoints: 1, ActTimer: 5.0, ActRange: 1, ReviveTimer: 20.0},
-		"Pushes the 🟥"+Tags[IconUnit]+"enemy ⬜in front.")
+		"Pushes the 🟥"+Tags[IconUnit]+"enemy⬜ in front.")
 	Characters[CharKid] = NewCharacter(ZoneField, geometry.NewRoundedRectangle(0, 4, 12, 24, 0, 1),
-		Values{Name: "Kid", Wage: 20, Role: RoleCollector, MoveSpeed: 20, ActPoints: 1, ReviveTimer: 20.0},
+		Values{Name: "Kid", Wage: 20, Role: RoleCollector, MoveSpeed: 20, ActPoints: 2, ReviveTimer: 20.0},
 		"🟩"+Tags[IconPlus]+"🌗🟨20 "+Tags[IconLeftRight]+"speed⬜ when 🟧"+Tags[IconBag]+"empty handed⬜.")
 	Characters[CharFisherman] = NewCharacter(ZoneField, geometry.NewRoundedRectangle(-4, 6, 20, 35, 0, 1),
 		Values{Name: "Fisherman", Wage: 20, Role: RoleGriefer, MoveSpeed: 15, ActTimer: 15.0, ReviveTimer: 20.0},
