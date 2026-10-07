@@ -54,17 +54,100 @@ const (
 	CharKid
 	CharFisherman
 	CharHorse
-	CharBrownBunny
-	CharWhiteBunny
+	CharHare
+	CharBunny
 
 	CharTroll
-	CharArbalestierGoblin
-	CharSkirmisherGoblin
-	CharStabberBandit
-	CharGunnerBandit
+	CharArbalestier
+	CharSpearlin
+	CharStabber
+	CharGunner
 	CharVulture
 	CharRaven
-	CharRedSnake
+	CharSerpent
+
+	CharPyromancer
+	CharHealer
+	CharToxicologist
+	CharWindspeaker
+	CharEssencialist
+	CharStormcaller
+	CharBear
+	CharWolf
+	CharBoar
+
+	CharShaman
+	CharCrook
+	CharBloater
+	CharOoze
+	CharToad
+	CharDrowned
+	CharTurtle
+	CharLizard
+	CharFrog
+
+	CharAnubis
+	CharWarlock
+	CharSkirmisher
+	CharArcher
+	CharPharaoh
+	CharMummy
+	CharCammel
+	CharHyena
+	CharScorpion
+
+	CharDemolitionist
+	CharCaptain
+	CharBuccaneer
+	CharCutthroat
+	CharCannoneer
+	CharRat
+	CharBlackbird
+	CharSongbird
+
+	CharMech
+	CharFlamethrower
+	CharSpearoid
+	CharTrapper
+	CharMechanic
+	CharTitatron
+	CharCachebot
+	CharBarrotor
+	CharEyeroller
+
+	CharBearalis
+	CharFrosty
+	CharDoombag
+	CharSatanClaws
+	CharFrooze
+	CharSnowman
+	CharElkling
+	CharElk
+
+	CharArachnid
+	CharBeetle
+	CharLarva
+	CharSpider
+	CharCentipede
+	CharBug
+	CharBat
+	CharViper
+
+	CharArtifact
+	CharAntique
+	CharMineral
+	CharGeode
+	CharElemental
+	CharTrolley
+	CharWisp
+	CharSlime
+
+	CharDiabolist
+	CharHellswine
+	CharDemon
+	CharImp
+	CharGoregoo
+	CharEldritch
 
 	CharCount
 )
@@ -121,10 +204,10 @@ func InitCharacters() {
 	Characters[CharHorse] = NewCharacter(ZoneField, geometry.NewRoundedRectangle(0, 8, 48, 32, 0, 0.5),
 		Values{Name: "Horse", Wage: 20, Role: RoleSupplier, MoveSpeed: 60, ActPoints: 20, ActRange: 3, ReviveTimer: 20.0},
 		"🟧"+Tags[IconHand]+"Speeds up 🌗🟧"+Tags[IconRange]+"nearby 🟩"+Tags[IconUnit]+"allies⬜.")
-	Characters[CharBrownBunny] = NewCharacter(ZoneField, geometry.NewRoundedRectangle(0, 0, 16, 16, 0, 1),
+	Characters[CharHare] = NewCharacter(ZoneField, geometry.NewRoundedRectangle(0, 0, 16, 16, 0, 1),
 		Values{Name: "Brown\nBunny", Wage: 20, Role: RoleCollector, MoveSpeed: 30, ActPoints: 1, ReviveTimer: 5.0},
 		"Very cute and soft.")
-	Characters[CharWhiteBunny] = NewCharacter(ZoneField, geometry.NewRoundedRectangle(0, 0, 16, 16, 0, 1),
+	Characters[CharBunny] = NewCharacter(ZoneField, geometry.NewRoundedRectangle(0, 0, 16, 16, 0, 1),
 		Values{Name: "White\nBunny", Wage: 20, Role: RoleCollector, MoveSpeed: 30, ActPoints: 1, ReviveTimer: 5.0},
 		"Very cute and soft.")
 
@@ -132,25 +215,25 @@ func InitCharacters() {
 		Values{Name: "Troll", Wage: 20, Role: RoleDefender, MaxHealth: 60, MoveSpeed: 10,
 			ActPoints: 2, ActTimer: 8.0, ActRange: 1, ReviveTimer: number.NaN()},
 		"Cannot 🌗🟦"+Tags[IconLoop]+"revive. Pushes 🌗🟧"+Tags[IconRange]+"nearby 🟥"+Tags[IconUnit]+"enemies⬜ away.")
-	Characters[CharSkirmisherGoblin] = NewCharacter(ZoneRuins, geometry.NewRoundedRectangle(-2, 0, 18, 30, 0, 1),
+	Characters[CharSpearlin] = NewCharacter(ZoneRuins, geometry.NewRoundedRectangle(-2, 0, 18, 30, 0, 1),
 		Values{Name: "Skirmisher\nGoblin", Wage: 20, Role: RoleFighter,
 			MaxHealth: 12, MoveSpeed: 25, ActPoints: 2, ActTimer: 1.5, ActRange: 1, ReviveTimer: 20.0},
 		"🟩"+Tags[IconPlus]+"🟧"+"2 "+Tags[IconSword]+"damage ⬜against "+Tags[IconShield]+"Defenders.")
-	Characters[CharArbalestierGoblin] = NewCharacter(ZoneRuins, geometry.NewRoundedRectangle(-2, 0, 18, 30, 0, 1),
+	Characters[CharArbalestier] = NewCharacter(ZoneRuins, geometry.NewRoundedRectangle(-2, 0, 18, 30, 0, 1),
 		Values{Name: "Arbalestier\nGoblin", Wage: 20, Role: RoleRanger,
 			MaxHealth: 12, MoveSpeed: 25, ActPoints: 6, ActTimer: 3.0, ActRange: 4, ReviveTimer: 20.0},
 		"🟩"+Tags[IconPlus]+"🟧"+"2 "+Tags[IconSword]+"damage ⬜against "+Tags[IconShield]+"Defenders.",
 		CharProjectile{ParabolaMultiplier: 0.2, Speed: 2})
-	Characters[CharStabberBandit] = NewCharacter(ZoneRuins, geometry.NewRoundedRectangle(-4, 7, 20, 33, 0, 1),
+	Characters[CharStabber] = NewCharacter(ZoneRuins, geometry.NewRoundedRectangle(-4, 7, 20, 33, 0, 1),
 		Values{Name: "Stabber\nBandit", Wage: 20, Role: RoleFighter,
 			MaxHealth: 16, MoveSpeed: 20, ActPoints: 2, ActTimer: 1.0, ActRange: 1, ReviveTimer: 30.0},
 		"🟩"+Tags[IconPlus]+"🟧"+"1 "+Tags[IconSword]+"damage ⬜upon killing an 🟥"+Tags[IconUnit]+"enemy⬜.")
-	Characters[CharGunnerBandit] = NewCharacter(ZoneRuins, geometry.NewRoundedRectangle(-1, 7, 20, 33, 0, 1),
+	Characters[CharGunner] = NewCharacter(ZoneRuins, geometry.NewRoundedRectangle(-1, 7, 20, 33, 0, 1),
 		Values{Name: "Gunner\nBandit", Wage: 20, Role: RoleRanger,
 			MaxHealth: 14, MoveSpeed: 20, ActPoints: 8, ActTimer: 8.0, ActRange: 8, ReviveTimer: 30.0},
 		"🟩"+Tags[IconPlus]+"🟧"+"4 "+Tags[IconSword]+"damage⬜ 🟥"+Tags[IconPlus]+"🌗🟪3s "+Tags[IconTimer]+"rest⬜"+
 			" when melee vs 🟥"+Tags[IconUnit]+"enemy⬜.",
-		CharProjectile{ParabolaMultiplier: 0.05, Speed: 3.5, Kind: ProjectileBullet})
+		CharProjectile{ParabolaMultiplier: 0.05, Speed: 3.5, Kind: ProjectileSmallBullet})
 	Characters[CharVulture] = NewCharacter(ZoneRuins, geometry.NewRoundedRectangle(0, 0, 32, 32, 0, 1),
 		Values{Name: "Vulture", Wage: 20, Role: RoleSupplier, MoveSpeed: 40, ActRange: 3, ReviveTimer: 20.0},
 		"🟧"+Tags[IconHand]+"Faster 🌗🟦"+Tags[IconLoop]+"revive⬜ for 🌗🟧"+Tags[IconRange]+"nearby 🟥"+
@@ -158,7 +241,7 @@ func InitCharacters() {
 	Characters[CharRaven] = NewCharacter(ZoneRuins, geometry.NewRoundedRectangle(0, 4, 30, 24, 0, 1),
 		Values{Name: "Raven", Wage: 20, Role: RoleGriefer, MoveSpeed: 40, ActPoints: 10, ActRange: 3, ReviveTimer: 20.0},
 		"🟧"+Tags[IconDebuff]+"Weakens⬜ 🌗🟧"+Tags[IconRange]+"nearby 🟥"+Tags[IconUnit]+"enemies⬜.")
-	Characters[CharRedSnake] = NewCharacter(ZoneRuins, geometry.NewRoundedRectangle(0, 0, 30, 18, 0, 1),
+	Characters[CharSerpent] = NewCharacter(ZoneRuins, geometry.NewRoundedRectangle(0, 0, 30, 18, 0, 1),
 		Values{Name: "Red Snake", Wage: 20, Role: RoleGriefer, MoveSpeed: 10, ActPoints: 10, ActRange: 3, ReviveTimer: 10.0},
 		"🟧"+Tags[IconDebuff]+"Slows down 🌗🟧"+Tags[IconRange]+"nearby 🟥"+Tags[IconUnit]+"enemies⬜.")
 

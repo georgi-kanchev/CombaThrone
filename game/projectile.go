@@ -29,11 +29,34 @@ type Projectile struct {
 }
 
 const (
-	ProjectileArrow, ProjectileBullet, ProjectileCount ProjectileKind = 0, 1, 2
+	ProjectileArrow ProjectileKind = iota
+	ProjectileSmallBullet
+	ProjectileSkull
+	ProjectileBigRock
+	ProjectileSmallEllipse
+	ProjectileBigBullet
+	ProjectileBarrel
+	ProjectileSmallRock
+	ProjectileMediumBall
+	ProjectileBigBall
+	ProjectileCannonBall1
+	ProjectileSmallSpit
+	ProjectileSmallBall
+	ProjectileBigEllipse
+	ProjectileCannonBall2
+	ProjectileCannonBall3
+	ProjectileMediumSpit
+	ProjectileFrozenSpit
+	ProjectileBigSpit
+	ProjectileRock
+	ProjectileRedPotion
+	ProjectileGreenPotion
+	ProjectileYellowPotion
+	ProjectileCount
 )
 
 var Projectiles, ProjectilesBehind []*Projectile = make([]*Projectile, 0, 32), make([]*Projectile, 0, 32)
-var ProjectilesFadeOutTimes = [ProjectileCount]float32{ProjectileArrow: 10, ProjectileBullet: 0.1}
+var ProjectilesFadeOutTimes = [ProjectileCount]float32{ProjectileArrow: 10, ProjectileSmallBullet: 0.1}
 
 func (u *Unit) NewProjectile(x, y, z, targetX, targetY, targetZ float32, value int,
 	kind ProjectileKind, enemyEntrance *Entrance) *Projectile {

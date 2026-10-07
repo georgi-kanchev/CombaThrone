@@ -143,9 +143,9 @@ var Behaviors = map[CharacterKind]func(self *Unit){
 			}
 		}
 	},
-	CharSkirmisherGoblin:  behaviorGoblin,
-	CharArbalestierGoblin: behaviorGoblin,
-	CharStabberBandit: func(self *Unit) {
+	CharSpearlin:    behaviorGoblin,
+	CharArbalestier: behaviorGoblin,
+	CharStabber: func(self *Unit) {
 		if self.State != StateActTrigger || self.UnitFront == nil || self.UnitFront.ProjectHealth(-self.Values.ActPoints) > 0 {
 			return // i have not attacked or enemy will live from my attack, so bail
 		}
@@ -162,7 +162,7 @@ var Behaviors = map[CharacterKind]func(self *Unit){
 		eff.EffectInfo = text.New("🟩", Tags[IconPlus], "🟧", eff.ActPoints, " ", Tags[IconSword], "damage ⬜(Self)")
 		self.Effects[EffectStabberBandit] = eff // return back to unit
 	},
-	CharGunnerBandit: func(self *Unit) {
+	CharGunner: func(self *Unit) {
 		if self.UnitFront == nil {
 			self.RemoveEffect(EffectGunnerBandit1)
 			self.RemoveEffect(EffectGunnerBandit2)
@@ -194,7 +194,7 @@ var Behaviors = map[CharacterKind]func(self *Unit){
 			}
 		}
 	},
-	CharRedSnake: func(self *Unit) {
+	CharSerpent: func(self *Unit) {
 		for _, u := range Units {
 			if self != u && self.Team != u.Team {
 				if self.Lane == u.Lane+1 && number.IsWithin(u.X, self.X, float32(self.Values.ActRange)*TileSize) {

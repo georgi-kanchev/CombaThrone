@@ -79,7 +79,7 @@ func InitScene() {
 	Bases[TeamAlly] = NewBase(TeamAlly, BaseFort, Garrison3, [3]EntranceKind{EntranceNone, EntranceNone, EntranceNone})
 	Bases[TeamEnemy] = NewBase(TeamEnemy, BaseFortress, Garrison3, [3]EntranceKind{EntranceDoor, EntranceNone, EntranceNone})
 
-	Units = append(Units, NewUnit(CharStabberBandit, TeamEnemy, LaneMiddle))
+	Units = append(Units, NewUnit(CharStabber, TeamEnemy, LaneMiddle))
 	// Units = append(Units, NewUnit(CharMiner, TeamEnemy, LaneMiddle))
 
 	Pickups = append(Pickups, NewPickup(-240, PickupRelic, LaneLowerOff))
@@ -94,13 +94,13 @@ func InitScene() {
 	Player = NewPlayer()
 
 	Player.Units[0] = NewUnit(CharRaven, TeamAlly, 0)
-	Player.Units[1] = NewUnit(CharRedSnake, TeamAlly, 0)
+	Player.Units[1] = NewUnit(CharSerpent, TeamAlly, 0)
 	Player.Units[2] = NewUnit(CharVulture, TeamAlly, 0)
 	Player.Units[3] = NewUnit(CharKid, TeamAlly, 0)
-	Player.Units[4] = NewUnit(CharStabberBandit, TeamAlly, 0)
-	Player.Units[5] = NewUnit(CharSkirmisherGoblin, TeamAlly, 0)
-	Player.Units[6] = NewUnit(CharArbalestierGoblin, TeamAlly, 0)
-	Player.Units[7] = NewUnit(CharGunnerBandit, TeamAlly, 0)
+	Player.Units[4] = NewUnit(CharStabber, TeamAlly, 0)
+	Player.Units[5] = NewUnit(CharSpearlin, TeamAlly, 0)
+	Player.Units[6] = NewUnit(CharArbalestier, TeamAlly, 0)
+	Player.Units[7] = NewUnit(CharGunner, TeamAlly, 0)
 }
 
 //=================================================================
