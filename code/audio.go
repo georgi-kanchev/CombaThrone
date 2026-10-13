@@ -1,6 +1,7 @@
 package game
 
 import (
+	"game/code/constants/zone"
 	"pure-game-kit/packages/assets"
 	"pure-game-kit/packages/audio"
 	"pure-game-kit/packages/utility/random"
@@ -14,8 +15,8 @@ var AudioHitFlesh, AudioHitWood, AudioHitMetal []audio.Audio
 var AudioEventPositive, AudioEventNegative []audio.Audio
 
 func LoadAudio() {
-	ambiences[ZoneField] = assets.LoadMusic("data/music/ambience-plains.mp3")
-	AudioAmbience = audio.New(ambiences[ZoneField])
+	ambiences[zone.Field] = assets.LoadMusic("data/music/ambience-plains.mp3")
+	AudioAmbience = audio.New(ambiences[zone.Field])
 
 	AudioDoorOpen = append(AudioDoorOpen, audio.New(assets.LoadSound("data/sounds/door-open1.mp3", 4)))
 	AudioDoorOpen = append(AudioDoorOpen, audio.New(assets.LoadSound("data/sounds/door-open2.mp3", 4)))
@@ -71,7 +72,7 @@ func PlaySound(variations []audio.Audio) {
 	var sound = random.PickFrom(variations)
 	sound.Play()
 }
-func PlayAmbience(zone ZoneKind) {
+func PlayAmbience(zone zone.Enum) {
 	AudioAmbience.AssetId = ambiences[zone]
 	AudioAmbience.ApplyProperties()
 	AudioAmbience.Play()
@@ -79,4 +80,4 @@ func PlayAmbience(zone ZoneKind) {
 
 // private ========================================================
 
-var ambiences [ZoneCount]assets.AudioId
+var ambiences [zone.Count]assets.AudioId

@@ -244,12 +244,12 @@
     <group name="kid-icon" cropIndexes="119"/>
     <group name="kid-idle" cropIndexes="120 121 122 123"/>
     <group name="kid-move" cropIndexes="124 125 126 127 128 129"/>
-    <group name="brown-bunny-icon" cropIndexes="130"/>
-    <group name="brown-bunny-idle" cropIndexes="131 132"/>
-    <group name="brown-bunny-move" cropIndexes="133 134 135 136"/>
-    <group name="white-bunny-icon" cropIndexes="137"/>
-    <group name="white-bunny-idle" cropIndexes="138 139"/>
-    <group name="white-bunny-move" cropIndexes="140 141 142 143"/>
+    <group name="hare-icon" cropIndexes="130"/>
+    <group name="hare-idle" cropIndexes="131 132"/>
+    <group name="hare-move" cropIndexes="133 134 135 136"/>
+    <group name="bunny-icon" cropIndexes="137"/>
+    <group name="bunny-idle" cropIndexes="138 139"/>
+    <group name="bunny-move" cropIndexes="140 141 142 143"/>
     <group name="troll-icon" cropIndexes="144"/>
     <group name="troll-idle" cropIndexes="145 146 147 148"/>
     <group name="troll-move" cropIndexes="149 150 151 152 153 154"/>
@@ -257,80 +257,80 @@
     <group name="troll-recover" cropIndexes="157"/>
     <group name="troll-hurt" cropIndexes="158 159"/>
     <group name="troll-die" cropIndexes="160 161 162 163 164"/>
-    <group name="gunner-bandit-icon" cropIndexes="165"/>
-    <group name="gunner-bandit-idle" cropIndexes="166 167 168 169"/>
-    <group name="gunner-bandit-move" cropIndexes="170 171 172 173 174 175"/>
-    <group name="gunner-bandit-prepare" cropIndexes="176 177"/>
-    <group name="gunner-bandit-recover" cropIndexes="178 179"/>
-    <group name="gunner-bandit-hurt" cropIndexes="180 181"/>
-    <group name="gunner-bandit-die" cropIndexes="182 183 184 185"/>
-    <group name="stabber-bandit-icon" cropIndexes="208"/>
-    <group name="stabber-bandit-idle" cropIndexes="209 210 211 212"/>
-    <group name="stabber-bandit-move" cropIndexes="213 214 215 216 217 218"/>
-    <group name="stabber-bandit-prepare" cropIndexes="219 220"/>
-    <group name="stabber-bandit-recover" cropIndexes="221 222"/>
-    <group name="stabber-bandit-hurt" cropIndexes="223 224"/>
-    <group name="stabber-bandit-die" cropIndexes="225 226 227 228"/>
-    <group name="arbalestier-goblin-icon" cropIndexes="186"/>
-    <group name="arbalestier-goblin-idle" cropIndexes="187 188 189 190"/>
-    <group name="arbalestier-goblin-move" cropIndexes="191 192 193 194 195 196"/>
-    <group name="arbalestier-goblin-prepare" cropIndexes="197 198 199"/>
-    <group name="arbalestier-goblin-recover" cropIndexes="200 201"/>
-    <group name="arbalestier-goblin-hurt" cropIndexes="202 203"/>
-    <group name="arbalestier-goblin-die" cropIndexes="204 205 206 207"/>
-    <group name="skirmisher-goblin-icon" cropIndexes="229"/>
-    <group name="skirmisher-goblin-idle" cropIndexes="230 231 232 233"/>
-    <group name="skirmisher-goblin-move" cropIndexes="234 235 236 237 238 239"/>
-    <group name="skirmisher-goblin-prepare" cropIndexes="240 241"/>
-    <group name="skirmisher-goblin-recover" cropIndexes="242"/>
-    <group name="skirmisher-goblin-hurt" cropIndexes="243 244"/>
-    <group name="skirmisher-goblin-die" cropIndexes="245 246 247 248"/>
+    <group name="gunner-icon" cropIndexes="165"/>
+    <group name="gunner-idle" cropIndexes="166 167 168 169"/>
+    <group name="gunner-move" cropIndexes="170 171 172 173 174 175"/>
+    <group name="gunner-prepare" cropIndexes="176 177"/>
+    <group name="gunner-recover" cropIndexes="178 179"/>
+    <group name="gunner-hurt" cropIndexes="180 181"/>
+    <group name="gunner-die" cropIndexes="182 183 184 185"/>
+    <group name="stabber-icon" cropIndexes="208"/>
+    <group name="stabber-idle" cropIndexes="209 210 211 212"/>
+    <group name="stabber-move" cropIndexes="213 214 215 216 217 218"/>
+    <group name="stabber-prepare" cropIndexes="219 220"/>
+    <group name="stabber-recover" cropIndexes="221 222"/>
+    <group name="stabber-hurt" cropIndexes="223 224"/>
+    <group name="stabber-die" cropIndexes="225 226 227 228"/>
+    <group name="arbalestier-icon" cropIndexes="186"/>
+    <group name="arbalestier-idle" cropIndexes="187 188 189 190"/>
+    <group name="arbalestier-move" cropIndexes="191 192 193 194 195 196"/>
+    <group name="arbalestier-prepare" cropIndexes="197 198 199"/>
+    <group name="arbalestier-recover" cropIndexes="200 201"/>
+    <group name="arbalestier-hurt" cropIndexes="202 203"/>
+    <group name="arbalestier-die" cropIndexes="204 205 206 207"/>
+    <group name="spearlin-icon" cropIndexes="229"/>
+    <group name="spearlin-idle" cropIndexes="230 231 232 233"/>
+    <group name="spearlin-move" cropIndexes="234 235 236 237 238 239"/>
+    <group name="spearlin-prepare" cropIndexes="240 241"/>
+    <group name="spearlin-recover" cropIndexes="242"/>
+    <group name="spearlin-hurt" cropIndexes="243 244"/>
+    <group name="spearlin-die" cropIndexes="245 246 247 248"/>
     <group name="vulture-icon" cropIndexes="249"/>
     <group name="vulture-move" cropIndexes="250 251 252 253"/>
     <group name="raven-icon" cropIndexes="254"/>
     <group name="raven-move" cropIndexes="255 256 257 258"/>
-    <group name="red-snake-icon" cropIndexes="259"/>
-    <group name="red-snake-idle" cropIndexes="260 261 262 263"/>
-    <group name="red-snake-move" cropIndexes="264 265 266 267"/>
-    <group name="fire-alchemist-icon" cropIndexes="268"/>
-    <group name="fire-alchemist-idle" cropIndexes="269 270 271 272"/>
-    <group name="fire-alchemist-move" cropIndexes="273 274 275 276 277 278"/>
-    <group name="fire-alchemist-act" cropIndexes="279 280 281 282 283 284"/>
-    <group name="fire-alchemist-hurt" cropIndexes="285 286"/>
-    <group name="fire-alchemist-die" cropIndexes="287 288 289"/>
-    <group name="wind-wizard-icon" cropIndexes="290"/>
-    <group name="wind-wizard-idle" cropIndexes="291 292 293 294"/>
-    <group name="wind-wizard-move" cropIndexes="295 296 297 298 299 300"/>
-    <group name="wind-wizard-act" cropIndexes="301 302 303 304"/>
-    <group name="wind-wizard-hurt" cropIndexes="305 306"/>
-    <group name="wind-wizard-die" cropIndexes="307 308 309"/>
-    <group name="heal-alchemist-icon" cropIndexes="310"/>
-    <group name="heal-alchemist-idle" cropIndexes="311 312 313 314"/>
-    <group name="heal-alchemist-move" cropIndexes="315 316 317 318 319 320"/>
-    <group name="heal-alchemist-act" cropIndexes="321 322 323 324 325 326"/>
-    <group name="heal-alchemist-hurt" cropIndexes="327 328"/>
-    <group name="heal-alchemist-die" cropIndexes="329 330 331"/>
-    <group name="aura-wizard-icon" cropIndexes="332"/>
-    <group name="aura-wizard-idle" cropIndexes="333 334 335 336"/>
-    <group name="aura-wizard-move" cropIndexes="337 338 339 340 341 342"/>
-    <group name="aura-wizard-act" cropIndexes="343 344 345 346"/>
-    <group name="aura-wizard-hurt" cropIndexes="347 348"/>
-    <group name="aura-wizard-die" cropIndexes="349 350 351"/>
-    <group name="poison-alchemist-icon" cropIndexes="352"/>
-    <group name="poison-alchemist-idle" cropIndexes="353 354 355 356"/>
-    <group name="poison-alchemist-move" cropIndexes="357 358 359 360 361 362"/>
-    <group name="poison-alchemist-act" cropIndexes="363 364 365 366 367 368"/>
-    <group name="poison-alchemist-hurt" cropIndexes="369 370"/>
-    <group name="poison-alchemist-die" cropIndexes="371 372 373"/>
-    <group name="electric-wizard-icon" cropIndexes="374"/>
-    <group name="electric-wizard-idle" cropIndexes="375 376 377 378"/>
-    <group name="electric-wizard-move" cropIndexes="379 380 381 382 383 384"/>
-    <group name="electric-wizard-act" cropIndexes="385 386 387 388"/>
-    <group name="electric-wizard-hurt" cropIndexes="389 390"/>
-    <group name="electric-wizard-die" cropIndexes="391 392 393"/>
-    <group name="brown-bear-icon" cropIndexes="394"/>
-    <group name="brown-bear-idle" cropIndexes="395 396 397 398"/>
-    <group name="brown-bear-move" cropIndexes="399 400 401 402 403 404"/>
+    <group name="snake-icon" cropIndexes="259"/>
+    <group name="snake-idle" cropIndexes="260 261 262 263"/>
+    <group name="snake-move" cropIndexes="264 265 266 267"/>
+    <group name="pyromancer-icon" cropIndexes="268"/>
+    <group name="pyromancer-idle" cropIndexes="269 270 271 272"/>
+    <group name="pyromancer-move" cropIndexes="273 274 275 276 277 278"/>
+    <group name="pyromancer-act" cropIndexes="279 280 281 282 283 284"/>
+    <group name="pyromancer-hurt" cropIndexes="285 286"/>
+    <group name="pyromancer-die" cropIndexes="287 288 289"/>
+    <group name="windbender-icon" cropIndexes="290"/>
+    <group name="windbender-idle" cropIndexes="291 292 293 294"/>
+    <group name="windbender-move" cropIndexes="295 296 297 298 299 300"/>
+    <group name="windbender-act" cropIndexes="301 302 303 304"/>
+    <group name="windbender-hurt" cropIndexes="305 306"/>
+    <group name="windbender-die" cropIndexes="307 308 309"/>
+    <group name="healer-icon" cropIndexes="310"/>
+    <group name="healer-idle" cropIndexes="311 312 313 314"/>
+    <group name="healer-move" cropIndexes="315 316 317 318 319 320"/>
+    <group name="healer-act" cropIndexes="321 322 323 324 325 326"/>
+    <group name="healer-hurt" cropIndexes="327 328"/>
+    <group name="healer-die" cropIndexes="329 330 331"/>
+    <group name="essencialist-icon" cropIndexes="332"/>
+    <group name="essencialist-idle" cropIndexes="333 334 335 336"/>
+    <group name="essencialist-move" cropIndexes="337 338 339 340 341 342"/>
+    <group name="essencialist-act" cropIndexes="343 344 345 346"/>
+    <group name="essencialist-hurt" cropIndexes="347 348"/>
+    <group name="essencialist-die" cropIndexes="349 350 351"/>
+    <group name="toxicologist-icon" cropIndexes="352"/>
+    <group name="toxicologist-idle" cropIndexes="353 354 355 356"/>
+    <group name="toxicologist-move" cropIndexes="357 358 359 360 361 362"/>
+    <group name="toxicologist-act" cropIndexes="363 364 365 366 367 368"/>
+    <group name="toxicologist-hurt" cropIndexes="369 370"/>
+    <group name="toxicologist-die" cropIndexes="371 372 373"/>
+    <group name="stormcaller-icon" cropIndexes="374"/>
+    <group name="stormcaller-idle" cropIndexes="375 376 377 378"/>
+    <group name="stormcaller-move" cropIndexes="379 380 381 382 383 384"/>
+    <group name="stormcaller-act" cropIndexes="385 386 387 388"/>
+    <group name="stormcaller-hurt" cropIndexes="389 390"/>
+    <group name="stormcaller-die" cropIndexes="391 392 393"/>
+    <group name="bear-icon" cropIndexes="394"/>
+    <group name="bear-idle" cropIndexes="395 396 397 398"/>
+    <group name="bear-move" cropIndexes="399 400 401 402 403 404"/>
     <group name="wolf-icon" cropIndexes="405"/>
     <group name="wolf-idle" cropIndexes="406 407 408 409"/>
     <group name="wolf-move" cropIndexes="410 411 412 413 414 415"/>

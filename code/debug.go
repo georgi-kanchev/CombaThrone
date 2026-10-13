@@ -1,6 +1,8 @@
 package game
 
 import (
+	"game/code/constants/state"
+	"game/code/constants/zone"
 	"pure-game-kit/packages/execution/condition"
 	"pure-game-kit/packages/geometry"
 	"pure-game-kit/packages/input/keyboard"
@@ -29,10 +31,10 @@ func UpdateDebug() {
 		DebugMode = number.Wrap(DebugMode+1, 0, 3)
 	}
 
-	if keyboard.IsKeyJustPressed(key.RightArrow) && CurrentZone.Kind < ZoneHell {
+	if keyboard.IsKeyJustPressed(key.RightArrow) && CurrentZone.Kind < zone.Hell {
 		CurrentZone = Zones[CurrentZone.Kind+1]
 	}
-	if keyboard.IsKeyJustPressed(key.LeftArrow) && CurrentZone.Kind > ZoneField {
+	if keyboard.IsKeyJustPressed(key.LeftArrow) && CurrentZone.Kind > zone.Field {
 		CurrentZone = Zones[CurrentZone.Kind-1]
 	}
 
@@ -93,9 +95,9 @@ func UpdateDebug() {
 // private ========================================================
 
 var debugStates = []string{
-	StateIdling: "idle", StateMoving: "walk",
-	StateHurtStart: "hurt", StateHurting: "hurt",
-	StateDyingStart: "dying", StateDying: "dying", StateDyingEnd: "dying", StateDecaying: "dead",
-	StateActStart: "act charge", StateActCharging: "act charge", StateActTrigger: "act charge",
-	StateActRecovering: "act recover", StateActEnd: "act recover"}
+	state.Idling: "idle", state.Moving: "walk",
+	state.HurtStart: "hurt", state.Hurting: "hurt",
+	state.DyingStart: "dying", state.Dying: "dying", state.DyingEnd: "dying", state.Decaying: "dead",
+	state.ActStart: "act charge", state.ActCharging: "act charge", state.ActTrigger: "act charge",
+	state.ActRecovering: "act recover", state.ActEnd: "act recover"}
 var debugInfo = ""

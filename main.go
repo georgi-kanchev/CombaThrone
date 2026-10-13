@@ -1,7 +1,7 @@
 package main
 
 import (
-	"game/game"
+	game "game/code"
 	"pure-game-kit/packages/window"
 )
 

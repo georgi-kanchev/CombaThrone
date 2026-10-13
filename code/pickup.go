@@ -1,6 +1,9 @@
 package game
 
 import (
+	"game/code/constants/icon"
+	"game/code/constants/lane"
+	"game/code/constants/pickup"
 	"pure-game-kit/packages/assets"
 	"pure-game-kit/packages/graphics"
 	"pure-game-kit/packages/motion"
@@ -9,13 +12,12 @@ import (
 	"pure-game-kit/packages/utility/point"
 )
 
-type PickupKind uint8
 type Pickup struct {
 	graphics.Object
 
 	Description string
-	Lane        Lane
-	Kind        PickupKind
+	Lane        lane.Enum
+	Kind        pickup.Enum
 	Z           float32
 
 	Anim      *motion.Animation[assets.ImageId]
@@ -25,50 +27,38 @@ type Pickup struct {
 	Effect func()
 }
 
-const (
-	PickupCoin PickupKind = iota
-	PickupGem
-	PickupCrystal
-	PickupRelic
-	PickupRune
-	PickupSnowflake
-	PickupStar
-	PickupKey
-	PickupCount
-)
-
 var Pickups []*Pickup = make([]*Pickup, 0, 32)
 
-func NewPickup(x float32, kind PickupKind, lane Lane) *Pickup {
-	var pickupGroups = [PickupCount]string{"coin", "gem", "crystal", "relic", "rune", "snowflake", "star", "key"}
+func NewPickup(x float32, kind pickup.Enum, atLane lane.Enum) *Pickup {
+	var pickupGroups = [pickup.Count]string{"coin", "gem", "crystal", "relic", "rune", "snowflake", "star", "key"}
 	var anim = motion.NewAnimation(6, true, Decor.Crops("pickup-"+pickupGroups[kind])...)
 	var data = &Pickup{
-		Object: graphics.NewSprite(x, 0, 1, 0), Z: laneZs[lane], Kind: kind, Anim: &anim, Lane: lane, HasShadow: true}
-	var collision = Collisions[lane][0]
+		Object: graphics.NewSprite(x, 0, 1, 0), Z: laneZs[atLane], Kind: kind, Anim: &anim, Lane: atLane, HasShadow: true}
+	var collision = Collisions[atLane][0]
 	data.SlotUI = -1
 	data.Update()
 	data.Y = collision.Y - collision.Height/2 - data.Height/2 // taller pickups go below their shadows - pivot bottom
 
 	switch kind {
-	case PickupCoin:
-		data.Description = "Gives you 🟨" + Tags[IconCoin] + "10 coins⬜. Not bad for a single coin, eh?"
+	case pickup.Coin:
+		data.Description = "Gives you 🟨" + Tags[icon.Coin] + "10 coins⬜. Not bad for a single coin, eh?"
 		data.Effect = func() { Player.Coins += 10 }
-	case PickupGem:
-		data.Description = "🟩" + Tags[IconPlus] + "🌗🟩10 " + Tags[IconHeart] + "health⬜ to all 🟩" +
-			Tags[IconUnit] + "allies⬜."
-	case PickupCrystal:
-		data.Description = "🟩" + Tags[IconPlus] + "🟧10 damage⬜ to all 🟩" + Tags[IconUnit] + "ally⬜ " +
-			Tags[IconSword] + "Fighters and " + Tags[IconBow] + "Rangers."
-	case PickupRelic:
-		data.Description = "🌗🟦" + Tags[IconLoop] + "Revives⬜ all 🟥" + Tags[IconSkull] +
-			"dead🟩 " + Tags[IconUnit] + "allies⬜ and gives them 🌗🟩full " + Tags[IconHeart] + "health⬜."
-	case PickupRune:
-		data.Description = "Prevents 🟥" + Tags[IconUnit] + "enemies⬜ from appearing for 20s."
-	case PickupSnowflake:
-		data.Description = "Prevents all 🟥" + Tags[IconUnit] + "enemies⬜ from moving. They can still act."
-	case PickupStar:
-		data.Description = "Gives you 🟩" + Tags[IconGlory] + "100 Glory⬜. So glorious!"
-	case PickupKey:
+	case pickup.Gem:
+		data.Description = "🟩" + Tags[icon.Plus] + "🌗🟩10 " + Tags[icon.Heart] + "health⬜ to all 🟩" +
+			Tags[icon.Unit] + "allies⬜."
+	case pickup.Crystal:
+		data.Description = "🟩" + Tags[icon.Plus] + "🟧10 damage⬜ to all 🟩" + Tags[icon.Unit] + "ally⬜ " +
+			Tags[icon.Sword] + "Fighters and " + Tags[icon.Bow] + "Rangers."
+	case pickup.Relic:
+		data.Description = "🌗🟦" + Tags[icon.Loop] + "Revives⬜ all 🟥" + Tags[icon.Skull] +
+			"dead🟩 " + Tags[icon.Unit] + "allies⬜ and gives them 🌗🟩full " + Tags[icon.Heart] + "health⬜."
+	case pickup.Rune:
+		data.Description = "Prevents 🟥" + Tags[icon.Unit] + "enemies⬜ from appearing for 20s."
+	case pickup.Snowflake:
+		data.Description = "Prevents all 🟥" + Tags[icon.Unit] + "enemies⬜ from moving. They can still act."
+	case pickup.Star:
+		data.Description = "Gives you 🟩" + Tags[icon.Glory] + "100 Glory⬜. So glorious!"
+	case pickup.Key:
 		data.Description = "Unlocks a treasure chest (if owned)."
 	}
 	return data
@@ -94,7 +84,7 @@ func (p *Pickup) Update() {
 	if p.SlotUI >= 0 {
 		var x, y = GameHUD.PickupSlotPosition(p.SlotUI)
 
-		if p.Kind == PickupCoin {
+		if p.Kind == pickup.Coin {
 			x, y = GameHUD.Coins.X, GameHUD.Coins.Y
 			p.X, p.Y = point.MoveToPointSmooth(p.X, p.Y, x, y, 0.06)
 

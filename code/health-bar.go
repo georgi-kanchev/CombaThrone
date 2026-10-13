@@ -1,6 +1,8 @@
 package game
 
 import (
+	"game/code/constants/icon"
+	"game/code/constants/team"
 	"pure-game-kit/packages/geometry"
 	"pure-game-kit/packages/graphics"
 	"pure-game-kit/packages/utility/color"
@@ -15,12 +17,12 @@ type HealthBar struct {
 
 	Timer, Duration          float32
 	LastValue                int
-	Team                     Team
+	Team                     team.Enum
 	ToGlory, SubtractedGlory bool
 	StartX, StartY           float32
 }
 
-func NewHealthBar(width float32, team Team, offLane bool) *HealthBar {
+func NewHealthBar(width float32, team team.Enum, offLane bool) *HealthBar {
 	var height float32 = 6
 	if offLane {
 		height = 3
@@ -61,9 +63,9 @@ func (hb *HealthBar) MoveToGlory(duration float32) {
 	hb.ToGlory = true
 	hb.Duration, hb.Timer = duration, duration
 	hb.StartX, hb.StartY = hb.Label.X, hb.Label.Y
-	hb.Glory.Text = text.New(Tags[IconGlory], -hb.LastValue)
+	hb.Glory.Text = text.New(Tags[icon.Glory], -hb.LastValue)
 
-	if hb.Team == TeamAlly {
+	if hb.Team == team.Ally {
 		PlaySound(AudioEventPositive)
 	} else {
 		PlaySound(AudioEventNegative)
@@ -113,7 +115,7 @@ func (hb *HealthBar) Update(target geometry.Shape, health, maxHealth int, mask g
 		hb.Damage.Height = hb.Fill.Height
 		hb.Damage.X, hb.Damage.Y = hb.Background.X-hb.Background.Width/2+hb.Damage.Width/2+border/2, hb.Background.Y
 
-		if hb.Team == TeamAlly {
+		if hb.Team == team.Ally {
 			hb.Damage.Details.FillColor = palette.Red
 		} else {
 			hb.Damage.Details.FillColor = palette.Orange

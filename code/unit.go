@@ -1,6 +1,15 @@
 package game
 
 import (
+	"game/code/constants/base"
+	char "game/code/constants/character"
+	"game/code/constants/effect"
+	"game/code/constants/entrance"
+	"game/code/constants/lane"
+	"game/code/constants/pickup"
+	"game/code/constants/role"
+	"game/code/constants/state"
+	"game/code/constants/team"
 	"pure-game-kit/packages/assets"
 	"pure-game-kit/packages/geometry"
 	"pure-game-kit/packages/graphics"
@@ -13,22 +22,18 @@ import (
 	"pure-game-kit/packages/utility/random"
 )
 
-type Team uint8
-type Lane uint8
-type State uint8
-type Role uint8
 type Unit struct {
 	graphics.Object
 	Health    int
 	Values    Values
-	Character CharacterKind
-	Lane      Lane
-	Team      Team
+	Character char.Enum
+	Lane      lane.Enum
+	Team      team.Enum
 	Anim      *motion.Animation[assets.ImageId]
 	HealthBar *HealthBar
-	State     State
+	State     state.Enum
 
-	Effects map[Effect]Values
+	Effects map[effect.Enum]Values
 
 	Blood *motion.ParticleSystem
 
@@ -43,55 +48,29 @@ type Unit struct {
 
 	LastX, LastY, MoveSpeedX float32
 	ActTimer, HurtTimer      float32 // negative values can be used for "time since last"
-	LastState                State
+	LastState                state.Enum
 }
-
-const ( // states
-	StateSummoned            State = iota // single frame
-	StateWaitingToBeSummoned              // continuous
-
-	StateIdling // continuous
-	StateMoving // continuous
-
-	StateHurtStart // single frame
-	StateHurting   // continuous
-
-	StateDyingStart // single frame
-	StateDying      // continuous
-	StateDyingEnd   // single frame
-	StateDecaying   // continuous
-
-	StateActStart      // single frame
-	StateActCharging   // continuous
-	StateActTrigger    // single frame
-	StateActRecovering // continuous
-	StateActEnd        // single frame
-)
-
-const TeamAlly, TeamEnemy, TeamCount Team = 0, 1, 2
-
-const RoleFighter, RoleRanger, RoleDefender, RoleGriefer, RoleSupplier, RoleCollector, RoleCount Role = 0, 1, 2, 3, 4, 5, 6
 
 const Gravity, GroundFriction, BloodMultiplier = 256.0, 400.0, 40.0
 
 var Units []*Unit = make([]*Unit, 0, 16)
-var Collisions = map[Lane][]geometry.Shape{}
+var Collisions = map[lane.Enum][]geometry.Shape{}
 var PinnedUnit *Unit
 
-func NewUnit(character CharacterKind, team Team, lane Lane) *Unit {
+func NewUnit(character char.Enum, fromTeam team.Enum, lane lane.Enum) *Unit {
 	var char = Characters[character]
 	var anim = motion.NewAnimation(0, false, char.Animations.Idle...)
-	var unit = Unit{Object: graphics.NewSprite(-2000, -2000, 1, 0), Character: character, Team: team, Lane: lane,
-		Anim: &anim, ActTimer: number.NaN(), HurtTimer: number.NaN(), LastState: StateWaitingToBeSummoned,
-		Effects: make(map[Effect]Values, 4),
+	var unit = Unit{Object: graphics.NewSprite(-2000, -2000, 1, 0), Character: character, Team: fromTeam, Lane: lane,
+		Anim: &anim, ActTimer: number.NaN(), HurtTimer: number.NaN(), LastState: state.WaitingToBeSummoned,
+		Effects: make(map[effect.Enum]Values, 4),
 	}
 
 	if len(anim.Frames) == 0 {
 		anim.Frames = char.Animations.Move
 	}
 
-	if team == TeamAlly {
-		unit.State = StateWaitingToBeSummoned
+	if fromTeam == team.Ally {
+		unit.State = state.WaitingToBeSummoned
 	}
 
 	unit.Blood = motion.NewParticleSystem(unit.particlesBlood)
@@ -130,34 +109,34 @@ func (u *Unit) EnemyEntrance() (canBeActedUpon bool, entrance *Entrance) {
 	return canBeActedUpon, e
 }
 func (u *Unit) IsLaner() bool {
-	return u.Lane == LaneLower || u.Lane == LaneMiddle || u.Lane == LaneUpper
+	return u.Lane == lane.Lower || u.Lane == lane.Middle || u.Lane == lane.Upper
 }
 func (u *Unit) IsOffLaner() bool {
-	return u.Values.Role == RoleCollector || u.Values.Role == RoleGriefer || u.Values.Role == RoleSupplier
+	return u.Values.Role == role.Collector || u.Values.Role == role.Griefer || u.Values.Role == role.Supplier
 }
 func (u *Unit) IsGarrisoner() bool {
-	return u.Lane >= LaneGarrison1
+	return u.Lane >= lane.Garrison1
 }
 func (u *Unit) IsSummoned() bool {
-	return u != nil && u.State != StateWaitingToBeSummoned
+	return u != nil && u.State != state.WaitingToBeSummoned
 }
 func (u *Unit) IsOutsideOwnBase() bool {
 	if u.IsGarrisoner() {
 		return false
 	}
 	var myEntrance = Bases[u.Team].Entrances[u.Lane/2]
-	if u.Team == TeamAlly && u.X > myEntrance.Tiles[0].X {
+	if u.Team == team.Ally && u.X > myEntrance.Tiles[0].X {
 		return true
-	} else if u.Team == TeamEnemy && u.X < myEntrance.Tiles[0].X {
+	} else if u.Team == team.Enemy && u.X < myEntrance.Tiles[0].X {
 		return true
 	}
 	return false
 }
 func (u *Unit) IsInsideEnemyBase(offset float32) bool {
 	var _, entrance = u.EnemyEntrance()
-	if entrance != nil && u.Team == TeamEnemy && u.X < entrance.Tiles[0].X-offset {
+	if entrance != nil && u.Team == team.Enemy && u.X < entrance.Tiles[0].X-offset {
 		return true
-	} else if entrance != nil && u.Team == TeamAlly && u.X > entrance.Tiles[0].X+offset {
+	} else if entrance != nil && u.Team == team.Ally && u.X > entrance.Tiles[0].X+offset {
 		return true
 	}
 	return false
@@ -172,7 +151,7 @@ func (u *Unit) IsAlive() bool {
 	return u.Values.MaxHealth == 0 || u.Health > 0
 }
 func (u *Unit) IsFacingLeft() bool {
-	return (u.Team == TeamEnemy && !u.IsReturning) || (u.Team == TeamAlly && u.IsReturning)
+	return (u.Team == team.Enemy && !u.IsReturning) || (u.Team == team.Ally && u.IsReturning)
 }
 
 func (u *Unit) PrepareSpawn() {
@@ -184,34 +163,34 @@ func (u *Unit) PrepareSpawn() {
 	clear(u.Effects)
 
 	if u.IsGarrisoner() {
-		u.AddEffect(EffectMoreRangeOnGarrison)
+		u.AddEffect(effect.MoreRangeOnGarrison)
 	}
 
 	var col = Collisions[u.Lane]
 	var hb = u.Hitbox()
 	var laneY = col[0].Y - col[0].Height/2 - hb.Height
 	switch u.Lane {
-	case LaneLower, LaneLowerOff:
+	case lane.Lower, lane.LowerOff:
 		u.X, u.Y = TileSize*9.5, laneY
-	case LaneMiddle, LaneMiddleOff:
+	case lane.Middle, lane.MiddleOff:
 		u.X, u.Y = TileSize*8.5, laneY
-	case LaneUpper, LaneUpperOff:
+	case lane.Upper, lane.UpperOff:
 		u.X, u.Y = TileSize*7.5, laneY
-	case LaneGarrison1, LaneGarrison2, LaneGarrison3:
+	case lane.Garrison1, lane.Garrison2, lane.Garrison3:
 		u.X, u.Y = CurrentZone.Ground.Width/2+u.Width/2, laneY
-	case LaneGarrisonPlus1, LaneGarrisonPlus2, LaneGarrisonPlus3:
+	case lane.GarrisonPlus1, lane.GarrisonPlus2, lane.GarrisonPlus3:
 		u.X, u.Y = PointAtCell(18.5, 3)
 	}
 	if u.IsOffLaner() {
 		u.Y += TileSize / 2
 	}
 
-	if u.Team == TeamAlly {
-		if Bases[u.Team].Kind < BaseBarrack {
+	if u.Team == team.Ally {
+		if Bases[u.Team].Kind < base.Barrack {
 			u.X = CurrentZone.Ground.Width/2 + u.Width/2
 		}
 		u.X = -u.X
-	} else if Bases[u.Team].Kind < BaseBarrack {
+	} else if Bases[u.Team].Kind < base.Barrack {
 		u.X = CurrentZone.Ground.Width / 2
 	}
 
@@ -227,7 +206,7 @@ func (u *Unit) Update() {
 	u.Values.SleepTimer -= DeltaTimeScaled()
 
 	if !u.IsSummoned() && (number.IsNaN(u.HurtTimer) || u.HurtTimer < -u.Values.ReviveTimer) {
-		u.State = StateWaitingToBeSummoned
+		u.State = state.WaitingToBeSummoned
 		return
 	}
 
@@ -235,7 +214,7 @@ func (u *Unit) Update() {
 	u.Z = laneZs[u.Lane]
 
 	u.Mask = laneMasks[u.Lane] // applied every frame to account for any changes in lane
-	if (u.X < 0 && Bases[TeamAlly].Kind < BaseBarrack) || (u.X > 0 && Bases[TeamEnemy].Kind < BaseBarrack) {
+	if (u.X < 0 && Bases[team.Ally].Kind < base.Barrack) || (u.X > 0 && Bases[team.Enemy].Kind < base.Barrack) {
 		u.Mask = geometry.Area{}
 	}
 
@@ -243,7 +222,7 @@ func (u *Unit) Update() {
 		u.updateEffects()
 		u.applyState()
 		var behavior = Behaviors[u.Character]
-		if behavior != nil && u.State != StateDecaying {
+		if behavior != nil && u.State != state.Decaying {
 			behavior(u)
 		}
 		u.actUponState()
@@ -277,13 +256,13 @@ func (u *Unit) Update() {
 }
 
 func (u *Unit) ProjectHealth(value int) (remainingHealth int) {
-	if !u.IsAlive() || u.State == StateDecaying {
+	if !u.IsAlive() || u.State == state.Decaying {
 		return u.Health
 	}
-	if u.Values.Role <= RoleDefender && value > 0 {
+	if u.Values.Role <= role.Defender && value > 0 {
 		return min(u.Health+value, u.Values.MaxHealth)
 	}
-	if u.Values.Role >= RoleDefender && value < 0 {
+	if u.Values.Role >= role.Defender && value < 0 {
 		value = min(value+u.Values.ActPoints, 0)
 	}
 	return u.Health + value
@@ -301,14 +280,14 @@ func (u *Unit) AffectHealth(value int) {
 	}
 }
 
-func (u *Unit) AddEffect(effect Effect) {
+func (u *Unit) AddEffect(effect effect.Enum) {
 	var _, has = u.Effects[effect]
 	if !has {
 		u.Effects[effect] = Effects[effect]
 		u.TickEffect(effect)
 	}
 }
-func (u *Unit) TickEffect(effect Effect) {
+func (u *Unit) TickEffect(effect effect.Enum) {
 	var _, has = u.Effects[effect]
 	if !has {
 		return
@@ -323,7 +302,7 @@ func (u *Unit) TickEffect(effect Effect) {
 
 	u.AffectHealth(-values.EffectTickDamage)
 }
-func (u *Unit) RemoveEffect(effect Effect) {
+func (u *Unit) RemoveEffect(effect effect.Enum) {
 	var _, has = u.Effects[effect]
 	if !has {
 		return
@@ -342,21 +321,21 @@ func (u *Unit) RemoveEffect(effect Effect) {
 
 // private ========================================================
 
-var laneZs = [LaneCount]float32{
-	LaneLower: 0, LaneLowerOff: 0.5, LaneMiddle: 1, LaneMiddleOff: 1.5, LaneUpper: 2, LaneUpperOff: 2.5,
-	LaneGarrison1: 0, LaneGarrison2: 1, LaneGarrison3: 2,
-	LaneGarrisonPlus1: 2.5, LaneGarrisonPlus2: 2.5, LaneGarrisonPlus3: 2.5,
+var laneZs = [lane.Count]float32{
+	lane.Lower: 0, lane.LowerOff: 0.5, lane.Middle: 1, lane.MiddleOff: 1.5, lane.Upper: 2, lane.UpperOff: 2.5,
+	lane.Garrison1: 0, lane.Garrison2: 1, lane.Garrison3: 2,
+	lane.GarrisonPlus1: 2.5, lane.GarrisonPlus2: 2.5, lane.GarrisonPlus3: 2.5,
 }
-var laneMasks = map[Lane]geometry.Area{
-	LaneLower:     geometry.NewArea(0, 0, 556, 1000),
-	LaneLowerOff:  geometry.NewArea(0, 0, 556, 1000),
-	LaneMiddle:    geometry.NewArea(0, 0, 492, 1000),
-	LaneMiddleOff: geometry.NewArea(0, 0, 492, 1000),
-	LaneUpper:     geometry.NewArea(0, 0, 428, 1000),
-	LaneUpperOff:  geometry.NewArea(0, 0, 428, 1000),
+var laneMasks = map[lane.Enum]geometry.Area{
+	lane.Lower:     geometry.NewArea(0, 0, 556, 1000),
+	lane.LowerOff:  geometry.NewArea(0, 0, 556, 1000),
+	lane.Middle:    geometry.NewArea(0, 0, 492, 1000),
+	lane.MiddleOff: geometry.NewArea(0, 0, 492, 1000),
+	lane.Upper:     geometry.NewArea(0, 0, 428, 1000),
+	lane.UpperOff:  geometry.NewArea(0, 0, 428, 1000),
 }
-var teamColors = [TeamCount]uint{TeamAlly: palette.Green, TeamEnemy: palette.Red}
-var effectsToRemove []Effect
+var teamColors = [team.Count]uint{team.Ally: palette.Green, team.Enemy: palette.Red}
+var effectsToRemove []effect.Enum
 
 func (u *Unit) particlesBlood(p *motion.Particle) (alive bool) {
 	if p.Age == 0 {
@@ -366,7 +345,7 @@ func (u *Unit) particlesBlood(p *motion.Particle) (alive bool) {
 		p.VelocityY = random.Range[float32](-20, 20)
 		p.Color = random.Range[uint](128, 255) // only red
 
-		if u.Team == TeamAlly {
+		if u.Team == team.Ally {
 			p.VelocityX *= -1
 		}
 	}
@@ -406,7 +385,7 @@ func (u *Unit) applyState() {
 		}
 
 		var distX = number.Absolute(t.X - u.X)
-		var allyEnemy, enemyAlly = u.Team == TeamAlly && t.Team == TeamEnemy, u.Team == TeamEnemy && t.Team == TeamAlly
+		var allyEnemy, enemyAlly = u.Team == team.Ally && t.Team == team.Enemy, u.Team == team.Enemy && t.Team == team.Ally
 		var isEnemy = allyEnemy || enemyAlly
 		var isInFront = (allyEnemy && u.X < t.X) || (enemyAlly && u.X > t.X)
 		var closeEnough = distX < actRange
@@ -428,74 +407,74 @@ func (u *Unit) applyState() {
 		canShoot = true
 	}
 
-	if u.State == StateMoving && u.IsAlive() && (!u.IsGrounded || u.MoveSpeedX < 0.01) {
-		u.State = StateIdling
-	} else if u.State == StateIdling && u.UnitFront == nil && canMove && u.IsAlive() && !canBeActedUpon {
-		u.State = StateMoving
+	if u.State == state.Moving && u.IsAlive() && (!u.IsGrounded || u.MoveSpeedX < 0.01) {
+		u.State = state.Idling
+	} else if u.State == state.Idling && u.UnitFront == nil && canMove && u.IsAlive() && !canBeActedUpon {
+		u.State = state.Moving
 	}
 
-	if u.State == StateSummoned && u.LastState == StateSummoned {
-		u.State = StateMoving // first frame is event, second frame (now) starts walking
+	if u.State == state.Summoned && u.LastState == state.Summoned {
+		u.State = state.Moving // first frame is event, second frame (now) starts walking
 	}
 
-	if u.State == StateActEnd && u.IsAlive() {
-		u.State = StateIdling
-	} else if u.State == StateActRecovering && u.Anim.IsJustFinished() {
-		u.State = StateActEnd
-	} else if u.State == StateActTrigger {
-		u.State = StateActRecovering
-	} else if u.State == StateActCharging && u.Anim.IsJustFinished() {
-		u.State = StateActTrigger
-	} else if u.State == StateActStart {
-		u.State = StateActCharging
-	} else if (u.State == StateIdling || u.State == StateMoving) && melee && !u.IsOffLaner() {
-		u.State = StateActStart
-	} else if (u.State == StateIdling || u.State == StateMoving) && ranged && garrisonOrNot && canShoot && !u.IsOffLaner() {
+	if u.State == state.ActEnd && u.IsAlive() {
+		u.State = state.Idling
+	} else if u.State == state.ActRecovering && u.Anim.IsJustFinished() {
+		u.State = state.ActEnd
+	} else if u.State == state.ActTrigger {
+		u.State = state.ActRecovering
+	} else if u.State == state.ActCharging && u.Anim.IsJustFinished() {
+		u.State = state.ActTrigger
+	} else if u.State == state.ActStart {
+		u.State = state.ActCharging
+	} else if (u.State == state.Idling || u.State == state.Moving) && melee && !u.IsOffLaner() {
+		u.State = state.ActStart
+	} else if (u.State == state.Idling || u.State == state.Moving) && ranged && garrisonOrNot && canShoot && !u.IsOffLaner() {
 		if canAct {
-			u.State = StateActStart
+			u.State = state.ActStart
 		} else if u.IsAlive() && u.IsLaner() { // no shoot-move-shoot-move for laners - but garrisoners should
-			u.State = StateIdling // enemy in range but waiting for act timer (stay in one place, don't keep walking)
+			u.State = state.Idling // enemy in range but waiting for act timer (stay in one place, don't keep walking)
 		}
 	}
 
 	if u.Values.SleepTimer > 0 {
-		u.State = StateIdling
+		u.State = state.Idling
 	}
 
-	if u.State == StateHurting && !u.IsAlive() {
-		u.State = StateDyingStart // bug fix for units sometimes staying alive
-	} else if u.State == StateHurting && u.HurtTimer < 0 && u.IsAlive() {
-		u.State = StateIdling
-	} else if u.State == StateHurtStart {
-		u.State = StateHurting
+	if u.State == state.Hurting && !u.IsAlive() {
+		u.State = state.DyingStart // bug fix for units sometimes staying alive
+	} else if u.State == state.Hurting && u.HurtTimer < 0 && u.IsAlive() {
+		u.State = state.Idling
+	} else if u.State == state.HurtStart {
+		u.State = state.Hurting
 	}
-	if u.State != StateDyingStart && u.State != StateDying && u.State != StateDecaying &&
-		u.State != StateHurting && u.HurtTimer > 0 {
-		u.State = StateHurtStart // can interupt other states
+	if u.State != state.DyingStart && u.State != state.Dying && u.State != state.Decaying &&
+		u.State != state.Hurting && u.HurtTimer > 0 {
+		u.State = state.HurtStart // can interupt other states
 	}
 
-	if u.State == StateDyingEnd {
-		u.State = StateDecaying
+	if u.State == state.DyingEnd {
+		u.State = state.Decaying
 	}
-	if u.State == StateDying && u.Anim.IsJustFinished() {
-		u.State = StateDyingEnd
-	} else if u.State == StateDyingStart {
-		u.State = StateDying
-	} else if u.State == StateHurtStart && u.Health <= 0 {
-		u.State = StateDyingStart
+	if u.State == state.Dying && u.Anim.IsJustFinished() {
+		u.State = state.DyingEnd
+	} else if u.State == state.DyingStart {
+		u.State = state.Dying
+	} else if u.State == state.HurtStart && u.Health <= 0 {
+		u.State = state.DyingStart
 	}
 }
 func (u *Unit) actUponState() {
 	switch u.State {
-	case StateWaitingToBeSummoned, StateSummoned: // empty
-	case StateIdling:
+	case state.WaitingToBeSummoned, state.Summoned: // empty
+	case state.Idling:
 		u.Anim.Frames = Characters[u.Character].Animations.Idle
 		u.Anim.IsLooping, u.Anim.FPS = true, 3
 
 		if number.IsNaN(u.Values.SleepTimer) || u.Values.SleepTimer < 0 {
 			u.VelocityX = 0
 		}
-	case StateMoving:
+	case state.Moving:
 		u.Anim.Frames = Characters[u.Character].Animations.Move
 		u.Anim.IsLooping, u.Anim.FPS = true, u.MoveSpeedX*0.25
 
@@ -508,7 +487,7 @@ func (u *Unit) actUponState() {
 			PinnedUnit = nil
 		}
 
-		u.VelocityX = float32([TeamCount]int{u.Values.MoveSpeed, -u.Values.MoveSpeed}[u.Team])
+		u.VelocityX = float32([team.Count]int{u.Values.MoveSpeed, -u.Values.MoveSpeed}[u.Team])
 		if u.IsAtWall { // chill out when next to a wall
 			u.VelocityX = 0
 		}
@@ -518,13 +497,13 @@ func (u *Unit) actUponState() {
 
 		if u.X < -CurrentZone.Ground.Width/2-u.Width*2 || u.X > CurrentZone.Ground.Width/2+u.Width*2 {
 			u.HurtTimer = 0 // no instant delete - to have time to play glory text animation etc
-			u.State = StateDecaying
+			u.State = state.Decaying
 		}
 		if u.IsOffLaner() && u.IsReturning && !u.IsOutsideOwnBase() {
 			for _, c := range u.Carrying {
 				c.Mask = geometry.Area{}
 				c.SlotUI = GameHUD.FreePickupSlot()
-				if c.Kind == PickupCoin {
+				if c.Kind == pickup.Coin {
 					c.SlotUI = len(GameHUD.Pickups)
 				} else {
 					GameHUD.PickupsCarrying--
@@ -534,17 +513,17 @@ func (u *Unit) actUponState() {
 			}
 			u.Carrying = collection.Clear(u.Carrying)
 		}
-	case StateActStart: // random delay to balance same sided units melee VVVVVVV
+	case state.ActStart: // random delay to balance same sided units melee VVVVVVV
 		u.ActTimer = u.Values.ActTimer + random.Range[float32](0, 0.1)
 		u.Anim.Frames = Characters[u.Character].Animations.Prepare
 		u.Anim.IsLooping, u.Anim.FPS, u.Anim.Time = false, 8, 0
 		u.VelocityX = 0
 		PlaySound(Characters[u.Character].Sounds.ActStart)
-	case StateActTrigger:
+	case state.ActTrigger:
 		u.Anim.Frames = Characters[u.Character].Animations.Recover
 		u.Anim.IsLooping, u.Anim.FPS, u.Anim.Time = false, 8, 0
 
-		if u.Values.Role == RoleDefender {
+		if u.Values.Role == role.Defender {
 			return // defenders cannot deal damage
 		}
 
@@ -556,9 +535,9 @@ func (u *Unit) actUponState() {
 				PlaySound(Characters[u.Character].Sounds.HitFlesh)
 			} else if canBeActedUpon && e != nil {
 				e.TakeDamage(dmg)
-				if e.Health > 0 && e.Kind == EntranceDoor {
+				if e.Health > 0 && e.Kind == entrance.Door {
 					PlaySound(Characters[u.Character].Sounds.HitWood)
-				} else if e.Health > 0 && (e.Kind == EntranceShortGate || e.Kind == EntranceTallGate) {
+				} else if e.Health > 0 && (e.Kind == entrance.ShortGate || e.Kind == entrance.TallGate) {
 					PlaySound(Characters[u.Character].Sounds.HitMetal)
 				}
 			}
@@ -573,7 +552,7 @@ func (u *Unit) actUponState() {
 				prediction = 0 // target is too close - don't predict movement to not shoot behind self
 			}
 			var offsetX = u.Width / 3
-			if u.Team == TeamEnemy {
+			if u.Team == team.Enemy {
 				offsetX = -u.Width / 3
 			}
 			var proj = u.NewProjectile(u.X+offsetX, u.Y, u.Z, t.X+prediction, t.Y+t.Height/2-8, t.Z, dmg, projectileKind, nil)
@@ -581,36 +560,36 @@ func (u *Unit) actUponState() {
 			PlaySound(Characters[u.Character].Sounds.ActTrigger)
 		} else if canBeActedUpon && e != nil {
 			var x, y = e.Tiles[0].X, e.Tiles[0].Y
-			if e.Kind == EntranceTallGate {
+			if e.Kind == entrance.TallGate {
 				y += TileSize
 			}
 			Projectiles = append(Projectiles, u.NewProjectile(u.X, u.Y, u.Z, x, y, laneZs[e.Lane], dmg, projectileKind, e))
 			PlaySound(Characters[u.Character].Sounds.ActTrigger)
 		}
-	case StateActCharging, StateActRecovering, StateActEnd: // empty
-	case StateHurtStart:
+	case state.ActCharging, state.ActRecovering, state.ActEnd: // empty
+	case state.HurtStart:
 		u.Anim.Frames = Characters[u.Character].Animations.Hurt
 		u.Anim.IsLooping, u.Anim.FPS, u.Anim.Time = false, 5, 0
 		u.VelocityX = 0
 		var percent = 1 - float32(u.Health)/float32(u.Values.MaxHealth)
 		u.Blood.EmitFromLine(int(percent*BloodMultiplier), u.X, u.Y-6, u.X, u.Y+6)
-	case StateHurting: // empty
-	case StateDyingStart:
+	case state.Hurting: // empty
+	case state.DyingStart:
 		u.Anim.Frames = Characters[u.Character].Animations.Die
 		u.Anim.IsLooping, u.Anim.FPS, u.Anim.Time = false, 8, 0
 		u.HealthBar.FadeOut(1.5)
 		u.VelocityX = 0
 		u.Blood.EmitFromLine(BloodMultiplier, u.X, u.Y-6, u.X, u.Y+6)
-	case StateDying, StateDyingEnd: // empty
-	case StateDecaying:
+	case state.Dying, state.DyingEnd: // empty
+	case state.Decaying:
 		if u.HurtTimer < -u.Values.ReviveTimer || u.IsGarrisoner() {
 			Units = collection.Remove(Units, u)
 			if PinnedUnit == u {
 				PinnedUnit = nil
 			}
 
-			if u.Team == TeamAlly {
-				u.State = StateWaitingToBeSummoned
+			if u.Team == team.Ally {
+				u.State = state.WaitingToBeSummoned
 				u.PrepareSpawn()
 			}
 		} else if u.HurtTimer < 0 {
@@ -690,14 +669,14 @@ func (u *Unit) applyCollisions() {
 
 		hb = hb.Collide(ohb)
 		u.X, u.Y = hb.X+diffX, hb.Y+diffY
-		if (u.Team == TeamAlly && u.X < other.X) || (u.Team == TeamEnemy && u.X > other.X) {
+		if (u.Team == team.Ally && u.X < other.X) || (u.Team == team.Enemy && u.X > other.X) {
 			u.UnitFront = other
-		} else if (u.Team == TeamAlly && u.X > other.X) || (u.Team == TeamEnemy && u.X < other.X) {
+		} else if (u.Team == team.Ally && u.X > other.X) || (u.Team == team.Enemy && u.X < other.X) {
 			u.UnitBehind = other
 		}
 	}
 
-	if u.Values.Role != RoleCollector {
+	if u.Values.Role != role.Collector {
 		return
 	}
 
@@ -706,11 +685,11 @@ func (u *Unit) applyCollisions() {
 	var canFitNext = len(GameHUD.Pickups)+GameHUD.PickupsCarrying+1 <= 4
 	var allowed = emptySlot && canCarry && canFitNext
 	for _, p := range Pickups {
-		if p != nil && p.Lane == u.Lane && p.Overlaps(hb) && (allowed || p.Kind == PickupCoin) {
+		if p != nil && p.Lane == u.Lane && p.Overlaps(hb) && (allowed || p.Kind == pickup.Coin) {
 			p.HasShadow = false
 			u.Carrying = collection.Add(u.Carrying, p)
 			Pickups = collection.Remove(Pickups, p)
-			if p.Kind != PickupCoin {
+			if p.Kind != pickup.Coin {
 				GameHUD.PickupsCarrying++
 			}
 			if len(u.Carrying) >= u.Values.ActPoints {

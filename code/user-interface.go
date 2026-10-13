@@ -1,6 +1,15 @@
 package game
 
 import (
+	"game/code/constants/base"
+	"game/code/constants/effect"
+	"game/code/constants/entrance"
+	"game/code/constants/icon"
+	"game/code/constants/lane"
+	"game/code/constants/pickup"
+	"game/code/constants/role"
+	"game/code/constants/state"
+	"game/code/constants/team"
 	"pure-game-kit/packages/assets"
 	"pure-game-kit/packages/geometry"
 	"pure-game-kit/packages/graphics"
@@ -16,11 +25,10 @@ import (
 	"pure-game-kit/packages/utility/text"
 )
 
-type Icon uint8
 type HUD struct {
 	View                             *graphics.View
 	Top, ZoneInfo, Coins, UnitsPanel *graphics.Object
-	TeamGlory                        [TeamCount]*graphics.Object
+	TeamGlory                        [team.Count]*graphics.Object
 
 	HoverHighlight *graphics.Object
 
@@ -31,42 +39,13 @@ type HUD struct {
 	SummonDragX, SummonDragY float32
 }
 
-const (
-	IconHeart Icon = iota
-	IconCoin
-	IconGlory
-	IconTimer
-	IconShield
-	IconBow
-	IconSword
-	IconFlag
-	IconRange
-	IconSkull
-	IconLocked
-	IconUnlocked
-	IconBook
-	IconPlus
-	IconBag
-	IconHand
-	IconDebuff
-	IconLeftRight
-	IconHouse
-	IconLoop
-	IconDoor
-	IconGear
-	IconTower
-	IconMinus
-	IconUnit
-	IconCount
-)
-
 // ①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳⑴⑵⑶⑷⑸⑹⑺⑻⑼⑽⑾⑿⒀⒁⒂⒃⒄⒅⒆⒇⒈⒉⒊⒋⒌⒍⒎⒏⒐⒑⒒⒓⒔⒕⒖⒗⒘⒙⒚⒛
 // ⓐⓑⓒⓓⓔⓕⓖⓗⓘⓙⓚⓛⓜⓝⓞⓟⓠⓡⓢⓣⓤⓥⓦⓧⓨⓩⒶⒷⒸⒹⒺⒻⒼⒽⒾⒿⓀⓁⓂⓃⓄⓅⓆⓇⓈⓉⓊⓋⓌⓍⓎⓏ⓪⓫⓬⓭⓮⓯⓰⓱⓲⓳⓴
 var Tags = []string{
-	IconHeart: "①", IconCoin: "②", IconGlory: "③", IconSkull: "④", IconBook: "⑤", IconLeftRight: "⑥", IconRange: "⑦",
-	IconTimer: "⑧", IconLoop: "⑨", IconHouse: "⑩", IconSword: "⑪", IconBow: "⑫", IconPlus: "⑬", IconFlag: "⑭",
-	IconShield: "⑮", IconBag: "⑯", IconDebuff: "⑰", IconHand: "⑱", IconDoor: "⑲", IconGear: "⑳", IconTower: "⑴",
-	IconMinus: "⑵", IconUnit: "⑶",
+	icon.Heart: "①", icon.Coin: "②", icon.Glory: "③", icon.Skull: "④", icon.Book: "⑤", icon.LeftRight: "⑥", icon.Range: "⑦",
+	icon.Timer: "⑧", icon.Loop: "⑨", icon.House: "⑩", icon.Sword: "⑪", icon.Bow: "⑫", icon.Plus: "⑬", icon.Flag: "⑭",
+	icon.Shield: "⑮", icon.Bag: "⑯", icon.Debuff: "⑰", icon.Hand: "⑱", icon.Door: "⑲", icon.Gear: "⑳", icon.Tower: "⑴",
+	icon.Minus: "⑵", icon.Unit: "⑶",
 }
 
 var ThemeUI assets.GUIThemeId
@@ -120,14 +99,14 @@ func NewHUD() *HUD {
 
 	var coins = label
 	coins.Details.TextLineHeight, coins.Details.Tint = 10, palette.White
-	coins.Text, coins.Height = Tags[IconCoin]+"0", coins.Height-8
+	coins.Text, coins.Height = Tags[icon.Coin]+"0", coins.Height-8
 
 	var info = label
 	info.Width, info.Details.TextLineHeight = TileSize*8.5, 8
 	info.Details.TextSymbolGap, info.Details.TextColor = 10, palette.Gold
 
 	var ally, enemy = label, label
-	var glory = [TeamCount]*graphics.Object{&ally, &enemy}
+	var glory = [team.Count]*graphics.Object{&ally, &enemy}
 
 	return &HUD{
 		View: &view, ZoneInfo: &info, Top: &top, TeamGlory: glory, Coins: &coins, UnitsPanel: &unitsPanel,
@@ -146,7 +125,7 @@ func (h *HUD) UnitIconPosition(index int) (x, y float32) {
 func (h *HUD) FreePickupSlot() int {
 	var freeSlot = 0
 	for _, p := range h.Pickups {
-		if p.Kind != PickupCoin && p.SlotUI == freeSlot {
+		if p.Kind != pickup.Coin && p.SlotUI == freeSlot {
 			freeSlot = p.SlotUI + 1
 		}
 	}
@@ -194,7 +173,7 @@ func (h *HUD) UpdateBack() {
 	iterateRemovable(&h.Pickups, func(p *Pickup) {
 		p.Update()
 
-		if p != nil && p.Kind != PickupCoin && p.ContainsPoint(h.View.MousePosition()) {
+		if p != nil && p.Kind != pickup.Coin && p.ContainsPoint(h.View.MousePosition()) {
 			mouse.SetCursor(cursor.Hand)
 			p.DrawTooltip(true)
 
@@ -209,22 +188,22 @@ func (h *HUD) UpdateBack() {
 func (h *HUD) UpdateFront() {
 	var icons = UserInterface.Crops("icons-hud")
 	h.Coins.X, h.Coins.Y = h.Top.X, h.Top.Y-9
-	h.Coins.Text = CoinsText.Set(Tags[IconCoin], Player.Coins)
+	h.Coins.Text = CoinsText.Set(Tags[icon.Coin], Player.Coins)
 	h.View.DrawObject(h.Coins)
 	if h.Coins.ContainsPoint(h.View.MousePosition()) {
-		h.DrawTooltip(h.Coins.Shape, TooltipTexts[0].Set("Your\n🟨", Tags[IconCoin], "Coins⬜"), icons[0])
+		h.DrawTooltip(h.Coins.Shape, TooltipTexts[0].Set("Your\n🟨", Tags[icon.Coin], "Coins⬜"), icons[0])
 	}
 
-	var ally, enemy = h.TeamGlory[TeamAlly], h.TeamGlory[TeamEnemy]
+	var ally, enemy = h.TeamGlory[team.Ally], h.TeamGlory[team.Enemy]
 	ally.X, ally.Y = h.Top.X-TileSize*3.5, h.Top.Y-6
 	enemy.X, enemy.Y = h.Top.X+TileSize*3.5, h.Top.Y-6
 	h.View.DrawObject(ally)
 	h.View.DrawObject(enemy)
 
 	if ally.ContainsPoint(h.View.MousePosition()) {
-		h.DrawTooltip(ally.Shape, TooltipTexts[0].Set("Your\n🟩", Tags[IconGlory], "Glory⬜"), icons[1])
+		h.DrawTooltip(ally.Shape, TooltipTexts[0].Set("Your\n🟩", Tags[icon.Glory], "Glory⬜"), icons[1])
 	} else if enemy.ContainsPoint(h.View.MousePosition()) {
-		h.DrawTooltip(enemy.Shape, TooltipTexts[0].Set("Enemy\n🟥", Tags[IconGlory], "Glory⬜"), icons[1])
+		h.DrawTooltip(enemy.Shape, TooltipTexts[0].Set("Enemy\n🟥", Tags[icon.Glory], "Glory⬜"), icons[1])
 	}
 
 	if h.SummonIndex < 0 {
@@ -319,8 +298,8 @@ func (u *Unit) DrawTooltip(shape geometry.Shape, bench bool) {
 
 	var area = geometry.NewArea(x, y, width+extraWidth, height).Inside(GameHUD.View.Bounds())
 	area = area.Outside(GameHUD.UnitsPanel.Shape.Bounds(), true, false)
-	area = area.Outside(GameHUD.TeamGlory[TeamAlly].Shape.Bounds(), true, false)
-	area = area.Outside(GameHUD.TeamGlory[TeamEnemy].Shape.Bounds(), true, false)
+	area = area.Outside(GameHUD.TeamGlory[team.Ally].Shape.Bounds(), true, false)
+	area = area.Outside(GameHUD.TeamGlory[team.Enemy].Shape.Bounds(), true, false)
 	x, y = area.X, area.Y
 
 	TooltipLabel.Details.TextAlignX, TooltipLabel.Details.TextAlignY = 0, 0
@@ -333,7 +312,7 @@ func (u *Unit) DrawTooltip(shape geometry.Shape, bench bool) {
 		TooltipTexts[0].Set()
 
 		var keys = collection.MapKeys(u.Effects)
-		collection.SortByField(keys, func(k Effect) uint8 { return uint8(k) })
+		collection.SortByField(keys, func(k effect.Enum) uint8 { return uint8(k) })
 		for _, k := range keys {
 			TooltipLabel.Text = TooltipTexts[0].Append(u.Effects[k].EffectInfo, "\n")
 		}
@@ -345,25 +324,24 @@ func (u *Unit) DrawTooltip(shape geometry.Shape, bench bool) {
 	GameHUD.View.DrawShape(x, y+height/2-tsz/2, width-10, 20, 0, 0, color.RGB(61, 37, 59), noMask)
 
 	var char = Characters[u.Character]
-	var icon = char.Icon
 	GameHUD.View.DrawImage(x+width/2-tsz/2-6, y-height/2+tsz/2+6, tsz, tsz, 0, SlotId, col, noMask)
-	GameHUD.View.DrawImage(x+width/2-tsz/2-6, y-height/2+tsz/2+6, -tsz, tsz, 0, icon, col, noMask)
+	GameHUD.View.DrawImage(x+width/2-tsz/2-6, y-height/2+tsz/2+6, -tsz, tsz, 0, char.Icon, col, noMask)
 
 	TooltipTexts[1].Set()
 	if !u.IsOffLaner() {
 		if u.Values.MaxHealth > 0 {
 			if !u.IsSummoned() || u.Health == u.Values.MaxHealth {
-				TooltipTexts[1].Append("🌗🟩", Tags[IconHeart], u.Values.MaxHealth, " health\n")
+				TooltipTexts[1].Append("🌗🟩", Tags[icon.Heart], u.Values.MaxHealth, " health\n")
 			} else if u.IsSummoned() {
-				TooltipTexts[1].Append("🌗🟩", Tags[IconHeart], max(u.Health, 0), "/", u.Values.MaxHealth, " health\n")
+				TooltipTexts[1].Append("🌗🟩", Tags[icon.Heart], max(u.Health, 0), "/", u.Values.MaxHealth, " health\n")
 			}
 		}
 	}
 	if u.Values.MoveSpeed > 0 {
-		TooltipTexts[1].Append("🌗🟨", Tags[IconLeftRight], u.Values.MoveSpeed, " speed\n")
+		TooltipTexts[1].Append("🌗🟨", Tags[icon.LeftRight], u.Values.MoveSpeed, " speed\n")
 	}
 	if u.Values.ActPoints > 0 {
-		if u.Values.Role == RoleCollector && u.IsSummoned() {
+		if u.Values.Role == role.Collector && u.IsSummoned() {
 			var name = char.ActPointsName
 			TooltipTexts[1].Append("🟧", Tags[char.RoleIcon], len(u.Carrying), "/", u.Values.ActPoints, " ", name, "\n")
 		} else {
@@ -371,22 +349,22 @@ func (u *Unit) DrawTooltip(shape geometry.Shape, bench bool) {
 		}
 	}
 	if u.Values.ActRange > 0 {
-		TooltipTexts[1].Append("🌗🟧", Tags[IconRange], u.Values.ActRange, " range\n")
+		TooltipTexts[1].Append("🌗🟧", Tags[icon.Range], u.Values.ActRange, " range\n")
 	}
 	if u.Values.ActTimer > 0 {
 		var canAct = u.ActTimer < 0 || u.ActTimer > u.Values.ActTimer
-		if !u.IsSummoned() || canAct || number.IsNaN(u.ActTimer) || u.State == StateDecaying {
-			TooltipTexts[1].Append("🌗🟪", Tags[IconTimer], number.Round(u.Values.ActTimer, 1), "s rest\n")
+		if !u.IsSummoned() || canAct || number.IsNaN(u.ActTimer) || u.State == state.Decaying {
+			TooltipTexts[1].Append("🌗🟪", Tags[icon.Timer], number.Round(u.Values.ActTimer, 1), "s rest\n")
 		} else if u.IsSummoned() {
-			TooltipTexts[1].Append("🌗🟪", Tags[IconTimer], max(number.Round(u.ActTimer, 1), 0), "/",
+			TooltipTexts[1].Append("🌗🟪", Tags[icon.Timer], max(number.Round(u.ActTimer, 1), 0), "/",
 				number.Round(u.Values.ActTimer, 1), "s rest\n")
 		}
 	}
 	if u.Values.ReviveTimer > 0 {
-		if !u.IsSummoned() || u.State != StateDecaying {
-			TooltipTexts[1].Append("🌗🟦", Tags[IconLoop], number.Round(u.Values.ReviveTimer, 1), "s revive\n")
-		} else if u.Values.ReviveTimer > 0 && u.State == StateDecaying && u.HurtTimer > -u.Values.ReviveTimer {
-			TooltipTexts[1].Append("🌗🟦", Tags[IconLoop], max(number.Round(u.Values.ReviveTimer+u.HurtTimer, 1), 0), "/",
+		if !u.IsSummoned() || u.State != state.Decaying {
+			TooltipTexts[1].Append("🌗🟦", Tags[icon.Loop], number.Round(u.Values.ReviveTimer, 1), "s revive\n")
+		} else if u.Values.ReviveTimer > 0 && u.State == state.Decaying && u.HurtTimer > -u.Values.ReviveTimer {
+			TooltipTexts[1].Append("🌗🟦", Tags[icon.Loop], max(number.Round(u.Values.ReviveTimer+u.HurtTimer, 1), 0), "/",
 				number.Round(char.Values.ReviveTimer, 1), "s revive\n")
 		}
 	}
@@ -403,7 +381,7 @@ func (u *Unit) DrawTooltip(shape geometry.Shape, bench bool) {
 	GameHUD.View.DrawObject(TooltipLabel)
 
 	if PinnedUnit == u {
-		var pin = UserInterface.Crops("icons-text")[IconLocked]
+		var pin = UserInterface.Crops("icons-text")[icon.Locked]
 		var sz float32 = TileSize / 2
 		GameHUD.View.DrawImage(x-width/2+3, y-height/2+3, sz*0.8, sz*0.8, 0, pin, palette.White, geometry.Area{})
 	}
@@ -468,9 +446,9 @@ func (h *HUD) drawBenchUnits(lastSummonIndex int) {
 		}
 		h.View.DrawImage(x, y, sz, sz, 0, Characters[unit.Character].Icon, tint, noMask)
 		h.View.DrawImage(x+sz/2-iSz/2, y+sz/2-iSz/2, iSz, iSz, 0, roleIcon, tint, noMask)
-		if unit.State == StateDecaying {
+		if unit.State == state.Decaying {
 			var timerWidth = number.Map(unit.HurtTimer, 0, -unit.Values.ReviveTimer, sz-2, 0)
-			var icon, col = IconLoop, color.RGB(102, 102, 255)
+			var icon, col = icon.Loop, color.RGB(102, 102, 255)
 
 			h.View.DrawShape(x, y, sz, sz, 0, 0, color.RGBA(0, 0, 0, 150), noMask)
 			h.View.DrawImage(x-sz/2+iSz/2, y+sz/2-iSz/2, iSz, iSz, 0, icons[icon], col, noMask)
@@ -482,12 +460,12 @@ func (h *HUD) drawBenchUnits(lastSummonIndex int) {
 				hp, maxHp = 1, 1
 			}
 			var hpWidth = number.Map(hp, 0, maxHp, 0, sz-2)
-			var icon, col = IconHeart, palette.Green
+			var curIcon, col = icon.Heart, palette.Green
 			if hp == 0 {
-				icon, col = IconSkull, palette.Red
+				curIcon, col = icon.Skull, palette.Red
 			}
 			h.View.DrawShape(x, y, sz, sz, 0, 0, color.RGBA(0, 0, 0, 150), noMask)
-			h.View.DrawImage(x-sz/2+iSz/2, y+sz/2-iSz/2, iSz, iSz, 0, icons[icon], col, noMask)
+			h.View.DrawImage(x-sz/2+iSz/2, y+sz/2-iSz/2, iSz, iSz, 0, icons[curIcon], col, noMask)
 			h.View.DrawShape(x-sz/2+sz/2, y+sz/2+2, sz, 3, 0, 0, palette.Black, noMask)
 			h.View.DrawShape(x+hpWidth/2-sz/2+1, y+sz/2+2, hpWidth, 1, 0, 0, col, noMask)
 		} else if hovered && click && lastSummonIndex < 0 {
@@ -515,7 +493,7 @@ func (h *HUD) drawBenchUnits(lastSummonIndex int) {
 
 	if hoveredUnit != nil {
 		mouse.SetCursor(cursor.Hand)
-		if hoveredUnit.State == StateDecaying || hoveredUnit.IsSummoned() {
+		if hoveredUnit.State == state.Decaying || hoveredUnit.IsSummoned() {
 			mouse.SetCursor(cursor.Arrow)
 		}
 		hoveredUnit.DrawTooltip(hoveredShape, true)
@@ -543,14 +521,14 @@ func (h *HUD) trySummon(lastSummonIndex int) {
 	var drop, click = mouse.IsButtonJustReleased(button.Left), mouse.IsButtonJustPressed(button.Left)
 	var smallestDist = number.Infinity()
 	const size = TileSize * 0.85
-	var lane Lane
+	var atLane lane.Enum
 
-	for _, e := range Bases[TeamAlly].Entrances {
+	for _, e := range Bases[team.Ally].Entrances {
 		var shape = e.Shape()
-		if Bases[TeamAlly].Kind < BaseBarrack {
+		if Bases[team.Ally].Kind < base.Barrack {
 			shape.X += TileSize / 1.5
 			shape.Y += TileSize
-		} else if e.Kind == EntranceTallGate {
+		} else if e.Kind == entrance.TallGate {
 			shape.Y += TileSize / 2
 		}
 		shape.Width, shape.Height = size, size
@@ -559,20 +537,20 @@ func (h *HUD) trySummon(lastSummonIndex int) {
 		if dist < smallestDist && dist < TileSize*1.5 {
 			smallestDist = dist
 			hoverShape = shape
-			lane = e.Lane
+			atLane = e.Lane
 		}
 		View.DrawShape(shape.X, shape.Y, shape.Width, shape.Height, 0, 0, color.RGBA(0, 255, 0, 80), geometry.Area{})
 		h.Highlight(View, shape, palette.Green)
 	}
 
-	var from, to = int(LaneGarrison3 + Lane(Bases[TeamAlly].Garrison)), int(LaneGarrison1)
-	var takenGarrisons = make([]Lane, 0, 8)
+	var from, to = int(lane.Garrison3 + lane.Enum(Bases[team.Ally].Garrison)), int(lane.Garrison1)
+	var takenGarrisons = make([]lane.Enum, 0, 8)
 	for _, pu := range Player.Units {
 		if pu != nil && pu.IsSummoned() && pu.IsGarrisoner() && pu.IsAlive() {
 			takenGarrisons = append(takenGarrisons, pu.Lane)
 		}
 	}
-	if unit.Values.ActRange > 1 && Bases[TeamAlly].Kind >= BaseFort {
+	if unit.Values.ActRange > 1 && Bases[team.Ally].Kind >= base.Fort {
 		var garrisonsFull = len(takenGarrisons) == 6
 		var garrisonX, garrisonY = PointAtCell(0.5, 4)
 		var shape = geometry.NewRectangle(garrisonX, garrisonY, size, size, 0)
@@ -581,11 +559,11 @@ func (h *HUD) trySummon(lastSummonIndex int) {
 		if !garrisonsFull && dist < smallestDist && dist < TileSize*1.5 {
 			smallestDist = dist
 			hoverShape = shape
-			lane = LaneGarrison1
+			atLane = lane.Garrison1
 
 			for i := from; i >= to; i-- {
-				if !collection.Contains(takenGarrisons, Lane(i)) {
-					lane = Lane(i)
+				if !collection.Contains(takenGarrisons, lane.Enum(i)) {
+					atLane = lane.Enum(i)
 					break
 				}
 			}
@@ -608,10 +586,10 @@ func (h *HUD) trySummon(lastSummonIndex int) {
 		if click || drop {
 			h.SummonIndex = -1
 			Units = append(Units, unit)
-			unit.Lane = lane
+			unit.Lane = atLane
 
 			switch unit.Values.Role {
-			case RoleGriefer, RoleSupplier, RoleCollector:
+			case role.Griefer, role.Supplier, role.Collector:
 				unit.Lane++
 			}
 			unit.PrepareSpawn()

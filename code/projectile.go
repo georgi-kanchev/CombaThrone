@@ -1,6 +1,8 @@
 package game
 
 import (
+	"game/code/constants/entrance"
+	proj "game/code/constants/projectile"
 	"pure-game-kit/packages/graphics"
 	"pure-game-kit/packages/utility/angle"
 	"pure-game-kit/packages/utility/collection"
@@ -10,7 +12,6 @@ import (
 	"pure-game-kit/packages/utility/random"
 )
 
-type ProjectileKind uint8
 type Projectile struct {
 	graphics.Object
 	Value int
@@ -21,45 +22,18 @@ type Projectile struct {
 	Z, Age, TravelTime, ArcHeight float32
 
 	FadeOutTime float32
-	Kind        ProjectileKind
+	Kind        proj.Enum
 
 	Owner         *Unit
 	EnemyEntrance *Entrance
 	Trigger       bool
 }
 
-const (
-	ProjectileArrow ProjectileKind = iota
-	ProjectileSmallBullet
-	ProjectileSkull
-	ProjectileBigRock
-	ProjectileSmallEllipse
-	ProjectileBigBullet
-	ProjectileBarrel
-	ProjectileSmallRock
-	ProjectileMediumBall
-	ProjectileBigBall
-	ProjectileCannonBall1
-	ProjectileSmallSpit
-	ProjectileSmallBall
-	ProjectileBigEllipse
-	ProjectileCannonBall2
-	ProjectileCannonBall3
-	ProjectileMediumSpit
-	ProjectileFrozenSpit
-	ProjectileBigSpit
-	ProjectileRock
-	ProjectileRedPotion
-	ProjectileGreenPotion
-	ProjectileYellowPotion
-	ProjectileCount
-)
-
 var Projectiles, ProjectilesBehind []*Projectile = make([]*Projectile, 0, 32), make([]*Projectile, 0, 32)
-var ProjectilesFadeOutTimes = [ProjectileCount]float32{ProjectileArrow: 10, ProjectileSmallBullet: 0.1}
+var ProjectilesFadeOutTimes = [proj.Count]float32{proj.Arrow: 10, proj.SmallBullet: 0.1}
 
 func (u *Unit) NewProjectile(x, y, z, targetX, targetY, targetZ float32, value int,
-	kind ProjectileKind, enemyEntrance *Entrance) *Projectile {
+	kind proj.Enum, enemyEntrance *Entrance) *Projectile {
 	var speed float32 = 100 * Characters[u.Character].Projectile.Speed
 	var accuracyMultiplier float32 = 1 / Characters[u.Character].Projectile.Speed
 	if enemyEntrance != nil { // should not miss the entrances
@@ -117,7 +91,7 @@ func (p *Projectile) Update() {
 				e.TakeDamage(p.Value)
 				if e.Health > 0 { // crumble sound played by entrance itself
 					var sounds = Characters[p.Owner.Character].Sounds.HitWood
-					if e.Kind == EntranceShortGate || e.Kind == EntranceTallGate {
+					if e.Kind == entrance.ShortGate || e.Kind == entrance.TallGate {
 						sounds = Characters[p.Owner.Character].Sounds.HitMetal
 					}
 					PlaySound(sounds)

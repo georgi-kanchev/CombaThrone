@@ -1,6 +1,12 @@
 package game
 
 import (
+	char "game/code/constants/character"
+	"game/code/constants/effect"
+	"game/code/constants/icon"
+	"game/code/constants/role"
+	"game/code/constants/state"
+	"game/code/constants/team"
 	"pure-game-kit/packages/geometry"
 	"pure-game-kit/packages/utility/color"
 	"pure-game-kit/packages/utility/direction"
@@ -8,27 +14,27 @@ import (
 	"pure-game-kit/packages/utility/text"
 )
 
-var Behaviors = map[CharacterKind]func(self *Unit){
-	CharDummy: func(self *Unit) {
+var Behaviors = map[char.Enum]func(self *Unit){
+	char.Dummy: func(self *Unit) {
 		switch self.State {
-		case StateDyingStart:
-			self.State = StateIdling
+		case state.DyingStart:
+			self.State = state.Idling
 			self.Health = 1
-		case StateSummoned:
+		case state.Summoned:
 			self.X, self.Y = TileSize*5, -TileSize*6
-		case StateMoving:
-			self.State = StateIdling
+		case state.Moving:
+			self.State = state.Idling
 		}
 	},
-	CharMiner: func(self *Unit) {
+	char.Miner: func(self *Unit) {
 		var attackable, entrance = self.EnemyEntrance()
 		if attackable && entrance != nil && self.UnitFront == nil {
-			self.AddEffect(EffectMiner)
+			self.AddEffect(effect.Miner)
 		} else {
-			self.RemoveEffect(EffectMiner)
+			self.RemoveEffect(effect.Miner)
 		}
 	},
-	CharCook: func(self *Unit) {
+	char.Cook: func(self *Unit) {
 		var canAct = number.IsNaN(self.ActTimer) || self.ActTimer < 0
 		var targetUnit *Unit
 		for _, u := range Units {
@@ -37,57 +43,57 @@ var Behaviors = map[CharacterKind]func(self *Unit){
 			if u.Team == self.Team && u != self && u.Lane == self.Lane-1 && isClose && !isMaxHp && u.IsAlive() {
 				targetUnit = u
 				if canAct {
-					self.State = StateActStart
+					self.State = state.ActStart
 				}
 				break
 			}
 		}
-		if self.State == StateActTrigger && targetUnit != nil {
+		if self.State == state.ActTrigger && targetUnit != nil {
 			if targetUnit.IsAlive() && targetUnit.Health != targetUnit.Values.MaxHealth {
 				targetUnit.AffectHealth(4)
 			}
 		}
 	},
-	CharBowyer: func(self *Unit) {
-		if self.State == StateSummoned && !self.IsGarrisoner() {
-			self.AddEffect(EffectBowyer)
+	char.Bowyer: func(self *Unit) {
+		if self.State == state.Summoned && !self.IsGarrisoner() {
+			self.AddEffect(effect.Bowyer)
 		}
 	},
-	CharSmith: func(self *Unit) {
+	char.Smith: func(self *Unit) {
 		var canAct = number.IsNaN(self.ActTimer) || self.ActTimer < 0
-		if self.State == StateIdling && self.UnitFront != nil && canAct {
-			self.State = StateActStart
-		} else if self.State == StateActTrigger && self.UnitFront != nil {
+		if self.State == state.Idling && self.UnitFront != nil && canAct {
+			self.State = state.ActStart
+		} else if self.State == state.ActTrigger && self.UnitFront != nil {
 			self.UnitFront.VelocityY = -10
 			self.UnitFront.Values.SleepTimer = 1.5
-			if self.Team == TeamAlly {
+			if self.Team == team.Ally {
 				self.UnitFront.VelocityX = 50
 			} else {
 				self.UnitFront.VelocityX = -50
 			}
 		}
 	},
-	CharKid: func(self *Unit) {
+	char.Kid: func(self *Unit) {
 		if len(self.Carrying) == 0 {
-			self.AddEffect(EffectKid)
+			self.AddEffect(effect.Kid)
 		} else {
-			self.RemoveEffect(EffectKid)
+			self.RemoveEffect(effect.Kid)
 		}
 	},
-	CharHorse: func(self *Unit) {
+	char.Horse: func(self *Unit) {
 		for _, u := range Units {
 			if self != u && self.Team == u.Team {
 				var affectedLane = self.Lane == u.Lane || self.Lane == u.Lane+1
 				if affectedLane && number.IsWithin(u.X, self.X, float32(self.Values.ActRange)*TileSize) {
-					u.AddEffect(EffectHorse)
+					u.AddEffect(effect.Horse)
 				} else {
-					u.RemoveEffect(EffectHorse)
+					u.RemoveEffect(effect.Horse)
 				}
 			}
 		}
 	},
-	CharFisherman: func(self *Unit) {
-		if self.State == StateSummoned {
+	char.Fisherman: func(self *Unit) {
+		if self.State == state.Summoned {
 			self.ActTimer = self.Values.ActTimer
 		}
 
@@ -95,7 +101,7 @@ var Behaviors = map[CharacterKind]func(self *Unit){
 		if self.IsReturning {
 			offset *= -1
 		}
-		if self.LastState == StateActTrigger { // is fishing
+		if self.LastState == state.ActTrigger { // is fishing
 			for _, u := range Units {
 				if self == u || self.Team == u.Team {
 					continue
@@ -110,7 +116,7 @@ var Behaviors = map[CharacterKind]func(self *Unit){
 			}
 			var height float32 = TileSize * 0.7
 			var x, y = self.X + 18.5, self.Y + height
-			if (self.Team == TeamAlly && self.IsReturning) || (self.Team == TeamEnemy && !self.IsReturning) {
+			if (self.Team == team.Ally && self.IsReturning) || (self.Team == team.Enemy && !self.IsReturning) {
 				x = self.X - 18.5
 			}
 			View.DrawShape(x, y, 3, height, 0, 0, color.RGB(37, 19, 26), geometry.Area{})
@@ -120,20 +126,20 @@ var Behaviors = map[CharacterKind]func(self *Unit){
 		}
 
 		if self.ActTimer < 0 {
-			if self.LastState == StateActTrigger {
+			if self.LastState == state.ActTrigger {
 				self.ActTimer = self.Values.ActTimer // consume act to hook up
-				self.State = StateActRecovering      // and keep moving
-				self.LastState = StateActRecovering
+				self.State = state.ActRecovering     // and keep moving
+				self.LastState = state.ActRecovering
 			} else {
-				self.State = StateActStart
+				self.State = state.ActStart
 			}
 		}
-		if self.LastState == StateActTrigger {
-			self.State = StateActTrigger // force keep StateActEnd
+		if self.LastState == state.ActTrigger {
+			self.State = state.ActTrigger // force keep StateActEnd
 		}
 	},
-	CharTroll: func(self *Unit) {
-		if self.State == StateActTrigger {
+	char.Troll: func(self *Unit) {
+		if self.State == state.ActTrigger {
 			for _, u := range Units {
 				if self.Team != u.Team && number.IsWithin(self.X, u.X, TileSize*2) {
 					var dirX, dirY = direction.BetweenPoints(self.X, self.Y+self.Height/2, u.X, u.Y)
@@ -143,64 +149,64 @@ var Behaviors = map[CharacterKind]func(self *Unit){
 			}
 		}
 	},
-	CharSpearlin:    behaviorGoblin,
-	CharArbalestier: behaviorGoblin,
-	CharStabber: func(self *Unit) {
-		if self.State != StateActTrigger || self.UnitFront == nil || self.UnitFront.ProjectHealth(-self.Values.ActPoints) > 0 {
+	char.Spearlin:    behaviorGoblin,
+	char.Arbalestier: behaviorGoblin,
+	char.Stabber: func(self *Unit) {
+		if self.State != state.ActTrigger || self.UnitFront == nil || self.UnitFront.ProjectHealth(-self.Values.ActPoints) > 0 {
 			return // i have not attacked or enemy will live from my attack, so bail
 		}
 
-		var eff, hasEffect = self.Effects[EffectStabberBandit] // accumulated effect from all kills
+		var eff, hasEffect = self.Effects[effect.Stabber] // accumulated effect from all kills
 		if !hasEffect {
-			self.AddEffect(EffectStabberBandit)
-			eff = self.Effects[EffectStabberBandit]
+			self.AddEffect(effect.Stabber)
+			eff = self.Effects[effect.Stabber]
 		} else { // dmg accumulates on the unit effect itself for tooltip display but its dmg value should remain unchanged
-			self.Effects[EffectStabberBandit] = Effects[EffectStabberBandit] // so swap for original
-			self.TickEffect(EffectStabberBandit)                             // tick original
-			eff.ActPoints += Effects[EffectStabberBandit].ActPoints          // accumulate the unit one
+			self.Effects[effect.Stabber] = Effects[effect.Stabber] // so swap for original
+			self.TickEffect(effect.Stabber)                        // tick original
+			eff.ActPoints += Effects[effect.Stabber].ActPoints     // accumulate the unit one
 		}
-		eff.EffectInfo = text.New("🟩", Tags[IconPlus], "🟧", eff.ActPoints, " ", Tags[IconSword], "damage ⬜(Self)")
-		self.Effects[EffectStabberBandit] = eff // return back to unit
+		eff.EffectInfo = text.New("🟩", Tags[icon.Plus], "🟧", eff.ActPoints, " ", Tags[icon.Sword], "damage ⬜(Self)")
+		self.Effects[effect.Stabber] = eff // return back to unit
 	},
-	CharGunner: func(self *Unit) {
+	char.Gunner: func(self *Unit) {
 		if self.UnitFront == nil {
-			self.RemoveEffect(EffectGunnerBandit1)
-			self.RemoveEffect(EffectGunnerBandit2)
+			self.RemoveEffect(effect.Gunner1)
+			self.RemoveEffect(effect.Gunner2)
 		} else {
-			self.AddEffect(EffectGunnerBandit1)
-			self.AddEffect(EffectGunnerBandit2)
+			self.AddEffect(effect.Gunner1)
+			self.AddEffect(effect.Gunner2)
 		}
 	},
-	CharVulture: func(self *Unit) {
+	char.Vulture: func(self *Unit) {
 		for _, u := range Units {
-			if self != u && self.Team == u.Team && u.State == StateDecaying {
+			if self != u && self.Team == u.Team && u.State == state.Decaying {
 				if self.Lane == u.Lane+1 && number.IsWithin(u.X, self.X, float32(self.Values.ActRange)*TileSize) {
-					u.AddEffect(EffectVulture)                // effect is just for tooltip, no stats
+					u.AddEffect(effect.Vulture)               // effect is just for tooltip, no stats
 					u.Values.ReviveTimer -= DeltaTimeScaled() // applied here instead
 				} else {
-					u.RemoveEffect(EffectVulture)
+					u.RemoveEffect(effect.Vulture)
 				}
 			}
 		}
 	},
-	CharRaven: func(self *Unit) {
+	char.Raven: func(self *Unit) {
 		for _, u := range Units {
 			if self != u && self.Team != u.Team {
 				if self.Lane == u.Lane+1 && number.IsWithin(u.X, self.X, float32(self.Values.ActRange)*TileSize) {
-					u.AddEffect(EffectRaven)
+					u.AddEffect(effect.Raven)
 				} else {
-					u.RemoveEffect(EffectRaven)
+					u.RemoveEffect(effect.Raven)
 				}
 			}
 		}
 	},
-	CharSerpent: func(self *Unit) {
+	char.Snake: func(self *Unit) {
 		for _, u := range Units {
 			if self != u && self.Team != u.Team {
 				if self.Lane == u.Lane+1 && number.IsWithin(u.X, self.X, float32(self.Values.ActRange)*TileSize) {
-					u.AddEffect(EffectRedSnake)
+					u.AddEffect(effect.Snake)
 				} else {
-					u.RemoveEffect(EffectRedSnake)
+					u.RemoveEffect(effect.Snake)
 				}
 			}
 		}
@@ -208,15 +214,15 @@ var Behaviors = map[CharacterKind]func(self *Unit){
 }
 
 func behaviorGoblin(self *Unit) {
-	if self.UnitFront != nil && self.UnitFront.Values.Role == RoleDefender {
-		self.AddEffect(EffectGoblin)
+	if self.UnitFront != nil && self.UnitFront.Values.Role == role.Defender {
+		self.AddEffect(effect.Goblin)
 	} else {
-		self.RemoveEffect(EffectGoblin)
+		self.RemoveEffect(effect.Goblin)
 	}
 
-	if self.ClosestEnemyInRange != nil && self.ClosestEnemyInRange.Values.Role == RoleDefender {
-		self.AddEffect(EffectGoblin)
+	if self.ClosestEnemyInRange != nil && self.ClosestEnemyInRange.Values.Role == role.Defender {
+		self.AddEffect(effect.Goblin)
 	} else {
-		self.RemoveEffect(EffectGoblin)
+		self.RemoveEffect(effect.Goblin)
 	}
 }

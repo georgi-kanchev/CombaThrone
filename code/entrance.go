@@ -1,6 +1,10 @@
 package game
 
 import (
+	"game/code/constants/base"
+	"game/code/constants/entrance"
+	"game/code/constants/lane"
+	"game/code/constants/team"
 	"pure-game-kit/packages/execution/condition"
 	"pure-game-kit/packages/geometry"
 	"pure-game-kit/packages/graphics"
@@ -8,12 +12,11 @@ import (
 	"pure-game-kit/packages/utility/random"
 )
 
-type EntranceKind uint8
 type Entrance struct {
 	Tiles     []*graphics.Object
-	Kind      EntranceKind
-	Lane      Lane
-	Team      Team
+	Kind      entrance.Enum
+	Lane      lane.Enum
+	Team      team.Enum
 	HealthBar *HealthBar
 
 	MaxHealth, Health int
@@ -22,39 +25,37 @@ type Entrance struct {
 	OpenY, MaxOpenY, ShakeTimer float32
 }
 
-const EntranceNone, EntranceDoor, EntranceShortGate, EntranceTallGate EntranceKind = 0, 1, 2, 3
-
-func NewEntrance(entry EntranceKind, base BaseKind, team Team, lane Lane) *Entrance {
-	var data = Entrance{Kind: entry, Team: team, Lane: lane, MaxOpenY: TileSize + (TileSize * (float32(entry) - 1))}
+func NewEntrance(entry entrance.Enum, owner base.Enum, forTeam team.Enum, atLane lane.Enum) *Entrance {
+	var data = Entrance{Kind: entry, Team: forTeam, Lane: atLane, MaxOpenY: TileSize + (TileSize * (float32(entry) - 1))}
 	var x, y float32 = -208, 48 // ally upper lane by default
 
-	if entry != EntranceNone {
-		data.HealthBar = NewHealthBar(TileSize-2, team, false)
+	if entry != entrance.None {
+		data.HealthBar = NewHealthBar(TileSize-2, forTeam, false)
 		data.MaxHealth, data.Health = 100, 100
 	}
 
-	if lane == LaneMiddle {
+	if atLane == lane.Middle {
 		x -= TileSize
 		y += TileSize
 	}
-	if lane == LaneLower {
+	if atLane == lane.Lower {
 		x -= TileSize * 2
 		y += TileSize * 2
 	}
 
 	switch entry {
-	case EntranceNone:
+	case entrance.None:
 		var hole = graphics.NewSprite(x, y, 1, Decor.Crops("hole")[0])
-		if base < BaseBarrack {
+		if owner < base.Barrack {
 			hole.X = -CurrentZone.Ground.Width / 2 // pull back entrance to edge of scene (valid playfield)
 			hole.Details.Tint = 0                  // and hide the hole
 		}
 
 		data.Tiles = []*graphics.Object{&hole}
-	case EntranceDoor:
+	case entrance.Door:
 		var door = graphics.NewSprite(x, y, 1, Decor.Crops("door")[1])
 		data.Tiles = []*graphics.Object{&door}
-	case EntranceShortGate:
+	case entrance.ShortGate:
 		var top0 = graphics.NewSprite(x, y-TileSize, 1, Decor.Crops("gate-top")[0])
 		var mid0 = graphics.NewSprite(x, y, 1, Decor.Crops("gate-middle")[0])
 		var bot0 = graphics.NewSprite(x, y+TileSize, 1, Decor.Crops("gate-bottom")[0])
@@ -62,7 +63,7 @@ func NewEntrance(entry EntranceKind, base BaseKind, team Team, lane Lane) *Entra
 		var mid1 = graphics.NewSprite(x, y, 1, Decor.Crops("gate-middle")[1])
 		var bot1 = graphics.NewSprite(x, y+TileSize, 1, Decor.Crops("gate-bottom")[1])
 		data.Tiles = []*graphics.Object{&top0, &mid0, &bot0, &top1, &mid1, &bot1}
-	case EntranceTallGate:
+	case entrance.TallGate:
 		y -= TileSize / 2
 		var top0 = graphics.NewSprite(x, y-TileSize*1.5, 1, Decor.Crops("gate-top")[0])
 		var midU0 = graphics.NewSprite(x, y-TileSize*0.5, 1, Decor.Crops("gate-middle")[0])
@@ -77,7 +78,7 @@ func NewEntrance(entry EntranceKind, base BaseKind, team Team, lane Lane) *Entra
 
 	for _, t := range data.Tiles {
 		data.OriginalTileYs = append(data.OriginalTileYs, t.Y)
-		if team == TeamEnemy {
+		if forTeam == team.Enemy {
 			t.X *= -1
 			t.Width *= -1
 		}
@@ -90,12 +91,12 @@ func NewEntrance(entry EntranceKind, base BaseKind, team Team, lane Lane) *Entra
 func (e *Entrance) Shape() geometry.Shape {
 	var shape geometry.Shape
 	switch e.Kind {
-	case EntranceNone, EntranceDoor:
+	case entrance.None, entrance.Door:
 		shape = e.Tiles[0].Shape
-	case EntranceShortGate:
+	case entrance.ShortGate:
 		shape = e.Tiles[1].Shape
 		shape.Height = TileSize * 3
-	case EntranceTallGate:
+	case entrance.TallGate:
 		shape = e.Tiles[2].Shape
 		shape.Y -= TileSize / 2
 		shape.Height = TileSize * 4
@@ -110,12 +111,12 @@ func (e *Entrance) IsOpen() bool {
 func (e *Entrance) Update() {
 	e.ShakeTimer -= DeltaTimeScaled()
 
-	var gate = e.Kind == EntranceShortGate || e.Kind == EntranceTallGate
+	var gate = e.Kind == entrance.ShortGate || e.Kind == entrance.TallGate
 	var shakeOffsetX, shakeOffsetY float32 = 0, 0
 
 	if e.Health > 0 {
 		var sensorDistance = float32(TileSize) * 1.2
-		if e.Kind == EntranceDoor {
+		if e.Kind == entrance.Door {
 			sensorDistance = TileSize * 2.3
 		}
 		var shortestDistance float32 = sensorDistance
@@ -138,7 +139,7 @@ func (e *Entrance) Update() {
 	}
 
 	switch e.Kind {
-	case EntranceDoor:
+	case entrance.Door:
 		var breakIndex = number.Map(e.Health, 0, e.MaxHealth, 5, 1)
 		if e.IsOpen() && e.Health > 0 {
 			breakIndex = 6
@@ -154,7 +155,7 @@ func (e *Entrance) Update() {
 		}
 
 		e.Tiles[0].ImageId = Decor.Crops("door")[breakIndex]
-	case EntranceShortGate, EntranceTallGate:
+	case entrance.ShortGate, entrance.TallGate:
 		if condition.JustTurnedTrue(e.OpenY > 0, int(e.Tiles[0].X)) {
 			PlaySound(AudioGateOpen)
 		}
@@ -188,20 +189,20 @@ func (e *Entrance) TakeDamage(damage int) {
 		e.HealthBar.FadeOut(1.5)
 
 		switch e.Kind {
-		case EntranceDoor:
+		case entrance.Door:
 			PlaySound(AudioDoorCrumble)
-		case EntranceShortGate, EntranceTallGate:
+		case entrance.ShortGate, entrance.TallGate:
 			PlaySound(AudioGateCrumble)
 		}
 	}
 
 	var breakIndex = number.Map(e.Health, 0, e.MaxHealth, 5, 1)
 	switch e.Kind { // EntryDoor done in update
-	case EntranceShortGate:
+	case entrance.ShortGate:
 		e.Tiles[3].ImageId = Decor.Crops("gate-top")[breakIndex]
 		e.Tiles[4].ImageId = Decor.Crops("gate-middle")[breakIndex]
 		e.Tiles[5].ImageId = Decor.Crops("gate-bottom")[breakIndex]
-	case EntranceTallGate:
+	case entrance.TallGate:
 		e.Tiles[4].ImageId = Decor.Crops("gate-top")[breakIndex]
 		e.Tiles[5].ImageId = Decor.Crops("gate-middle")[breakIndex]
 		e.Tiles[6].ImageId = Decor.Crops("gate-middle")[breakIndex]

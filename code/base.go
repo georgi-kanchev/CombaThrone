@@ -1,20 +1,25 @@
 package game
 
 import (
+	"game/code/constants/base"
+	"game/code/constants/entrance"
+	"game/code/constants/garrison"
+	"game/code/constants/icon"
+	"game/code/constants/lane"
+	"game/code/constants/team"
+	"game/code/constants/zone"
 	"pure-game-kit/packages/assets"
 	"pure-game-kit/packages/graphics"
 	"pure-game-kit/packages/motion"
 	"pure-game-kit/packages/utility/text"
 )
 
-type BaseKind uint8
-type Garrison uint8
 type Base struct {
-	Kind     BaseKind
-	Team     Team
-	Garrison Garrison
+	Kind     base.Enum
+	Team     team.Enum
+	Garrison garrison.Enum
 
-	EntranceKinds [3]EntranceKind
+	EntranceKinds [3]entrance.Enum
 	Entrances     []*Entrance
 
 	Glory, LastGlory int
@@ -24,26 +29,17 @@ type Base struct {
 	FlagAnim *motion.Animation[assets.ImageId]
 }
 
-const (
-	BaseNone BaseKind = iota
-	BaseCamp
-	BaseBarrack
-	BaseFort
-	BaseFortress
-)
-const GarrisonNone, Garrison1, Garrison2, Garrison3 Garrison = 0, 1, 2, 3
+var Bases [team.Count]*Base
 
-var Bases [TeamCount]*Base
-
-func NewBase(team Team, kind BaseKind, garrison Garrison, entrances [3]EntranceKind) *Base {
-	var b = &Base{Team: team, Kind: kind, Garrison: garrison, Glory: baseGlory[kind]}
+func NewBase(forTeam team.Enum, kind base.Enum, garr garrison.Enum, entrances [3]entrance.Enum) *Base {
+	var b = &Base{Team: forTeam, Kind: kind, Garrison: garr, Glory: baseGlory[kind]}
 	b.Entrances = make([]*Entrance, 3)
-	b.Entrances[LaneLower/2] = NewEntrance(entrances[LaneLower/2], b.Kind, team, LaneLower)
-	b.Entrances[LaneMiddle/2] = NewEntrance(entrances[LaneMiddle/2], b.Kind, team, LaneMiddle)
-	b.Entrances[LaneUpper/2] = NewEntrance(entrances[LaneUpper/2], b.Kind, team, LaneUpper)
+	b.Entrances[lane.Lower/2] = NewEntrance(entrances[lane.Lower/2], b.Kind, forTeam, lane.Lower)
+	b.Entrances[lane.Middle/2] = NewEntrance(entrances[lane.Middle/2], b.Kind, forTeam, lane.Middle)
+	b.Entrances[lane.Upper/2] = NewEntrance(entrances[lane.Upper/2], b.Kind, forTeam, lane.Upper)
 
 	var x, y = PointAtCell(14, 5.5)
-	if team == TeamAlly {
+	if forTeam == team.Ally {
 		x, y = PointAtCell(3, 6)
 	}
 
@@ -52,48 +48,48 @@ func NewBase(team Team, kind BaseKind, garrison Garrison, entrances [3]EntranceK
 	b.Flag, b.FlagAnim = &flag, &anim
 
 	switch b.Kind {
-	case BaseNone:
+	case base.None:
 		return b
-	case BaseCamp:
-		var back = graphics.NewTilemap(Layers[BaseCamp-1])
+	case base.Camp:
+		var back = graphics.NewTilemap(Layers[base.Camp-1])
 		b.Back = &back
-		if team == TeamEnemy {
+		if forTeam == team.Enemy {
 			b.Back.Width *= -1
 		}
 		return b
-	case BaseBarrack:
-		var barrack = graphics.NewTilemap(Layers[BaseBarrack-1])
+	case base.Barrack:
+		var barrack = graphics.NewTilemap(Layers[base.Barrack-1])
 		b.Back = &barrack
-		if team == TeamEnemy {
+		if forTeam == team.Enemy {
 			b.Back.Width *= -1
 		}
 		return b
 	}
 
-	var back, front = graphics.NewTilemap(Layers[BaseFort-1]), graphics.NewTilemap(Layers[BaseFort])
+	var back, front = graphics.NewTilemap(Layers[base.Fort-1]), graphics.NewTilemap(Layers[base.Fort])
 	b.Back, b.Front = &back, &front
 
-	if team == TeamEnemy {
+	if forTeam == team.Enemy {
 		b.Back.Width *= -1
 		b.Front.Width *= -1
 	}
-	if b.Kind == BaseFort {
+	if b.Kind == base.Fort {
 		b.Back.Y += TileSize
 		b.Front.Y += TileSize
 
-		bringGarrisonLanesDown(team)
+		bringGarrisonLanesDown(forTeam)
 	}
 
-	if b.Garrison != GarrisonNone {
-		var backIndex, frontIndex = int(BaseFort-1) + int(b.Garrison)*2, int(BaseFort) + int(b.Garrison)*2
+	if b.Garrison != garrison.None {
+		var backIndex, frontIndex = int(base.Fort-1) + int(b.Garrison)*2, int(base.Fort) + int(b.Garrison)*2
 		var garBack, garFront = graphics.NewTilemap(Layers[backIndex]), graphics.NewTilemap(Layers[frontIndex])
 		b.GarrisonBack, b.GarrisonFront = &garBack, &garFront
 
-		if b.Kind == BaseFort {
+		if b.Kind == base.Fort {
 			b.GarrisonBack.Y += TileSize
 			b.GarrisonFront.Y += TileSize
 		}
-		if team == TeamEnemy {
+		if forTeam == team.Enemy {
 			b.GarrisonBack.Width *= -1
 			b.GarrisonFront.Width *= -1
 		}
@@ -103,7 +99,7 @@ func NewBase(team Team, kind BaseKind, garrison Garrison, entrances [3]EntranceK
 
 //=================================================================
 
-var baseGlory = map[BaseKind]int{BaseNone: 10, BaseCamp: 15, BaseBarrack: 30, BaseFort: 90, BaseFortress: 360}
+var baseGlory = map[base.Enum]int{base.None: 10, base.Camp: 15, base.Barrack: 30, base.Fort: 90, base.Fortress: 360}
 
 func (b *Base) UpdateBack() {
 	View.DrawObject(b.Back)
@@ -111,11 +107,11 @@ func (b *Base) UpdateBack() {
 
 	var x, y = b.Flag.X, b.Flag.Y
 	b.FlagAnim.Frames = CurrentZone.FlagFrames
-	if b.Team == TeamAlly {
+	if b.Team == team.Ally {
 		b.FlagAnim.Frames = Decor.Crops("flag-player")
 		b.FlagAnim.FPS = 6
 	} else {
-		if CurrentZone.Kind == ZoneDocks {
+		if CurrentZone.Kind == zone.Docks {
 			x, y = PointAtCell(13.85, 0.31)
 			b.FlagAnim.FPS = 5
 		} else {
@@ -138,11 +134,11 @@ func (b *Base) UpdateFront() {
 		//TimeScale = 0 // game over
 	}
 
-	if b.Team == TeamAlly && Player.CoinsJustChanged() {
+	if b.Team == team.Ally && Player.CoinsJustChanged() {
 		GameHUD.Coins.Text = text.New(Player.Coins, "$")
 	}
 	if b.Glory != b.LastGlory {
-		GameHUD.TeamGlory[b.Team].Text = text.New(Tags[IconGlory], b.Glory)
+		GameHUD.TeamGlory[b.Team].Text = text.New(Tags[icon.Glory], b.Glory)
 		b.LastGlory = b.Glory
 	}
 
