@@ -295,7 +295,8 @@
     <group name="pyromancer-icon" cropIndexes="268"/>
     <group name="pyromancer-idle" cropIndexes="269 270 271 272"/>
     <group name="pyromancer-move" cropIndexes="273 274 275 276 277 278"/>
-    <group name="pyromancer-act" cropIndexes="279 280 281 282 283 284"/>
+    <group name="pyromancer-prepare" cropIndexes="279 280 281 282"/>
+    <group name="pyromancer-recover" cropIndexes="283 284"/>
     <group name="pyromancer-hurt" cropIndexes="285 286"/>
     <group name="pyromancer-die" cropIndexes="287 288 289"/>
     <group name="windbender-icon" cropIndexes="290"/>

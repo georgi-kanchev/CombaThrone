@@ -14,17 +14,17 @@ const (
 	MediumBall
 	BigBall
 	CannonBall1
-	SmallSpit
-	SmallBall
 	BigEllipse
 	CannonBall2
 	CannonBall3
-	MediumSpit
+	Rock
 	FrozenSpit
 	BigSpit
-	Rock
+	SmallBall
 	RedPotion
 	GreenPotion
 	YellowPotion
+	SmallSpit
+	MediumSpit
 	Count
 )

@@ -24,13 +24,14 @@ type Projectile struct {
 	FadeOutTime float32
 	Kind        proj.Enum
 
-	Owner         *Unit
-	EnemyEntrance *Entrance
-	Trigger       bool
+	Owner                *Unit
+	EnemyEntrance        *Entrance
+	Trigger, FreeRoation bool
 }
 
 var Projectiles, ProjectilesBehind []*Projectile = make([]*Projectile, 0, 32), make([]*Projectile, 0, 32)
 var ProjectilesFadeOutTimes = [proj.Count]float32{proj.Arrow: 10, proj.SmallBullet: 0.1}
+var ProjectilesFreeRotation = map[proj.Enum]struct{}{proj.RedPotion: {}, proj.GreenPotion: {}, proj.YellowPotion: {}}
 
 func (u *Unit) NewProjectile(x, y, z, targetX, targetY, targetZ float32, value int,
 	kind proj.Enum, enemyEntrance *Entrance) *Projectile {
@@ -41,6 +42,7 @@ func (u *Unit) NewProjectile(x, y, z, targetX, targetY, targetZ float32, value i
 		targetY += TileSize / 2
 	}
 
+	var _, freeRotation = ProjectilesFreeRotation[kind]
 	var dist = point.DistanceToPoint(x, y, targetX, targetY)
 	var totalTime = max(dist/speed, 0.01) // prevent division by zero
 	var parabola = Characters[u.Character].Projectile.ParabolaMultiplier
@@ -52,6 +54,7 @@ func (u *Unit) NewProjectile(x, y, z, targetX, targetY, targetZ float32, value i
 		TargetZ:    targetZ + random.Range[float32](-0.35, 0.35)*accuracyMultiplier,
 		TravelTime: totalTime, ArcHeight: dist / 3 * parabola, Value: value, EnemyEntrance: enemyEntrance,
 		FadeOutTime: ProjectilesFadeOutTimes[kind],
+		FreeRoation: freeRotation,
 	}
 	return proj
 }
@@ -74,7 +77,11 @@ func (p *Projectile) Update() {
 	var velX = p.TargetX - p.StartX
 	var velY = (p.TargetY - p.StartY) - 4*p.ArcHeight*(1-2*progress)
 
-	p.Angle = angle.BetweenPoints(0, 0, velX, velY)
+	if p.FreeRoation {
+		p.Angle += velX * DeltaTimeScaled()
+	} else {
+		p.Angle = angle.BetweenPoints(0, 0, velX, velY)
+	}
 
 	if progress >= 1.0 {
 		var e = p.EnemyEntrance

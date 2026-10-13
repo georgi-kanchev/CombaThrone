@@ -142,9 +142,11 @@ func InitCharacters() {
 		Values{Name: "Snake", Wage: 20, Role: role.Griefer, MoveSpeed: 10, ActPoints: 10, ActRange: 3, ReviveTimer: 10.0},
 		"🟧"+Tags[icon.Debuff]+"Slows down 🌗🟧"+Tags[icon.Range]+"nearby 🟥"+Tags[icon.Unit]+"enemies⬜.")
 
-	Characters[char.Pyromancer] = NewCharacter(zone.Ruins, geometry.NewRoundedRectangle(0, 0, 30, 18, 0, 1),
-		Values{Name: "Snake", Wage: 20, Role: role.Griefer, MoveSpeed: 10, ActPoints: 10, ActRange: 3, ReviveTimer: 10.0},
-		"🟧"+Tags[icon.Debuff]+"Slows down 🌗🟧"+Tags[icon.Range]+"nearby 🟥"+Tags[icon.Unit]+"enemies⬜.")
+	Characters[char.Pyromancer] = NewCharacter(zone.Ruins, geometry.NewRoundedRectangle(0, 6, 18, 35, 0, 1),
+		Values{Name: "Pyromancer", Wage: 20, Role: role.Ranger, MoveSpeed: 20,
+			ActPoints: 10, ActTimer: 5.0, ActRange: 6, ReviveTimer: 10.0},
+		"🟧"+Tags[icon.Debuff]+"Slows down 🌗🟧"+Tags[icon.Range]+"nearby 🟥"+Tags[icon.Unit]+"enemies⬜.",
+		CharProjectile{ParabolaMultiplier: 1, Speed: 0.6, Kind: proj.RedPotion})
 
 	for i, c := range Characters {
 		if c == nil {
