@@ -4,6 +4,7 @@ import (
 	"game/code/constants/entrance"
 	proj "game/code/constants/projectile"
 	"pure-game-kit/packages/graphics"
+	"pure-game-kit/packages/motion/particles"
 	"pure-game-kit/packages/utility/angle"
 	"pure-game-kit/packages/utility/collection"
 	"pure-game-kit/packages/utility/color"
@@ -24,14 +25,19 @@ type Projectile struct {
 	FadeOutTime float32
 	Kind        proj.Enum
 
-	Owner                *Unit
-	EnemyEntrance        *Entrance
-	Trigger, FreeRoation bool
+	Owner         *Unit
+	EnemyEntrance *Entrance
+	Particles     *particles.System
+
+	Triggered, FreeRoation,
+	Hidden bool
 }
 
 var Projectiles, ProjectilesBehind []*Projectile = make([]*Projectile, 0, 32), make([]*Projectile, 0, 32)
-var ProjectilesFadeOutTimes = [proj.Count]float32{proj.Arrow: 10, proj.SmallBullet: 0.1}
+var ProjectilesFadeOutTimes = [proj.Count]float32{proj.Arrow: 10, proj.SmallBullet: 0.1, proj.RedPotion: 10}
 var ProjectilesFreeRotation = map[proj.Enum]struct{}{proj.RedPotion: {}, proj.GreenPotion: {}, proj.YellowPotion: {}}
+var ProjectilesParticles = map[proj.Enum]func(p *particles.Particle) bool{proj.RedPotion: ParticlesGlass}
+var ProjectilesPersistOnImpact = map[proj.Enum]struct{}{proj.Arrow: {}}
 
 func (u *Unit) NewProjectile(x, y, z, targetX, targetY, targetZ float32, value int,
 	kind proj.Enum, enemyEntrance *Entrance) *Projectile {
@@ -53,8 +59,7 @@ func (u *Unit) NewProjectile(x, y, z, targetX, targetY, targetZ float32, value i
 		TargetY:    targetY + random.Range[float32](-12, 12),
 		TargetZ:    targetZ + random.Range[float32](-0.35, 0.35)*accuracyMultiplier,
 		TravelTime: totalTime, ArcHeight: dist / 3 * parabola, Value: value, EnemyEntrance: enemyEntrance,
-		FadeOutTime: ProjectilesFadeOutTimes[kind],
-		FreeRoation: freeRotation,
+		FadeOutTime: ProjectilesFadeOutTimes[kind], FreeRoation: freeRotation, Particles: particles.NewSystem(),
 	}
 	return proj
 }
@@ -63,12 +68,14 @@ func (u *Unit) NewProjectile(x, y, z, targetX, targetY, targetZ float32, value i
 
 func (p *Projectile) Update() {
 	p.Age += DeltaTimeScaled()
+	p.Particles.Update()
 
 	var enemyTeam = 1 - p.Owner.Team
 	var progress = min(1.0, p.Age/p.TravelTime)
 	var groundX = p.StartX + (p.TargetX-p.StartX)*progress
 	var groundY = p.StartY + (p.TargetY-p.StartY)*progress
 	var heightArc = 4 * p.ArcHeight * progress * (1 - progress)
+	var particlesUpdate = ProjectilesParticles[p.Kind]
 
 	p.X = groundX
 	p.Y = groundY - heightArc
@@ -77,7 +84,7 @@ func (p *Projectile) Update() {
 	var velX = p.TargetX - p.StartX
 	var velY = (p.TargetY - p.StartY) - 4*p.ArcHeight*(1-2*progress)
 
-	if p.FreeRoation {
+	if p.FreeRoation && !p.Triggered {
 		p.Angle += velX * DeltaTimeScaled()
 	} else {
 		p.Angle = angle.BetweenPoints(0, 0, velX, velY)
@@ -85,8 +92,14 @@ func (p *Projectile) Update() {
 
 	if progress >= 1.0 {
 		var e = p.EnemyEntrance
-		if !p.Trigger {
-			p.Trigger = true
+		if !p.Triggered {
+			p.Triggered = true
+			p.Particles.EmitFromPoint(50, p.X, p.Y, particlesUpdate)
+
+			var _, persist = ProjectilesPersistOnImpact[p.Kind]
+			if !persist {
+				p.Hidden = true
+			}
 
 			var _, aboveGroundY = PointAtCell(0, 6)
 			if p.Y > aboveGroundY { // rendering projectiles above walls is fine
@@ -116,7 +129,9 @@ func (p *Projectile) Update() {
 			Projectiles = collection.Remove(Projectiles, p)
 			ProjectilesBehind = collection.Remove(ProjectilesBehind, p)
 		}
-		View.DrawObject(&p.Object)
+		if !p.Hidden {
+			View.DrawObject(&p.Object)
+		}
 		return
 	}
 
@@ -131,11 +146,13 @@ func (p *Projectile) Update() {
 			hb.Y -= hb.Height / 2 // move up
 		}
 
-		if p.Shape.Overlaps(hb) && number.IsWithin(p.Z, u.Z, 0.2) {
-			p.Trigger = true
+		if !p.Triggered && p.Shape.Overlaps(hb) && number.IsWithin(p.Z, u.Z, 0.2) {
+			p.Triggered = true
+			p.Particles.EmitFromPoint(50, p.X, p.Y, particlesUpdate)
 			u.AffectHealth(-p.Value)
-			Projectiles = collection.Remove(Projectiles, p)
-			ProjectilesBehind = collection.Remove(ProjectilesBehind, p)
+			p.Hidden = true
+			// Projectiles = collection.Remove(Projectiles, p)
+			// ProjectilesBehind = collection.Remove(ProjectilesBehind, p)
 			PlaySound(Characters[p.Owner.Character].Sounds.HitFlesh)
 			return
 		}
@@ -145,6 +162,8 @@ func (p *Projectile) Update() {
 	if p.TargetZ == p.Z { // same lane path shouldn't bend the shadow angle
 		shadowAngle = 0
 	}
-	DrawShadow(groundX, p.Z, number.Absolute(p.Width), p.Height*0.25, shadowAngle, p.Mask)
-	View.DrawObject(&p.Object)
+	if !p.Hidden {
+		DrawShadow(groundX, p.Z, number.Absolute(p.Width), p.Height*0.25, shadowAngle, p.Mask)
+		View.DrawObject(&p.Object)
+	}
 }

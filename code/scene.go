@@ -88,7 +88,7 @@ func InitScene() {
 	Player = NewPlayer()
 
 	Player.Units[0] = NewUnit(char.Raven, team.Ally, 0)
-	Player.Units[1] = NewUnit(char.Snake, team.Ally, 0)
+	Player.Units[1] = NewUnit(char.Bowyer, team.Ally, 0)
 	Player.Units[2] = NewUnit(char.Vulture, team.Ally, 0)
 	Player.Units[3] = NewUnit(char.Kid, team.Ally, 0)
 	Player.Units[4] = NewUnit(char.Stabber, team.Ally, 0)

@@ -376,8 +376,12 @@ func (u *Unit) DrawTooltip(shape geometry.Shape, bench bool) {
 	TooltipLabel.Text = TooltipTexts[2].Set("\n\n\n\n\n\n⬜", char.Info)
 	GameHUD.View.DrawObject(TooltipLabel)
 
+	var nameCol = "🟩"
+	if u.Team == team.Enemy {
+		nameCol = "🟥"
+	}
 	TooltipLabel.Details.TextAlignX = 1
-	TooltipLabel.Text = TooltipTexts[3].Set("\n\n\n⬜", u.Values.Name, "\n", Tags[char.RoleIcon], char.RoleName)
+	TooltipLabel.Text = TooltipTexts[3].Set("\n\n\n", nameCol, u.Values.Name, "\n", Tags[char.RoleIcon], char.RoleName)
 	GameHUD.View.DrawObject(TooltipLabel)
 
 	if PinnedUnit == u {

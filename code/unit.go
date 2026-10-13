@@ -337,7 +337,7 @@ var effectsToRemove []effect.Enum
 
 func (u *Unit) particlesBlood(p *particles.Particle) (alive bool) {
 	if p.Age == 0 {
-		p.CustomData["offsetY"] = random.Range[float32](-4, 4)
+		p.CustomData["y"] = random.Range[float32](p.Y+u.Height/2-4, p.Y+u.Height/2+4)
 		p.Scale = random.Range[float32](0.2, 3)
 		p.VelocityX = random.Range[float32](30, 50)
 		p.VelocityY = random.Range[float32](-20, 20)
@@ -355,8 +355,8 @@ func (u *Unit) particlesBlood(p *particles.Particle) (alive bool) {
 	p.X += p.VelocityX * dt
 	p.Y += p.VelocityY * dt
 
-	if p.Y > u.Y+u.Height/2+p.CustomData["offsetY"].(float32) {
-		p.Y = u.Y + u.Height/2 + p.CustomData["offsetY"].(float32)
+	if p.Y > p.CustomData["y"].(float32) {
+		p.Y = p.CustomData["y"].(float32)
 		p.VelocityX, p.VelocityY = 0, 0
 	}
 
