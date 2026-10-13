@@ -14,6 +14,7 @@ import (
 	"pure-game-kit/packages/geometry"
 	"pure-game-kit/packages/graphics"
 	"pure-game-kit/packages/motion"
+	"pure-game-kit/packages/motion/particles"
 	"pure-game-kit/packages/utility/collection"
 	"pure-game-kit/packages/utility/color"
 	"pure-game-kit/packages/utility/color/palette"
@@ -31,11 +32,10 @@ type Unit struct {
 	Team      team.Enum
 	Anim      *motion.Animation[assets.ImageId]
 	HealthBar *HealthBar
+	Particles *particles.System
 	State     state.Enum
 
 	Effects map[effect.Enum]Values
-
-	Blood *motion.ParticleSystem
 
 	VelocityX, VelocityY, Z float32
 
@@ -62,7 +62,7 @@ func NewUnit(character char.Enum, fromTeam team.Enum, lane lane.Enum) *Unit {
 	var anim = motion.NewAnimation(0, false, char.Animations.Idle...)
 	var unit = Unit{Object: graphics.NewSprite(-2000, -2000, 1, 0), Character: character, Team: fromTeam, Lane: lane,
 		Anim: &anim, ActTimer: number.NaN(), HurtTimer: number.NaN(), LastState: state.WaitingToBeSummoned,
-		Effects: make(map[effect.Enum]Values, 4),
+		Effects: make(map[effect.Enum]Values, 4), Particles: particles.NewSystem(),
 	}
 
 	if len(anim.Frames) == 0 {
@@ -72,8 +72,6 @@ func NewUnit(character char.Enum, fromTeam team.Enum, lane lane.Enum) *Unit {
 	if fromTeam == team.Ally {
 		unit.State = state.WaitingToBeSummoned
 	}
-
-	unit.Blood = motion.NewParticleSystem(unit.particlesBlood)
 
 	unit.draw() // update frame size
 	unit.PrepareSpawn()
@@ -243,7 +241,7 @@ func (u *Unit) Update() {
 	}
 
 	if TimeScale > 0 {
-		u.Blood.Update()
+		u.Particles.Update()
 
 		var speedX = number.Absolute(u.X-u.LastX) / DeltaTimeScaled() // smooth out for FPS dips
 		u.MoveSpeedX = u.MoveSpeedX + (speedX-u.MoveSpeedX)*0.15      // 0.15 = how fast it catches up
@@ -337,7 +335,7 @@ var laneMasks = map[lane.Enum]geometry.Area{
 var teamColors = [team.Count]uint{team.Ally: palette.Green, team.Enemy: palette.Red}
 var effectsToRemove []effect.Enum
 
-func (u *Unit) particlesBlood(p *motion.Particle) (alive bool) {
+func (u *Unit) particlesBlood(p *particles.Particle) (alive bool) {
 	if p.Age == 0 {
 		p.CustomData["offsetY"] = random.Range[float32](-4, 4)
 		p.Scale = random.Range[float32](0.2, 3)
@@ -572,14 +570,14 @@ func (u *Unit) actUponState() {
 		u.Anim.IsLooping, u.Anim.FPS, u.Anim.Time = false, 5, 0
 		u.VelocityX = 0
 		var percent = 1 - float32(u.Health)/float32(u.Values.MaxHealth)
-		u.Blood.EmitFromLine(int(percent*BloodMultiplier), u.X, u.Y-6, u.X, u.Y+6)
+		u.Particles.EmitFromLine(int(percent*BloodMultiplier), u.X, u.Y-6, u.X, u.Y+6, u.particlesBlood)
 	case state.Hurting: // empty
 	case state.DyingStart:
 		u.Anim.Frames = Characters[u.Character].Animations.Die
 		u.Anim.IsLooping, u.Anim.FPS, u.Anim.Time = false, 8, 0
 		u.HealthBar.FadeOut(1.5)
 		u.VelocityX = 0
-		u.Blood.EmitFromLine(BloodMultiplier, u.X, u.Y-6, u.X, u.Y+6)
+		u.Particles.EmitFromLine(BloodMultiplier, u.X, u.Y-6, u.X, u.Y+6, u.particlesBlood)
 	case state.Dying, state.DyingEnd: // empty
 	case state.Decaying:
 		if u.HurtTimer < -u.Values.ReviveTimer || u.IsGarrisoner() {
@@ -591,6 +589,8 @@ func (u *Unit) actUponState() {
 			if u.Team == team.Ally {
 				u.State = state.WaitingToBeSummoned
 				u.PrepareSpawn()
+			} else {
+				Units = collection.Remove(Units, u)
 			}
 		} else if u.HurtTimer < 0 {
 			u.Details.Tint = color.RGBA(255, 255, 255, byte(number.Map(u.HurtTimer, 0, -u.Values.ReviveTimer, 255, 0)))
@@ -621,7 +621,7 @@ func (u *Unit) applyPhysics() {
 		u.VelocityX *= 1.0 - (GroundFriction/100)*DeltaTimeScaled()
 	}
 	var canBeActedUpon, entry = u.EnemyEntrance()
-	if canBeActedUpon && entry != nil {
+	if u.IsLaner() && canBeActedUpon && entry != nil {
 		u.VelocityX = 0
 	}
 
@@ -659,7 +659,10 @@ func (u *Unit) applyCollisions() {
 		var anyoneDead = !u.IsAlive() || !other.IsAlive()
 		var isGarrison = other.IsGarrisoner() || u.IsGarrisoner()
 		var intruder = !u.IsOutsideOwnBase() && other.IsInsideEnemyBase(TileSize/2)
-		if other == u || u.Lane != other.Lane || anyoneDead || isGarrison || !hb.Overlaps(ohb) || intruder {
+		var _, otherFlying = CharactersFlying[other.Character]
+		var _, meFlying = CharactersFlying[u.Character]
+		var anyoneFlying = otherFlying || meFlying
+		if other == u || u.Lane != other.Lane || anyoneDead || isGarrison || !hb.Overlaps(ohb) || intruder || anyoneFlying {
 			continue
 		}
 		var opposite = (!u.IsReturning && other.IsReturning) || (u.Team != other.Team)
