@@ -151,6 +151,11 @@ func InitCharacters() {
 			ActPoints: 2, ActTimer: 5.0, ActRange: 6, ReviveTimer: 30.0},
 		"Heal "+Tags[icon.Splash]+"splash.",
 		CharProjectile{ParabolaMultiplier: 1, Speed: 0.6, Kind: proj.GreenPotion})
+	Characters[char.Toxicologist] = NewCharacter(zone.Ruins, geometry.NewRoundedRectangle(0, 6, 18, 35, 0, 1),
+		Values{Name: "Toxicologist", Wage: 20, Role: role.Ranger, MoveSpeed: 20, MaxHealth: 8,
+			ActPoints: 2, ActTimer: 5.0, ActRange: 6, ReviveTimer: 30.0},
+		"Poison "+Tags[icon.Splash]+"splash. Better against "+Tags[icon.Door]+"metal gates.",
+		CharProjectile{ParabolaMultiplier: 1, Speed: 0.6, Kind: proj.YellowPotion})
 
 	for i, c := range Characters {
 		if c == nil {

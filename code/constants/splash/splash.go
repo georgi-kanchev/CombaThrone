@@ -8,7 +8,7 @@ const (
 	Fire2
 	Fire1
 	Heal
-	Poison
+	PoisonCloud
 	Dust
 	Pickup
 	Count

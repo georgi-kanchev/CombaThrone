@@ -50,7 +50,7 @@ var ProjectilesBase = [proj.Count]ProjectileBase{
 	proj.GreenPotion: ProjectileBase{FadeOutTime: 10, FreeRotation: true, MissMultiplier: 0.2, ParticlesFunc: ParticlesGlass,
 		SplashMiddle: splash.Heal},
 	proj.YellowPotion: ProjectileBase{FadeOutTime: 10, FreeRotation: true, MissMultiplier: 1.0, ParticlesFunc: ParticlesGlass,
-		SplashTop: splash.Fire2, SplashMiddle: splash.Fire3, SplashBottom: splash.Fire2},
+		SplashMiddle: splash.PoisonCloud},
 }
 
 func (u *Unit) NewProjectile(x, y, z, targetX, targetY, targetZ float32, value int, kind proj.Enum, enemyEntrance *Entrance) *Projectile {

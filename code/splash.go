@@ -40,6 +40,8 @@ var SplashBases = map[splash.Enum]SplashValues{
 		Tick: splashTickFire},
 	splash.Heal: SplashValues{AnimName: "heal", FPS: 10, Loop: true, Timer: 5, Damage: -2, FadeOutTime: 0.25,
 		Tick: splashTickHeal},
+	splash.PoisonCloud: SplashValues{AnimName: "poison-cloud", FPS: 10, Loop: true, Timer: 5, Damage: 2, FadeOutTime: 0.25,
+		Tick: splashTickPoisonCloud},
 }
 var Splashes = make([]*Splash, 0, 8)
 
@@ -89,8 +91,7 @@ func (s *Splash) Update() {
 
 func splashTickFire(self *Splash) {
 	for _, u := range Units {
-		var hb = u.Hitbox()
-		if u.Team != self.Team && self.ContainsPoint(hb.X, hb.Y+hb.Height/2) {
+		if u.Team != self.Team && self.overlapsUnit(u) {
 			u.AffectHealth(-self.Values.Damage, false)
 		}
 	}
@@ -101,11 +102,35 @@ func splashTickFire(self *Splash) {
 		}
 	}
 }
-func splashTickHeal(self *Splash) {
+func splashTickPoisonCloud(self *Splash) {
 	for _, u := range Units {
-		var hb = u.Hitbox()
-		if u.Team == self.Team && self.ContainsPoint(hb.X, hb.Y+hb.Height/2) {
+		if u.Team != self.Team && self.overlapsUnit(u) {
 			u.AffectHealth(-self.Values.Damage, false)
 		}
 	}
+	var entrances = Bases[1-self.Team].Entrances
+	for _, e := range entrances {
+		var contains = false
+		for _, t := range e.Tiles {
+			if self.ContainsPoint(t.X, t.Y) {
+				contains = true
+				break
+			}
+		}
+		if e.Kind > entrance.Door && contains {
+			e.TakeDamage(self.Values.Damage)
+		}
+	}
+}
+func splashTickHeal(self *Splash) {
+	for _, u := range Units {
+		if u.Team == self.Team && self.overlapsUnit(u) {
+			u.AffectHealth(-self.Values.Damage, false)
+		}
+	}
+}
+
+func (s *Splash) overlapsUnit(unit *Unit) bool {
+	var hb = unit.Hitbox()
+	return s.ContainsPoint(hb.X, hb.Y+hb.Height/2) || s.ContainsPoint(hb.X, hb.Y)
 }
