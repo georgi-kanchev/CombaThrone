@@ -36,28 +36,31 @@ type Projectile struct {
 }
 type ProjectileBase struct {
 	SplashTop, SplashMiddle, SplashBottom splash.Enum
-	FadeOutTime                           float32
+	FadeOutTime, MissMultiplier           float32
 	FreeRotation, PersistOnImpact         bool
 	ParticlesFunc                         func(p *particles.Particle) bool
 }
 
 var Projectiles, ProjectilesBehind []*Projectile = make([]*Projectile, 0, 32), make([]*Projectile, 0, 32)
 var ProjectilesBase = [proj.Count]ProjectileBase{
-	proj.Arrow:       ProjectileBase{FadeOutTime: 10, PersistOnImpact: true},
-	proj.SmallBullet: ProjectileBase{FadeOutTime: 0.1},
-	proj.RedPotion: ProjectileBase{FadeOutTime: 10, FreeRotation: true, ParticlesFunc: ParticlesGlass,
+	proj.Arrow:       ProjectileBase{FadeOutTime: 10, PersistOnImpact: true, MissMultiplier: 1.0},
+	proj.SmallBullet: ProjectileBase{FadeOutTime: 0.1, MissMultiplier: 1.0},
+	proj.RedPotion: ProjectileBase{FadeOutTime: 10, FreeRotation: true, MissMultiplier: 1.0, ParticlesFunc: ParticlesGlass,
 		SplashTop: splash.Fire2, SplashMiddle: splash.Fire3, SplashBottom: splash.Fire2},
-	proj.GreenPotion: ProjectileBase{FadeOutTime: 10, FreeRotation: true, ParticlesFunc: ParticlesGlass,
-		SplashTop: splash.Fire2, SplashMiddle: splash.Fire3, SplashBottom: splash.Fire2},
-	proj.YellowPotion: ProjectileBase{FadeOutTime: 10, FreeRotation: true, ParticlesFunc: ParticlesGlass,
+	proj.GreenPotion: ProjectileBase{FadeOutTime: 10, FreeRotation: true, MissMultiplier: 0.2, ParticlesFunc: ParticlesGlass,
+		SplashMiddle: splash.Heal},
+	proj.YellowPotion: ProjectileBase{FadeOutTime: 10, FreeRotation: true, MissMultiplier: 1.0, ParticlesFunc: ParticlesGlass,
 		SplashTop: splash.Fire2, SplashMiddle: splash.Fire3, SplashBottom: splash.Fire2},
 }
 
 func (u *Unit) NewProjectile(x, y, z, targetX, targetY, targetZ float32, value int, kind proj.Enum, enemyEntrance *Entrance) *Projectile {
 	var speed float32 = 100 * Characters[u.Character].Projectile.Speed
-	var accuracyMultiplier float32 = 1 / Characters[u.Character].Projectile.Speed
+	var missMultiplier float32 = 1 / Characters[u.Character].Projectile.Speed
+	var randomY = random.Range[float32](-12, 12)
+	missMultiplier *= ProjectilesBase[kind].MissMultiplier
+	randomY *= missMultiplier
 	if enemyEntrance != nil { // should not miss the entrances
-		accuracyMultiplier = 0
+		missMultiplier = 0
 		targetY += TileSize / 2
 	}
 
@@ -68,9 +71,9 @@ func (u *Unit) NewProjectile(x, y, z, targetX, targetY, targetZ float32, value i
 	var proj = &Projectile{Owner: u, Kind: kind,
 		Object: graphics.NewSprite(x, y, 1, Decor.Crops("projectiles")[kind]),
 		StartX: x, StartY: y, StartZ: z, Z: z,
-		TargetX:    targetX + random.Range[float32](-12, 12)*accuracyMultiplier,
-		TargetY:    targetY + random.Range[float32](-12, 12),
-		TargetZ:    targetZ + random.Range[float32](-0.35, 0.35)*accuracyMultiplier,
+		TargetX:    targetX + random.Range[float32](-12, 12)*missMultiplier,
+		TargetY:    targetY + randomY,
+		TargetZ:    targetZ + random.Range[float32](-0.35, 0.35)*missMultiplier,
 		TravelTime: totalTime, ArcHeight: dist / 3 * parabola, Value: value, EnemyEntrance: enemyEntrance,
 		FadeOutTime: fadeOutTime, FreeRoation: freeRotation, Particles: particles.NewSystem(),
 	}
@@ -105,7 +108,6 @@ func (p *Projectile) Update() {
 	if progress >= 1.0 {
 		var e = p.EnemyEntrance
 		if !p.Triggered {
-			p.trigger()
 
 			if !ProjectilesBase[p.Kind].PersistOnImpact {
 				p.Hidden = true
@@ -119,6 +121,11 @@ func (p *Projectile) Update() {
 
 			if e != nil && !e.IsOpen() && e.Health > 0 && number.IsWithin(p.X, e.Tiles[0].X, TileSize/2) {
 				e.TakeDamage(p.Value)
+				if e.Kind == entrance.ShortGate || e.Kind == entrance.TallGate {
+					p.trigger(28, true)
+				} else {
+					p.trigger(0, true)
+				}
 				if e.Health > 0 { // crumble sound played by entrance itself
 					var sounds = Characters[p.Owner.Character].Sounds.HitWood
 					if e.Kind == entrance.ShortGate || e.Kind == entrance.TallGate {
@@ -127,6 +134,7 @@ func (p *Projectile) Update() {
 					PlaySound(sounds)
 				}
 			} else {
+				p.trigger(0, false)
 				PlaySound(Characters[p.Owner.Character].Sounds.HitGround)
 			}
 		}
@@ -157,7 +165,7 @@ func (p *Projectile) Update() {
 		}
 
 		if !p.Triggered && p.Shape.Overlaps(hb) && number.IsWithin(p.Z, u.Z, 0.2) {
-			p.trigger()
+			p.trigger(0, false)
 			u.AffectHealth(-p.Value, true)
 			p.Hidden = true
 			PlaySound(Characters[p.Owner.Character].Sounds.HitFlesh)
@@ -177,19 +185,25 @@ func (p *Projectile) Update() {
 
 // private ========================================================
 
-func (p *Projectile) trigger() {
+func (p *Projectile) trigger(offsetY float32, gate bool) {
 	var base = ProjectilesBase[p.Kind]
 	var top, mid, bot = base.SplashTop, base.SplashMiddle, base.SplashBottom
 	p.Triggered = true
 	p.Particles.EmitFromPoint(50, p.X, p.Y, base.ParticlesFunc)
 
 	if top != splash.None {
-		Splashes = append(Splashes, NewSplash(top, p.Owner.Team, p.X, p.Y-8))
+		var t = NewSplash(top, p.Owner.Team, p.X, p.Y-8+offsetY)
+		t.Mask = p.Owner.Mask
+		Splashes = append(Splashes, t)
 	}
 	if mid != splash.None {
-		Splashes = append(Splashes, NewSplash(mid, p.Owner.Team, p.X, p.Y))
+		var m = NewSplash(mid, p.Owner.Team, p.X, p.Y+offsetY)
+		m.Mask = p.Owner.Mask
+		Splashes = append(Splashes, m)
 	}
 	if bot != splash.None {
-		Splashes = append(Splashes, NewSplash(bot, p.Owner.Team, p.X, p.Y+8))
+		var b = NewSplash(bot, p.Owner.Team, p.X, p.Y+8+offsetY)
+		b.Mask = p.Owner.Mask
+		Splashes = append(Splashes, b)
 	}
 }

@@ -170,11 +170,11 @@ func (u *Unit) PrepareSpawn() {
 	var laneY = col[0].Y - col[0].Height/2 - hb.Height
 	switch u.Lane {
 	case lane.Lower, lane.LowerOff:
-		u.X, u.Y = TileSize*9.5, laneY
+		u.X, u.Y = TileSize*10, laneY
 	case lane.Middle, lane.MiddleOff:
-		u.X, u.Y = TileSize*8.5, laneY
+		u.X, u.Y = TileSize*9, laneY
 	case lane.Upper, lane.UpperOff:
-		u.X, u.Y = TileSize*7.5, laneY
+		u.X, u.Y = TileSize*8, laneY
 	case lane.Garrison1, lane.Garrison2, lane.Garrison3:
 		u.X, u.Y = CurrentZone.Ground.Width/2+u.Width/2, laneY-32
 	case lane.GarrisonPlus1, lane.GarrisonPlus2, lane.GarrisonPlus3:
@@ -267,6 +267,10 @@ func (u *Unit) ProjectHealth(value int) (remainingHealth int) {
 	return u.Health + value
 }
 func (u *Unit) AffectHealth(value int, particles bool) {
+	if u.IsOffLaner() {
+		return
+	}
+
 	var newHealth = u.ProjectHealth(value)
 	if newHealth != u.Health {
 		u.Health = newHealth
@@ -394,7 +398,7 @@ func (u *Unit) applyState() {
 			u.ClosestEnemyInRange = t
 		}
 	}
-	var ranged = u.Values.ActRange > 1 && (u.ClosestEnemyInRange != nil || enemyEntranceInRange)
+	var ranged = u.Values.ActRange > 1 && u.Values.Role == role.Ranger && (u.ClosestEnemyInRange != nil || enemyEntranceInRange)
 	var garrisonOrNot = !u.IsGarrisoner() || (u.IsGarrisoner() && u.IsOnScreen())
 	var myEntrance *Entrance
 	if u.IsLaner() {
@@ -403,6 +407,7 @@ func (u *Unit) applyState() {
 	var sameLaneWithTarget = u.ClosestEnemyInRange != nil && u.Lane == u.ClosestEnemyInRange.Lane
 	var openDoorShoot = u.IsLaner() && !u.IsOutsideOwnBase() && myEntrance.IsOpen() && sameLaneWithTarget
 	var canShoot = u.IsOutsideOwnBase() || openDoorShoot
+	canBeActedUpon = canBeActedUpon && u.Values.Role == role.Ranger
 	if u.IsGarrisoner() {
 		canShoot = true
 	}
@@ -475,8 +480,10 @@ func (u *Unit) actUponState() {
 			u.VelocityX = 0
 		}
 	case state.Moving:
-		u.Anim.Frames = Characters[u.Character].Animations.Move
-		u.Anim.IsLooping, u.Anim.FPS = true, u.MoveSpeedX*0.25
+		if u.MoveSpeedX > 0.1 {
+			u.Anim.Frames = Characters[u.Character].Animations.Move
+			u.Anim.IsLooping, u.Anim.FPS = true, u.MoveSpeedX*0.25
+		}
 
 		if u.IsLaner() && u.IsInsideEnemyBase(TileSize/1.5) {
 			u.HealthBar.MoveToGlory(2.5)
@@ -544,20 +551,14 @@ func (u *Unit) actUponState() {
 			break
 		}
 
+		if u.Values.Role != role.Ranger { // non-rangers cannot shoot projectiles in the default way
+			return // if required (like a supplier throwing a heal potion), it should happen through behaviors manually
+		}
+
 		var projectileKind = Characters[u.Character].Projectile.Kind
 		var t = u.ClosestEnemyInRange
-		if t != nil && !t.IsOffLaner() {
-			var prediction = t.VelocityX
-			if number.Absolute(t.X-u.X) < TileSize*3 {
-				prediction = 0 // target is too close - don't predict movement to not shoot behind self
-			}
-			var offsetX = u.Width / 3
-			if u.Team == team.Enemy {
-				offsetX = -u.Width / 3
-			}
-			var proj = u.NewProjectile(u.X+offsetX, u.Y, u.Z, t.X+prediction, t.Y+t.Height/2-8, t.Z, dmg, projectileKind, nil)
-			Projectiles = append(Projectiles, proj)
-			PlaySound(Characters[u.Character].Sounds.ActTrigger)
+		if t != nil {
+			u.shootAt(t)
 		} else if canBeActedUpon && e != nil {
 			var x, y = e.Tiles[0].X, e.Tiles[0].Y
 			if e.Kind == entrance.TallGate {
@@ -666,7 +667,8 @@ func (u *Unit) applyCollisions() {
 		var _, otherFlying = CharactersFlying[other.Character]
 		var _, meFlying = CharactersFlying[u.Character]
 		var anyoneFlying = otherFlying || meFlying
-		if other == u || u.Lane != other.Lane || anyoneDead || isGarrison || !hb.Overlaps(ohb) || intruder || anyoneFlying {
+		var ohbWider = other.Hitbox(2) // some small buffer to help imprecisions
+		if other == u || u.Lane != other.Lane || anyoneDead || isGarrison || !hb.Overlaps(ohbWider) || intruder || anyoneFlying {
 			continue
 		}
 		var opposite = (!u.IsReturning && other.IsReturning) || (u.Team != other.Team)
@@ -725,4 +727,21 @@ func (u *Unit) draw() {
 	}
 	View.DrawObject(&u.Object)
 	u.Width = crop.Width
+}
+
+func (u *Unit) shootAt(target *Unit) {
+	var t = target
+	var dmg = max(u.Values.ActPoints, 0)
+	var prediction = t.VelocityX
+	if number.Absolute(t.X-u.X) < TileSize*3 {
+		prediction = 0 // target is too close - don't predict movement to not shoot behind self
+	}
+	var offsetX = u.Width / 3
+	if u.Team == team.Enemy {
+		offsetX = -u.Width / 3
+	}
+	var projectileKind = Characters[u.Character].Projectile.Kind
+	var proj = u.NewProjectile(u.X+offsetX, u.Y, u.Z, t.X+prediction, t.Y+t.Height/2-8, t.Z, dmg, projectileKind, nil)
+	Projectiles = append(Projectiles, proj)
+	PlaySound(Characters[u.Character].Sounds.ActTrigger)
 }

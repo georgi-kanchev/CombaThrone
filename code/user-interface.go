@@ -45,7 +45,7 @@ var Tags = []string{
 	icon.Heart: "①", icon.Coin: "②", icon.Glory: "③", icon.Skull: "④", icon.Book: "⑤", icon.LeftRight: "⑥", icon.Range: "⑦",
 	icon.Timer: "⑧", icon.Loop: "⑨", icon.House: "⑩", icon.Sword: "⑪", icon.Bow: "⑫", icon.Plus: "⑬", icon.Flag: "⑭",
 	icon.Shield: "⑮", icon.Bag: "⑯", icon.Debuff: "⑰", icon.Hand: "⑱", icon.Door: "⑲", icon.Gear: "⑳", icon.Tower: "⑴",
-	icon.Minus: "⑵", icon.Unit: "⑶",
+	icon.Minus: "⑵", icon.Unit: "⑶", icon.Splash: "⑷",
 }
 
 var ThemeUI assets.GUIThemeId

@@ -28,5 +28,6 @@ const (
 	Tower
 	Minus
 	Unit
+	Splash
 	Count
 )

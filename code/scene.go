@@ -16,6 +16,8 @@ import (
 	"pure-game-kit/packages/geometry"
 	"pure-game-kit/packages/graphics"
 	"pure-game-kit/packages/gui"
+	"pure-game-kit/packages/input/keyboard"
+	"pure-game-kit/packages/input/keyboard/key"
 	"pure-game-kit/packages/input/mouse"
 	"pure-game-kit/packages/input/mouse/cursor"
 	"pure-game-kit/packages/utility/collection"
@@ -75,9 +77,9 @@ func InitScene() {
 	Bases[team.Ally] = NewBase(team.Ally, base.Fort, garrison.Three,
 		[3]entrance.Enum{entrance.None, entrance.None, entrance.None})
 	Bases[team.Enemy] = NewBase(team.Enemy, base.Fortress, garrison.Three,
-		[3]entrance.Enum{entrance.Door, entrance.None, entrance.None})
+		[3]entrance.Enum{entrance.Door, entrance.ShortGate, entrance.TallGate})
 
-	Units = append(Units, NewUnit(char.Stabber, team.Enemy, lane.Middle))
+	// Units = append(Units, NewUnit(char.Stabber, team.Enemy, lane.GarrisonPlus3))
 	// Units = append(Units, NewUnit(CharMiner, TeamEnemy, LaneMiddle))
 
 	Pickups = append(Pickups, NewPickup(-240, pickup.Relic, lane.LowerOff))
@@ -93,11 +95,11 @@ func InitScene() {
 
 	Player.Units[0] = NewUnit(char.Kid, team.Ally, 0)
 	Player.Units[1] = NewUnit(char.Bowyer, team.Ally, 0)
-	Player.Units[2] = NewUnit(char.Fisherman, team.Ally, 0)
+	Player.Units[2] = NewUnit(char.Gunner, team.Ally, 0)
 	Player.Units[3] = NewUnit(char.Troll, team.Ally, 0)
 	Player.Units[4] = NewUnit(char.Stabber, team.Ally, 0)
 	Player.Units[5] = NewUnit(char.Spearlin, team.Ally, 0)
-	Player.Units[6] = NewUnit(char.Arbalestier, team.Ally, 0)
+	Player.Units[6] = NewUnit(char.Healer, team.Ally, 0)
 	Player.Units[7] = NewUnit(char.Pyromancer, team.Ally, 0)
 }
 
@@ -138,6 +140,10 @@ func UpdateScene() {
 	alignView()
 
 	mouse.SetCursor(cursor.Default)
+
+	if keyboard.IsKeyJustPressed(key.A) {
+		Units = append(Units, NewUnit(char.Stabber, team.Enemy, lane.Middle))
+	}
 
 	CurrentZone.UpdateBack()
 	Bases[team.Ally].UpdateBack()

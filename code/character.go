@@ -82,7 +82,7 @@ func InitCharacters() {
 			ActPoints: 4, ActTimer: 10.0, ActRange: 1, ReviveTimer: 10.0},
 		"🟧"+Tags[icon.Hand]+"Heals⬜ a 🌗🟨"+Tags[icon.LeftRight]+"passing by 🟩"+Tags[icon.Unit]+"ally⬜.")
 	Characters[char.Bowyer] = NewCharacter(zone.Field, geometry.NewRoundedRectangle(0, 7, 18, 35, 0, 1),
-		Values{Name: "Bowyer", Wage: 40, Role: role.Ranger, MaxHealth: 14, MoveSpeed: 15,
+		Values{Name: "Bowyer", Wage: 40, Role: role.Ranger, MaxHealth: 10, MoveSpeed: 15,
 			ActPoints: 4, ActTimer: 2.0, ActRange: 6, ReviveTimer: 10.0},
 		"🟩"+Tags[icon.Plus]+"🌗🟧2 "+Tags[icon.Range]+"range ⬜when 🌗🟨"+Tags[icon.LeftRight]+"grounded⬜.")
 	Characters[char.Bowyer].Sounds = CharSounds{ActTrigger: AudioBow, HitGround: AudioProjectileGround,
@@ -110,7 +110,7 @@ func InitCharacters() {
 	Characters[char.Troll] = NewCharacter(zone.Ruins, geometry.NewRoundedRectangle(0, 6, 32, 52, 0, 1),
 		Values{Name: "Troll", Wage: 20, Role: role.Defender, MaxHealth: 60, MoveSpeed: 10,
 			ActPoints: 2, ActTimer: 8.0, ActRange: 1, ReviveTimer: number.NaN()},
-		"Cannot 🌗🟦"+Tags[icon.Loop]+"revive. Pushes 🌗🟧"+Tags[icon.Range]+"nearby 🟥"+Tags[icon.Unit]+"enemies⬜ away.")
+		"Cannot 🌗🟦"+Tags[icon.Loop]+"revive.⬜ Pushes 🌗🟧"+Tags[icon.Range]+"nearby 🟥"+Tags[icon.Unit]+"enemies⬜ away.")
 	Characters[char.Spearlin] = NewCharacter(zone.Ruins, geometry.NewRoundedRectangle(-2, 0, 18, 30, 0, 1),
 		Values{Name: "Spearlin", Wage: 20, Role: role.Fighter,
 			MaxHealth: 12, MoveSpeed: 25, ActPoints: 2, ActTimer: 1.5, ActRange: 1, ReviveTimer: 20.0},
@@ -142,10 +142,15 @@ func InitCharacters() {
 		"🟧"+Tags[icon.Debuff]+"Slows down 🌗🟧"+Tags[icon.Range]+"nearby 🟥"+Tags[icon.Unit]+"enemies⬜.")
 
 	Characters[char.Pyromancer] = NewCharacter(zone.Ruins, geometry.NewRoundedRectangle(0, 6, 18, 35, 0, 1),
-		Values{Name: "Pyromancer", Wage: 20, Role: role.Ranger, MoveSpeed: 20, MaxHealth: 10,
-			ActPoints: 1, ActTimer: 8.0, ActRange: 6, ReviveTimer: 10.0},
-		"🟧"+Tags[icon.Debuff]+"Slows down 🌗🟧"+Tags[icon.Range]+"nearby 🟥"+Tags[icon.Unit]+"enemies⬜.",
+		Values{Name: "Pyromancer", Wage: 20, Role: role.Ranger, MoveSpeed: 20, MaxHealth: 8,
+			ActPoints: 0, ActTimer: 8.0, ActRange: 6, ReviveTimer: 30.0},
+		"Fire "+Tags[icon.Splash]+"splash. Better against "+Tags[icon.Door]+"wooden doors.",
 		CharProjectile{ParabolaMultiplier: 1, Speed: 0.6, Kind: proj.RedPotion})
+	Characters[char.Healer] = NewCharacter(zone.Ruins, geometry.NewRoundedRectangle(0, 6, 18, 35, 0, 1),
+		Values{Name: "Healer", Wage: 20, Role: role.Supplier, MoveSpeed: 20,
+			ActPoints: 2, ActTimer: 5.0, ActRange: 6, ReviveTimer: 30.0},
+		"Heal "+Tags[icon.Splash]+"splash.",
+		CharProjectile{ParabolaMultiplier: 1, Speed: 0.6, Kind: proj.GreenPotion})
 
 	for i, c := range Characters {
 		if c == nil {

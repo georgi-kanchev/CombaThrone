@@ -10,7 +10,7 @@ import (
 
 func ParticlesGlass(p *particles.Particle) (alive bool) {
 	if p.Age == 0 {
-		p.CustomData["startY"] = p.Y + random.Range[float32](0, 12)
+		p.CustomData["startY"] = p.Y + random.Range[float32](0, 16)
 		p.CustomData["height"] = random.Range[float32](0.2, 3)
 		p.Scale = random.Range[float32](0.2, 2)
 		p.VelocityX = random.Range[float32](-40, 40)
@@ -32,7 +32,7 @@ func ParticlesGlass(p *particles.Particle) (alive bool) {
 		ang = 45
 	}
 
-	var alpha = number.Map(p.Age, 1.5, 2.0, 255, 0)
+	var alpha = number.Map(p.Age, 1.0, 2.0, 255, 0)
 	var col = color.RGBA(byte(p.Color), byte(p.Color), byte(p.Color), byte(number.Limit(alpha, 0, 255)))
 	View.DrawShape(p.X, p.Y, p.Scale, p.CustomData["height"].(float32), ang, 0.1, col, geometry.Area{})
 	return p.Age < 2.0

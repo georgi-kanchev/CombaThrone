@@ -52,7 +52,7 @@ var Behaviors = map[char.Enum]func(self *Unit){
 		}
 		if self.State == state.ActTrigger && targetUnit != nil {
 			if targetUnit.IsAlive() && targetUnit.Health != targetUnit.Values.MaxHealth {
-				targetUnit.AffectHealth(4, true)
+				targetUnit.AffectHealth(self.Values.ActPoints, true)
 			}
 		}
 	},
@@ -216,6 +216,27 @@ var Behaviors = map[char.Enum]func(self *Unit){
 				} else {
 					u.RemoveEffect(effect.Snake)
 				}
+			}
+		}
+	},
+	char.Healer: func(self *Unit) {
+		var canAct = number.IsNaN(self.ActTimer) || self.ActTimer < 0
+		var target *Unit
+		for _, u := range Units {
+			var isClose = number.IsWithin(u.X, self.X, float32(self.Values.ActRange)*TileSize)
+			var isMaxHp = u.Health == u.Values.MaxHealth
+			var inFront = (!self.IsFacingLeft() && u.X > self.X) || (self.IsFacingLeft() && u.X < self.X)
+			if u.Team == self.Team && u != self && isClose && !isMaxHp && u.IsAlive() && inFront {
+				target = u
+				break
+			}
+		}
+		if target != nil {
+			if canAct {
+				self.State = state.ActStart
+			}
+			if self.State == state.ActTrigger {
+				self.shootAt(target)
 			}
 		}
 	},

@@ -308,7 +308,8 @@
     <group name="healer-icon" cropIndexes="310"/>
     <group name="healer-idle" cropIndexes="311 312 313 314"/>
     <group name="healer-move" cropIndexes="315 316 317 318 319 320"/>
-    <group name="healer-act" cropIndexes="321 322 323 324 325 326"/>
+    <group name="healer-prepare" cropIndexes="321 322 323 324"/>
+    <group name="healer-recover" cropIndexes="325 326"/>
     <group name="healer-hurt" cropIndexes="327 328"/>
     <group name="healer-die" cropIndexes="329 330 331"/>
     <group name="essencialist-icon" cropIndexes="332"/>
@@ -320,7 +321,8 @@
     <group name="toxicologist-icon" cropIndexes="352"/>
     <group name="toxicologist-idle" cropIndexes="353 354 355 356"/>
     <group name="toxicologist-move" cropIndexes="357 358 359 360 361 362"/>
-    <group name="toxicologist-act" cropIndexes="363 364 365 366 367 368"/>
+    <group name="toxicologist-prepare" cropIndexes="363 364 365 366"/>
+    <group name="toxicologist-recover" cropIndexes="367 368"/>
     <group name="toxicologist-hurt" cropIndexes="369 370"/>
     <group name="toxicologist-die" cropIndexes="371 372 373"/>
     <group name="stormcaller-icon" cropIndexes="374"/>

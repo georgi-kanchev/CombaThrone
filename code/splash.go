@@ -1,6 +1,7 @@
 package game
 
 import (
+	"game/code/constants/entrance"
 	"game/code/constants/splash"
 	"game/code/constants/team"
 	"pure-game-kit/packages/assets"
@@ -37,13 +38,15 @@ var SplashBases = map[splash.Enum]SplashValues{
 		Tick: splashTickFire},
 	splash.Fire1: SplashValues{AnimName: "fire-1", FPS: 10, Loop: true, Timer: 5, Damage: 1, FadeOutTime: 0.25,
 		Tick: splashTickFire},
+	splash.Heal: SplashValues{AnimName: "heal", FPS: 10, Loop: true, Timer: 5, Damage: -2, FadeOutTime: 0.25,
+		Tick: splashTickHeal},
 }
 var Splashes = make([]*Splash, 0, 8)
 
 func NewSplash(kind splash.Enum, team team.Enum, x, y float32) *Splash {
 	var frames = SplashAtlas.Crops(SplashBases[kind].AnimName)
 	var anim = motion.NewAnimation[assets.ImageId](SplashBases[kind].FPS, SplashBases[kind].Loop, frames...)
-	return &Splash{Object: graphics.NewSprite(x, y, 1, 0), Kind: kind, Team: team, Anim: &anim, Values: SplashBases[kind]}
+	return &Splash{Object: graphics.NewSprite(x, y, 0, 0), Kind: kind, Team: team, Anim: &anim, Values: SplashBases[kind]}
 }
 
 //=================================================================
@@ -54,7 +57,10 @@ func (s *Splash) Update() {
 
 	if s.Values.TickTimer < 0 {
 		s.Values.TickTimer = 1
-		s.Values.Tick(s)
+
+		if s.Values.Tick != nil {
+			s.Values.Tick(s)
+		}
 
 		if s.Values.SingleTick {
 			s.Values.TickTimer = number.Infinity()
@@ -85,6 +91,20 @@ func splashTickFire(self *Splash) {
 	for _, u := range Units {
 		var hb = u.Hitbox()
 		if u.Team != self.Team && self.ContainsPoint(hb.X, hb.Y+hb.Height/2) {
+			u.AffectHealth(-self.Values.Damage, false)
+		}
+	}
+	var entrances = Bases[1-self.Team].Entrances
+	for _, e := range entrances {
+		if e.Kind == entrance.Door && self.ContainsPoint(e.Tiles[0].X, e.Tiles[0].Y) {
+			e.TakeDamage(self.Values.Damage)
+		}
+	}
+}
+func splashTickHeal(self *Splash) {
+	for _, u := range Units {
+		var hb = u.Hitbox()
+		if u.Team == self.Team && self.ContainsPoint(hb.X, hb.Y+hb.Height/2) {
 			u.AffectHealth(-self.Values.Damage, false)
 		}
 	}
