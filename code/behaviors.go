@@ -5,9 +5,11 @@ import (
 	"game/code/constants/effect"
 	"game/code/constants/icon"
 	"game/code/constants/role"
+	"game/code/constants/splash"
 	"game/code/constants/state"
 	"game/code/constants/team"
 	"pure-game-kit/packages/geometry"
+	"pure-game-kit/packages/utility/collection"
 	"pure-game-kit/packages/utility/color"
 	"pure-game-kit/packages/utility/direction"
 	"pure-game-kit/packages/utility/number"
@@ -50,7 +52,7 @@ var Behaviors = map[char.Enum]func(self *Unit){
 		}
 		if self.State == state.ActTrigger && targetUnit != nil {
 			if targetUnit.IsAlive() && targetUnit.Health != targetUnit.Values.MaxHealth {
-				targetUnit.AffectHealth(4)
+				targetUnit.AffectHealth(4, true)
 			}
 		}
 	},
@@ -140,6 +142,12 @@ var Behaviors = map[char.Enum]func(self *Unit){
 	},
 	char.Troll: func(self *Unit) {
 		if self.State == state.ActTrigger {
+			var hb = self.Hitbox()
+			var offX float32 = 12
+			if self.IsFacingLeft() {
+				offX *= -1
+			}
+			Splashes = collection.Add(Splashes, NewSplash(splash.Dust, 0, hb.X+offX, hb.Y+hb.Height/2-14))
 			for _, u := range Units {
 				if self.Team != u.Team && number.IsWithin(self.X, u.X, TileSize*2) {
 					var dirX, dirY = direction.BetweenPoints(self.X, self.Y+self.Height/2, u.X, u.Y)

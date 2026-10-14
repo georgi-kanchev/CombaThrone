@@ -21,9 +21,8 @@ type Values struct {
 
 	ActTimer, ReviveTimer, SleepTimer float32
 
-	EffectTimer        float32 // remaining time before removal (used only for Unit.Effects - not in Unit/Character.Values)
-	EffectTickInterval float32 // used only for Unit.Effects - not in Unit/Character.Values
-	EffectTickDamage   int     // used only for Unit.Effects - not in Unit/Character.Values
+	EffectTimer      float32 // remaining time before removal (used only for Unit.Effects - not in Unit/Character.Values)
+	EffectTickDamage int     // used only for Unit.Effects - not in Unit/Character.Values
 
 	Role role.Enum
 }
@@ -93,7 +92,7 @@ func InitCharacters() {
 			ActPoints: 1, ActTimer: 5.0, ActRange: 1, ReviveTimer: 20.0},
 		"Pushes the 🟥"+Tags[icon.Unit]+"enemy⬜ in front.")
 	Characters[char.Kid] = NewCharacter(zone.Field, geometry.NewRoundedRectangle(0, 4, 12, 24, 0, 1),
-		Values{Name: "Kid", Wage: 20, Role: role.Collector, MoveSpeed: 20, ActPoints: 2, ReviveTimer: 20.0},
+		Values{Name: "Kid", Wage: 20, Role: role.Collector, MoveSpeed: 20, ActPoints: 1, ReviveTimer: 20.0},
 		"🟩"+Tags[icon.Plus]+"🌗🟨20 "+Tags[icon.LeftRight]+"speed⬜ when 🟧"+Tags[icon.Bag]+"empty handed⬜.")
 	Characters[char.Fisherman] = NewCharacter(zone.Field, geometry.NewRoundedRectangle(-4, 6, 20, 35, 0, 1),
 		Values{Name: "Fisherman", Wage: 20, Role: role.Griefer, MoveSpeed: 15, ActTimer: 15.0, ReviveTimer: 20.0},

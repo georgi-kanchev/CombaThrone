@@ -13,8 +13,8 @@ func ParticlesGlass(p *particles.Particle) (alive bool) {
 		p.CustomData["startY"] = p.Y + random.Range[float32](0, 12)
 		p.CustomData["height"] = random.Range[float32](0.2, 3)
 		p.Scale = random.Range[float32](0.2, 2)
-		p.VelocityX = random.Range[float32](-60, 60)
-		p.VelocityY = random.Range[float32](-120, -40)
+		p.VelocityX = random.Range[float32](-40, 40)
+		p.VelocityY = random.Range[float32](-100, -40)
 		p.Color = random.Range[uint](200, 255) // only red
 	}
 

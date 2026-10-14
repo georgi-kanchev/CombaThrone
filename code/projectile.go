@@ -3,6 +3,7 @@ package game
 import (
 	"game/code/constants/entrance"
 	proj "game/code/constants/projectile"
+	"game/code/constants/splash"
 	"pure-game-kit/packages/graphics"
 	"pure-game-kit/packages/motion/particles"
 	"pure-game-kit/packages/utility/angle"
@@ -29,18 +30,30 @@ type Projectile struct {
 	EnemyEntrance *Entrance
 	Particles     *particles.System
 
-	Triggered, FreeRoation,
-	Hidden bool
+	Triggered, FreeRoation bool
+
+	Hidden bool // makes sure the Particles finish off even after the Projectile itself is gone, FadeOutTime removes it later
+}
+type ProjectileBase struct {
+	SplashTop, SplashMiddle, SplashBottom splash.Enum
+	FadeOutTime                           float32
+	FreeRotation, PersistOnImpact         bool
+	ParticlesFunc                         func(p *particles.Particle) bool
 }
 
 var Projectiles, ProjectilesBehind []*Projectile = make([]*Projectile, 0, 32), make([]*Projectile, 0, 32)
-var ProjectilesFadeOutTimes = [proj.Count]float32{proj.Arrow: 10, proj.SmallBullet: 0.1, proj.RedPotion: 10}
-var ProjectilesFreeRotation = map[proj.Enum]struct{}{proj.RedPotion: {}, proj.GreenPotion: {}, proj.YellowPotion: {}}
-var ProjectilesParticles = map[proj.Enum]func(p *particles.Particle) bool{proj.RedPotion: ParticlesGlass}
-var ProjectilesPersistOnImpact = map[proj.Enum]struct{}{proj.Arrow: {}}
+var ProjectilesBase = [proj.Count]ProjectileBase{
+	proj.Arrow:       ProjectileBase{FadeOutTime: 10, PersistOnImpact: true},
+	proj.SmallBullet: ProjectileBase{FadeOutTime: 0.1},
+	proj.RedPotion: ProjectileBase{FadeOutTime: 10, FreeRotation: true, ParticlesFunc: ParticlesGlass,
+		SplashTop: splash.Fire2, SplashMiddle: splash.Fire3, SplashBottom: splash.Fire2},
+	proj.GreenPotion: ProjectileBase{FadeOutTime: 10, FreeRotation: true, ParticlesFunc: ParticlesGlass,
+		SplashTop: splash.Fire2, SplashMiddle: splash.Fire3, SplashBottom: splash.Fire2},
+	proj.YellowPotion: ProjectileBase{FadeOutTime: 10, FreeRotation: true, ParticlesFunc: ParticlesGlass,
+		SplashTop: splash.Fire2, SplashMiddle: splash.Fire3, SplashBottom: splash.Fire2},
+}
 
-func (u *Unit) NewProjectile(x, y, z, targetX, targetY, targetZ float32, value int,
-	kind proj.Enum, enemyEntrance *Entrance) *Projectile {
+func (u *Unit) NewProjectile(x, y, z, targetX, targetY, targetZ float32, value int, kind proj.Enum, enemyEntrance *Entrance) *Projectile {
 	var speed float32 = 100 * Characters[u.Character].Projectile.Speed
 	var accuracyMultiplier float32 = 1 / Characters[u.Character].Projectile.Speed
 	if enemyEntrance != nil { // should not miss the entrances
@@ -48,7 +61,7 @@ func (u *Unit) NewProjectile(x, y, z, targetX, targetY, targetZ float32, value i
 		targetY += TileSize / 2
 	}
 
-	var _, freeRotation = ProjectilesFreeRotation[kind]
+	var fadeOutTime, freeRotation = ProjectilesBase[kind].FadeOutTime, ProjectilesBase[kind].FreeRotation
 	var dist = point.DistanceToPoint(x, y, targetX, targetY)
 	var totalTime = max(dist/speed, 0.01) // prevent division by zero
 	var parabola = Characters[u.Character].Projectile.ParabolaMultiplier
@@ -59,7 +72,7 @@ func (u *Unit) NewProjectile(x, y, z, targetX, targetY, targetZ float32, value i
 		TargetY:    targetY + random.Range[float32](-12, 12),
 		TargetZ:    targetZ + random.Range[float32](-0.35, 0.35)*accuracyMultiplier,
 		TravelTime: totalTime, ArcHeight: dist / 3 * parabola, Value: value, EnemyEntrance: enemyEntrance,
-		FadeOutTime: ProjectilesFadeOutTimes[kind], FreeRoation: freeRotation, Particles: particles.NewSystem(),
+		FadeOutTime: fadeOutTime, FreeRoation: freeRotation, Particles: particles.NewSystem(),
 	}
 	return proj
 }
@@ -75,7 +88,6 @@ func (p *Projectile) Update() {
 	var groundX = p.StartX + (p.TargetX-p.StartX)*progress
 	var groundY = p.StartY + (p.TargetY-p.StartY)*progress
 	var heightArc = 4 * p.ArcHeight * progress * (1 - progress)
-	var particlesUpdate = ProjectilesParticles[p.Kind]
 
 	p.X = groundX
 	p.Y = groundY - heightArc
@@ -93,11 +105,9 @@ func (p *Projectile) Update() {
 	if progress >= 1.0 {
 		var e = p.EnemyEntrance
 		if !p.Triggered {
-			p.Triggered = true
-			p.Particles.EmitFromPoint(50, p.X, p.Y, particlesUpdate)
+			p.trigger()
 
-			var _, persist = ProjectilesPersistOnImpact[p.Kind]
-			if !persist {
+			if !ProjectilesBase[p.Kind].PersistOnImpact {
 				p.Hidden = true
 			}
 
@@ -147,12 +157,9 @@ func (p *Projectile) Update() {
 		}
 
 		if !p.Triggered && p.Shape.Overlaps(hb) && number.IsWithin(p.Z, u.Z, 0.2) {
-			p.Triggered = true
-			p.Particles.EmitFromPoint(50, p.X, p.Y, particlesUpdate)
-			u.AffectHealth(-p.Value)
+			p.trigger()
+			u.AffectHealth(-p.Value, true)
 			p.Hidden = true
-			// Projectiles = collection.Remove(Projectiles, p)
-			// ProjectilesBehind = collection.Remove(ProjectilesBehind, p)
 			PlaySound(Characters[p.Owner.Character].Sounds.HitFlesh)
 			return
 		}
@@ -165,5 +172,24 @@ func (p *Projectile) Update() {
 	if !p.Hidden {
 		DrawShadow(groundX, p.Z, number.Absolute(p.Width), p.Height*0.25, shadowAngle, p.Mask)
 		View.DrawObject(&p.Object)
+	}
+}
+
+// private ========================================================
+
+func (p *Projectile) trigger() {
+	var base = ProjectilesBase[p.Kind]
+	var top, mid, bot = base.SplashTop, base.SplashMiddle, base.SplashBottom
+	p.Triggered = true
+	p.Particles.EmitFromPoint(50, p.X, p.Y, base.ParticlesFunc)
+
+	if top != splash.None {
+		Splashes = append(Splashes, NewSplash(top, p.Owner.Team, p.X, p.Y-8))
+	}
+	if mid != splash.None {
+		Splashes = append(Splashes, NewSplash(mid, p.Owner.Team, p.X, p.Y))
+	}
+	if bot != splash.None {
+		Splashes = append(Splashes, NewSplash(bot, p.Owner.Team, p.X, p.Y+8))
 	}
 }

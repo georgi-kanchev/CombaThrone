@@ -34,6 +34,7 @@ var InGame bool
 var InGameTimer float32
 
 var Decor assets.AtlasId
+var SplashAtlas assets.AtlasId
 
 var TimeScale float32 = 1
 var View *graphics.View
@@ -52,6 +53,7 @@ func InitScene() {
 	var layers, decor = assets.LoadTileLayersFromTiled("data/decor.tmx")
 	Layers = layers
 	Decor = assets.LoadAtlas(decor, "data/decor.xml")
+	SplashAtlas = assets.LoadAtlas(assets.LoadImage("data/splash.png"), "data/splash.xml")
 
 	for i := range lane.Count {
 		var tilemap = graphics.NewTilemap(layers[lane.Enum(lane.LayerOffset)+i])
@@ -70,8 +72,10 @@ func InitScene() {
 	}
 	CurrentZone = Zones[zone.Field]
 
-	Bases[team.Ally] = NewBase(team.Ally, base.Fort, garrison.Three, [3]entrance.Enum{entrance.None, entrance.None, entrance.None})
-	Bases[team.Enemy] = NewBase(team.Enemy, base.Fortress, garrison.Three, [3]entrance.Enum{entrance.Door, entrance.None, entrance.None})
+	Bases[team.Ally] = NewBase(team.Ally, base.Fort, garrison.Three,
+		[3]entrance.Enum{entrance.None, entrance.None, entrance.None})
+	Bases[team.Enemy] = NewBase(team.Enemy, base.Fortress, garrison.Three,
+		[3]entrance.Enum{entrance.Door, entrance.None, entrance.None})
 
 	Units = append(Units, NewUnit(char.Stabber, team.Enemy, lane.Middle))
 	// Units = append(Units, NewUnit(CharMiner, TeamEnemy, LaneMiddle))
@@ -87,10 +91,10 @@ func InitScene() {
 
 	Player = NewPlayer()
 
-	Player.Units[0] = NewUnit(char.Raven, team.Ally, 0)
+	Player.Units[0] = NewUnit(char.Kid, team.Ally, 0)
 	Player.Units[1] = NewUnit(char.Bowyer, team.Ally, 0)
-	Player.Units[2] = NewUnit(char.Vulture, team.Ally, 0)
-	Player.Units[3] = NewUnit(char.Kid, team.Ally, 0)
+	Player.Units[2] = NewUnit(char.Fisherman, team.Ally, 0)
+	Player.Units[3] = NewUnit(char.Troll, team.Ally, 0)
 	Player.Units[4] = NewUnit(char.Stabber, team.Ally, 0)
 	Player.Units[5] = NewUnit(char.Spearlin, team.Ally, 0)
 	Player.Units[6] = NewUnit(char.Arbalestier, team.Ally, 0)
@@ -142,6 +146,7 @@ func UpdateScene() {
 	iterateRemovable(&Bases[team.Enemy].Entrances, func(e *Entrance) { e.Update() })
 	CurrentZone.UpdateFront()
 
+	iterateRemovable(&Splashes, func(s *Splash) { s.Update() })
 	iterateRemovable(&ProjectilesBehind, func(p *Projectile) { p.Update() })
 	iterateRemovable(&Pickups, func(p *Pickup) { p.Update() })
 

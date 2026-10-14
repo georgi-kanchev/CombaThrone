@@ -8,6 +8,7 @@ import (
 	"game/code/constants/lane"
 	"game/code/constants/pickup"
 	"game/code/constants/role"
+	"game/code/constants/splash"
 	"game/code/constants/state"
 	"game/code/constants/team"
 	"pure-game-kit/packages/assets"
@@ -175,7 +176,7 @@ func (u *Unit) PrepareSpawn() {
 	case lane.Upper, lane.UpperOff:
 		u.X, u.Y = TileSize*7.5, laneY
 	case lane.Garrison1, lane.Garrison2, lane.Garrison3:
-		u.X, u.Y = CurrentZone.Ground.Width/2+u.Width/2, laneY
+		u.X, u.Y = CurrentZone.Ground.Width/2+u.Width/2, laneY-32
 	case lane.GarrisonPlus1, lane.GarrisonPlus2, lane.GarrisonPlus3:
 		u.X, u.Y = PointAtCell(18.5, 3)
 	}
@@ -265,15 +266,18 @@ func (u *Unit) ProjectHealth(value int) (remainingHealth int) {
 	}
 	return u.Health + value
 }
-func (u *Unit) AffectHealth(value int) {
+func (u *Unit) AffectHealth(value int, particles bool) {
 	var newHealth = u.ProjectHealth(value)
 	if newHealth != u.Health {
 		u.Health = newHealth
 
 		if value < 0 {
 			u.HurtTimer = 0.5
-		} else if value > 0 {
-			// TODO: particles
+
+			if particles {
+				var multiplier = 1 - float32(u.Health)/float32(u.Values.MaxHealth)
+				u.Particles.EmitFromLine(int(multiplier*BloodMultiplier), u.X, u.Y-6, u.X, u.Y+6, u.particlesBlood)
+			}
 		}
 	}
 }
@@ -297,8 +301,6 @@ func (u *Unit) TickEffect(effect effect.Enum) {
 	u.Values.ActPoints += values.ActPoints
 	u.Values.ActRange += values.ActRange
 	u.Values.ActTimer += values.ActTimer
-
-	u.AffectHealth(-values.EffectTickDamage)
 }
 func (u *Unit) RemoveEffect(effect effect.Enum) {
 	var _, has = u.Effects[effect]
@@ -529,7 +531,7 @@ func (u *Unit) actUponState() {
 		var canBeActedUpon, e = u.EnemyEntrance()
 		if u.Values.ActRange == 1 {
 			if u.UnitFront != nil {
-				u.UnitFront.AffectHealth(-dmg)
+				u.UnitFront.AffectHealth(-dmg, true)
 				PlaySound(Characters[u.Character].Sounds.HitFlesh)
 			} else if canBeActedUpon && e != nil {
 				e.TakeDamage(dmg)
@@ -569,15 +571,12 @@ func (u *Unit) actUponState() {
 		u.Anim.Frames = Characters[u.Character].Animations.Hurt
 		u.Anim.IsLooping, u.Anim.FPS, u.Anim.Time = false, 5, 0
 		u.VelocityX = 0
-		var percent = 1 - float32(u.Health)/float32(u.Values.MaxHealth)
-		u.Particles.EmitFromLine(int(percent*BloodMultiplier), u.X, u.Y-6, u.X, u.Y+6, u.particlesBlood)
 	case state.Hurting: // empty
 	case state.DyingStart:
 		u.Anim.Frames = Characters[u.Character].Animations.Die
 		u.Anim.IsLooping, u.Anim.FPS, u.Anim.Time = false, 8, 0
 		u.HealthBar.FadeOut(1.5)
 		u.VelocityX = 0
-		u.Particles.EmitFromLine(BloodMultiplier, u.X, u.Y-6, u.X, u.Y+6, u.particlesBlood)
 	case state.Dying, state.DyingEnd: // empty
 	case state.Decaying:
 		if u.HurtTimer < -u.Values.ReviveTimer || u.IsGarrisoner() {
@@ -638,6 +637,11 @@ func (u *Unit) applyCollisions() {
 			if hb.Overlaps(s) {
 				hb = hb.Collide(s)
 				u.X, u.Y = hb.X+diffX, hb.Y+diffY
+
+				if u.VelocityY > 30 && u.IsOutsideOwnBase() && !u.IsInsideEnemyBase(0) {
+					Splashes = append(Splashes, NewSplash(splash.Dust, 0, hb.X, hb.Y+hb.Height/2-14))
+				}
+
 				u.VelocityY = 0
 				u.IsGrounded = true
 
@@ -690,6 +694,7 @@ func (u *Unit) applyCollisions() {
 	for _, p := range Pickups {
 		if p != nil && p.Lane == u.Lane && p.Overlaps(hb) && (allowed || p.Kind == pickup.Coin) {
 			p.HasShadow = false
+			Splashes = append(Splashes, NewSplash(splash.Pickup, 0, p.X, p.Y))
 			u.Carrying = collection.Add(u.Carrying, p)
 			Pickups = collection.Remove(Pickups, p)
 			if p.Kind != pickup.Coin {
