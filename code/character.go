@@ -165,6 +165,11 @@ func InitCharacters() {
 			ActPoints: 3, ActTimer: 12.0, ActRange: 1, ReviveTimer: 30.0},
 		"Casts a water shield, blocking all damage.",
 		CharProjectile{CastCustomSplashInstead: splash.WaterShield})
+	Characters[char.Stormcaller] = NewCharacter(geometry.NewRoundedRectangle(0, 4, 18, 40, 0, 1),
+		Values{Name: "Stormcaller", Wage: 20, Role: role.Ranger, MoveSpeed: 20, MaxHealth: 8,
+			ActPoints: 6, ActTimer: 12.0, ActRange: 2, ReviveTimer: 30.0},
+		"Casts a lightning bolt zap.",
+		CharProjectile{CastCustomSplashInstead: splash.LightningZap})
 
 	for i, c := range Characters {
 		if c == nil {

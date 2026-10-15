@@ -330,7 +330,8 @@
     <group name="stormcaller-icon" cropIndexes="374"/>
     <group name="stormcaller-idle" cropIndexes="375 376 377 378"/>
     <group name="stormcaller-move" cropIndexes="379 380 381 382 383 384"/>
-    <group name="stormcaller-act" cropIndexes="385 386 387 388"/>
+    <group name="stormcaller-prepare" cropIndexes="385 386 387"/>
+    <group name="stormcaller-recover" cropIndexes="388"/>
     <group name="stormcaller-hurt" cropIndexes="389 390"/>
     <group name="stormcaller-die" cropIndexes="391 392 393"/>
     <group name="bear-icon" cropIndexes="394"/>

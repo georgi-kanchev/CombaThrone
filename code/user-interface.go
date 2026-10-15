@@ -2,6 +2,7 @@ package game
 
 import (
 	"game/code/constants/base"
+	char "game/code/constants/character"
 	"game/code/constants/effect"
 	"game/code/constants/entrance"
 	"game/code/constants/icon"
@@ -554,7 +555,7 @@ func (h *HUD) trySummon(lastSummonIndex int) {
 			takenGarrisons = append(takenGarrisons, pu.Lane)
 		}
 	}
-	if unit.Values.ActRange > 1 && Bases[team.Ally].Kind >= base.Fort {
+	if unit.Values.ActRange > 1 && Bases[team.Ally].Kind >= base.Fort && unit.Character != char.Stormcaller {
 		var garrisonsFull = len(takenGarrisons) == 6
 		var garrisonX, garrisonY = PointAtCell(0.5, 4)
 		var shape = geometry.NewRectangle(garrisonX, garrisonY, size, size, 0)

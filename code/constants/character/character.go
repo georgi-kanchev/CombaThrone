@@ -70,13 +70,13 @@ const (
 	Mechanic
 	Gigantron
 	Cachebot
-	Barrotor
-	Eyeroller
+	Barrocopter
+	Roller
 
-	Bearalis
+	Bearealis
 	Frosty
 	Doombag
-	SatanClaws
+	Moroz
 	Frooze
 	Snowman
 	Elkling
@@ -89,7 +89,7 @@ const (
 	Centipede
 	Bug
 	Bat
-	Viper
+	Serpent
 
 	Artifact
 	Antique

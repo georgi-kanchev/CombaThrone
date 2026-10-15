@@ -96,7 +96,7 @@ func InitScene() {
 	Player.Units[0] = NewUnit(char.Kid, team.Ally, 0)
 	Player.Units[1] = NewUnit(char.Aquaweaver, team.Ally, 0)
 	Player.Units[2] = NewUnit(char.Toxicologist, team.Ally, 0)
-	Player.Units[3] = NewUnit(char.Troll, team.Ally, 0)
+	Player.Units[3] = NewUnit(char.Stormcaller, team.Ally, 0)
 	Player.Units[4] = NewUnit(char.Stabber, team.Ally, 0)
 	Player.Units[5] = NewUnit(char.Windbender, team.Ally, 0)
 	Player.Units[6] = NewUnit(char.Healer, team.Ally, 0)
@@ -142,7 +142,7 @@ func UpdateScene() {
 	mouse.SetCursor(cursor.Default)
 
 	if keyboard.IsKeyJustPressed(key.A) {
-		Units = append(Units, NewUnit(char.Gunner, team.Enemy, lane.Middle))
+		Units = append(Units, NewUnit(char.Miner, team.Enemy, lane.Middle))
 	}
 
 	CurrentZone.UpdateBack()
@@ -191,9 +191,11 @@ func UpdateScene() {
 		g.HealthBar.Update(g.Tiles[0].Shape, g.Health, g.MaxHealth, geometry.Area{})
 	}
 	for _, u := range Units { // health bars take the Z order of the units
-		var hb = u.Hitbox()
-		hb.Height += 8
-		u.HealthBar.Update(hb, u.Health, u.Values.MaxHealth, u.Mask)
+		if u.IsSummoned() { // this check prevents healthbar flash the very first summon frame
+			var hb = u.Hitbox()
+			hb.Height += 8
+			u.HealthBar.Update(hb, u.Health, u.Values.MaxHealth, u.Mask)
+		}
 	}
 
 	GameHUD.UpdateFront()

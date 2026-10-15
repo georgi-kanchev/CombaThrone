@@ -47,7 +47,6 @@ func NewHealthBar(width float32, team team.Enum, offLane bool) *HealthBar {
 
 		data.Label, data.Glory, data.Damage = &label, &glory, &dmg
 	}
-
 	return &data
 }
 
