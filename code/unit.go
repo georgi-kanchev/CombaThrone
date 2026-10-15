@@ -1,7 +1,6 @@
 package game
 
 import (
-	"fmt"
 	"game/code/constants/base"
 	char "game/code/constants/character"
 	"game/code/constants/effect"
@@ -447,15 +446,13 @@ func (u *Unit) applyState() {
 		u.State = state.Idling
 	}
 
-	if u.State == state.Hurting && !u.IsAlive() {
-		u.State = state.DyingStart // bug fix for units sometimes staying alive
-	} else if u.State == state.Hurting && u.HurtTimer < 0 && u.IsAlive() {
+	if u.State == state.Hurting && u.HurtTimer < 0 && u.IsAlive() {
 		u.State = state.Idling
 	} else if u.State == state.HurtStart {
 		u.State = state.Hurting
 	}
-	if u.State != state.DyingStart && u.State != state.Dying && u.State != state.Decaying &&
-		u.State != state.Hurting && u.HurtTimer > 0 {
+	if u.State != state.DyingStart && u.State != state.Dying && u.State != state.DyingEnd &&
+		u.State != state.Decaying && u.State != state.Hurting && u.HurtTimer > 0 {
 		u.State = state.HurtStart // can interupt other states
 	}
 
@@ -466,8 +463,7 @@ func (u *Unit) applyState() {
 		u.State = state.DyingEnd
 	} else if u.State == state.DyingStart {
 		u.State = state.Dying
-	} else if u.State == state.HurtStart && u.Health <= 0 {
-		fmt.Printf("\"twice\": %v\n", "twice")
+	} else if (u.State == state.HurtStart && u.Health <= 0) || (u.State == state.Hurting && !u.IsAlive()) {
 		u.State = state.DyingStart
 	}
 }
