@@ -3,7 +3,8 @@ package proj
 type Enum uint8
 
 const (
-	Arrow Enum = iota
+	NONE Enum = iota
+	Arrow
 	SmallBullet
 	Skull
 	BigRock
@@ -26,5 +27,6 @@ const (
 	YellowPotion
 	SmallSpit
 	MediumSpit
-	Count
+	CAST_CUSTOM_SPLASH
+	COUNT
 )

@@ -29,5 +29,5 @@ const (
 	Minus
 	Unit
 	Splash
-	Count
+	COUNT
 )

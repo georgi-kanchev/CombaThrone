@@ -5,6 +5,7 @@ import (
 	"game/code/constants/splash"
 	"game/code/constants/team"
 	"pure-game-kit/packages/assets"
+	"pure-game-kit/packages/geometry"
 	"pure-game-kit/packages/graphics"
 	"pure-game-kit/packages/motion"
 	"pure-game-kit/packages/utility/collection"
@@ -20,13 +21,13 @@ type Splash struct {
 	Team   team.Enum
 }
 type SplashValues struct {
-	AnimName         string
-	Damage           int
-	Loop, SingleTick bool
-	Timer, FadeOutTime, FPS,
-	VelocityX, VelocityY float32
-	TickTimer float32 // ticks every 1 second, always ticks once upon creation (first update) since it starts at 0
-	Tick      func(self *Splash)
+	AnimName                string
+	Damage                  int
+	Loop, SingleTick        bool
+	Timer, FadeOutTime, FPS float32
+	TickTimer               float32 // ticks every 1 second, always ticks once upon creation (first update) since it starts at 0
+	Tick                    func(self *Splash)
+	Update                  func(self *Splash)
 }
 
 var SplashBases = map[splash.Enum]SplashValues{
@@ -42,13 +43,17 @@ var SplashBases = map[splash.Enum]SplashValues{
 		Tick: splashTickHeal},
 	splash.PoisonCloud: SplashValues{AnimName: "poison-cloud", FPS: 10, Loop: true, Timer: 5, Damage: 2, FadeOutTime: 0.25,
 		Tick: splashTickPoisonCloud},
+	splash.Whirlwind: SplashValues{AnimName: "whirlwind", FPS: 10, Loop: true, Timer: 20, Damage: 4, FadeOutTime: 0.5,
+		SingleTick: true, Tick: splashTickWhirlwind, Update: splashUpdateWhirlwind},
 }
 var Splashes = make([]*Splash, 0, 8)
 
-func NewSplash(kind splash.Enum, team team.Enum, x, y float32) *Splash {
+func NewSplash(kind splash.Enum, team team.Enum, x, y float32, mask geometry.Area) *Splash {
 	var frames = SplashAtlas.Crops(SplashBases[kind].AnimName)
 	var anim = motion.NewAnimation[assets.ImageId](SplashBases[kind].FPS, SplashBases[kind].Loop, frames...)
-	return &Splash{Object: graphics.NewSprite(x, y, 0, 0), Kind: kind, Team: team, Anim: &anim, Values: SplashBases[kind]}
+	var spr = graphics.NewSprite(x, y, 0, 0)
+	spr.Mask = mask
+	return &Splash{Object: spr, Kind: kind, Team: team, Anim: &anim, Values: SplashBases[kind]}
 }
 
 //=================================================================
@@ -56,6 +61,10 @@ func NewSplash(kind splash.Enum, team team.Enum, x, y float32) *Splash {
 func (s *Splash) Update() {
 	s.Values.Timer -= DeltaTimeScaled()
 	s.Values.TickTimer -= DeltaTimeScaled()
+
+	if s.Values.Update != nil {
+		s.Values.Update(s)
+	}
 
 	if s.Values.TickTimer < 0 {
 		s.Values.TickTimer = 1
@@ -88,6 +97,11 @@ func (s *Splash) Update() {
 }
 
 // private ========================================================
+
+func (s *Splash) overlapsUnit(unit *Unit) bool {
+	var hb = unit.Hitbox()
+	return s.ContainsPoint(hb.X, hb.Y+hb.Height/2) || s.ContainsPoint(hb.X, hb.Y)
+}
 
 func splashTickFire(self *Splash) {
 	for _, u := range Units {
@@ -129,8 +143,25 @@ func splashTickHeal(self *Splash) {
 		}
 	}
 }
+func splashTickWhirlwind(self *Splash) {
+	for _, u := range Units {
+		if u.Team != self.Team && self.overlapsUnit(u) && u.IsGrounded {
+			u.VelocityY = -200
+			u.AffectHealth(-self.Values.Damage, false)
+		}
+	}
+}
+func splashUpdateWhirlwind(self *Splash) {
+	var velocityX = 100
+	if self.Team == team.Enemy {
+		velocityX *= -1
+	}
+	self.X += float32(velocityX) * DeltaTimeScaled()
 
-func (s *Splash) overlapsUnit(unit *Unit) bool {
-	var hb = unit.Hitbox()
-	return s.ContainsPoint(hb.X, hb.Y+hb.Height/2) || s.ContainsPoint(hb.X, hb.Y)
+	for _, u := range Units {
+		if u.Team != self.Team && self.overlapsUnit(u) && u.IsGrounded {
+			u.VelocityY = -230
+			u.AffectHealth(-self.Values.Damage, false)
+		}
+	}
 }

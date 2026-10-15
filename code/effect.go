@@ -6,7 +6,7 @@ import (
 	"pure-game-kit/packages/utility/number"
 )
 
-var Effects = [effect.Count]Values{
+var Effects = [effect.COUNT]Values{
 	effect.MoreRangeOnGarrison: Values{ActRange: 2, EffectTimer: number.Infinity(),
 		EffectInfo: "🟩" + Tags[icon.Plus] + "🌗🟧2 " + Tags[icon.Range] + "range ⬜(Garrison)"},
 	effect.Bowyer: Values{ActRange: 2, EffectTimer: number.Infinity(),

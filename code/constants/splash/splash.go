@@ -3,7 +3,7 @@ package splash
 type Enum uint8
 
 const (
-	None Enum = iota
+	NONE Enum = iota
 	Fire3
 	Fire2
 	Fire1
@@ -11,5 +11,8 @@ const (
 	PoisonCloud
 	Dust
 	Pickup
-	Count
+	Whirlwind
+	WaterShield
+	LightningZap
+	COUNT
 )

@@ -3,9 +3,10 @@ package base
 type Enum uint8
 
 const (
-	None Enum = iota
+	NONE Enum = iota
 	Camp
 	Barrack
 	Fort
 	Fortress
+	COUNT
 )

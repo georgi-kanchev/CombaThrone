@@ -80,4 +80,4 @@ func PlayAmbience(zone zone.Enum) {
 
 // private ========================================================
 
-var ambiences [zone.Count]assets.AudioId
+var ambiences [zone.COUNT]assets.AudioId

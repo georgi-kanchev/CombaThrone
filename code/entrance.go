@@ -29,7 +29,7 @@ func NewEntrance(entry entrance.Enum, owner base.Enum, forTeam team.Enum, atLane
 	var data = Entrance{Kind: entry, Team: forTeam, Lane: atLane, MaxOpenY: TileSize + (TileSize * (float32(entry) - 1))}
 	var x, y float32 = -208, 48 // ally upper lane by default
 
-	if entry != entrance.None {
+	if entry != entrance.NONE {
 		data.HealthBar = NewHealthBar(TileSize-2, forTeam, false)
 		data.MaxHealth, data.Health = 100, 100
 	}
@@ -44,7 +44,7 @@ func NewEntrance(entry entrance.Enum, owner base.Enum, forTeam team.Enum, atLane
 	}
 
 	switch entry {
-	case entrance.None:
+	case entrance.NONE:
 		var hole = graphics.NewSprite(x, y, 1, Decor.Crops("hole")[0])
 		if owner < base.Barrack {
 			hole.X = -CurrentZone.Ground.Width / 2 // pull back entrance to edge of scene (valid playfield)
@@ -91,7 +91,7 @@ func NewEntrance(entry entrance.Enum, owner base.Enum, forTeam team.Enum, atLane
 func (e *Entrance) Shape() geometry.Shape {
 	var shape geometry.Shape
 	switch e.Kind {
-	case entrance.None, entrance.Door:
+	case entrance.NONE, entrance.Door:
 		shape = e.Tiles[0].Shape
 	case entrance.ShortGate:
 		shape = e.Tiles[1].Shape

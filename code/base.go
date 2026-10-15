@@ -29,7 +29,7 @@ type Base struct {
 	FlagAnim *motion.Animation[assets.ImageId]
 }
 
-var Bases [team.Count]*Base
+var Bases [team.COUNT]*Base
 
 func NewBase(forTeam team.Enum, kind base.Enum, garr garrison.Enum, entrances [3]entrance.Enum) *Base {
 	var b = &Base{Team: forTeam, Kind: kind, Garrison: garr, Glory: baseGlory[kind]}
@@ -48,7 +48,7 @@ func NewBase(forTeam team.Enum, kind base.Enum, garr garrison.Enum, entrances [3
 	b.Flag, b.FlagAnim = &flag, &anim
 
 	switch b.Kind {
-	case base.None:
+	case base.NONE:
 		return b
 	case base.Camp:
 		var back = graphics.NewTilemap(Layers[base.Camp-1])
@@ -80,7 +80,7 @@ func NewBase(forTeam team.Enum, kind base.Enum, garr garrison.Enum, entrances [3
 		bringGarrisonLanesDown(forTeam)
 	}
 
-	if b.Garrison != garrison.None {
+	if b.Garrison != garrison.NONE {
 		var backIndex, frontIndex = int(base.Fort-1) + int(b.Garrison)*2, int(base.Fort) + int(b.Garrison)*2
 		var garBack, garFront = graphics.NewTilemap(Layers[backIndex]), graphics.NewTilemap(Layers[frontIndex])
 		b.GarrisonBack, b.GarrisonFront = &garBack, &garFront
@@ -99,7 +99,7 @@ func NewBase(forTeam team.Enum, kind base.Enum, garr garrison.Enum, entrances [3
 
 //=================================================================
 
-var baseGlory = map[base.Enum]int{base.None: 10, base.Camp: 15, base.Barrack: 30, base.Fort: 90, base.Fortress: 360}
+var baseGlory = map[base.Enum]int{base.NONE: 10, base.Camp: 15, base.Barrack: 30, base.Fort: 90, base.Fortress: 360}
 
 func (b *Base) UpdateBack() {
 	View.DrawObject(b.Back)

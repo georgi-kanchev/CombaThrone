@@ -42,7 +42,7 @@ type ProjectileBase struct {
 }
 
 var Projectiles, ProjectilesBehind []*Projectile = make([]*Projectile, 0, 32), make([]*Projectile, 0, 32)
-var ProjectilesBase = [proj.Count]ProjectileBase{
+var ProjectilesBase = [proj.COUNT]ProjectileBase{
 	proj.Arrow:       ProjectileBase{FadeOutTime: 10, PersistOnImpact: true, MissMultiplier: 1.0},
 	proj.SmallBullet: ProjectileBase{FadeOutTime: 0.1, MissMultiplier: 1.0},
 	proj.RedPotion: ProjectileBase{FadeOutTime: 10, FreeRotation: true, MissMultiplier: 1.0, ParticlesFunc: ParticlesGlass,
@@ -191,19 +191,13 @@ func (p *Projectile) trigger(offsetY float32, gate bool) {
 	p.Triggered = true
 	p.Particles.EmitFromPoint(50, p.X, p.Y, base.ParticlesFunc)
 
-	if top != splash.None {
-		var t = NewSplash(top, p.Owner.Team, p.X, p.Y-8+offsetY)
-		t.Mask = p.Owner.Mask
-		Splashes = append(Splashes, t)
+	if top != splash.NONE {
+		Splashes = append(Splashes, NewSplash(top, p.Owner.Team, p.X, p.Y-8+offsetY, p.Owner.Mask))
 	}
-	if mid != splash.None {
-		var m = NewSplash(mid, p.Owner.Team, p.X, p.Y+offsetY)
-		m.Mask = p.Owner.Mask
-		Splashes = append(Splashes, m)
+	if mid != splash.NONE {
+		Splashes = append(Splashes, NewSplash(mid, p.Owner.Team, p.X, p.Y+offsetY, p.Owner.Mask))
 	}
-	if bot != splash.None {
-		var b = NewSplash(bot, p.Owner.Team, p.X, p.Y+8+offsetY)
-		b.Mask = p.Owner.Mask
-		Splashes = append(Splashes, b)
+	if bot != splash.NONE {
+		Splashes = append(Splashes, NewSplash(bot, p.Owner.Team, p.X, p.Y+8+offsetY, p.Owner.Mask))
 	}
 }

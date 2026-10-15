@@ -1,6 +1,7 @@
 package game
 
 import (
+	"fmt"
 	"game/code/constants/base"
 	char "game/code/constants/character"
 	"game/code/constants/effect"
@@ -170,11 +171,11 @@ func (u *Unit) PrepareSpawn() {
 	var laneY = col[0].Y - col[0].Height/2 - hb.Height
 	switch u.Lane {
 	case lane.Lower, lane.LowerOff:
-		u.X, u.Y = TileSize*10, laneY
+		u.X, u.Y = TileSize*9.8, laneY
 	case lane.Middle, lane.MiddleOff:
-		u.X, u.Y = TileSize*9, laneY
+		u.X, u.Y = TileSize*8.8, laneY
 	case lane.Upper, lane.UpperOff:
-		u.X, u.Y = TileSize*8, laneY
+		u.X, u.Y = TileSize*7.8, laneY
 	case lane.Garrison1, lane.Garrison2, lane.Garrison3:
 		u.X, u.Y = CurrentZone.Ground.Width/2+u.Width/2, laneY-32
 	case lane.GarrisonPlus1, lane.GarrisonPlus2, lane.GarrisonPlus3:
@@ -325,7 +326,7 @@ func (u *Unit) RemoveEffect(effect effect.Enum) {
 
 // private ========================================================
 
-var laneZs = [lane.Count]float32{
+var laneZs = [lane.COUNT]float32{
 	lane.Lower: 0, lane.LowerOff: 0.5, lane.Middle: 1, lane.MiddleOff: 1.5, lane.Upper: 2, lane.UpperOff: 2.5,
 	lane.Garrison1: 0, lane.Garrison2: 1, lane.Garrison3: 2,
 	lane.GarrisonPlus1: 2.5, lane.GarrisonPlus2: 2.5, lane.GarrisonPlus3: 2.5,
@@ -338,7 +339,7 @@ var laneMasks = map[lane.Enum]geometry.Area{
 	lane.Upper:     geometry.NewArea(0, 0, 428, 1000),
 	lane.UpperOff:  geometry.NewArea(0, 0, 428, 1000),
 }
-var teamColors = [team.Count]uint{team.Ally: palette.Green, team.Enemy: palette.Red}
+var teamColors = [team.COUNT]uint{team.Ally: palette.Green, team.Enemy: palette.Red}
 var effectsToRemove []effect.Enum
 
 func (u *Unit) particlesBlood(p *particles.Particle) (alive bool) {
@@ -466,6 +467,7 @@ func (u *Unit) applyState() {
 	} else if u.State == state.DyingStart {
 		u.State = state.Dying
 	} else if u.State == state.HurtStart && u.Health <= 0 {
+		fmt.Printf("\"twice\": %v\n", "twice")
 		u.State = state.DyingStart
 	}
 }
@@ -494,7 +496,7 @@ func (u *Unit) actUponState() {
 			PinnedUnit = nil
 		}
 
-		u.VelocityX = float32([team.Count]int{u.Values.MoveSpeed, -u.Values.MoveSpeed}[u.Team])
+		u.VelocityX = float32([team.COUNT]int{u.Values.MoveSpeed, -u.Values.MoveSpeed}[u.Team])
 		if u.IsAtWall { // chill out when next to a wall
 			u.VelocityX = 0
 		}
@@ -555,16 +557,26 @@ func (u *Unit) actUponState() {
 			return // if required (like a supplier throwing a heal potion), it should happen through behaviors manually
 		}
 
-		var projectileKind = Characters[u.Character].Projectile.Kind
+		var projectile = Characters[u.Character].Projectile
 		var t = u.ClosestEnemyInRange
 		if t != nil {
-			u.shootAt(t)
-		} else if canBeActedUpon && e != nil {
-			var x, y = e.Tiles[0].X, e.Tiles[0].Y
-			if e.Kind == entrance.TallGate {
-				y += TileSize
+			if projectile.CastCustomSplashInstead != splash.NONE {
+				var hb = u.Hitbox()
+				Splashes = append(Splashes, NewSplash(projectile.CastCustomSplashInstead, u.Team, hb.X, hb.Y, u.Mask))
+			} else {
+				u.shootAt(t)
 			}
-			Projectiles = append(Projectiles, u.NewProjectile(u.X, u.Y, u.Z, x, y, laneZs[e.Lane], dmg, projectileKind, e))
+		} else if canBeActedUpon && e != nil {
+			if projectile.CastCustomSplashInstead != splash.NONE {
+				var hb = u.Hitbox()
+				Splashes = append(Splashes, NewSplash(projectile.CastCustomSplashInstead, u.Team, hb.X, hb.Y, u.Mask))
+			} else {
+				var x, y = e.Tiles[0].X, e.Tiles[0].Y
+				if e.Kind == entrance.TallGate {
+					y += TileSize
+				}
+				Projectiles = append(Projectiles, u.NewProjectile(u.X, u.Y, u.Z, x, y, laneZs[e.Lane], dmg, projectile.Kind, e))
+			}
 			PlaySound(Characters[u.Character].Sounds.ActTrigger)
 		}
 	case state.ActCharging, state.ActRecovering, state.ActEnd: // empty
@@ -640,7 +652,11 @@ func (u *Unit) applyCollisions() {
 				u.X, u.Y = hb.X+diffX, hb.Y+diffY
 
 				if u.VelocityY > 30 && u.IsOutsideOwnBase() && !u.IsInsideEnemyBase(0) {
-					Splashes = append(Splashes, NewSplash(splash.Dust, 0, hb.X, hb.Y+hb.Height/2-14))
+					Splashes = append(Splashes, NewSplash(splash.Dust, 0, hb.X, hb.Y+hb.Height/2-14, u.Mask))
+				}
+
+				if u.VelocityY > 100 {
+					u.AffectHealth(int(-(u.VelocityY-100)/20), false) // fall damage
 				}
 
 				u.VelocityY = 0
@@ -696,7 +712,7 @@ func (u *Unit) applyCollisions() {
 	for _, p := range Pickups {
 		if p != nil && p.Lane == u.Lane && p.Overlaps(hb) && (allowed || p.Kind == pickup.Coin) {
 			p.HasShadow = false
-			Splashes = append(Splashes, NewSplash(splash.Pickup, 0, p.X, p.Y))
+			Splashes = append(Splashes, NewSplash(splash.Pickup, 0, p.X, p.Y, u.Mask))
 			u.Carrying = collection.Add(u.Carrying, p)
 			Pickups = collection.Remove(Pickups, p)
 			if p.Kind != pickup.Coin {

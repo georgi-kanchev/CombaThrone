@@ -18,6 +18,6 @@ const (
 	Mine
 	Hell
 
-	Count
+	COUNT
 	LayerOffset = 10
 )

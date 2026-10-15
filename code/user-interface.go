@@ -28,7 +28,7 @@ import (
 type HUD struct {
 	View                             *graphics.View
 	Top, ZoneInfo, Coins, UnitsPanel *graphics.Object
-	TeamGlory                        [team.Count]*graphics.Object
+	TeamGlory                        [team.COUNT]*graphics.Object
 
 	HoverHighlight *graphics.Object
 
@@ -106,7 +106,7 @@ func NewHUD() *HUD {
 	info.Details.TextSymbolGap, info.Details.TextColor = 10, palette.Gold
 
 	var ally, enemy = label, label
-	var glory = [team.Count]*graphics.Object{&ally, &enemy}
+	var glory = [team.COUNT]*graphics.Object{&ally, &enemy}
 
 	return &HUD{
 		View: &view, ZoneInfo: &info, Top: &top, TeamGlory: glory, Coins: &coins, UnitsPanel: &unitsPanel,

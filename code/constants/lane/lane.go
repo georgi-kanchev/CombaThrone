@@ -15,6 +15,6 @@ const ( // (collision layers)
 	GarrisonPlus1
 	GarrisonPlus2
 	GarrisonPlus3
-	Count
+	COUNT
 	LayerOffset = 32
 )

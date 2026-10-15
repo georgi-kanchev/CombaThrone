@@ -5,6 +5,7 @@ import (
 	"game/code/constants/icon"
 	proj "game/code/constants/projectile"
 	"game/code/constants/role"
+	"game/code/constants/splash"
 	"game/code/constants/zone"
 	"pure-game-kit/packages/assets"
 	"pure-game-kit/packages/audio"
@@ -29,9 +30,9 @@ type Values struct {
 
 type CharSounds struct{ ActStart, ActTrigger, HitFlesh, HitWood, HitMetal, HitGround []audio.Audio }
 type CharProjectile struct {
-	Kind proj.Enum
-	ParabolaMultiplier,
-	Speed float32
+	Kind                      proj.Enum
+	ParabolaMultiplier, Speed float32
+	CastCustomSplashInstead   splash.Enum
 }
 type Character struct {
 	Values              Values
@@ -48,13 +49,13 @@ type Character struct {
 	Projectile CharProjectile
 }
 
-var Characters [char.Count]*Character
+var Characters [char.COUNT]*Character
 var CharactersFlying = map[char.Enum]struct{}{char.Vulture: {}, char.Raven: {}}
 
 func NewCharacter(origin zone.Enum, hitbox geometry.Shape, stats Values, info string, proj ...CharProjectile) *Character {
-	var roleIcons = [role.Count]icon.Enum{icon.Sword, icon.Bow, icon.Shield, icon.Debuff, icon.Hand, icon.Bag}
-	var roleNames = [role.Count]string{"Fighter", "Ranger", "Defender", "Griefer", "Supplier", "Collector"}
-	var actNames = [role.Count]string{"damage", "damage", "block", "grief", "buff", "pickups"}
+	var roleIcons = [role.COUNT]icon.Enum{icon.Sword, icon.Bow, icon.Shield, icon.Debuff, icon.Hand, icon.Bag}
+	var roleNames = [role.COUNT]string{"Fighter", "Ranger", "Defender", "Griefer", "Supplier", "Collector"}
+	var actNames = [role.COUNT]string{"damage", "damage", "block", "grief", "buff", "pickups"}
 
 	if len(proj) == 0 {
 		proj = []CharProjectile{CharProjectile{ParabolaMultiplier: 1, Speed: 1}}
@@ -156,6 +157,11 @@ func InitCharacters() {
 			ActPoints: 2, ActTimer: 5.0, ActRange: 6, ReviveTimer: 30.0},
 		"Poison "+Tags[icon.Splash]+"splash. Better against "+Tags[icon.Door]+"metal gates.",
 		CharProjectile{ParabolaMultiplier: 1, Speed: 0.6, Kind: proj.YellowPotion})
+	Characters[char.Windbender] = NewCharacter(zone.Ruins, geometry.NewRoundedRectangle(0, 4, 18, 40, 0, 1),
+		Values{Name: "Windbender", Wage: 20, Role: role.Ranger, MoveSpeed: 20, MaxHealth: 8,
+			ActPoints: 4, ActTimer: 12.0, ActRange: 3, ReviveTimer: 30.0},
+		"Casts a whirlwind. Useless against "+Tags[icon.Door]+"entrances.",
+		CharProjectile{CastCustomSplashInstead: splash.Whirlwind})
 
 	for i, c := range Characters {
 		if c == nil {

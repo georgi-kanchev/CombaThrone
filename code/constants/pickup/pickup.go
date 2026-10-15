@@ -11,5 +11,5 @@ const (
 	Snowflake
 	Star
 	Key
-	Count
+	COUNT
 )

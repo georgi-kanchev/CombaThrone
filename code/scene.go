@@ -57,25 +57,25 @@ func InitScene() {
 	Decor = assets.LoadAtlas(decor, "data/decor.xml")
 	SplashAtlas = assets.LoadAtlas(assets.LoadImage("data/splash.png"), "data/splash.xml")
 
-	for i := range lane.Count {
+	for i := range lane.COUNT {
 		var tilemap = graphics.NewTilemap(layers[lane.Enum(lane.LayerOffset)+i])
 		Collisions[i] = tilemap.TilemapShapes()
 	}
 	mirrorGarrisonLanes()
 
-	Clouds[clouds.None] = []assets.ImageId{0}
+	Clouds[clouds.NONE] = []assets.ImageId{0}
 	Clouds[clouds.Windy] = append(Clouds[clouds.Windy], assets.LoadImage("data/zones/sky-clouds-wind.png"))
 	for i := 1; i <= 4; i++ {
 		Clouds[clouds.Normal] = append(Clouds[clouds.Normal], assets.LoadImage(text.New("data/zones/sky-clouds", i, ".png")))
 	}
-	for i := range zone.Count {
+	for i := range zone.COUNT {
 		Zones[i] = NewZone(zone.Enum(i))
 		ZoneBackgrounds[i] = assets.LoadImage("data/zones/background-" + text.ToLowerCase(Zones[i].Name) + ".png")
 	}
 	CurrentZone = Zones[zone.Field]
 
 	Bases[team.Ally] = NewBase(team.Ally, base.Fort, garrison.Three,
-		[3]entrance.Enum{entrance.None, entrance.None, entrance.None})
+		[3]entrance.Enum{entrance.NONE, entrance.NONE, entrance.NONE})
 	Bases[team.Enemy] = NewBase(team.Enemy, base.Fortress, garrison.Three,
 		[3]entrance.Enum{entrance.Door, entrance.ShortGate, entrance.TallGate})
 
@@ -98,7 +98,7 @@ func InitScene() {
 	Player.Units[2] = NewUnit(char.Toxicologist, team.Ally, 0)
 	Player.Units[3] = NewUnit(char.Troll, team.Ally, 0)
 	Player.Units[4] = NewUnit(char.Stabber, team.Ally, 0)
-	Player.Units[5] = NewUnit(char.Spearlin, team.Ally, 0)
+	Player.Units[5] = NewUnit(char.Windbender, team.Ally, 0)
 	Player.Units[6] = NewUnit(char.Healer, team.Ally, 0)
 	Player.Units[7] = NewUnit(char.Pyromancer, team.Ally, 0)
 }
@@ -152,7 +152,6 @@ func UpdateScene() {
 	iterateRemovable(&Bases[team.Enemy].Entrances, func(e *Entrance) { e.Update() })
 	CurrentZone.UpdateFront()
 
-	iterateRemovable(&Splashes, func(s *Splash) { s.Update() })
 	iterateRemovable(&ProjectilesBehind, func(p *Projectile) { p.Update() })
 	iterateRemovable(&Pickups, func(p *Pickup) { p.Update() })
 
@@ -177,6 +176,7 @@ func UpdateScene() {
 		}
 		u.Update()
 	})
+	iterateRemovable(&Splashes, func(s *Splash) { s.Update() })
 
 	Bases[team.Ally].UpdateFront()
 	Bases[team.Enemy].UpdateFront()

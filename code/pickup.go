@@ -30,7 +30,7 @@ type Pickup struct {
 var Pickups []*Pickup = make([]*Pickup, 0, 32)
 
 func NewPickup(x float32, kind pickup.Enum, atLane lane.Enum) *Pickup {
-	var pickupGroups = [pickup.Count]string{"coin", "gem", "crystal", "relic", "rune", "snowflake", "star", "key"}
+	var pickupGroups = [pickup.COUNT]string{"coin", "gem", "crystal", "relic", "rune", "snowflake", "star", "key"}
 	var anim = motion.NewAnimation(6, true, Decor.Crops("pickup-"+pickupGroups[kind])...)
 	var data = &Pickup{
 		Object: graphics.NewSprite(x, 0, 1, 0), Z: laneZs[atLane], Kind: kind, Anim: &anim, Lane: atLane, HasShadow: true}

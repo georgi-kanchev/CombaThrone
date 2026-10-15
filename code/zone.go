@@ -27,14 +27,14 @@ type Zone struct {
 	FlagFrames []assets.ImageId
 }
 
-var Clouds [clouds.Count][]assets.ImageId
-var ZoneBackgrounds [zone.Count]assets.ImageId
-var Zones [zone.Count]*Zone
+var Clouds [clouds.COUNT][]assets.ImageId
+var ZoneBackgrounds [zone.COUNT]assets.ImageId
+var Zones [zone.COUNT]*Zone
 
 func NewZone(kind zone.Enum) *Zone {
-	var names = [zone.Count]string{
+	var names = [zone.COUNT]string{
 		"Field", "Ruins", "Forest", "Swamp", "Desert", "Docks", "Ocean", "Glacier", "Cave", "Mine", "Hell"}
-	var skyColors = [zone.Count]uint{
+	var skyColors = [zone.COUNT]uint{
 		zone.Field: color.TagRGBA("rgb(98, 171, 212)"), zone.Ruins: color.TagRGBA("rgb(98, 171, 212)"),
 		zone.Forest: color.TagRGBA("rgb(31, 55, 54)"), zone.Swamp: color.TagRGBA("rgb(92, 107, 83)"),
 		zone.Desert: color.TagRGBA("rgb(155, 240, 253)"), zone.Docks: color.TagRGBA("rgb(98, 171, 212)"),
@@ -42,15 +42,15 @@ func NewZone(kind zone.Enum) *Zone {
 		zone.Cave: color.TagRGBA("rgb(72, 54, 59)"), zone.Mine: color.TagRGBA("rgb(61, 36, 59)"),
 		zone.Hell: color.TagRGBA("rgb(227, 177, 109)"),
 	}
-	var infos = [zone.Count]string{"1. The Field of the Vanilla-gers", "2. The Ruins of the Robbing Hoods",
+	var infos = [zone.COUNT]string{"1. The Field of the Vanilla-gers", "2. The Ruins of the Robbing Hoods",
 		"3. The Forest of the Cast-aways & Potion-eers", "4. The Swamp of the Abomi Nation",
 		"5. The Desert of the Sarcopha-guys", "6. The Docks of the Plank-ton Squid-iots",
 		"7. The Cliff of the Balloon-a-ticks", "8. The Glacier of the Satan Claws & Co.",
 		"9. The Cave of the Troglo-bites", "10. The Mine of the ???????-????", /*Masquer-oids*/
 		"11. The Hell of the Demons-trosities"}
-	var cloudPerZone = [zone.Count]clouds.Enum{zone.Field: clouds.Normal, zone.Ruins: clouds.Normal, zone.Forest: clouds.None,
-		zone.Swamp: clouds.None, zone.Desert: clouds.None, zone.Docks: clouds.Windy, zone.Ocean: clouds.Windy,
-		zone.Glacier: clouds.Windy, zone.Cave: clouds.None, zone.Mine: clouds.None, zone.Hell: clouds.None}
+	var cloudPerZone = [zone.COUNT]clouds.Enum{zone.Field: clouds.Normal, zone.Ruins: clouds.Normal, zone.Forest: clouds.NONE,
+		zone.Swamp: clouds.NONE, zone.Desert: clouds.NONE, zone.Docks: clouds.Windy, zone.Ocean: clouds.Windy,
+		zone.Glacier: clouds.Windy, zone.Cave: clouds.NONE, zone.Mine: clouds.NONE, zone.Hell: clouds.NONE}
 	var ground = graphics.NewTilemap(Layers[zone.LayerOffset+int(kind)*2])
 	var buildings = graphics.NewTilemap(Layers[zone.LayerOffset+int(kind)*2+1])
 	var randomClouds = Clouds[cloudPerZone[kind]]
@@ -59,7 +59,7 @@ func NewZone(kind zone.Enum) *Zone {
 	var windSpeed float32
 	var flagGroup = "flag-" + text.ToLowerCase(names[kind])
 	switch cloudPerZone[kind] {
-	case clouds.None:
+	case clouds.NONE:
 		windSpeed = random.Range[float32](0.2, 0.7)
 	case clouds.Normal:
 		collection.Remove(randomClouds, cloud) // field and ruins shouldn't have the same clouds

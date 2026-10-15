@@ -3,7 +3,8 @@ package char
 type Enum uint8
 
 const (
-	Dummy Enum = iota
+	NONE Enum = iota
+	Dummy
 	Miner
 	Cook
 	Bowyer
@@ -106,5 +107,5 @@ const (
 	Goregoo
 	Eldritch
 
-	Count
+	COUNT
 )

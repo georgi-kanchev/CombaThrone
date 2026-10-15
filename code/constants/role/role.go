@@ -9,5 +9,5 @@ const (
 	Griefer
 	Supplier
 	Collector
-	Count
+	COUNT
 )

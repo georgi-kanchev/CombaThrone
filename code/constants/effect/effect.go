@@ -3,7 +3,8 @@ package effect
 type Enum uint8
 
 const (
-	MoreRangeOnGarrison Enum = iota
+	NONE Enum = iota
+	MoreRangeOnGarrison
 	Bowyer
 	Miner
 	Kid
@@ -15,5 +16,5 @@ const (
 	Vulture
 	Raven
 	Snake
-	Count
+	COUNT
 )

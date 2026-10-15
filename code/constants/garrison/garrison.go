@@ -3,8 +3,9 @@ package garrison
 type Enum uint8
 
 const (
-	None Enum = iota
+	NONE Enum = iota
 	One
 	Two
 	Three
+	COUNT
 )

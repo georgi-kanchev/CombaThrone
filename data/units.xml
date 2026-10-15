@@ -302,7 +302,8 @@
     <group name="windbender-icon" cropIndexes="290"/>
     <group name="windbender-idle" cropIndexes="291 292 293 294"/>
     <group name="windbender-move" cropIndexes="295 296 297 298 299 300"/>
-    <group name="windbender-act" cropIndexes="301 302 303 304"/>
+    <group name="windbender-prepare" cropIndexes="301 302 303"/>
+    <group name="windbender-recover" cropIndexes="304"/>
     <group name="windbender-hurt" cropIndexes="305 306"/>
     <group name="windbender-die" cropIndexes="307 308 309"/>
     <group name="healer-icon" cropIndexes="310"/>

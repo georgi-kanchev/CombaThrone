@@ -3,8 +3,9 @@ package entrance
 type Enum uint8
 
 const (
-	None Enum = iota
+	NONE Enum = iota
 	Door
 	ShortGate
 	TallGate
+	COUNT
 )
