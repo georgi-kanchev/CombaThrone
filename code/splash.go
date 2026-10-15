@@ -1,15 +1,16 @@
 package game
 
 import (
+	"game/code/constants/effect"
 	"game/code/constants/entrance"
 	"game/code/constants/splash"
 	"game/code/constants/team"
 	"pure-game-kit/packages/assets"
-	"pure-game-kit/packages/geometry"
 	"pure-game-kit/packages/graphics"
 	"pure-game-kit/packages/motion"
 	"pure-game-kit/packages/utility/collection"
 	"pure-game-kit/packages/utility/color"
+	"pure-game-kit/packages/utility/direction"
 	"pure-game-kit/packages/utility/number"
 )
 
@@ -19,6 +20,9 @@ type Splash struct {
 	Anim   *motion.Animation[assets.ImageId]
 	Values SplashValues
 	Team   team.Enum
+	Owner  *Unit
+
+	VelocityX, VelocityY float32
 }
 type SplashValues struct {
 	AnimName                string
@@ -43,17 +47,21 @@ var SplashBases = map[splash.Enum]SplashValues{
 		Tick: splashTickHeal},
 	splash.PoisonCloud: SplashValues{AnimName: "poison-cloud", FPS: 10, Loop: true, Timer: 5, Damage: 2, FadeOutTime: 0.25,
 		Tick: splashTickPoisonCloud},
-	splash.Whirlwind: SplashValues{AnimName: "whirlwind", FPS: 10, Loop: true, Timer: 20, Damage: 4, FadeOutTime: 0.5,
+	splash.Whirlwind: SplashValues{AnimName: "whirlwind", FPS: 12, Loop: true, Timer: 20, Damage: 4, FadeOutTime: 0.5,
 		SingleTick: true, Tick: splashTickWhirlwind, Update: splashUpdateWhirlwind},
+	splash.WaterShield: SplashValues{AnimName: "water-shield", FPS: 12, Loop: true, Timer: 6, FadeOutTime: 0.5,
+		Update: splashUpdateWatershield},
 }
 var Splashes = make([]*Splash, 0, 8)
 
-func NewSplash(kind splash.Enum, team team.Enum, x, y float32, mask geometry.Area) *Splash {
+func NewSplash(kind splash.Enum, team team.Enum, x, y float32, owner *Unit) *Splash {
 	var frames = SplashAtlas.Crops(SplashBases[kind].AnimName)
 	var anim = motion.NewAnimation[assets.ImageId](SplashBases[kind].FPS, SplashBases[kind].Loop, frames...)
 	var spr = graphics.NewSprite(x, y, 0, 0)
-	spr.Mask = mask
-	return &Splash{Object: spr, Kind: kind, Team: team, Anim: &anim, Values: SplashBases[kind]}
+	if owner != nil {
+		// spr.Mask = owner.Mask
+	}
+	return &Splash{Object: spr, Kind: kind, Team: team, Anim: &anim, Values: SplashBases[kind], Owner: owner}
 }
 
 //=================================================================
@@ -61,6 +69,8 @@ func NewSplash(kind splash.Enum, team team.Enum, x, y float32, mask geometry.Are
 func (s *Splash) Update() {
 	s.Values.Timer -= DeltaTimeScaled()
 	s.Values.TickTimer -= DeltaTimeScaled()
+	s.X += s.VelocityX * DeltaTimeScaled()
+	s.Y += s.VelocityY * DeltaTimeScaled()
 
 	if s.Values.Update != nil {
 		s.Values.Update(s)
@@ -105,20 +115,20 @@ func (s *Splash) overlapsUnit(unit *Unit) bool {
 
 func splashTickFire(self *Splash) {
 	for _, u := range Units {
-		if u.Team != self.Team && self.overlapsUnit(u) {
+		if u.Team != self.Team && self.overlapsUnit(u) && u.IsAlive() {
 			u.AffectHealth(-self.Values.Damage, false)
 		}
 	}
 	var entrances = Bases[1-self.Team].Entrances
 	for _, e := range entrances {
-		if e.Kind == entrance.Door && self.ContainsPoint(e.Tiles[0].X, e.Tiles[0].Y) {
+		if e.Kind == entrance.Door && self.Overlaps(e.Tiles[0].Shape) {
 			e.TakeDamage(self.Values.Damage)
 		}
 	}
 }
 func splashTickPoisonCloud(self *Splash) {
 	for _, u := range Units {
-		if u.Team != self.Team && self.overlapsUnit(u) {
+		if u.Team != self.Team && self.overlapsUnit(u) && u.IsAlive() {
 			u.AffectHealth(-self.Values.Damage, false)
 		}
 	}
@@ -126,7 +136,7 @@ func splashTickPoisonCloud(self *Splash) {
 	for _, e := range entrances {
 		var contains = false
 		for _, t := range e.Tiles {
-			if self.ContainsPoint(t.X, t.Y) {
+			if self.Overlaps(t.Shape) {
 				contains = true
 				break
 			}
@@ -138,30 +148,54 @@ func splashTickPoisonCloud(self *Splash) {
 }
 func splashTickHeal(self *Splash) {
 	for _, u := range Units {
-		if u.Team == self.Team && self.overlapsUnit(u) {
+		if u.Team == self.Team && self.overlapsUnit(u) && u.IsAlive() {
 			u.AffectHealth(-self.Values.Damage, false)
 		}
 	}
 }
 func splashTickWhirlwind(self *Splash) {
+	self.Y -= 12
+
+	var smallestDist float32 = 99999
+	var closestUnit *Unit
 	for _, u := range Units {
-		if u.Team != self.Team && self.overlapsUnit(u) && u.IsGrounded {
+		var ally = self.Team == team.Ally && self.X < u.X
+		var enemy = self.Team == team.Enemy && self.X > u.X
+		var dist = number.Absolute(u.X - self.X)
+		if u.Team != self.Team && u.IsGrounded && (ally || enemy) && dist < smallestDist {
+			smallestDist = dist
+			closestUnit = u
+		}
+	}
+
+	const speed = 100.0
+	if closestUnit != nil {
+		var dirX, dirY = direction.BetweenPoints(self.X, self.Y, closestUnit.X, closestUnit.Y)
+		self.VelocityX, self.VelocityY = dirX*speed, dirY*speed
+	} else {
+		self.VelocityX = speed
+		if self.Team == team.Enemy {
+			self.VelocityX *= -1
+		}
+	}
+}
+func splashUpdateWhirlwind(self *Splash) {
+	for _, u := range Units {
+		if u.Team != self.Team && self.overlapsUnit(u) && u.IsGrounded && u.IsAlive() {
 			u.VelocityY = -200
 			u.AffectHealth(-self.Values.Damage, false)
 		}
 	}
 }
-func splashUpdateWhirlwind(self *Splash) {
-	var velocityX = 100
-	if self.Team == team.Enemy {
-		velocityX *= -1
-	}
-	self.X += float32(velocityX) * DeltaTimeScaled()
+func splashUpdateWatershield(self *Splash) {
+	if self.Owner != nil {
+		var hb = self.Owner.Hitbox()
+		self.X, self.Y = hb.X, hb.Y
 
-	for _, u := range Units {
-		if u.Team != self.Team && self.overlapsUnit(u) && u.IsGrounded {
-			u.VelocityY = -230
-			u.AffectHealth(-self.Values.Damage, false)
+		if self.Values.Timer < 0.2 {
+			self.Owner.RemoveEffect(effect.Aquaweaver)
+		} else {
+			self.Owner.AddEffect(effect.Aquaweaver)
 		}
 	}
 }

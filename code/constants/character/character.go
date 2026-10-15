@@ -28,7 +28,7 @@ const (
 	Healer
 	Toxicologist
 	Windbender
-	Essencialist
+	Aquaweaver
 	Stormcaller
 	Bear
 	Wolf
@@ -68,7 +68,7 @@ const (
 	Spearoid
 	Trapper
 	Mechanic
-	Robotron
+	Gigantron
 	Cachebot
 	Barrotor
 	Eyeroller

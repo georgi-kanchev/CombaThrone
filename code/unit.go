@@ -525,10 +525,17 @@ func (u *Unit) actUponState() {
 		u.VelocityX = 0
 		PlaySound(Characters[u.Character].Sounds.ActStart)
 	case state.ActTrigger:
+		var projectile = Characters[u.Character].Projectile
+		var splashInstead = projectile.CastCustomSplashInstead
+
 		u.Anim.Frames = Characters[u.Character].Animations.Recover
 		u.Anim.IsLooping, u.Anim.FPS, u.Anim.Time = false, 8, 0
 
 		if u.Values.Role == role.Defender {
+			if splashInstead != splash.NONE {
+				var hb = u.Hitbox()
+				Splashes = append(Splashes, NewSplash(splashInstead, u.Team, hb.X, hb.Y, u))
+			}
 			return // defenders cannot deal damage
 		}
 
@@ -553,19 +560,18 @@ func (u *Unit) actUponState() {
 			return // if required (like a supplier throwing a heal potion), it should happen through behaviors manually
 		}
 
-		var projectile = Characters[u.Character].Projectile
 		var t = u.ClosestEnemyInRange
 		if t != nil {
-			if projectile.CastCustomSplashInstead != splash.NONE {
+			if splashInstead != splash.NONE {
 				var hb = u.Hitbox()
-				Splashes = append(Splashes, NewSplash(projectile.CastCustomSplashInstead, u.Team, hb.X, hb.Y, u.Mask))
+				Splashes = append(Splashes, NewSplash(splashInstead, u.Team, hb.X, hb.Y, u))
 			} else {
 				u.shootAt(t)
 			}
 		} else if canBeActedUpon && e != nil {
-			if projectile.CastCustomSplashInstead != splash.NONE {
+			if splashInstead != splash.NONE {
 				var hb = u.Hitbox()
-				Splashes = append(Splashes, NewSplash(projectile.CastCustomSplashInstead, u.Team, hb.X, hb.Y, u.Mask))
+				Splashes = append(Splashes, NewSplash(splashInstead, u.Team, hb.X, hb.Y, u))
 			} else {
 				var x, y = e.Tiles[0].X, e.Tiles[0].Y
 				if e.Kind == entrance.TallGate {
@@ -648,7 +654,7 @@ func (u *Unit) applyCollisions() {
 				u.X, u.Y = hb.X+diffX, hb.Y+diffY
 
 				if u.VelocityY > 30 && u.IsOutsideOwnBase() && !u.IsInsideEnemyBase(0) {
-					Splashes = append(Splashes, NewSplash(splash.Dust, 0, hb.X, hb.Y+hb.Height/2-14, u.Mask))
+					Splashes = append(Splashes, NewSplash(splash.Dust, 0, hb.X, hb.Y+hb.Height/2-14, u))
 				}
 
 				if u.VelocityY > 100 {
@@ -708,7 +714,7 @@ func (u *Unit) applyCollisions() {
 	for _, p := range Pickups {
 		if p != nil && p.Lane == u.Lane && p.Overlaps(hb) && (allowed || p.Kind == pickup.Coin) {
 			p.HasShadow = false
-			Splashes = append(Splashes, NewSplash(splash.Pickup, 0, p.X, p.Y, u.Mask))
+			Splashes = append(Splashes, NewSplash(splash.Pickup, 0, p.X, p.Y, u))
 			u.Carrying = collection.Add(u.Carrying, p)
 			Pickups = collection.Remove(Pickups, p)
 			if p.Kind != pickup.Coin {

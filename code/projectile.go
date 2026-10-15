@@ -192,12 +192,12 @@ func (p *Projectile) trigger(offsetY float32, gate bool) {
 	p.Particles.EmitFromPoint(50, p.X, p.Y, base.ParticlesFunc)
 
 	if top != splash.NONE {
-		Splashes = append(Splashes, NewSplash(top, p.Owner.Team, p.X, p.Y-8+offsetY, p.Owner.Mask))
+		Splashes = append(Splashes, NewSplash(top, p.Owner.Team, p.X, p.Y-8+offsetY, p.Owner))
 	}
 	if mid != splash.NONE {
-		Splashes = append(Splashes, NewSplash(mid, p.Owner.Team, p.X, p.Y+offsetY, p.Owner.Mask))
+		Splashes = append(Splashes, NewSplash(mid, p.Owner.Team, p.X, p.Y+offsetY, p.Owner))
 	}
 	if bot != splash.NONE {
-		Splashes = append(Splashes, NewSplash(bot, p.Owner.Team, p.X, p.Y+8+offsetY, p.Owner.Mask))
+		Splashes = append(Splashes, NewSplash(bot, p.Owner.Team, p.X, p.Y+8+offsetY, p.Owner))
 	}
 }

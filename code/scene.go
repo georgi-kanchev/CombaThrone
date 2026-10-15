@@ -94,7 +94,7 @@ func InitScene() {
 	Player = NewPlayer()
 
 	Player.Units[0] = NewUnit(char.Kid, team.Ally, 0)
-	Player.Units[1] = NewUnit(char.Bowyer, team.Ally, 0)
+	Player.Units[1] = NewUnit(char.Aquaweaver, team.Ally, 0)
 	Player.Units[2] = NewUnit(char.Toxicologist, team.Ally, 0)
 	Player.Units[3] = NewUnit(char.Troll, team.Ally, 0)
 	Player.Units[4] = NewUnit(char.Stabber, team.Ally, 0)
@@ -142,7 +142,7 @@ func UpdateScene() {
 	mouse.SetCursor(cursor.Default)
 
 	if keyboard.IsKeyJustPressed(key.A) {
-		Units = append(Units, NewUnit(char.Stabber, team.Enemy, lane.Middle))
+		Units = append(Units, NewUnit(char.Gunner, team.Enemy, lane.Middle))
 	}
 
 	CurrentZone.UpdateBack()
@@ -176,10 +176,10 @@ func UpdateScene() {
 		}
 		u.Update()
 	})
-	iterateRemovable(&Splashes, func(s *Splash) { s.Update() })
 
 	Bases[team.Ally].UpdateFront()
 	Bases[team.Enemy].UpdateFront()
+	iterateRemovable(&Splashes, func(s *Splash) { s.Update() })
 
 	GameHUD.UpdateBack()
 	iterateRemovable(&Projectiles, func(p *Projectile) { p.Update() })

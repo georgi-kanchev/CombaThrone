@@ -3,8 +3,7 @@ package proj
 type Enum uint8
 
 const (
-	NONE Enum = iota
-	Arrow
+	Arrow Enum = iota
 	SmallBullet
 	Skull
 	BigRock

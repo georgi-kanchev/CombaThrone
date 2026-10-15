@@ -31,4 +31,6 @@ var Effects = [effect.COUNT]Values{
 		EffectInfo: "🟥" + Tags[icon.Minus] + "🟧10 " + Tags[icon.Sword] + "damage ⬜(Raven)"},
 	effect.Snake: Values{MoveSpeed: -10, EffectTimer: number.Infinity(),
 		EffectInfo: "🟥" + Tags[icon.Minus] + "🌗🟨10 " + Tags[icon.LeftRight] + "speed ⬜(Red Snake)"},
+	effect.Aquaweaver: Values{ActPoints: 1000, EffectTimer: number.Infinity(),
+		EffectInfo: "🟩" + Tags[icon.Plus] + "🟧1000 " + Tags[icon.Shield] + "defence ⬜(Self)"},
 }

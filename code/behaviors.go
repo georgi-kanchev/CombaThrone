@@ -147,7 +147,7 @@ var Behaviors = map[char.Enum]func(self *Unit){
 			if self.IsFacingLeft() {
 				offX *= -1
 			}
-			Splashes = collection.Add(Splashes, NewSplash(splash.Dust, 0, hb.X+offX, hb.Y+hb.Height/2-14, self.Mask))
+			Splashes = collection.Add(Splashes, NewSplash(splash.Dust, 0, hb.X+offX, hb.Y+hb.Height/2-14, self))
 			for _, u := range Units {
 				if self.Team != u.Team && number.IsWithin(self.X, u.X, TileSize*2) {
 					var dirX, dirY = direction.BetweenPoints(self.X, self.Y+self.Height/2, u.X, u.Y)

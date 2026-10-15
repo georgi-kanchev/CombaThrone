@@ -16,5 +16,6 @@ const (
 	Vulture
 	Raven
 	Snake
+	Aquaweaver
 	COUNT
 )
