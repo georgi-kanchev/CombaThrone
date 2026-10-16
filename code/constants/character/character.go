@@ -92,20 +92,20 @@ const (
 	Serpent
 
 	Artifact
-	Antique
-	Mineral
+	Solarite
+	Construct
 	Geode
 	Elemental
 	Trolley
 	Wisp
-	Slime
+	Blobster
 
 	Diabolist
 	Hellswine
 	Demon
 	Imp
 	Goregoo
-	Eldritch
+	Cuddles
 
 	COUNT
 )
