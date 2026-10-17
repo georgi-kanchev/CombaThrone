@@ -30,7 +30,9 @@ var Effects = [effect.COUNT]Values{
 	effect.Raven: Values{ActPoints: -10, EffectTimer: number.Infinity(),
 		EffectInfo: "🟥" + Tags[icon.Minus] + "🟧10 " + Tags[icon.Sword] + "damage ⬜(Raven)"},
 	effect.Snake: Values{MoveSpeed: -10, EffectTimer: number.Infinity(),
-		EffectInfo: "🟥" + Tags[icon.Minus] + "🌗🟨10 " + Tags[icon.LeftRight] + "speed ⬜(Red Snake)"},
+		EffectInfo: "🟥" + Tags[icon.Minus] + "🌗🟨10 " + Tags[icon.LeftRight] + "speed ⬜(Snake)"},
 	effect.Aquaweaver: Values{ActPoints: 1000, EffectTimer: number.Infinity(),
 		EffectInfo: "🟩" + Tags[icon.Plus] + "🟧1000 " + Tags[icon.Shield] + "defence ⬜(Self)"},
+	effect.Bear: Values{SleepTimer: 1.0, EffectTimer: 0.95,
+		EffectInfo: "🟩" + Tags[icon.Plus] + "fear " + Tags[icon.Shield] + " ⬜(Bear)"},
 }

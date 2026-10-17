@@ -152,6 +152,9 @@ func (u *Unit) IsAlive() bool {
 func (u *Unit) IsFacingLeft() bool {
 	return (u.Team == team.Enemy && !u.IsReturning) || (u.Team == team.Ally && u.IsReturning)
 }
+func (u *Unit) IsUnitInRange(unit *Unit) bool {
+	return number.IsWithin(unit.X, u.X, float32(u.Values.ActRange)*TileSize)
+}
 
 func (u *Unit) PrepareSpawn() {
 	u.ActTimer, u.HurtTimer = number.NaN(), number.NaN()
@@ -202,7 +205,7 @@ func (u *Unit) Update() {
 
 	u.ActTimer -= DeltaTimeScaled()
 	u.HurtTimer -= DeltaTimeScaled()
-	u.Values.SleepTimer -= DeltaTimeScaled()
+	u.Values.SleepTimer = max(u.Values.SleepTimer-DeltaTimeScaled(), 0)
 
 	if !u.IsSummoned() && (number.IsNaN(u.HurtTimer) || u.HurtTimer < -u.Values.ReviveTimer) {
 		u.State = state.WaitingToBeSummoned
@@ -305,6 +308,7 @@ func (u *Unit) TickEffect(effect effect.Enum) {
 	u.Values.ActPoints += values.ActPoints
 	u.Values.ActRange += values.ActRange
 	u.Values.ActTimer += values.ActTimer
+	u.Values.SleepTimer += values.SleepTimer
 }
 func (u *Unit) RemoveEffect(effect effect.Enum) {
 	var _, has = u.Effects[effect]
@@ -442,7 +446,7 @@ func (u *Unit) applyState() {
 		}
 	}
 
-	if u.Values.SleepTimer > 0 {
+	if u.Values.SleepTimer > 0 && (u.State == state.Moving || u.State == state.ActStart) {
 		u.State = state.Idling
 	}
 
@@ -474,7 +478,7 @@ func (u *Unit) actUponState() {
 		u.Anim.Frames = Characters[u.Character].Animations.Idle
 		u.Anim.IsLooping, u.Anim.FPS = true, 3
 
-		if number.IsNaN(u.Values.SleepTimer) || u.Values.SleepTimer < 0 {
+		if number.IsNaN(u.Values.SleepTimer) || u.Values.SleepTimer <= 0 {
 			u.VelocityX = 0
 		}
 	case state.Moving:
@@ -616,12 +620,12 @@ func (u *Unit) updateEffects() {
 		return
 	}
 
-	collection.Clear(effectsToRemove)
+	effectsToRemove = collection.Clear(effectsToRemove)
 	for k, v := range u.Effects {
 		v.EffectTimer -= DeltaTimeScaled()
 		u.Effects[k] = v
 
-		if v.EffectTimer < 0 {
+		if v.EffectTimer <= 0 {
 			effectsToRemove = collection.Add(effectsToRemove, k)
 		}
 	}

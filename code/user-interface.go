@@ -287,7 +287,7 @@ func (u *Unit) DrawTooltip(shape geometry.Shape, bench bool) {
 	var col, noMask = palette.White, geometry.Area{}
 	const width, height, effWidth = 130.0, 94.0, 105.0
 	var extraWidth float32
-	var x, y = shape.X, shape.Y - shape.Height/2 - height/2 - 14
+	var x, y = shape.X, shape.Y - shape.Height/2 - height/2 - 22
 	if bench {
 		x, y = 0, GameHUD.UnitsPanel.Y+GameHUD.UnitsPanel.Height/2+height/2
 	}

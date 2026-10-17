@@ -19,10 +19,11 @@ type Values struct {
 	MaxHealth, MoveSpeed, Wage int
 	ActPoints, ActRange        int
 
-	ActTimer, ReviveTimer, SleepTimer float32
+	ActTimer, ReviveTimer float32
 
-	EffectTimer      float32 // remaining time before removal (used only for Unit.Effects - not in Unit/Character.Values)
-	EffectTickDamage int     // used only for Unit.Effects - not in Unit/Character.Values
+	SleepTimer float32 // cannot go below 0 because effects add accumulatevly to it
+
+	EffectTimer float32 // remaining time before removal (used only for Unit.Effects - not in Unit/Character.Values)
 
 	Role role.Enum
 }
@@ -170,6 +171,10 @@ func InitCharacters() {
 			ActPoints: 6, ActTimer: 12.0, ActRange: 2, ReviveTimer: 30.0},
 		"Casts a lightning bolt zap.",
 		CharProjectile{CastCustomSplashInstead: splash.LightningZap})
+
+	Characters[char.Bear] = NewCharacter(geometry.NewRoundedRectangle(0, 4, 40, 25, 0, 1),
+		Values{Name: "Bear", Wage: 20, Role: role.Griefer, MoveSpeed: 15, ActRange: 2, ReviveTimer: 30.0},
+		"Makes 🌗🟧"+Tags[icon.Range]+"nearby 🟥"+Tags[icon.Unit]+"enemies⬜ freeze in fear.")
 
 	for i, c := range Characters {
 		if c == nil {

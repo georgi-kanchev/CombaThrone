@@ -81,6 +81,7 @@ func UpdateDebug() {
 					"velocity: ", number.Round(hovered.VelocityX, 1), " | ", number.Round(hovered.VelocityY, 1), "\n",
 					"move speed: ", number.Round(hovered.MoveSpeedX, 1), "\n",
 					"returning: ", hovered.IsReturning, "\n",
+					"sleep timer: ", number.Round(hovered.Values.SleepTimer, 1), "\n",
 				)
 			}
 

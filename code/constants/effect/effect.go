@@ -17,5 +17,6 @@ const (
 	Raven
 	Snake
 	Aquaweaver
+	Bear
 	COUNT
 )
