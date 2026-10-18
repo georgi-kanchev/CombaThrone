@@ -41,17 +41,17 @@ func NewPickup(x float32, kind pickup.Enum, atLane lane.Enum) *Pickup {
 
 	switch kind {
 	case pickup.Coin:
-		data.Description = "Gives you 🟨" + Tags[icon.Coin] + "10 coins⬜. Not bad for a single coin, eh?"
+		data.Description = "Gives you 🟨" + Tags[icon.Coins] + "10 coins⬜. Not bad for a single coin, eh?"
 		data.Effect = func() { Player.Coins += 10 }
 	case pickup.Gem:
-		data.Description = "🟩" + Tags[icon.Plus] + "🌗🟩10 " + Tags[icon.Heart] + "health⬜ to all 🟩" +
+		data.Description = "🟩" + Tags[icon.Plus] + "🌗🟩10 " + Tags[icon.Health] + "health⬜ to all 🟩" +
 			Tags[icon.Unit] + "allies⬜."
 	case pickup.Crystal:
 		data.Description = "🟩" + Tags[icon.Plus] + "🟧10 damage⬜ to all 🟩" + Tags[icon.Unit] + "ally⬜ " +
-			Tags[icon.Sword] + "Fighters and " + Tags[icon.Bow] + "Rangers."
+			Tags[icon.Fighter] + "Fighters and " + Tags[icon.Backliner] + "Rangers."
 	case pickup.Relic:
-		data.Description = "🌗🟦" + Tags[icon.Loop] + "Revives⬜ all 🟥" + Tags[icon.Skull] +
-			"dead🟩 " + Tags[icon.Unit] + "allies⬜ and gives them 🌗🟩full " + Tags[icon.Heart] + "health⬜."
+		data.Description = "🌗🟦" + Tags[icon.Respawn] + "Revives⬜ all 🟥" + Tags[icon.Skull] +
+			"dead🟩 " + Tags[icon.Unit] + "allies⬜ and gives them 🌗🟩full " + Tags[icon.Health] + "health⬜."
 	case pickup.Rune:
 		data.Description = "Prevents 🟥" + Tags[icon.Unit] + "enemies⬜ from appearing for 20s."
 	case pickup.Snowflake:

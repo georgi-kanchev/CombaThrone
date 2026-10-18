@@ -163,7 +163,7 @@ var Behaviors = map[char.Enum]func(self *Unit){
 			self.TickEffect(effect.Stabber)                        // tick original
 			eff.ActPoints += Effects[effect.Stabber].ActPoints     // accumulate the unit one
 		}
-		eff.EffectInfo = text.New("🟩", Tags[icon.Plus], "🟧", eff.ActPoints, " ", Tags[icon.Sword], "damage ⬜(Self)")
+		eff.EffectInfo = text.New("🟩", Tags[icon.Plus], "🟧", eff.ActPoints, " ", Tags[icon.Fighter], "damage ⬜(Self)")
 		self.Effects[effect.Stabber] = eff // return back to unit
 	},
 	char.Gunner: func(self *Unit) {

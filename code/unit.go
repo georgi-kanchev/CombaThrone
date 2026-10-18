@@ -402,7 +402,7 @@ func (u *Unit) applyState() {
 			u.ClosestEnemyInRange = t
 		}
 	}
-	var ranged = u.Values.ActRange > 1 && u.Values.Role == role.Ranger && (u.ClosestEnemyInRange != nil || enemyEntranceInRange)
+	var ranged = u.Values.ActRange > 1 && u.Values.Role == role.Backliner && (u.ClosestEnemyInRange != nil || enemyEntranceInRange)
 	var garrisonOrNot = !u.IsGarrisoner() || (u.IsGarrisoner() && u.IsOnScreen())
 	var myEntrance *Entrance
 	if u.IsLaner() {
@@ -411,7 +411,7 @@ func (u *Unit) applyState() {
 	var sameLaneWithTarget = u.ClosestEnemyInRange != nil && u.Lane == u.ClosestEnemyInRange.Lane
 	var openDoorShoot = u.IsLaner() && !u.IsOutsideOwnBase() && myEntrance.IsOpen() && sameLaneWithTarget
 	var canShoot = u.IsOutsideOwnBase() || openDoorShoot
-	canBeActedUpon = canBeActedUpon && u.Values.Role == role.Ranger
+	canBeActedUpon = canBeActedUpon && u.Values.Role == role.Backliner
 	if u.IsGarrisoner() {
 		canShoot = true
 	}
@@ -560,7 +560,7 @@ func (u *Unit) actUponState() {
 			break
 		}
 
-		if u.Values.Role != role.Ranger { // non-rangers cannot shoot projectiles in the default way
+		if u.Values.Role != role.Backliner { // non-rangers cannot shoot projectiles in the default way
 			return // if required (like a supplier throwing a heal potion), it should happen through behaviors manually
 		}
 

@@ -52,8 +52,8 @@ var Characters [char.COUNT]*Character
 var CharactersFlying = map[char.Enum]struct{}{char.Vulture: {}, char.Raven: {}}
 
 func NewCharacter(hitbox geometry.Shape, stats Values, info string, proj ...CharProjectile) *Character {
-	var roleIcons = [role.COUNT]icon.Enum{icon.Sword, icon.Bow, icon.Shield, icon.Debuff, icon.Hand, icon.Bag}
-	var roleNames = [role.COUNT]string{"Fighter", "Ranger", "Defender", "Griefer", "Supplier", "Collector"}
+	var roleIcons = [role.COUNT]icon.Enum{icon.Fighter, icon.Backliner, icon.Defender, icon.Griefer, icon.Supplier, icon.Collector}
+	var roleNames = [role.COUNT]string{"Fighter", "Backliner", "Defender", "Griefer", "Supplier", "Collector"}
 	var actNames = [role.COUNT]string{"damage", "damage", "block", "grief", "buff", "pickups"}
 
 	if len(proj) == 0 {
@@ -76,15 +76,15 @@ func InitCharacters() {
 	Characters[char.Miner] = NewCharacter(geometry.NewRoundedRectangle(0, 6, 18, 35, 0, 1),
 		Values{Name: "Miner", Wage: 20, Role: role.Fighter, MaxHealth: 15, MoveSpeed: 20,
 			ActPoints: 2, ActTimer: 2.0, ActRange: 1, ReviveTimer: 10.0},
-		"🟩"+Tags[icon.Plus]+"🟧"+"8 "+Tags[icon.Sword]+"damage ⬜against "+Tags[icon.Door]+"entrances.")
+		"🟩"+Tags[icon.Plus]+"🟧"+"8 "+Tags[icon.Fighter]+"damage ⬜against "+Tags[icon.Door]+"entrances.")
 	Characters[char.Cook] = NewCharacter(geometry.NewRoundedRectangle(0, 0, 18, 35, 0, 1),
 		Values{Name: "Cook", Wage: 10, Role: role.Supplier, MoveSpeed: 15,
 			ActPoints: 4, ActTimer: 10.0, ActRange: 1, ReviveTimer: 10.0},
-		"🟧"+Tags[icon.Hand]+"Heals⬜ a 🌗🟨"+Tags[icon.LeftRight]+"passing by 🟩"+Tags[icon.Unit]+"ally⬜.")
+		"🟧"+Tags[icon.Supplier]+"Heals⬜ a 🌗🟨"+Tags[icon.Move]+"passing by 🟩"+Tags[icon.Unit]+"ally⬜.")
 	Characters[char.Bowyer] = NewCharacter(geometry.NewRoundedRectangle(0, 7, 18, 35, 0, 1),
-		Values{Name: "Bowyer", Wage: 40, Role: role.Ranger, MaxHealth: 10, MoveSpeed: 15,
+		Values{Name: "Bowyer", Wage: 40, Role: role.Backliner, MaxHealth: 10, MoveSpeed: 15,
 			ActPoints: 4, ActTimer: 2.0, ActRange: 6, ReviveTimer: 10.0},
-		"🟩"+Tags[icon.Plus]+"🌗🟧2 "+Tags[icon.Range]+"range ⬜when 🌗🟨"+Tags[icon.LeftRight]+"grounded⬜.")
+		"🟩"+Tags[icon.Plus]+"🌗🟧2 "+Tags[icon.Range]+"range ⬜when 🌗🟨"+Tags[icon.Move]+"grounded⬜.")
 	Characters[char.Bowyer].Sounds = CharSounds{ActTrigger: AudioBow, HitGround: AudioProjectileGround,
 		HitFlesh: AudioProjectileFlesh, HitWood: AudioProjectileWood, HitMetal: AudioProjectileMetal}
 	Characters[char.Smith] = NewCharacter(geometry.NewRoundedRectangle(0, 0, 24, 48, 0, 1),
@@ -93,13 +93,13 @@ func InitCharacters() {
 		"Pushes the 🟥"+Tags[icon.Unit]+"enemy⬜ in front.")
 	Characters[char.Kid] = NewCharacter(geometry.NewRoundedRectangle(0, 4, 12, 24, 0, 1),
 		Values{Name: "Kid", Wage: 20, Role: role.Collector, MoveSpeed: 20, ActPoints: 1, ReviveTimer: 20.0},
-		"🟩"+Tags[icon.Plus]+"🌗🟨20 "+Tags[icon.LeftRight]+"speed⬜ when 🟧"+Tags[icon.Bag]+"empty handed⬜.")
+		"🟩"+Tags[icon.Plus]+"🌗🟨20 "+Tags[icon.Move]+"speed⬜ when 🟧"+Tags[icon.Collector]+"empty handed⬜.")
 	Characters[char.Fisherman] = NewCharacter(geometry.NewRoundedRectangle(-4, 6, 20, 35, 0, 1),
 		Values{Name: "Fisherman", Wage: 20, Role: role.Griefer, MoveSpeed: 15, ActTimer: 15.0, ReviveTimer: 20.0},
-		"Hooks up ⬜a 🌗🟨"+Tags[icon.LeftRight]+"passing by 🟥"+Tags[icon.Unit]+"enemy⬜.")
+		"Hooks up ⬜a 🌗🟨"+Tags[icon.Move]+"passing by 🟥"+Tags[icon.Unit]+"enemy⬜.")
 	Characters[char.Horse] = NewCharacter(geometry.NewRoundedRectangle(0, 8, 48, 32, 0, 0.5),
 		Values{Name: "Horse", Wage: 20, Role: role.Supplier, MoveSpeed: 60, ActPoints: 20, ActRange: 3, ReviveTimer: 20.0},
-		"🟧"+Tags[icon.Hand]+"Speeds up 🌗🟧"+Tags[icon.Range]+"nearby 🟩"+Tags[icon.Unit]+"allies⬜.")
+		"🟧"+Tags[icon.Supplier]+"Speeds up 🌗🟧"+Tags[icon.Range]+"nearby 🟩"+Tags[icon.Unit]+"allies⬜.")
 	Characters[char.Hare] = NewCharacter(geometry.NewRoundedRectangle(0, 0, 16, 16, 0, 1),
 		Values{Name: "Hare", Wage: 20, Role: role.Collector, MoveSpeed: 30, ActPoints: 1, ReviveTimer: 5.0},
 		"Very cute and soft.")
@@ -110,39 +110,39 @@ func InitCharacters() {
 	Characters[char.Troll] = NewCharacter(geometry.NewRoundedRectangle(0, 6, 32, 52, 0, 1),
 		Values{Name: "Troll", Wage: 20, Role: role.Defender, MaxHealth: 60, MoveSpeed: 10,
 			ActPoints: 2, ActTimer: 8.0, ActRange: 1, ReviveTimer: number.NaN()},
-		"Cannot 🌗🟦"+Tags[icon.Loop]+"revive.⬜ Pushes 🌗🟧"+Tags[icon.Range]+"nearby 🟥"+Tags[icon.Unit]+"enemies⬜ away.")
+		"Cannot 🌗🟦"+Tags[icon.Respawn]+"revive.⬜ Pushes 🌗🟧"+Tags[icon.Range]+"nearby 🟥"+Tags[icon.Unit]+"enemies⬜ away.")
 	Characters[char.Spearlin] = NewCharacter(geometry.NewRoundedRectangle(-2, 0, 18, 30, 0, 1),
 		Values{Name: "Spearlin", Wage: 20, Role: role.Fighter,
 			MaxHealth: 12, MoveSpeed: 25, ActPoints: 2, ActTimer: 1.5, ActRange: 1, ReviveTimer: 20.0},
-		"🟩"+Tags[icon.Plus]+"🟧"+"2 "+Tags[icon.Sword]+"damage ⬜against "+Tags[icon.Shield]+"Defenders.")
+		"🟩"+Tags[icon.Plus]+"🟧"+"2 "+Tags[icon.Fighter]+"damage ⬜against "+Tags[icon.Defender]+"Defenders.")
 	Characters[char.Arbalestier] = NewCharacter(geometry.NewRoundedRectangle(-2, 0, 18, 30, 0, 1),
-		Values{Name: "Arbalestier", Wage: 20, Role: role.Ranger,
+		Values{Name: "Arbalestier", Wage: 20, Role: role.Backliner,
 			MaxHealth: 12, MoveSpeed: 25, ActPoints: 6, ActTimer: 3.0, ActRange: 4, ReviveTimer: 20.0},
-		"🟩"+Tags[icon.Plus]+"🟧"+"2 "+Tags[icon.Sword]+"damage ⬜against "+Tags[icon.Shield]+"Defenders.",
+		"🟩"+Tags[icon.Plus]+"🟧"+"2 "+Tags[icon.Fighter]+"damage ⬜against "+Tags[icon.Defender]+"Defenders.",
 		CharProjectile{ParabolaMultiplier: 0.2, Speed: 2})
 	Characters[char.Stabber] = NewCharacter(geometry.NewRoundedRectangle(-4, 7, 20, 33, 0, 1),
 		Values{Name: "Stabber", Wage: 20, Role: role.Fighter,
 			MaxHealth: 16, MoveSpeed: 20, ActPoints: 2, ActTimer: 1.0, ActRange: 1, ReviveTimer: 30.0},
-		"🟩"+Tags[icon.Plus]+"🟧"+"1 "+Tags[icon.Sword]+"damage ⬜upon killing an 🟥"+Tags[icon.Unit]+"enemy⬜.")
+		"🟩"+Tags[icon.Plus]+"🟧"+"1 "+Tags[icon.Fighter]+"damage ⬜upon killing an 🟥"+Tags[icon.Unit]+"enemy⬜.")
 	Characters[char.Gunner] = NewCharacter(geometry.NewRoundedRectangle(-1, 7, 20, 33, 0, 1),
-		Values{Name: "Gunner", Wage: 20, Role: role.Ranger,
+		Values{Name: "Gunner", Wage: 20, Role: role.Backliner,
 			MaxHealth: 14, MoveSpeed: 20, ActPoints: 8, ActTimer: 8.0, ActRange: 8, ReviveTimer: 30.0},
-		"🟩"+Tags[icon.Plus]+"🟧"+"4 "+Tags[icon.Sword]+"damage⬜ 🟥"+Tags[icon.Plus]+"🌗🟪3s "+Tags[icon.Timer]+"rest⬜"+
+		"🟩"+Tags[icon.Plus]+"🟧"+"4 "+Tags[icon.Fighter]+"damage⬜ 🟥"+Tags[icon.Plus]+"🌗🟪3s "+Tags[icon.Timer]+"rest⬜"+
 			" when melee vs 🟥"+Tags[icon.Unit]+"enemy⬜.",
 		CharProjectile{ParabolaMultiplier: 0.05, Speed: 3.5, Kind: proj.SmallBullet})
 	Characters[char.Vulture] = NewCharacter(geometry.NewRoundedRectangle(0, 0, 32, 32, 0, 1),
 		Values{Name: "Vulture", Wage: 20, Role: role.Supplier, MoveSpeed: 40, ActRange: 3, ReviveTimer: 20.0},
-		"🟧"+Tags[icon.Hand]+"Faster 🌗🟦"+Tags[icon.Loop]+"revive⬜ for 🌗🟧"+Tags[icon.Range]+"nearby 🟥"+
+		"🟧"+Tags[icon.Supplier]+"Faster 🌗🟦"+Tags[icon.Respawn]+"revive⬜ for 🌗🟧"+Tags[icon.Range]+"nearby 🟥"+
 			Tags[icon.Skull]+"dead 🟩"+Tags[icon.Unit]+"allies⬜.")
 	Characters[char.Raven] = NewCharacter(geometry.NewRoundedRectangle(0, 4, 30, 24, 0, 1),
 		Values{Name: "Raven", Wage: 20, Role: role.Griefer, MoveSpeed: 40, ActPoints: 10, ActRange: 3, ReviveTimer: 20.0},
-		"🟧"+Tags[icon.Debuff]+"Weakens⬜ 🌗🟧"+Tags[icon.Range]+"nearby 🟥"+Tags[icon.Unit]+"enemies⬜.")
+		"🟧"+Tags[icon.Griefer]+"Weakens⬜ 🌗🟧"+Tags[icon.Range]+"nearby 🟥"+Tags[icon.Unit]+"enemies⬜.")
 	Characters[char.Snake] = NewCharacter(geometry.NewRoundedRectangle(0, 0, 30, 18, 0, 1),
 		Values{Name: "Snake", Wage: 20, Role: role.Griefer, MoveSpeed: 10, ActPoints: 10, ActRange: 3, ReviveTimer: 10.0},
-		"🟧"+Tags[icon.Debuff]+"Slows down 🌗🟧"+Tags[icon.Range]+"nearby 🟥"+Tags[icon.Unit]+"enemies⬜.")
+		"🟧"+Tags[icon.Griefer]+"Slows down 🌗🟧"+Tags[icon.Range]+"nearby 🟥"+Tags[icon.Unit]+"enemies⬜.")
 
 	Characters[char.Pyromancer] = NewCharacter(geometry.NewRoundedRectangle(0, 6, 18, 35, 0, 1),
-		Values{Name: "Pyromancer", Wage: 20, Role: role.Ranger, MoveSpeed: 20, MaxHealth: 8,
+		Values{Name: "Pyromancer", Wage: 20, Role: role.Backliner, MoveSpeed: 20, MaxHealth: 8,
 			ActPoints: 1, ActTimer: 8.0, ActRange: 6, ReviveTimer: 30.0},
 		"Fire "+Tags[icon.Splash]+"splash. Better against "+Tags[icon.Door]+"wooden doors.",
 		CharProjectile{ParabolaMultiplier: 1, Speed: 0.6, Kind: proj.RedPotion})
@@ -152,12 +152,12 @@ func InitCharacters() {
 		"Heal "+Tags[icon.Splash]+"splash.",
 		CharProjectile{ParabolaMultiplier: 1, Speed: 0.6, Kind: proj.GreenPotion})
 	Characters[char.Toxicologist] = NewCharacter(geometry.NewRoundedRectangle(0, 6, 18, 35, 0, 1),
-		Values{Name: "Toxicologist", Wage: 20, Role: role.Ranger, MoveSpeed: 20, MaxHealth: 8,
+		Values{Name: "Toxicologist", Wage: 20, Role: role.Backliner, MoveSpeed: 20, MaxHealth: 8,
 			ActPoints: 2, ActTimer: 5.0, ActRange: 6, ReviveTimer: 30.0},
 		"Poison "+Tags[icon.Splash]+"splash. Better against "+Tags[icon.Door]+"metal gates.",
 		CharProjectile{ParabolaMultiplier: 1, Speed: 0.6, Kind: proj.YellowPotion})
 	Characters[char.Windbender] = NewCharacter(geometry.NewRoundedRectangle(0, 4, 18, 40, 0, 1),
-		Values{Name: "Windbender", Wage: 20, Role: role.Ranger, MoveSpeed: 20, MaxHealth: 8,
+		Values{Name: "Windbender", Wage: 20, Role: role.Backliner, MoveSpeed: 20, MaxHealth: 8,
 			ActPoints: 6, ActTimer: 12.0, ActRange: 3, ReviveTimer: 30.0},
 		"Casts a whirlwind. Useless against "+Tags[icon.Door]+"entrances.",
 		CharProjectile{CastCustomSplashInstead: splash.Whirlwind})
@@ -167,14 +167,14 @@ func InitCharacters() {
 		"Casts a water shield, blocking all damage.",
 		CharProjectile{CastCustomSplashInstead: splash.WaterShield})
 	Characters[char.Stormcaller] = NewCharacter(geometry.NewRoundedRectangle(0, 4, 18, 40, 0, 1),
-		Values{Name: "Stormcaller", Wage: 20, Role: role.Ranger, MoveSpeed: 20, MaxHealth: 8,
+		Values{Name: "Stormcaller", Wage: 20, Role: role.Backliner, MoveSpeed: 20, MaxHealth: 8,
 			ActPoints: 6, ActTimer: 12.0, ActRange: 2, ReviveTimer: 30.0},
 		"Casts a lightning bolt zap.",
 		CharProjectile{CastCustomSplashInstead: splash.LightningZap})
 
 	Characters[char.Bear] = NewCharacter(geometry.NewRoundedRectangle(0, 4, 40, 25, 0, 1),
 		Values{Name: "Bear", Wage: 20, Role: role.Griefer, MoveSpeed: 15, ActRange: 2, ReviveTimer: 30.0},
-		"Makes 🌗🟧"+Tags[icon.Range]+"nearby 🟥"+Tags[icon.Unit]+"enemies⬜ freeze in fear.")
+		"Makes 🌗🟧"+Tags[icon.Range]+"nearby 🟥"+Tags[icon.Unit]+"enemies⬜ freeze in 🌓⬜"+Tags[icon.Fear]+"fear⬜.")
 
 	for i, c := range Characters {
 		if c == nil {

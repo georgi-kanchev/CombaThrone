@@ -40,15 +40,14 @@ type HUD struct {
 	SummonDragX, SummonDragY float32
 }
 
-// ①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳⑴⑵⑶⑷⑸⑹⑺⑻⑼⑽⑾⑿⒀⒁⒂⒃⒄⒅⒆⒇⒈⒉⒊⒋⒌⒍⒎⒏⒐⒑⒒⒓⒔⒕⒖⒗⒘⒙⒚⒛
-// ⓐⓑⓒⓓⓔⓕⓖⓗⓘⓙⓚⓛⓜⓝⓞⓟⓠⓡⓢⓣⓤⓥⓦⓧⓨⓩⒶⒷⒸⒹⒺⒻⒼⒽⒾⒿⓀⓁⓂⓃⓄⓅⓆⓇⓈⓉⓊⓋⓌⓍⓎⓏ⓪⓫⓬⓭⓮⓯⓰⓱⓲⓳⓴
-var Tags = []string{
-	icon.Heart: "①", icon.Coin: "②", icon.Glory: "③", icon.Skull: "④", icon.Book: "⑤", icon.LeftRight: "⑥", icon.Range: "⑦",
-	icon.Timer: "⑧", icon.Loop: "⑨", icon.House: "⑩", icon.Sword: "⑪", icon.Bow: "⑫", icon.Plus: "⑬", icon.Flag: "⑭",
-	icon.Shield: "⑮", icon.Bag: "⑯", icon.Debuff: "⑰", icon.Hand: "⑱", icon.Door: "⑲", icon.Gear: "⑳", icon.Tower: "⑴",
-	icon.Minus: "⑵", icon.Unit: "⑶", icon.Splash: "⑷",
+var Tags = [123]string{
+	"⓪", "①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨", "⑩", "⑪", "⑫", "⑬", "⑭", "⑮", "⑯", "⑰", "⑱", "⑲", "⑳",
+	"⑴", "⑵", "⑶", "⑷", "⑸", "⑹", "⑺", "⑻", "⑼", "⑽", "⑾", "⑿", "⒀", "⒁", "⒂", "⒃", "⒄", "⒅", "⒆", "⒇",
+	"⒈", "⒉", "⒊", "⒋", "⒌", "⒍", "⒎", "⒏", "⒐", "⒑", "⒒", "⒓", "⒔", "⒕", "⒖", "⒗", "⒘", "⒙", "⒚", "⒛",
+	"ⓐ", "ⓑ", "ⓒ", "ⓓ", "ⓔ", "ⓕ", "ⓖ", "ⓗ", "ⓘ", "ⓙ", "ⓚ", "ⓛ", "ⓜ", "ⓝ", "ⓞ", "ⓟ", "ⓠ", "ⓡ", "ⓢ", "ⓣ", "ⓤ",
+	"ⓥ", "ⓦ", "ⓧ", "ⓨ", "ⓩ", "Ⓐ", "Ⓑ", "Ⓒ", "Ⓓ", "Ⓔ", "Ⓕ", "Ⓖ", "Ⓗ", "Ⓘ", "Ⓙ", "Ⓚ", "Ⓛ", "Ⓜ", "Ⓝ", "Ⓞ", "Ⓟ",
+	"Ⓠ", "Ⓡ", "Ⓢ", "Ⓣ", "Ⓤ", "Ⓥ", "Ⓦ", "Ⓧ", "Ⓨ", "Ⓩ", "⓫", "⓬", "⓭", "⓮", "⓯", "⓰", "⓱", "⓲", "⓳", "⓴",
 }
-
 var ThemeUI assets.GUIThemeId
 var UserInterface assets.AtlasId
 var SlotId, ButtonUpId, ButtonDownId assets.ImageId
@@ -64,10 +63,8 @@ func InitUI() {
 func NewHUD() *HUD {
 	UserInterface = assets.LoadAtlas(assets.LoadImage("data/user-interface.png"), "data/user-interface.xml")
 
-	for i, t := range Tags {
-		if t != "" {
-			assets.FontId(0).EmbedImage(text.At(t, 0), UserInterface.Crops("icons-text")[i])
-		}
+	for i := range icon.COUNT {
+		assets.FontId(0).EmbedImage(text.At(Tags[i], 0), UserInterface.Crops("icons-text")[i])
 	}
 
 	ThemeUI = assets.LoadGUITheme("data/user-interface-theme.xml")
@@ -100,7 +97,7 @@ func NewHUD() *HUD {
 
 	var coins = label
 	coins.Details.TextLineHeight, coins.Details.Tint = 10, palette.White
-	coins.Text, coins.Height = Tags[icon.Coin]+"0", coins.Height-8
+	coins.Text, coins.Height = Tags[icon.Coins]+"0", coins.Height-8
 
 	var info = label
 	info.Width, info.Details.TextLineHeight = TileSize*8.5, 8
@@ -189,10 +186,10 @@ func (h *HUD) UpdateBack() {
 func (h *HUD) UpdateFront() {
 	var icons = UserInterface.Crops("icons-hud")
 	h.Coins.X, h.Coins.Y = h.Top.X, h.Top.Y-9
-	h.Coins.Text = CoinsText.Set(Tags[icon.Coin], Player.Coins)
+	h.Coins.Text = CoinsText.Set(Tags[icon.Coins], Player.Coins)
 	h.View.DrawObject(h.Coins)
 	if h.Coins.ContainsPoint(h.View.MousePosition()) {
-		h.DrawTooltip(h.Coins.Shape, TooltipTexts[0].Set("Your\n🟨", Tags[icon.Coin], "Coins⬜"), icons[0])
+		h.DrawTooltip(h.Coins.Shape, TooltipTexts[0].Set("Your\n🟨", Tags[icon.Coins], "Coins⬜"), icons[0])
 	}
 
 	var ally, enemy = h.TeamGlory[team.Ally], h.TeamGlory[team.Enemy]
@@ -332,14 +329,14 @@ func (u *Unit) DrawTooltip(shape geometry.Shape, bench bool) {
 	if !u.IsOffLaner() {
 		if u.Values.MaxHealth > 0 {
 			if !u.IsSummoned() || u.Health == u.Values.MaxHealth {
-				TooltipTexts[1].Append("🌗🟩", Tags[icon.Heart], u.Values.MaxHealth, " health\n")
+				TooltipTexts[1].Append("🌗🟩", Tags[icon.Health], u.Values.MaxHealth, " health\n")
 			} else if u.IsSummoned() {
-				TooltipTexts[1].Append("🌗🟩", Tags[icon.Heart], max(u.Health, 0), "/", u.Values.MaxHealth, " health\n")
+				TooltipTexts[1].Append("🌗🟩", Tags[icon.Health], max(u.Health, 0), "/", u.Values.MaxHealth, " health\n")
 			}
 		}
 	}
 	if u.Values.MoveSpeed > 0 {
-		TooltipTexts[1].Append("🌗🟨", Tags[icon.LeftRight], u.Values.MoveSpeed, " speed\n")
+		TooltipTexts[1].Append("🌗🟨", Tags[icon.Move], u.Values.MoveSpeed, " speed\n")
 	}
 	if u.Values.ActPoints > 0 {
 		if u.Values.Role == role.Collector && u.IsSummoned() {
@@ -355,17 +352,17 @@ func (u *Unit) DrawTooltip(shape geometry.Shape, bench bool) {
 	if u.Values.ActTimer > 0 {
 		var canAct = u.ActTimer < 0 || u.ActTimer > u.Values.ActTimer
 		if !u.IsSummoned() || canAct || number.IsNaN(u.ActTimer) || u.State == state.Decaying {
-			TooltipTexts[1].Append("🌗🟪", Tags[icon.Timer], number.Round(u.Values.ActTimer, 1), "s rest\n")
+			TooltipTexts[1].Append("🌖🟪", Tags[icon.Timer], number.Round(u.Values.ActTimer, 1), "s rest\n")
 		} else if u.IsSummoned() {
-			TooltipTexts[1].Append("🌗🟪", Tags[icon.Timer], max(number.Round(u.ActTimer, 1), 0), "/",
+			TooltipTexts[1].Append("🌖🟪", Tags[icon.Timer], max(number.Round(u.ActTimer, 1), 0), "/",
 				number.Round(u.Values.ActTimer, 1), "s rest\n")
 		}
 	}
 	if u.Values.ReviveTimer > 0 {
 		if !u.IsSummoned() || u.State != state.Decaying {
-			TooltipTexts[1].Append("🌗🟦", Tags[icon.Loop], number.Round(u.Values.ReviveTimer, 1), "s revive\n")
+			TooltipTexts[1].Append("🌗🟦", Tags[icon.Respawn], number.Round(u.Values.ReviveTimer, 1), "s revive\n")
 		} else if u.Values.ReviveTimer > 0 && u.State == state.Decaying && u.HurtTimer > -u.Values.ReviveTimer {
-			TooltipTexts[1].Append("🌗🟦", Tags[icon.Loop], max(number.Round(u.Values.ReviveTimer+u.HurtTimer, 1), 0), "/",
+			TooltipTexts[1].Append("🌗🟦", Tags[icon.Respawn], max(number.Round(u.Values.ReviveTimer+u.HurtTimer, 1), 0), "/",
 				number.Round(char.Values.ReviveTimer, 1), "s revive\n")
 		}
 	}
@@ -377,12 +374,8 @@ func (u *Unit) DrawTooltip(shape geometry.Shape, bench bool) {
 	TooltipLabel.Text = TooltipTexts[2].Set("\n\n\n\n\n\n⬜", char.Info)
 	GameHUD.View.DrawObject(TooltipLabel)
 
-	var nameCol = "🟩"
-	if u.Team == team.Enemy {
-		nameCol = "🟥"
-	}
 	TooltipLabel.Details.TextAlignX = 1
-	TooltipLabel.Text = TooltipTexts[3].Set("\n\n\n", nameCol, u.Values.Name, "\n", Tags[char.RoleIcon], char.RoleName)
+	TooltipLabel.Text = TooltipTexts[3].Set("\n\n\n", u.Values.Name, "\n", Tags[char.RoleIcon], char.RoleName)
 	GameHUD.View.DrawObject(TooltipLabel)
 
 	if PinnedUnit == u {
@@ -450,10 +443,10 @@ func (h *HUD) drawBenchUnits(lastSummonIndex int) {
 			tint = color.RGBA(255, 255, 255, 127)
 		}
 		h.View.DrawImage(x, y, sz, sz, 0, Characters[unit.Character].Icon, tint, noMask)
-		h.View.DrawImage(x+sz/2-iSz/2, y+sz/2-iSz/2, iSz, iSz, 0, roleIcon, tint, noMask)
+		h.View.DrawImage(x-sz/2+iSz/2, y-sz/2+iSz/2, iSz, iSz, 0, roleIcon, tint, noMask)
 		if unit.State == state.Decaying {
 			var timerWidth = number.Map(unit.HurtTimer, 0, -unit.Values.ReviveTimer, sz-2, 0)
-			var icon, col = icon.Loop, color.RGB(102, 102, 255)
+			var icon, col = icon.Respawn, color.RGB(102, 102, 255)
 
 			h.View.DrawShape(x, y, sz, sz, 0, 0, color.RGBA(0, 0, 0, 150), noMask)
 			h.View.DrawImage(x-sz/2+iSz/2, y+sz/2-iSz/2, iSz, iSz, 0, icons[icon], col, noMask)
@@ -465,7 +458,7 @@ func (h *HUD) drawBenchUnits(lastSummonIndex int) {
 				hp, maxHp = 1, 1
 			}
 			var hpWidth = number.Map(hp, 0, maxHp, 0, sz-2)
-			var curIcon, col = icon.Heart, palette.Green
+			var curIcon, col = icon.Health, palette.Green
 			if hp == 0 {
 				curIcon, col = icon.Skull, palette.Red
 			}

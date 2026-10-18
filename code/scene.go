@@ -229,8 +229,8 @@ func DeltaTimeScaled() float32 {
 var highlightCursorColors = map[int]uint{
 	cursor.Arrow: palette.LightGray, cursor.Hand: palette.White, cursor.NotAllowed: palette.Red,
 }
-var story, arena = Tags[icon.Book] + "Story Mode", Tags[icon.Tower] + "Arena Mode"
-var settings, credits, exit = Tags[icon.Gear] + "Settings", Tags[icon.Hand] + "Credits", Tags[icon.Door] + "Exit"
+var story, arena = Tags[icon.Book] + "Story Mode", Tags[icon.Sword] + "Arena Mode"
+var settings, credits, exit = Tags[icon.Gear] + "Settings", Tags[icon.Glory] + "Credits", Tags[icon.Door] + "Exit"
 
 func mirrorGarrisonLanes() {
 	for i := lane.Garrison1; i < lane.GarrisonPlus3+1; i++ {

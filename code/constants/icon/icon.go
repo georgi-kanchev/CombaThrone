@@ -3,31 +3,41 @@ package icon
 type Enum uint8
 
 const (
-	Heart Enum = iota
-	Coin
-	Glory
-	Timer
-	Shield
-	Bow
-	Sword
-	Flag
+	Glory Enum = iota
+	Coins
+	Health
+	Move
+	Fighter
+	Backliner
+	Defender
+	Griefer
+	Supplier
+	Collector
 	Range
+	Timer
+	Respawn
+	Plus
+	Minus
 	Skull
+	Fear
+	Stun
+	Sleep
+	Freeze
+	Buff
+	Debuff
+	Heal
 	Locked
 	Unlocked
-	Book
-	Plus
-	Bag
-	Hand
-	Debuff
-	LeftRight
-	House
-	Loop
-	Door
-	Gear
-	Tower
-	Minus
-	Unit
 	Splash
+	Unit
+	Book
+	Sword
+	Gear
+	Door
+	Music
+	CirclePlus
+	CircleMinus
+	Chest
+	Upgrade
 	COUNT
 )

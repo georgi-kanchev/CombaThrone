@@ -4,7 +4,7 @@ type Enum uint8
 
 const (
 	Fighter Enum = iota
-	Ranger
+	Backliner
 	Defender
 	Griefer
 	Supplier
