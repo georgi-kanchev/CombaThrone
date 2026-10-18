@@ -2,7 +2,6 @@ package game
 
 import (
 	"game/code/constants/base"
-	char "game/code/constants/character"
 	"game/code/constants/effect"
 	"game/code/constants/entrance"
 	"game/code/constants/icon"
@@ -284,7 +283,7 @@ func (u *Unit) DrawTooltip(shape geometry.Shape, bench bool) {
 	var col, noMask = palette.White, geometry.Area{}
 	const width, height, effWidth = 130.0, 94.0, 105.0
 	var extraWidth float32
-	var x, y = shape.X, shape.Y - shape.Height/2 - height/2 - 22
+	var x, y = shape.X, shape.Y - shape.Height/2 - height/2 - 14
 	if bench {
 		x, y = 0, GameHUD.UnitsPanel.Y+GameHUD.UnitsPanel.Height/2+height/2
 	}
@@ -309,10 +308,8 @@ func (u *Unit) DrawTooltip(shape geometry.Shape, bench bool) {
 		TooltipLabel.Details.TextLineHeight = 8
 		TooltipTexts[0].Set()
 
-		var keys = collection.MapKeys(u.Effects)
-		collection.SortByField(keys, func(k effect.Enum) uint8 { return uint8(k) })
-		for _, k := range keys {
-			TooltipLabel.Text = TooltipTexts[0].Append(u.Effects[k].EffectInfo, "\n")
+		for _, k := range u.EffectsKeysSorted {
+			TooltipLabel.Text = TooltipTexts[0].Append(u.Effects[effect.Enum(k)].EffectInfo, "\n")
 		}
 		GameHUD.View.DrawObject(TooltipLabel)
 	}
@@ -336,7 +333,7 @@ func (u *Unit) DrawTooltip(shape geometry.Shape, bench bool) {
 		}
 	}
 	if u.Values.MoveSpeed > 0 {
-		TooltipTexts[1].Append("🌗🟨", Tags[icon.Move], u.Values.MoveSpeed, " speed\n")
+		TooltipTexts[1].Append("🌗🟨", Tags[icon.Speed], u.Values.MoveSpeed, " speed\n")
 	}
 	if u.Values.ActPoints > 0 {
 		if u.Values.Role == role.Collector && u.IsSummoned() {
@@ -352,9 +349,9 @@ func (u *Unit) DrawTooltip(shape geometry.Shape, bench bool) {
 	if u.Values.ActTimer > 0 {
 		var canAct = u.ActTimer < 0 || u.ActTimer > u.Values.ActTimer
 		if !u.IsSummoned() || canAct || number.IsNaN(u.ActTimer) || u.State == state.Decaying {
-			TooltipTexts[1].Append("🌖🟪", Tags[icon.Timer], number.Round(u.Values.ActTimer, 1), "s rest\n")
+			TooltipTexts[1].Append("🌖🟪", Tags[icon.Hourglass], number.Round(u.Values.ActTimer, 1), "s rest\n")
 		} else if u.IsSummoned() {
-			TooltipTexts[1].Append("🌖🟪", Tags[icon.Timer], max(number.Round(u.ActTimer, 1), 0), "/",
+			TooltipTexts[1].Append("🌖🟪", Tags[icon.Hourglass], max(number.Round(u.ActTimer, 1), 0), "/",
 				number.Round(u.Values.ActTimer, 1), "s rest\n")
 		}
 	}
@@ -474,7 +471,6 @@ func (h *HUD) drawBenchUnits(lastSummonIndex int) {
 		if benchUnitShape.ContainsPoint(h.View.MousePosition()) {
 			hoveredUnit = unit
 			hoveredShape = benchUnitShape
-
 		}
 		if h.SummonIndex == index {
 			h.Highlight(h.View, benchUnitShape, palette.White)
@@ -482,7 +478,8 @@ func (h *HUD) drawBenchUnits(lastSummonIndex int) {
 
 		if h.SummonIndex < 0 {
 			if unit.IsSummoned() && hovered {
-				h.Highlight(View, unit.Shape, palette.White)
+				var hb = unit.Hitbox(TileSize / 3)
+				h.Highlight(View, geometry.NewRectangle(hb.X, hb.Y, hb.Width, hb.Height, 0), palette.White)
 			} else if unit.IsSummoned() && unit.Hitbox(TileSize/3).ContainsPoint(View.MousePosition()) {
 				h.Highlight(h.View, benchUnitShape, palette.White)
 			}
@@ -548,7 +545,7 @@ func (h *HUD) trySummon(lastSummonIndex int) {
 			takenGarrisons = append(takenGarrisons, pu.Lane)
 		}
 	}
-	if unit.Values.ActRange > 1 && Bases[team.Ally].Kind >= base.Fort && unit.Character != char.Stormcaller {
+	if unit.Values.ActRange > 2 && Bases[team.Ally].Kind >= base.Fort {
 		var garrisonsFull = len(takenGarrisons) == 6
 		var garrisonX, garrisonY = PointAtCell(0.5, 4)
 		var shape = geometry.NewRectangle(garrisonX, garrisonY, size, size, 0)

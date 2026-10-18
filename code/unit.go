@@ -22,6 +22,7 @@ import (
 	"pure-game-kit/packages/utility/number"
 	"pure-game-kit/packages/utility/point"
 	"pure-game-kit/packages/utility/random"
+	"pure-game-kit/packages/utility/text"
 )
 
 type Unit struct {
@@ -36,14 +37,17 @@ type Unit struct {
 	Particles *particles.System
 	State     state.Enum
 
-	Effects map[effect.Enum]Values
+	Effects           map[effect.Enum]Values
+	EffectsKeysSorted []uint8
+	EffectsLabel      *graphics.Object
+	EffectsDynamic    text.Dynamic
 
 	VelocityX, VelocityY, Z float32
 
 	IsGrounded, IsAtWall bool
 	IsReturning          bool // for OffLaners only
 
-	UnitFront, UnitBehind, ClosestEnemyInRange *Unit
+	UnitFront, UnitBehind, ClosestEnemyInRange, LastHurtBy *Unit
 
 	Carrying []*Pickup
 
@@ -61,10 +65,17 @@ var PinnedUnit *Unit
 func NewUnit(character char.Enum, fromTeam team.Enum, lane lane.Enum) *Unit {
 	var char = Characters[character]
 	var anim = motion.NewAnimation(0, false, char.Animations.Idle...)
+	var disablesLabel = graphics.NewTextbox(0, 0, 64, 12, 0)
 	var unit = Unit{Object: graphics.NewSprite(-2000, -2000, 1, 0), Character: character, Team: fromTeam, Lane: lane,
 		Anim: &anim, ActTimer: number.NaN(), HurtTimer: number.NaN(), LastState: state.WaitingToBeSummoned,
-		Effects: make(map[effect.Enum]Values, 4), Particles: particles.NewSystem(),
+		Effects: make(map[effect.Enum]Values, 8), Particles: particles.NewSystem(),
+		EffectsLabel: &disablesLabel,
 	}
+
+	unit.EffectsLabel.Details.FillColor, unit.EffectsLabel.Details.TextLineHeight = 0, 10
+	unit.EffectsLabel.Details.TextAlignX, unit.EffectsLabel.Details.TextAlignY = 0.5, 0.5
+	unit.EffectsLabel.Details.TextShadowColor, unit.EffectsLabel.Details.TextShadowWeight = 0, 0
+	unit.EffectsLabel.Details.OutlineSize, unit.EffectsLabel.Details.OutlineColor = 0.4, palette.Black
 
 	if len(anim.Frames) == 0 {
 		anim.Frames = char.Animations.Move
@@ -205,7 +216,7 @@ func (u *Unit) Update() {
 
 	u.ActTimer -= DeltaTimeScaled()
 	u.HurtTimer -= DeltaTimeScaled()
-	u.Values.SleepTimer = max(u.Values.SleepTimer-DeltaTimeScaled(), 0)
+	u.Values.DisablesTimer = max(u.Values.DisablesTimer-DeltaTimeScaled(), 0)
 
 	if !u.IsSummoned() && (number.IsNaN(u.HurtTimer) || u.HurtTimer < -u.Values.ReviveTimer) {
 		u.State = state.WaitingToBeSummoned
@@ -269,7 +280,7 @@ func (u *Unit) ProjectHealth(value int) (remainingHealth int) {
 	}
 	return u.Health + value
 }
-func (u *Unit) AffectHealth(value int, particles bool) {
+func (u *Unit) AffectHealth(value int, particles bool, hurtBy *Unit) {
 	if u.IsOffLaner() {
 		return
 	}
@@ -279,6 +290,7 @@ func (u *Unit) AffectHealth(value int, particles bool) {
 		u.Health = newHealth
 
 		if value < 0 {
+			u.LastHurtBy = hurtBy
 			u.HurtTimer = 0.5
 
 			if particles {
@@ -293,6 +305,8 @@ func (u *Unit) AddEffect(effect effect.Enum) {
 	var _, has = u.Effects[effect]
 	if !has {
 		u.Effects[effect] = Effects[effect]
+		u.EffectsKeysSorted = append(u.EffectsKeysSorted, uint8(effect))
+		collection.SortNumbers(u.EffectsKeysSorted...)
 		u.TickEffect(effect)
 	}
 }
@@ -308,7 +322,7 @@ func (u *Unit) TickEffect(effect effect.Enum) {
 	u.Values.ActPoints += values.ActPoints
 	u.Values.ActRange += values.ActRange
 	u.Values.ActTimer += values.ActTimer
-	u.Values.SleepTimer += values.SleepTimer
+	u.Values.DisablesTimer += values.DisablesTimer
 }
 func (u *Unit) RemoveEffect(effect effect.Enum) {
 	var _, has = u.Effects[effect]
@@ -325,6 +339,7 @@ func (u *Unit) RemoveEffect(effect effect.Enum) {
 	u.Values.ActTimer -= values.ActTimer
 
 	delete(u.Effects, effect)
+	u.EffectsKeysSorted = collection.Remove(u.EffectsKeysSorted, uint8(effect))
 }
 
 // private ========================================================
@@ -446,7 +461,7 @@ func (u *Unit) applyState() {
 		}
 	}
 
-	if u.Values.SleepTimer > 0 && (u.State == state.Moving || u.State == state.ActStart) {
+	if u.Values.DisablesTimer > 0 && (u.State == state.Moving || u.State == state.ActStart) {
 		u.State = state.Idling
 	}
 
@@ -478,7 +493,7 @@ func (u *Unit) actUponState() {
 		u.Anim.Frames = Characters[u.Character].Animations.Idle
 		u.Anim.IsLooping, u.Anim.FPS = true, 3
 
-		if number.IsNaN(u.Values.SleepTimer) || u.Values.SleepTimer <= 0 {
+		if number.IsNaN(u.Values.DisablesTimer) || u.Values.DisablesTimer <= 0 {
 			u.VelocityX = 0
 		}
 	case state.Moving:
@@ -547,7 +562,7 @@ func (u *Unit) actUponState() {
 		var canBeActedUpon, e = u.EnemyEntrance()
 		if u.Values.ActRange == 1 {
 			if u.UnitFront != nil {
-				u.UnitFront.AffectHealth(-dmg, true)
+				u.UnitFront.AffectHealth(-dmg, true, u)
 				PlaySound(Characters[u.Character].Sounds.HitFlesh)
 			} else if canBeActedUpon && e != nil {
 				e.TakeDamage(dmg)
@@ -596,6 +611,12 @@ func (u *Unit) actUponState() {
 		u.Anim.IsLooping, u.Anim.FPS, u.Anim.Time = false, 8, 0
 		u.HealthBar.FadeOut(1.5)
 		u.VelocityX = 0
+
+		clear(u.Effects)
+		u.AddEffect(effect.Dead)
+		var eff = u.Effects[effect.Dead]
+		eff.EffectInfo += " (" + Characters[u.LastHurtBy.Character].Values.Name + ")"
+		u.Effects[effect.Dead] = eff
 	case state.Dying, state.DyingEnd: // empty
 	case state.Decaying:
 		if u.HurtTimer < -u.Values.ReviveTimer || u.IsGarrisoner() {
@@ -662,7 +683,7 @@ func (u *Unit) applyCollisions() {
 				}
 
 				if u.VelocityY > 100 {
-					u.AffectHealth(int(-(u.VelocityY-100)/20), false) // fall damage
+					u.AffectHealth(int(-(u.VelocityY-100)/20), false, u) // fall damage
 				}
 
 				u.VelocityY = 0
@@ -750,6 +771,24 @@ func (u *Unit) draw() {
 	View.DrawObject(&u.Object)
 	u.Width = crop.Width
 }
+func (u *Unit) drawDisables() {
+	if u.HealthBar != nil {
+		u.EffectsLabel.X, u.EffectsLabel.Y = u.HealthBar.Background.X, u.HealthBar.Background.Y-8
+		u.EffectsLabel.Mask = u.Mask
+
+		if !u.IsAlive() {
+			u.EffectsLabel.Y = u.Hitbox().Y
+		}
+
+		u.EffectsDynamic.Set()
+		for _, k := range u.EffectsKeysSorted {
+			u.EffectsDynamic.Append(u.Effects[effect.Enum(k)].EffectIconText)
+		}
+
+		u.EffectsLabel.Text = u.EffectsDynamic.Get()
+		View.DrawObject(u.EffectsLabel)
+	}
+}
 
 func (u *Unit) shootAt(target *Unit) {
 	var t = target
@@ -767,3 +806,5 @@ func (u *Unit) shootAt(target *Unit) {
 	Projectiles = append(Projectiles, proj)
 	PlaySound(Characters[u.Character].Sounds.ActTrigger)
 }
+
+func sortEffect(e effect.Enum) uint8 { return uint8(e) }

@@ -166,7 +166,7 @@ func (p *Projectile) Update() {
 
 		if !p.Triggered && p.Shape.Overlaps(hb) && number.IsWithin(p.Z, u.Z, 0.2) {
 			p.trigger(0, false)
-			u.AffectHealth(-p.Value, true)
+			u.AffectHealth(-p.Value, true, p.Owner)
 			p.Hidden = true
 			PlaySound(Characters[p.Owner.Character].Sounds.HitFlesh)
 			return

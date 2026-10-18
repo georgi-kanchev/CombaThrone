@@ -4,6 +4,7 @@ type Enum uint8
 
 const (
 	NONE Enum = iota
+	Dead
 	MoreRangeOnGarrison
 	Bowyer
 	Miner
@@ -14,7 +15,8 @@ const (
 	Gunner1
 	Gunner2
 	Vulture
-	Raven
+	RavenFighter
+	RavenBackliner
 	Snake
 	Aquaweaver
 	Bear

@@ -53,7 +53,7 @@ var Behaviors = map[char.Enum]func(self *Unit){
 		}
 		if self.State == state.ActTrigger && targetUnit != nil {
 			if targetUnit.IsAlive() && targetUnit.Health != targetUnit.Values.MaxHealth {
-				targetUnit.AffectHealth(self.Values.ActPoints, true)
+				targetUnit.AffectHealth(self.Values.ActPoints, true, nil)
 			}
 		}
 	},
@@ -68,7 +68,7 @@ var Behaviors = map[char.Enum]func(self *Unit){
 			self.State = state.ActStart
 		} else if self.State == state.ActTrigger && self.UnitFront != nil {
 			self.UnitFront.VelocityY = -10
-			self.UnitFront.Values.SleepTimer = 1.5
+			self.UnitFront.Values.DisablesTimer = 1.5
 			if self.Team == team.Ally {
 				self.UnitFront.VelocityX = 50
 			} else {
@@ -83,7 +83,9 @@ var Behaviors = map[char.Enum]func(self *Unit){
 			self.RemoveEffect(effect.Kid)
 		}
 	},
-	char.Horse: func(self *Unit) { self.applyEffectInRange(effect.Horse, self.Team, self.Lane, self.Lane-1) },
+	char.Horse: func(self *Unit) {
+		self.applyEffectInRange(effect.Horse, self.Team, []lane.Enum{self.Lane, self.Lane - 1}, nil)
+	},
 	char.Fisherman: func(self *Unit) {
 		if self.State == state.Summoned {
 			self.ActTimer = self.Values.ActTimer
@@ -142,7 +144,7 @@ var Behaviors = map[char.Enum]func(self *Unit){
 				if self.Team != u.Team && number.IsWithin(self.X, u.X, TileSize*2) {
 					var dirX, dirY = direction.BetweenPoints(self.X, self.Y+self.Height/2, u.X, u.Y)
 					u.VelocityX, u.VelocityY = dirX*100, dirY*100
-					u.Values.SleepTimer = 1.5
+					u.Values.DisablesTimer = 1.5
 				}
 			}
 		}
@@ -154,8 +156,8 @@ var Behaviors = map[char.Enum]func(self *Unit){
 			return // i have not attacked or enemy will live from my attack, so bail
 		}
 
-		var eff, hasEffect = self.Effects[effect.Stabber] // accumulated effect from all kills
-		if !hasEffect {
+		var eff = self.Effects[effect.Stabber] // accumulated effect from all kills
+		if eff == (Values{}) {
 			self.AddEffect(effect.Stabber)
 			eff = self.Effects[effect.Stabber]
 		} else { // dmg accumulates on the unit effect itself for tooltip display but its dmg value should remain unchanged
@@ -187,8 +189,13 @@ var Behaviors = map[char.Enum]func(self *Unit){
 			}
 		}
 	},
-	char.Raven: func(self *Unit) { self.applyEffectInRange(effect.Raven, 1-self.Team, self.Lane-1) },
-	char.Snake: func(self *Unit) { self.applyEffectInRange(effect.Snake, 1-self.Team, self.Lane, self.Lane-1) },
+	char.Raven: func(self *Unit) {
+		self.applyEffectInRange(effect.RavenFighter, 1-self.Team, []lane.Enum{self.Lane - 1}, []role.Enum{role.Fighter})
+		self.applyEffectInRange(effect.RavenBackliner, 1-self.Team, []lane.Enum{self.Lane - 1}, []role.Enum{role.Backliner})
+	},
+	char.Snake: func(self *Unit) {
+		self.applyEffectInRange(effect.Snake, 1-self.Team, []lane.Enum{self.Lane, self.Lane - 1}, nil)
+	},
 	char.Healer: func(self *Unit) {
 		var canAct = number.IsNaN(self.ActTimer) || self.ActTimer < 0
 		var target *Unit
@@ -210,7 +217,9 @@ var Behaviors = map[char.Enum]func(self *Unit){
 			}
 		}
 	},
-	char.Bear: func(self *Unit) { self.applyEffectInRange(effect.Bear, 1-self.Team, self.Lane-1) },
+	char.Bear: func(self *Unit) {
+		self.applyEffectInRange(effect.Bear, 1-self.Team, []lane.Enum{self.Lane, self.Lane - 1}, nil)
+	},
 }
 
 func behaviorGoblin(self *Unit) {
@@ -226,17 +235,16 @@ func behaviorGoblin(self *Unit) {
 		self.RemoveEffect(effect.Goblin)
 	}
 }
-func (u *Unit) applyEffectInRange(effect effect.Enum, forTeam team.Enum, forLanes ...lane.Enum) {
-	for _, unit := range Units {
-		var correctLane = false
-		for _, l := range forLanes {
-			if unit.Lane == l {
-				correctLane = true
-				break
-			}
-		}
+func (u *Unit) applyEffectInRange(effect effect.Enum, forTeam team.Enum, forLanes []lane.Enum, forRole []role.Enum) {
+	if len(forRole) == 0 {
+		forRole = []role.Enum{role.Fighter, role.Backliner, role.Defender, role.Griefer, role.Supplier, role.Collector}
+	}
 
-		if u != unit && unit.Team == forTeam && correctLane && unit.IsAlive() {
+	for _, unit := range Units {
+		var correctLane = collection.Contains(forLanes, unit.Lane)
+		var correctRole = collection.Contains(forRole, unit.Values.Role)
+
+		if u != unit && unit.Team == forTeam && unit.IsAlive() && correctLane && correctRole {
 			if u.IsUnitInRange(unit) {
 				unit.AddEffect(effect)
 			} else {

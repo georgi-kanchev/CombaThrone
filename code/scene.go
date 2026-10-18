@@ -79,7 +79,7 @@ func InitScene() {
 	Bases[team.Enemy] = NewBase(team.Enemy, base.Fortress, garrison.Three,
 		[3]entrance.Enum{entrance.Door, entrance.ShortGate, entrance.TallGate})
 
-	// Units = append(Units, NewUnit(char.Stabber, team.Enemy, lane.GarrisonPlus3))
+	Units = append(Units, NewUnit(char.Bowyer, team.Enemy, lane.Middle))
 	// Units = append(Units, NewUnit(CharMiner, TeamEnemy, LaneMiddle))
 
 	Pickups = append(Pickups, NewPickup(-240, pickup.Relic, lane.LowerOff))
@@ -94,8 +94,8 @@ func InitScene() {
 	Player = NewPlayer()
 
 	Player.Units[0] = NewUnit(char.Bear, team.Ally, 0)
-	Player.Units[1] = NewUnit(char.Aquaweaver, team.Ally, 0)
-	Player.Units[2] = NewUnit(char.Toxicologist, team.Ally, 0)
+	Player.Units[1] = NewUnit(char.Raven, team.Ally, 0)
+	Player.Units[2] = NewUnit(char.Miner, team.Ally, 0)
 	Player.Units[3] = NewUnit(char.Stormcaller, team.Ally, 0)
 	Player.Units[4] = NewUnit(char.Stabber, team.Ally, 0)
 	Player.Units[5] = NewUnit(char.Windbender, team.Ally, 0)
@@ -142,7 +142,7 @@ func UpdateScene() {
 	mouse.SetCursor(cursor.Default)
 
 	if keyboard.IsKeyJustPressed(key.A) {
-		Units = append(Units, NewUnit(char.Miner, team.Enemy, lane.Middle))
+		Units = append(Units, NewUnit(char.Stabber, team.Enemy, lane.Middle))
 	}
 
 	CurrentZone.UpdateBack()
@@ -195,6 +195,7 @@ func UpdateScene() {
 			var hb = u.Hitbox()
 			hb.Height += 8
 			u.HealthBar.Update(hb, u.Health, u.Values.MaxHealth, u.Mask)
+			u.drawDisables()
 		}
 	}
 

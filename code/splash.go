@@ -142,7 +142,7 @@ func splashTickPoisonCloud(self *Splash) {
 func splashTickHeal(self *Splash) {
 	for _, u := range Units {
 		if u.Team == self.Team && self.overlapsUnit(u) && u.IsAlive() {
-			u.AffectHealth(-self.Values.Damage, false)
+			u.AffectHealth(-self.Values.Damage, false, self.Owner)
 		}
 	}
 }
@@ -176,7 +176,7 @@ func splashUpdateWhirlwind(self *Splash) {
 	for _, u := range Units {
 		if u.Team != self.Team && self.overlapsUnit(u) && u.IsGrounded && u.IsAlive() {
 			u.VelocityY = -200
-			u.AffectHealth(-self.Values.Damage, false)
+			u.AffectHealth(-self.Values.Damage, false, self.Owner)
 		}
 	}
 }
@@ -205,7 +205,7 @@ func splashTickLightingZap(self *Splash) {
 func (s *Splash) tryDamageEnemy() {
 	for _, u := range Units {
 		if u.Team != s.Team && s.overlapsUnit(u) && u.IsAlive() {
-			u.AffectHealth(-s.Values.Damage, false)
+			u.AffectHealth(-s.Values.Damage, false, s.Owner)
 		}
 	}
 }

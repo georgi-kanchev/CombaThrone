@@ -6,7 +6,7 @@ const (
 	Glory Enum = iota
 	Coins
 	Health
-	Move
+	Speed
 	Fighter
 	Backliner
 	Defender
@@ -14,7 +14,7 @@ const (
 	Supplier
 	Collector
 	Range
-	Timer
+	Hourglass
 	Respawn
 	Plus
 	Minus
@@ -39,5 +39,10 @@ const (
 	CircleMinus
 	Chest
 	Upgrade
+	_
+	Star
+	Flag
+	Timer
+	Disable
 	COUNT
 )
