@@ -238,6 +238,31 @@ var Behaviors = map[char.Enum]func(self *Unit){
 			}
 		}
 	},
+	char.Wolf: func(self *Unit) {
+		if self.IsReturning {
+			return
+		}
+
+		if self.Following == nil {
+			for _, u := range Units {
+				if u != self && u.Team == self.Team && u.IsAlive() && u.Lane == self.Lane-1 && self.Hitbox().Overlaps(u.Hitbox()) {
+					self.Following = u
+				}
+			}
+			return
+		}
+
+		if self.Hitbox().Overlaps(self.Following.Hitbox()) {
+			self.Values.DisablesTimer = 0.1
+			self.Values.MoveSpeed = self.Following.Values.MoveSpeed
+			self.Following.AddEffect(effect.Wolf)              // effect is just for tooltip, no stats
+			self.Following.ActTimer -= DeltaTimeScaled() * 0.5 // applied here instead
+		}
+		if !self.Following.IsSummoned() {
+			self.IsReturning = true
+			self.Following = nil
+		}
+	},
 }
 
 func behaviorGoblin(self *Unit) {

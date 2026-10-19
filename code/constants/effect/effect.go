@@ -21,5 +21,6 @@ const (
 	Aquaweaver
 	Bear
 	Boar
+	Wolf
 	COUNT
 )

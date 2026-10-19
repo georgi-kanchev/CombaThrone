@@ -27,8 +27,8 @@ var Effects = [effect.COUNT]Values{
 		EffectInfo: "🟩" + Tags[icon.Plus] + "🟧4 " + Tags[icon.Backliner] + "damage ⬜(Self)"},
 	effect.Gunner2: Values{ActTimer: 3, EffectTimer: number.Infinity(), EffectIconText: "🌗🟥" + Tags[icon.Hourglass],
 		EffectInfo: "🟥" + Tags[icon.Plus] + "🌗🟪3s " + Tags[icon.Hourglass] + "rest ⬜(Self)"},
-	effect.Vulture: Values{EffectTimer: number.Infinity(), EffectIconText: "🟩" + Tags[icon.Hourglass],
-		EffectInfo: "🟩" + Tags[icon.Plus] + "🌗🟦" + Tags[icon.Respawn] + "fast revive ⬜(Vulture)"},
+	effect.Vulture: Values{EffectTimer: number.Infinity(), EffectIconText: "🟩" + Tags[icon.Revive],
+		EffectInfo: "🌗🟦" + Tags[icon.Revive] + "faster revive ⬜(Vulture)"},
 	effect.RavenFighter: Values{ActPoints: -10, EffectTimer: number.Infinity(), EffectIconText: "🟥" + Tags[icon.Fighter],
 		EffectInfo: "🟥" + Tags[icon.Minus] + "🟧10 " + Tags[icon.Fighter] + "damage ⬜(Raven)"},
 	effect.RavenBackliner: Values{ActPoints: -10, EffectTimer: number.Infinity(), EffectIconText: "🟥" + Tags[icon.Backliner],
@@ -41,4 +41,6 @@ var Effects = [effect.COUNT]Values{
 		EffectInfo: "🌓⬜" + Tags[icon.Fear] + "in fear ⬜(Bear)"},
 	effect.Boar: Values{DisablesTimer: 4.0, EffectTimer: 3.95, EffectIconText: "🟥" + Tags[icon.Stun],
 		EffectInfo: "🌓⬜" + Tags[icon.Stun] + "stunned ⬜(Boar)"},
+	effect.Wolf: Values{EffectTimer: number.Infinity(), EffectIconText: "🟩" + Tags[icon.Hourglass],
+		EffectInfo: "🌗🟪" + Tags[icon.Hourglass] + "faster rest ⬜(Wolf)"},
 }

@@ -111,7 +111,7 @@ func InitCharacters() {
 	Characters[char.Troll] = NewCharacter(geometry.NewRoundedRectangle(0, 6, 32, 52, 0, 1),
 		Values{Name: "Troll", Wage: 20, Role: role.Defender, MaxHealth: 60, MoveSpeed: 10,
 			ActPoints: 2, ActTimer: 8.0, ActRange: 1, ReviveTimer: number.NaN()},
-		"Cannot 🌗🟦"+Tags[icon.Respawn]+"revive.⬜ Pushes 🌗🟧"+Tags[icon.Range]+"nearby 🟥"+Tags[icon.Unit]+"enemies⬜ away.")
+		"Cannot 🌗🟦"+Tags[icon.Revive]+"revive.⬜ Pushes 🌗🟧"+Tags[icon.Range]+"nearby 🟥"+Tags[icon.Unit]+"enemies⬜ away.")
 	Characters[char.Spearlin] = NewCharacter(geometry.NewRoundedRectangle(-2, 0, 18, 30, 0, 1),
 		Values{Name: "Spearlin", Wage: 20, Role: role.Fighter,
 			MaxHealth: 12, MoveSpeed: 25, ActPoints: 2, ActTimer: 1.5, ActRange: 1, ReviveTimer: 20.0},
@@ -134,7 +134,7 @@ func InitCharacters() {
 	Characters[char.Vulture] = NewCharacter(geometry.NewRoundedRectangle(0, 0, 32, 32, 0, 1),
 		Values{Name: "Vulture", Wage: 20, Role: role.Supplier, MoveSpeed: 40, ActRange: 3, ReviveTimer: 20.0},
 		"🌓⬜"+Tags[icon.Skull]+"Dead 🟩"+Tags[icon.Unit]+"allies 🌗🟧"+Tags[icon.Range]+
-			"nearby 🌗🟦"+Tags[icon.Respawn]+"revive⬜ twice as fast.")
+			"nearby 🌗🟦"+Tags[icon.Revive]+"revive⬜ twice as fast.")
 	Characters[char.Raven] = NewCharacter(geometry.NewRoundedRectangle(0, 4, 30, 24, 0, 1),
 		Values{Name: "Raven", Wage: 20, Role: role.Griefer, MoveSpeed: 40, ActPoints: 10, ActRange: 3, ReviveTimer: 20.0},
 		"Inflicts 🟧"+Tags[icon.Griefer]+"weakness⬜ to 🌗🟧"+Tags[icon.Range]+"nearby 🟥"+Tags[icon.Unit]+"enemies⬜.")
@@ -177,8 +177,8 @@ func InitCharacters() {
 		Values{Name: "Bear", Wage: 20, Role: role.Griefer, MoveSpeed: 15, ActRange: 2, ReviveTimer: 30.0},
 		"Inflicts 🌓⬜"+Tags[icon.Fear]+"fear⬜ to 🌗🟧"+Tags[icon.Range]+"nearby 🟥"+Tags[icon.Unit]+"enemies⬜.")
 	Characters[char.Wolf] = NewCharacter(geometry.NewRoundedRectangle(0, 4, 40, 25, 0, 1),
-		Values{Name: "Wolf", Wage: 20, Role: role.Supplier, MoveSpeed: 35, ActRange: 2, ReviveTimer: 30.0},
-		"Inflicts 🌓⬜"+Tags[icon.Fear]+"fear⬜ to 🌗🟧"+Tags[icon.Range]+"nearby 🟥"+Tags[icon.Unit]+"enemies⬜.")
+		Values{Name: "Wolf", Wage: 20, Role: role.Supplier, MoveSpeed: 35, ReviveTimer: 30.0},
+		"Follows an 🟩"+Tags[icon.Unit]+"ally⬜. Makes them 🌗🟪"+Tags[icon.Hourglass]+"rest⬜ 50% faster.")
 	Characters[char.Boar] = NewCharacter(geometry.NewRoundedRectangle(0, 4, 40, 25, 0, 1),
 		Values{Name: "Boar", Wage: 20, Role: role.Griefer, MoveSpeed: 60, ReviveTimer: 30.0},
 		"Charges, then 🟧"+Tags[icon.Griefer]+"pushes⬜ and 🌓⬜"+Tags[icon.Stun]+"stuns⬜ for 4s.")

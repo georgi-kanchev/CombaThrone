@@ -357,9 +357,9 @@ func (u *Unit) DrawTooltip(shape geometry.Shape, bench bool) {
 	}
 	if u.Values.ReviveTimer > 0 {
 		if !u.IsSummoned() || u.State != state.Decaying {
-			TooltipTexts[1].Append("🌗🟦", Tags[icon.Respawn], number.Round(u.Values.ReviveTimer, 1), "s revive\n")
+			TooltipTexts[1].Append("🌗🟦", Tags[icon.Revive], number.Round(u.Values.ReviveTimer, 1), "s revive\n")
 		} else if u.Values.ReviveTimer > 0 && u.State == state.Decaying && u.HurtTimer > -u.Values.ReviveTimer {
-			TooltipTexts[1].Append("🌗🟦", Tags[icon.Respawn], max(number.Round(u.Values.ReviveTimer+u.HurtTimer, 1), 0), "/",
+			TooltipTexts[1].Append("🌗🟦", Tags[icon.Revive], max(number.Round(u.Values.ReviveTimer+u.HurtTimer, 1), 0), "/",
 				number.Round(char.Values.ReviveTimer, 1), "s revive\n")
 		}
 	}
@@ -443,7 +443,7 @@ func (h *HUD) drawBenchUnits(lastSummonIndex int) {
 		h.View.DrawImage(x-sz/2+iSz/2, y-sz/2+iSz/2, iSz, iSz, 0, roleIcon, tint, noMask)
 		if unit.State == state.Decaying {
 			var timerWidth = number.Map(unit.HurtTimer, 0, -unit.Values.ReviveTimer, sz-2, 0)
-			var icon, col = icon.Respawn, color.RGB(102, 102, 255)
+			var icon, col = icon.Revive, color.RGB(102, 102, 255)
 
 			h.View.DrawShape(x, y, sz, sz, 0, 0, color.RGBA(0, 0, 0, 150), noMask)
 			h.View.DrawImage(x-sz/2+iSz/2, y+sz/2-iSz/2, iSz, iSz, 0, icons[icon], col, noMask)

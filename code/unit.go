@@ -49,6 +49,8 @@ type Unit struct {
 
 	UnitFront, UnitBehind, ClosestEnemyInRange, LastHurtBy *Unit
 
+	Following *Unit // used only by the Wolf character
+
 	Carrying []*Pickup
 
 	LastX, LastY, MoveSpeedX float32
@@ -173,6 +175,7 @@ func (u *Unit) PrepareSpawn() {
 	u.Values = Characters[u.Character].Values
 	u.IsReturning, u.Health = false, u.Values.MaxHealth
 	u.VelocityX, u.VelocityY = 0, 0
+	u.EffectsKeysSorted = collection.Clear(u.EffectsKeysSorted)
 	clear(u.Effects)
 
 	if u.IsGarrisoner() {

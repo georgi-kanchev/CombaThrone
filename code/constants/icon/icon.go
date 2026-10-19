@@ -15,7 +15,7 @@ const (
 	Collector
 	Range
 	Hourglass
-	Respawn
+	Revive
 	Plus
 	Minus
 	Skull

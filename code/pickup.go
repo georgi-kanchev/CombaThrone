@@ -50,7 +50,7 @@ func NewPickup(x float32, kind pickup.Enum, atLane lane.Enum) *Pickup {
 		data.Description = "🟩" + Tags[icon.Plus] + "🟧10 damage⬜ to all 🟩" + Tags[icon.Unit] + "ally⬜ " +
 			Tags[icon.Fighter] + "Fighters and " + Tags[icon.Backliner] + "Rangers."
 	case pickup.Relic:
-		data.Description = "🌗🟦" + Tags[icon.Respawn] + "Revives⬜ all 🌓⬜" + Tags[icon.Skull] +
+		data.Description = "🌗🟦" + Tags[icon.Revive] + "Revives⬜ all 🌓⬜" + Tags[icon.Skull] +
 			"dead🟩 " + Tags[icon.Unit] + "allies⬜ and gives them 🌗🟩full " + Tags[icon.Health] + "health⬜."
 	case pickup.Rune:
 		data.Description = "Prevents 🟥" + Tags[icon.Unit] + "enemies⬜ from appearing for 20s."
