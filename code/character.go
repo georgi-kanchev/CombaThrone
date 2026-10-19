@@ -180,7 +180,7 @@ func InitCharacters() {
 		Values{Name: "Wolf", Wage: 20, Role: role.Supplier, MoveSpeed: 35, ActRange: 2, ReviveTimer: 30.0},
 		"Inflicts 🌓⬜"+Tags[icon.Fear]+"fear⬜ to 🌗🟧"+Tags[icon.Range]+"nearby 🟥"+Tags[icon.Unit]+"enemies⬜.")
 	Characters[char.Boar] = NewCharacter(geometry.NewRoundedRectangle(0, 4, 40, 25, 0, 1),
-		Values{Name: "Boar", Wage: 20, Role: role.Griefer, MoveSpeed: 35, ReviveTimer: 30.0},
+		Values{Name: "Boar", Wage: 20, Role: role.Griefer, MoveSpeed: 60, ReviveTimer: 30.0},
 		"Charges, then 🟧"+Tags[icon.Griefer]+"pushes⬜ and 🌓⬜"+Tags[icon.Stun]+"stuns⬜ for 4s.")
 
 	for i, c := range Characters {
