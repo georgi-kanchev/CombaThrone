@@ -39,4 +39,6 @@ var Effects = [effect.COUNT]Values{
 		EffectInfo: "🟩" + Tags[icon.Plus] + "🟧1000 " + Tags[icon.Defender] + "defence ⬜(Self)"},
 	effect.Bear: Values{DisablesTimer: 1.0, EffectTimer: 0.95, EffectIconText: "🟥" + Tags[icon.Fear],
 		EffectInfo: "🌓⬜" + Tags[icon.Fear] + "in fear ⬜(Bear)"},
+	effect.Boar: Values{DisablesTimer: 4.0, EffectTimer: 3.95, EffectIconText: "🟥" + Tags[icon.Stun],
+		EffectInfo: "🌓⬜" + Tags[icon.Stun] + "stunned ⬜(Boar)"},
 }

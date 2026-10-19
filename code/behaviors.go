@@ -68,7 +68,7 @@ var Behaviors = map[char.Enum]func(self *Unit){
 			self.State = state.ActStart
 		} else if self.State == state.ActTrigger && self.UnitFront != nil {
 			self.UnitFront.VelocityY = -10
-			self.UnitFront.Values.DisablesTimer = 1.5
+			self.UnitFront.Values.DisablesTimer += 1.5
 			if self.Team == team.Ally {
 				self.UnitFront.VelocityX = 50
 			} else {
@@ -103,7 +103,7 @@ var Behaviors = map[char.Enum]func(self *Unit){
 				var hb = u.Hitbox()
 				if self.Lane == u.Lane+1 && number.IsWithin(self.X+offset, hb.X, hb.Width/2) {
 					u.VelocityY = -150
-					u.Lane += 2
+					u.Lane = min(u.Lane+2, lane.Upper)
 					self.ActTimer = -1 // trigger act
 					break
 				}
@@ -144,7 +144,7 @@ var Behaviors = map[char.Enum]func(self *Unit){
 				if self.Team != u.Team && number.IsWithin(self.X, u.X, TileSize*2) {
 					var dirX, dirY = direction.BetweenPoints(self.X, self.Y+self.Height/2, u.X, u.Y)
 					u.VelocityX, u.VelocityY = dirX*100, dirY*100
-					u.Values.DisablesTimer = 1.5
+					u.Values.DisablesTimer += 1.5
 				}
 			}
 		}
@@ -219,6 +219,24 @@ var Behaviors = map[char.Enum]func(self *Unit){
 	},
 	char.Bear: func(self *Unit) {
 		self.applyEffectInRange(effect.Bear, 1-self.Team, []lane.Enum{self.Lane, self.Lane - 1}, nil)
+	},
+	char.Boar: func(self *Unit) {
+		if self.IsReturning {
+			return
+		}
+
+		for _, u := range Units {
+			if u != nil && self.Team != u.Team && self.Lane == u.Lane+1 && u.IsAlive() && self.Hitbox().Overlaps(u.Hitbox()) {
+				if self.IsFacingLeft() {
+					u.VelocityX = -150
+				} else {
+					u.VelocityX = 150
+				}
+				u.VelocityY = -80
+				u.AddEffect(effect.Boar)
+				self.IsReturning = true
+			}
+		}
 	},
 }
 

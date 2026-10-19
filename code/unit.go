@@ -682,8 +682,8 @@ func (u *Unit) applyCollisions() {
 					Splashes = append(Splashes, NewSplash(splash.Dust, 0, hb.X, hb.Y+hb.Height/2-14, u))
 				}
 
-				if u.VelocityY > 100 {
-					u.AffectHealth(int(-(u.VelocityY-100)/20), false, u) // fall damage
+				if u.VelocityY > 130 {
+					u.AffectHealth(int(-(u.VelocityY-130)/20), false, u) // fall damage
 				}
 
 				u.VelocityY = 0
@@ -773,7 +773,7 @@ func (u *Unit) draw() {
 }
 func (u *Unit) drawDisables() {
 	if u.HealthBar != nil {
-		u.EffectsLabel.X, u.EffectsLabel.Y = u.HealthBar.Background.X, u.HealthBar.Background.Y-8
+		u.EffectsLabel.X, u.EffectsLabel.Y = u.HealthBar.Background.X, u.HealthBar.Background.Y-9
 		u.EffectsLabel.Mask = u.Mask
 
 		if !u.IsAlive() {
@@ -806,5 +806,3 @@ func (u *Unit) shootAt(target *Unit) {
 	Projectiles = append(Projectiles, proj)
 	PlaySound(Characters[u.Character].Sounds.ActTrigger)
 }
-
-func sortEffect(e effect.Enum) uint8 { return uint8(e) }

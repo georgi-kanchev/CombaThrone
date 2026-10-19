@@ -20,5 +20,6 @@ const (
 	Snake
 	Aquaweaver
 	Bear
+	Boar
 	COUNT
 )

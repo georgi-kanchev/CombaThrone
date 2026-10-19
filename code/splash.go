@@ -47,7 +47,7 @@ var SplashBases = map[splash.Enum]SplashValues{
 		Tick: splashTickHeal},
 	splash.PoisonCloud: SplashValues{AnimName: "poison-cloud", FPS: 10, Loop: true, Timer: 5, Damage: 2, FadeOutTime: 0.25,
 		Tick: splashTickPoisonCloud},
-	splash.Whirlwind: SplashValues{AnimName: "whirlwind", FPS: 12, Loop: true, Timer: 20, Damage: 4, FadeOutTime: 0.5,
+	splash.Whirlwind: SplashValues{AnimName: "whirlwind", FPS: 12, Loop: true, Timer: 20, Damage: 6, FadeOutTime: 0.5,
 		SingleTick: true, Tick: splashTickWhirlwind, Update: splashUpdateWhirlwind},
 	splash.WaterShield: SplashValues{AnimName: "water-shield", FPS: 12, Loop: true, Timer: 6, FadeOutTime: 0.5,
 		Update: splashUpdateWatershield},
@@ -175,7 +175,7 @@ func splashTickWhirlwind(self *Splash) {
 func splashUpdateWhirlwind(self *Splash) {
 	for _, u := range Units {
 		if u.Team != self.Team && self.overlapsUnit(u) && u.IsGrounded && u.IsAlive() {
-			u.VelocityY = -200
+			u.VelocityY = -220
 			u.AffectHealth(-self.Values.Damage, false, self.Owner)
 		}
 	}
