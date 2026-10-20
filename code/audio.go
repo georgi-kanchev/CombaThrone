@@ -14,7 +14,7 @@ var AudioBow, AudioProjectileGround, AudioProjectileWood, AudioProjectileMetal, 
 var AudioHitFlesh, AudioHitWood, AudioHitMetal []audio.Audio
 var AudioEventPositive, AudioEventNegative []audio.Audio
 
-func LoadAudio() {
+func InitAudio() {
 	ambiences[zone.Field] = assets.LoadMusic("data/music/ambience-plains.mp3")
 	AudioAmbience = audio.New(ambiences[zone.Field])
 

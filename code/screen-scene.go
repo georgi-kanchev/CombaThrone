@@ -6,7 +6,6 @@ import (
 	"game/code/constants/clouds"
 	"game/code/constants/entrance"
 	"game/code/constants/garrison"
-	"game/code/constants/icon"
 	"game/code/constants/lane"
 	"game/code/constants/pickup"
 	"game/code/constants/state"
@@ -15,7 +14,6 @@ import (
 	"pure-game-kit/packages/assets"
 	"pure-game-kit/packages/geometry"
 	"pure-game-kit/packages/graphics"
-	"pure-game-kit/packages/gui"
 	"pure-game-kit/packages/input/keyboard"
 	"pure-game-kit/packages/input/keyboard/key"
 	"pure-game-kit/packages/input/mouse"
@@ -26,20 +24,16 @@ import (
 	"pure-game-kit/packages/utility/number"
 	"pure-game-kit/packages/utility/text"
 	"pure-game-kit/packages/utility/time"
-	"pure-game-kit/packages/window"
 )
 
 const TileSize, MapCount = 32.0, 4
 
-var TitleScreen assets.ImageId
-var InGame bool
 var InGameTimer float32
 
 var Decor assets.AtlasId
 var SplashAtlas assets.AtlasId
 
 var TimeScale float32 = 1
-var View *graphics.View
 var CurrentZone *Zone
 var Layers []assets.TileLayerId
 var SortedY []*graphics.Object // for units & pickups
@@ -47,11 +41,6 @@ var SortedY []*graphics.Object // for units & pickups
 var Player *PlayerState
 
 func InitScene() {
-	TitleScreen = assets.LoadImage("data/title-screen.png")
-
-	var view = graphics.NewView(1)
-	View = &view
-
 	var layers, decor = assets.LoadTileLayersFromTiled("data/decor.tmx")
 	Layers = layers
 	Decor = assets.LoadAtlas(decor, "data/decor.xml")
@@ -101,42 +90,6 @@ func InitScene() {
 	Player.Units[5] = NewUnit(char.Wolf, team.Ally, 0)
 	Player.Units[6] = NewUnit(char.Healer, team.Ally, 0)
 	Player.Units[7] = NewUnit(char.Boar, team.Ally, 0)
-}
-
-//=================================================================
-
-func UpdateTitleScreen() {
-	alignView()
-
-	const baseAspect = 16.0 / 9.0
-	var bgrCrop = TitleScreen.CropArea()
-	var logo = UserInterface.Crops("logo")[0]
-	var logoCrop = logo.CropArea()
-	var hud = gui.AreaHUD(0.5, 0.5, 0, 0)
-
-	View.DrawColor(Zones[zone.Desert].SkyColor)
-	View.DrawImage(0, 0, bgrCrop.Width, bgrCrop.Height, 0, TitleScreen, palette.White, geometry.Area{})
-
-	gui.Image(logo, geometry.NewArea(hud.X, hud.Y-TileSize*3, logoCrop.Width, logoCrop.Height), false)
-
-	View.FitSize(320, 320) // always fit logo + buttons on screen, regardless of resolution
-	gui.Scale = View.Zoom
-
-	gui.Button(story, geometry.NewArea(hud.X, hud.Y-TileSize*0.5, 120, 28), geometry.Area{}, ThemeUI, true)
-	if gui.IsJustClicked() {
-		InGame = true
-		PlayAmbience(CurrentZone.Kind)
-	}
-	gui.Button(arena, geometry.NewArea(hud.X, hud.Y+TileSize*0.5, 120, 28), geometry.Area{}, ThemeUI, false)
-	if gui.IsFocused() {
-		mouse.SetCursor(cursor.NotAllowed)
-	}
-	gui.Button(settings, geometry.NewArea(hud.X, hud.Y+TileSize*2, 100, 28), geometry.Area{}, ThemeUI, true)
-	gui.Button(credits, geometry.NewArea(hud.X, hud.Y+TileSize*3, 100, 28), geometry.Area{}, ThemeUI, true)
-	gui.Button(exit, geometry.NewArea(hud.X, hud.Y+TileSize*4, 100, 28), geometry.Area{}, ThemeUI, true)
-	if gui.IsJustClicked() {
-		window.Close()
-	}
 }
 func UpdateScene() {
 	InGameTimer += DeltaTimeScaled()
@@ -233,8 +186,6 @@ func DeltaTimeScaled() float32 {
 var highlightCursorColors = map[int]uint{
 	cursor.Arrow: palette.LightGray, cursor.Hand: palette.White, cursor.NotAllowed: palette.Red,
 }
-var story, arena = Tags[icon.Book] + "Story Mode", Tags[icon.Sword] + "Arena Mode"
-var settings, credits, exit = Tags[icon.Gear] + "Settings", Tags[icon.Glory] + "Credits", Tags[icon.Door] + "Exit"
 
 func mirrorGarrisonLanes() {
 	for i := lane.Garrison1; i < lane.GarrisonPlus3+1; i++ {
