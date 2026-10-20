@@ -146,7 +146,7 @@ func (h *HUD) PickupSlotPosition(slot int) (x, y float32) {
 }
 
 func (h *HUD) UpdateBack() {
-	const scale = 0.9
+	const scale = 0.85 // 0.9
 	h.View.Zoom = scale * 5
 
 	var tx, ty = h.View.PointFromEdge(0.5, 0)

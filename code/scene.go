@@ -74,7 +74,7 @@ func InitScene() {
 	}
 	CurrentZone = Zones[zone.Field]
 
-	Bases[team.Ally] = NewBase(team.Ally, base.Fort, garrison.Three,
+	Bases[team.Ally] = NewBase(team.Ally, base.Fortress, garrison.Three,
 		[3]entrance.Enum{entrance.NONE, entrance.NONE, entrance.NONE})
 	Bases[team.Enemy] = NewBase(team.Enemy, base.Fortress, garrison.Three,
 		[3]entrance.Enum{entrance.Door, entrance.ShortGate, entrance.TallGate})
@@ -108,29 +108,32 @@ func InitScene() {
 func UpdateTitleScreen() {
 	alignView()
 
+	const baseAspect = 16.0 / 9.0
 	var bgrCrop = TitleScreen.CropArea()
+	var logo = UserInterface.Crops("logo")[0]
+	var logoCrop = logo.CropArea()
+	var hud = gui.AreaHUD(0.5, 0.5, 0, 0)
+
 	View.DrawColor(Zones[zone.Desert].SkyColor)
 	View.DrawImage(0, 0, bgrCrop.Width, bgrCrop.Height, 0, TitleScreen, palette.White, geometry.Area{})
 
-	var logo = UserInterface.Crops("logo")[0]
-	var logoCrop = logo.CropArea()
-	var x, y = PointAtCell(8.5, 1.5)
-	View.DrawImage(x, y, logoCrop.Width, logoCrop.Height, 0, logo, palette.White, geometry.Area{})
+	gui.Image(logo, geometry.NewArea(hud.X, hud.Y-TileSize*3, logoCrop.Width, logoCrop.Height), false)
 
+	View.FitSize(320, 320) // always fit logo + buttons on screen, regardless of resolution
 	gui.Scale = View.Zoom
-	var hud = gui.AreaHUD(0.5, 1, 0, 0)
-	gui.Button(story, geometry.NewArea(hud.X, hud.Y-TileSize*5.5, 120, 28), geometry.Area{}, ThemeUI, true)
+
+	gui.Button(story, geometry.NewArea(hud.X, hud.Y-TileSize*0.5, 120, 28), geometry.Area{}, ThemeUI, true)
 	if gui.IsJustClicked() {
 		InGame = true
 		PlayAmbience(CurrentZone.Kind)
 	}
-	gui.Button(arena, geometry.NewArea(hud.X, hud.Y-TileSize*4.5, 120, 28), geometry.Area{}, ThemeUI, false)
+	gui.Button(arena, geometry.NewArea(hud.X, hud.Y+TileSize*0.5, 120, 28), geometry.Area{}, ThemeUI, false)
 	if gui.IsFocused() {
 		mouse.SetCursor(cursor.NotAllowed)
 	}
-	gui.Button(settings, geometry.NewArea(hud.X, hud.Y-TileSize*3, 100, 28), geometry.Area{}, ThemeUI, true)
-	gui.Button(credits, geometry.NewArea(hud.X, hud.Y-TileSize*2, 100, 28), geometry.Area{}, ThemeUI, true)
-	gui.Button(exit, geometry.NewArea(hud.X, hud.Y-TileSize*1, 100, 28), geometry.Area{}, ThemeUI, true)
+	gui.Button(settings, geometry.NewArea(hud.X, hud.Y+TileSize*2, 100, 28), geometry.Area{}, ThemeUI, true)
+	gui.Button(credits, geometry.NewArea(hud.X, hud.Y+TileSize*3, 100, 28), geometry.Area{}, ThemeUI, true)
+	gui.Button(exit, geometry.NewArea(hud.X, hud.Y+TileSize*4, 100, 28), geometry.Area{}, ThemeUI, true)
 	if gui.IsJustClicked() {
 		window.Close()
 	}

@@ -224,7 +224,7 @@
     <group name="fisherman-icon" cropIndexes="51"/>
     <group name="fisherman-idle" cropIndexes="52 53 54 55"/>
     <group name="fisherman-move" cropIndexes="56 57 58 59 60 61"/>
-    <group name="fisherman-prepare" cropIndexes="62 63 64 65 66"/>
+    <group name="fisherman-prepare" cropIndexes="62 63 64 65"/>
     <group name="fisherman-recover" cropIndexes="66 67 68 69 70"/>
     <group name="smith-icon" cropIndexes="71"/>
     <group name="smith-idle" cropIndexes="72 73 74 75"/>
