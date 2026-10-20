@@ -3,10 +3,8 @@ package screen
 type Enum uint8
 
 const (
-	TitleMenu Enum = iota
-	Settings
-	Credits
+	NONE Enum = iota
+	Title
 	Scene
-	PauseMenu
 	COUNT
 )

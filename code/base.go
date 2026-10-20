@@ -31,12 +31,12 @@ type Base struct {
 
 var Bases [team.COUNT]*Base
 
-func NewBase(forTeam team.Enum, kind base.Enum, garr garrison.Enum, entrances [3]entrance.Enum) *Base {
+func NewBase(forTeam team.Enum, kind base.Enum, garr garrison.Enum, entranceLow, entranceMid, entranceUp entrance.Enum) *Base {
 	var b = &Base{Team: forTeam, Kind: kind, Garrison: garr, Glory: baseGlory[kind]}
 	b.Entrances = make([]*Entrance, 3)
-	b.Entrances[lane.Lower/2] = NewEntrance(entrances[lane.Lower/2], b.Kind, forTeam, lane.Lower)
-	b.Entrances[lane.Middle/2] = NewEntrance(entrances[lane.Middle/2], b.Kind, forTeam, lane.Middle)
-	b.Entrances[lane.Upper/2] = NewEntrance(entrances[lane.Upper/2], b.Kind, forTeam, lane.Upper)
+	b.Entrances[lane.Lower/2] = NewEntrance(entranceLow, b.Kind, forTeam, lane.Lower)
+	b.Entrances[lane.Middle/2] = NewEntrance(entranceMid, b.Kind, forTeam, lane.Middle)
+	b.Entrances[lane.Upper/2] = NewEntrance(entranceUp, b.Kind, forTeam, lane.Upper)
 
 	var x, y = PointAtCell(14, 5.5)
 	if forTeam == team.Ally {
@@ -135,10 +135,10 @@ func (b *Base) UpdateFront() {
 	}
 
 	if b.Team == team.Ally && Player.CoinsJustChanged() {
-		GameHUD.Coins.Text = text.New(Player.Coins, "$")
+		SceneHUD.Coins.Text = text.New(Player.Coins, "$")
 	}
 	if b.Glory != b.LastGlory {
-		GameHUD.TeamGlory[b.Team].Text = text.New(Tags[icon.Glory], b.Glory)
+		SceneHUD.TeamGlory[b.Team].Text = text.New(Tags[icon.Glory], b.Glory)
 		b.LastGlory = b.Glory
 	}
 

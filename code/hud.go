@@ -39,53 +39,20 @@ type HUD struct {
 	SummonDragX, SummonDragY float32
 }
 
-var Tags = [123]string{
-	"⓪", "①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨", "⑩", "⑪", "⑫", "⑬", "⑭", "⑮", "⑯", "⑰", "⑱", "⑲", "⑳",
-	"⑴", "⑵", "⑶", "⑷", "⑸", "⑹", "⑺", "⑻", "⑼", "⑽", "⑾", "⑿", "⒀", "⒁", "⒂", "⒃", "⒄", "⒅", "⒆", "⒇",
-	"⒈", "⒉", "⒊", "⒋", "⒌", "⒍", "⒎", "⒏", "⒐", "⒑", "⒒", "⒓", "⒔", "⒕", "⒖", "⒗", "⒘", "⒙", "⒚", "⒛",
-	"ⓐ", "ⓑ", "ⓒ", "ⓓ", "ⓔ", "ⓕ", "ⓖ", "ⓗ", "ⓘ", "ⓙ", "ⓚ", "ⓛ", "ⓜ", "ⓝ", "ⓞ", "ⓟ", "ⓠ", "ⓡ", "ⓢ", "ⓣ", "ⓤ",
-	"ⓥ", "ⓦ", "ⓧ", "ⓨ", "ⓩ", "Ⓐ", "Ⓑ", "Ⓒ", "Ⓓ", "Ⓔ", "Ⓕ", "Ⓖ", "Ⓗ", "Ⓘ", "Ⓙ", "Ⓚ", "Ⓛ", "Ⓜ", "Ⓝ", "Ⓞ", "Ⓟ",
-	"Ⓠ", "Ⓡ", "Ⓢ", "Ⓣ", "Ⓤ", "Ⓥ", "Ⓦ", "Ⓧ", "Ⓨ", "Ⓩ", "⓫", "⓬", "⓭", "⓮", "⓯", "⓰", "⓱", "⓲", "⓳", "⓴",
-}
-var ThemeUI assets.GUIThemeId
-var UserInterface assets.AtlasId
-var SlotId, ButtonUpId, ButtonDownId assets.ImageId
-var PanelNinePatchId assets.ImageId
-var GameHUD *HUD
 var TooltipLabel *graphics.Object
 var TooltipTexts [9]text.Dynamic
 var CoinsText text.Dynamic
 
-func InitUI() {
-	GameHUD = NewHUD()
-}
 func NewHUD() *HUD {
-	UserInterface = assets.LoadAtlas(assets.LoadImage("data/user-interface.png"), "data/user-interface.xml")
-
-	for i := range icon.COUNT {
-		assets.FontId(0).EmbedImage(text.At(Tags[i], 0), UserInterface.Crops("icons-text")[i])
-	}
-
-	ThemeUI = assets.LoadGUITheme("data/user-interface-theme.xml")
-	SlotId = UserInterface.Crops("slot")[0]
-
 	TooltipLabel = new(graphics.NewTextbox(0, 0, 100, 100, 0))
 	TooltipLabel.Details.FillColor, TooltipLabel.Details.TextLineHeight = 0, 10
 	TooltipLabel.Details.TextLineGap = -30
 	TooltipLabel.Details.TextAlignX, TooltipLabel.Details.TextAlignY = 0.5, 0.5
 
-	var btn = UserInterface.Crops("button")
-	ButtonUpId = assets.LoadImage9Patch(btn[0], 8, 8, 8, 8)
-	ButtonDownId = assets.LoadImage9Patch(btn[1], 8, 8, 8, 8)
-	PanelNinePatchId = assets.LoadImage9Patch(UserInterface.Crops("panel")[0], 8, 8, 8, 8)
-
-	var view = graphics.NewView(1)
-	var top = graphics.NewSprite(0, 0, 1, UserInterface.Crops("hud-top")[0])
-
-	var highlightNinePatch = assets.LoadImage9Patch(UserInterface.Crops("highlight")[0], 4, 4, 4, 4)
+	var top = graphics.NewSprite(0, 0, 1, GUI.Crops("hud-top")[0])
+	var highlightNinePatch = assets.LoadImage9Patch(GUI.Crops("highlight")[0], 4, 4, 4, 4)
 	var highlight = graphics.NewSprite(0, 0, 1, highlightNinePatch)
-
-	var unitsPanel = graphics.NewSprite(0, 0, 1, PanelNinePatchId)
+	var unitsPanel = graphics.NewSprite(0, 0, 1, PanelId)
 	unitsPanel.Width, unitsPanel.Height = TileSize*5.5, TileSize*3
 
 	var label = graphics.NewTextbox(0, 0, TileSize+6, TileSize/2+2, 0)
@@ -102,11 +69,9 @@ func NewHUD() *HUD {
 	info.Width, info.Details.TextLineHeight = TileSize*8.5, 8
 	info.Details.TextSymbolGap, info.Details.TextColor = 10, palette.Gold
 
-	var ally, enemy = label, label
-	var glory = [team.COUNT]*graphics.Object{&ally, &enemy}
-
 	return &HUD{
-		View: &view, ZoneInfo: &info, Top: &top, TeamGlory: glory, Coins: &coins, UnitsPanel: &unitsPanel,
+		View: new(graphics.NewView(1)), ZoneInfo: &info, Top: &top,
+		TeamGlory: [team.COUNT]*graphics.Object{new(label), new(label)}, Coins: &coins, UnitsPanel: &unitsPanel,
 		HoverHighlight: &highlight, SummonIndex: -1,
 	}
 }
@@ -183,7 +148,7 @@ func (h *HUD) UpdateBack() {
 	h.trySummon(lastSummonIndex)
 }
 func (h *HUD) UpdateFront() {
-	var icons = UserInterface.Crops("icons-hud")
+	var icons = GUI.Crops("icons-hud")
 	h.Coins.X, h.Coins.Y = h.Top.X, h.Top.Y-9
 	h.Coins.Text = CoinsText.Set(Tags[icon.Coins], Player.Coins)
 	h.View.DrawObject(h.Coins)
@@ -256,8 +221,8 @@ func (h *HUD) DrawPath(view *graphics.View, fromX, fromY, toX, toY float32) {
 	}
 }
 func (h *HUD) ShapeToUI(gameShape geometry.Shape) geometry.Shape {
-	var scale = View.Zoom / GameHUD.View.Zoom
-	var x, y = View.PointToView(GameHUD.View, gameShape.X, gameShape.Y)
+	var scale = View.Zoom / SceneHUD.View.Zoom
+	var x, y = View.PointToView(SceneHUD.View, gameShape.X, gameShape.Y)
 	return geometry.NewRectangle(x, y, gameShape.Width*scale, gameShape.Height*scale, gameShape.Angle)
 }
 
@@ -267,13 +232,13 @@ func (h *HUD) DrawTooltip(shape geometry.Shape, text string, icon assets.ImageId
 	var x, y = shape.X, shape.Y + shape.Height/2 + height/2
 
 	h.Highlight(h.View, shape, palette.White)
-	h.View.DrawImage(x, y, width, height, 0, PanelNinePatchId, col, noMask)
+	h.View.DrawImage(x, y, width, height, 0, PanelId, col, noMask)
 	h.View.DrawImage(x+width/2-TileSize/2-6, y, -TileSize, TileSize, 0, icon, col, noMask)
 
 	TooltipLabel.Shape = geometry.NewRectangle(x-width/4+4, y, width/2, height, 0)
 	TooltipLabel.Details.TextAlignX, TooltipLabel.Details.TextAlignY = 0.5, 0.5
 	TooltipLabel.Text = text
-	GameHUD.View.DrawObject(TooltipLabel)
+	SceneHUD.View.DrawObject(TooltipLabel)
 }
 
 //=================================================================
@@ -285,7 +250,7 @@ func (u *Unit) DrawTooltip(shape geometry.Shape, bench bool) {
 	var extraWidth float32
 	var x, y = shape.X, shape.Y - shape.Height/2 - height/2 - 14
 	if bench {
-		x, y = 0, GameHUD.UnitsPanel.Y+GameHUD.UnitsPanel.Height/2+height/2
+		x, y = 0, SceneHUD.UnitsPanel.Y+SceneHUD.UnitsPanel.Height/2+height/2
 	}
 
 	if len(u.Effects) > 0 {
@@ -293,17 +258,17 @@ func (u *Unit) DrawTooltip(shape geometry.Shape, bench bool) {
 		x += effWidth / 2
 	}
 
-	var area = geometry.NewArea(x, y, width+extraWidth, height).Inside(GameHUD.View.Bounds())
-	area = area.Outside(GameHUD.UnitsPanel.Shape.Bounds(), true, false)
-	area = area.Outside(GameHUD.TeamGlory[team.Ally].Shape.Bounds(), true, false)
-	area = area.Outside(GameHUD.TeamGlory[team.Enemy].Shape.Bounds(), true, false)
+	var area = geometry.NewArea(x, y, width+extraWidth, height).Inside(SceneHUD.View.Bounds())
+	area = area.Outside(SceneHUD.UnitsPanel.Shape.Bounds(), true, false)
+	area = area.Outside(SceneHUD.TeamGlory[team.Ally].Shape.Bounds(), true, false)
+	area = area.Outside(SceneHUD.TeamGlory[team.Enemy].Shape.Bounds(), true, false)
 	x, y = area.X, area.Y
 
 	TooltipLabel.Details.TextAlignX, TooltipLabel.Details.TextAlignY = 0, 0
 	if len(u.Effects) > 0 {
 		x -= effWidth / 2
 		var effHeight, effX = float32(len(u.Effects))*9 + 12, x + width/2 + effWidth/2 - 6
-		GameHUD.View.DrawImage(effX, y-height/2+effHeight/2, effWidth, effHeight, 0, PanelNinePatchId, col, noMask)
+		SceneHUD.View.DrawImage(effX, y-height/2+effHeight/2, effWidth, effHeight, 0, PanelId, col, noMask)
 		TooltipLabel.Shape = geometry.NewRectangle(x+width/2+effWidth/2+2, y+6, effWidth, height, 0)
 		TooltipLabel.Details.TextLineHeight = 8
 		TooltipTexts[0].Set()
@@ -311,16 +276,16 @@ func (u *Unit) DrawTooltip(shape geometry.Shape, bench bool) {
 		for _, k := range u.EffectsKeysSorted {
 			TooltipLabel.Text = TooltipTexts[0].Append(u.Effects[effect.Enum(k)].EffectInfo, "\n")
 		}
-		GameHUD.View.DrawObject(TooltipLabel)
+		SceneHUD.View.DrawObject(TooltipLabel)
 	}
 
-	GameHUD.Highlight(GameHUD.View, shape, palette.White)
-	GameHUD.View.DrawImage(x, y, width, height, 0, PanelNinePatchId, col, noMask)
-	GameHUD.View.DrawShape(x, y+height/2-tsz/2, width-10, 20, 0, 0, color.RGB(61, 37, 59), noMask)
+	SceneHUD.Highlight(SceneHUD.View, shape, palette.White)
+	SceneHUD.View.DrawImage(x, y, width, height, 0, PanelId, col, noMask)
+	SceneHUD.View.DrawShape(x, y+height/2-tsz/2, width-10, 20, 0, 0, color.RGB(61, 37, 59), noMask)
 
 	var char = Characters[u.Character]
-	GameHUD.View.DrawImage(x+width/2-tsz/2-6, y-height/2+tsz/2+6, tsz, tsz, 0, SlotId, col, noMask)
-	GameHUD.View.DrawImage(x+width/2-tsz/2-6, y-height/2+tsz/2+6, -tsz, tsz, 0, char.Icon, col, noMask)
+	SceneHUD.View.DrawImage(x+width/2-tsz/2-6, y-height/2+tsz/2+6, tsz, tsz, 0, SlotId, col, noMask)
+	SceneHUD.View.DrawImage(x+width/2-tsz/2-6, y-height/2+tsz/2+6, -tsz, tsz, 0, char.Icon, col, noMask)
 
 	TooltipTexts[1].Set()
 	if !u.IsOffLaner() {
@@ -366,42 +331,42 @@ func (u *Unit) DrawTooltip(shape geometry.Shape, bench bool) {
 	TooltipLabel.Shape = geometry.NewRectangle(x, y+6, width-14, height, 0)
 	TooltipLabel.Details.TextAlignX, TooltipLabel.Details.TextLineHeight = 0, 10
 	TooltipLabel.Text = TooltipTexts[1].Get()
-	GameHUD.View.DrawObject(TooltipLabel)
+	SceneHUD.View.DrawObject(TooltipLabel)
 
 	TooltipLabel.Text = TooltipTexts[2].Set("\n\n\n\n\n\n⬜", char.Info)
-	GameHUD.View.DrawObject(TooltipLabel)
+	SceneHUD.View.DrawObject(TooltipLabel)
 
 	TooltipLabel.Details.TextAlignX = 1
 	TooltipLabel.Text = TooltipTexts[3].Set("\n\n\n", u.Values.Name, "\n", Tags[char.RoleIcon], char.RoleName)
-	GameHUD.View.DrawObject(TooltipLabel)
+	SceneHUD.View.DrawObject(TooltipLabel)
 
 	if PinnedUnit == u {
-		var pin = UserInterface.Crops("icons-text")[icon.Locked]
+		var pin = GUI.Crops("icons-text")[icon.Locked]
 		var sz float32 = TileSize / 2
-		GameHUD.View.DrawImage(x-width/2+3, y-height/2+3, sz*0.8, sz*0.8, 0, pin, palette.White, geometry.Area{})
+		SceneHUD.View.DrawImage(x-width/2+3, y-height/2+3, sz*0.8, sz*0.8, 0, pin, palette.White, geometry.Area{})
 	}
 }
 func (p *Pickup) DrawTooltip(bench bool) {
 	const width, height = 140.0, TileSize + 12
-	var shape = GameHUD.ShapeToUI(p.Object.Shape)
+	var shape = SceneHUD.ShapeToUI(p.Object.Shape)
 	var col, noMask = palette.White, geometry.Area{}
-	var icon = UserInterface.Crops("icons-pickup")[p.Kind]
+	var icon = GUI.Crops("icons-pickup")[p.Kind]
 	var x, y = shape.X, shape.Y - shape.Height/2 - height/2
 	if bench {
 		shape = p.Object.Shape
 		x, y = shape.X, shape.Y+shape.Height/2+height/2
 	}
-	var area = geometry.NewArea(x, y, width, height).Inside(GameHUD.View.Bounds())
+	var area = geometry.NewArea(x, y, width, height).Inside(SceneHUD.View.Bounds())
 	x, y = area.X, area.Y
 
-	GameHUD.Highlight(GameHUD.View, shape, palette.White)
-	GameHUD.View.DrawImage(x, y, width, height, 0, PanelNinePatchId, col, noMask)
-	GameHUD.View.DrawImage(x+width/2-TileSize/2-6, y, -TileSize, TileSize, 0, icon, col, noMask)
+	SceneHUD.Highlight(SceneHUD.View, shape, palette.White)
+	SceneHUD.View.DrawImage(x, y, width, height, 0, PanelId, col, noMask)
+	SceneHUD.View.DrawImage(x+width/2-TileSize/2-6, y, -TileSize, TileSize, 0, icon, col, noMask)
 
 	TooltipLabel.Shape = geometry.NewRectangle(x-TileSize/2, y, width-TileSize-12, height-12, 0)
 	TooltipLabel.Text = p.Description
 	TooltipLabel.Details.TextAlignX, TooltipLabel.Details.TextAlignY = 0.5, 0.5
-	GameHUD.View.DrawObject(TooltipLabel)
+	SceneHUD.View.DrawObject(TooltipLabel)
 }
 
 // private ========================================================
@@ -433,7 +398,7 @@ func (h *HUD) drawBenchUnits(lastSummonIndex int) {
 		}
 
 		var iSz = sz / 2.5
-		var icons = UserInterface.Crops("icons-text")
+		var icons = GUI.Crops("icons-text")
 		var tint = palette.White
 		var roleIcon = icons[Characters[unit.Character].RoleIcon]
 		if index == h.SummonIndex {

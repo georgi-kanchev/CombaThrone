@@ -28,19 +28,23 @@ import (
 
 const TileSize, MapCount = 32.0, 4
 
-var InGameTimer float32
-
 var Decor assets.AtlasId
 var SplashAtlas assets.AtlasId
 
 var TimeScale float32 = 1
+var SceneHUD *HUD
 var CurrentZone *Zone
 var Layers []assets.TileLayerId
 var SortedY []*graphics.Object // for units & pickups
 
 var Player *PlayerState
 
+var InGameTimer float32
+
 func InitScene() {
+	SceneHUD = NewHUD()
+	InitCharacters()
+
 	var layers, decor = assets.LoadTileLayersFromTiled("data/decor.tmx")
 	Layers = layers
 	Decor = assets.LoadAtlas(decor, "data/decor.xml")
@@ -63,10 +67,8 @@ func InitScene() {
 	}
 	CurrentZone = Zones[zone.Field]
 
-	Bases[team.Ally] = NewBase(team.Ally, base.Fortress, garrison.Three,
-		[3]entrance.Enum{entrance.NONE, entrance.NONE, entrance.NONE})
-	Bases[team.Enemy] = NewBase(team.Enemy, base.Fortress, garrison.Three,
-		[3]entrance.Enum{entrance.Door, entrance.ShortGate, entrance.TallGate})
+	Bases[team.Ally] = NewBase(team.Ally, base.Fortress, garrison.Three, entrance.NONE, entrance.NONE, entrance.NONE)
+	Bases[team.Enemy] = NewBase(team.Enemy, base.Fortress, garrison.Three, entrance.Door, entrance.ShortGate, entrance.TallGate)
 
 	Units = append(Units, NewUnit(char.Stabber, team.Enemy, lane.Middle))
 	// Units = append(Units, NewUnit(CharMiner, TeamEnemy, LaneMiddle))
@@ -93,7 +95,7 @@ func InitScene() {
 }
 func UpdateScene() {
 	InGameTimer += DeltaTimeScaled()
-	alignView()
+	AlignView()
 
 	mouse.SetCursor(cursor.Default)
 
@@ -137,7 +139,7 @@ func UpdateScene() {
 	Bases[team.Enemy].UpdateFront()
 	iterateRemovable(&Splashes, func(s *Splash) { s.Update() })
 
-	GameHUD.UpdateBack()
+	SceneHUD.UpdateBack()
 	iterateRemovable(&Projectiles, func(p *Projectile) { p.Update() })
 
 	for _, g := range Bases[team.Ally].Entrances {
@@ -155,9 +157,10 @@ func UpdateScene() {
 		}
 	}
 
-	GameHUD.UpdateFront()
+	SceneHUD.UpdateFront()
 	Player.Update()
 }
+
 func DrawShadow(x, z, width, height, angle float32, mask geometry.Area) {
 	var lower, upper = Collisions[lane.Lower][0], Collisions[lane.Upper][0]
 	var y = number.Map(z, 0, 2, lower.Y-lower.Height/2, upper.Y-upper.Height/2)
@@ -222,11 +225,4 @@ func iterateRemovable[T any](things *[]*T, iteration func(*T)) {
 			i-- // was removed during update
 		}
 	}
-}
-func alignView() {
-	var _, bly = CurrentZone.Ground.PointFromEdge(0.5, 1)
-	View.FitSize(CurrentZone.Ground.Width, 0)
-	var _, h = View.Size()
-	View.Y = (bly - h/2) - 2
-	// View.Zoom = 4
 }

@@ -529,13 +529,13 @@ func (u *Unit) actUponState() {
 		if u.IsOffLaner() && u.IsReturning && !u.IsOutsideOwnBase() {
 			for _, c := range u.Carrying {
 				c.Mask = geometry.Area{}
-				c.SlotUI = GameHUD.FreePickupSlot()
+				c.SlotUI = SceneHUD.FreePickupSlot()
 				if c.Kind == pickup.Coin {
-					c.SlotUI = len(GameHUD.Pickups)
+					c.SlotUI = len(SceneHUD.Pickups)
 				} else {
-					GameHUD.PickupsCarrying--
+					SceneHUD.PickupsCarrying--
 				}
-				GameHUD.Pickups = collection.Add(GameHUD.Pickups, c)
+				SceneHUD.Pickups = collection.Add(SceneHUD.Pickups, c)
 				Pickups = collection.Remove(Pickups, c)
 			}
 			u.Carrying = collection.Clear(u.Carrying)
@@ -736,8 +736,8 @@ func (u *Unit) applyCollisions() {
 	}
 
 	var canCarry = len(u.Carrying) < u.Values.ActPoints
-	var emptySlot = GameHUD.FreePickupSlot() >= 0
-	var canFitNext = len(GameHUD.Pickups)+GameHUD.PickupsCarrying+1 <= 4
+	var emptySlot = SceneHUD.FreePickupSlot() >= 0
+	var canFitNext = len(SceneHUD.Pickups)+SceneHUD.PickupsCarrying+1 <= 4
 	var allowed = emptySlot && canCarry && canFitNext
 	for _, p := range Pickups {
 		if p != nil && p.Lane == u.Lane && p.Overlaps(hb) && (allowed || p.Kind == pickup.Coin) {
@@ -746,7 +746,7 @@ func (u *Unit) applyCollisions() {
 			u.Carrying = collection.Add(u.Carrying, p)
 			Pickups = collection.Remove(Pickups, p)
 			if p.Kind != pickup.Coin {
-				GameHUD.PickupsCarrying++
+				SceneHUD.PickupsCarrying++
 			}
 			if len(u.Carrying) >= u.Values.ActPoints {
 				u.IsReturning = true

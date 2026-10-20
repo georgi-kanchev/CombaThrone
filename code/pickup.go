@@ -73,7 +73,7 @@ func (p *Pickup) Update() {
 
 	var view = View
 	if p.SlotUI >= 0 {
-		view = GameHUD.View
+		view = SceneHUD.View
 	}
 	p.Anim.TimeScale = TimeScale
 
@@ -82,15 +82,15 @@ func (p *Pickup) Update() {
 	p.ImageId, p.Width, p.Height = frame, crop.Width, crop.Height
 
 	if p.SlotUI >= 0 {
-		var x, y = GameHUD.PickupSlotPosition(p.SlotUI)
+		var x, y = SceneHUD.PickupSlotPosition(p.SlotUI)
 
 		if p.Kind == pickup.Coin {
-			x, y = GameHUD.Coins.X, GameHUD.Coins.Y
+			x, y = SceneHUD.Coins.X, SceneHUD.Coins.Y
 			p.X, p.Y = point.MoveToPointSmooth(p.X, p.Y, x, y, 0.06)
 
 			if p.SlotUI >= 0 && number.IsWithin(p.X, x, 3) && number.IsWithin(p.Y, y, 3) {
 				p.Effect()
-				GameHUD.Pickups = collection.Remove(GameHUD.Pickups, p)
+				SceneHUD.Pickups = collection.Remove(SceneHUD.Pickups, p)
 			}
 		}
 

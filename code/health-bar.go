@@ -137,7 +137,7 @@ func (hb *HealthBar) Update(target geometry.Shape, health, maxHealth int, mask g
 
 	if hb.ToGlory {
 		var progress = number.Limit(number.Map(hb.Timer, hb.Duration, 0, 0, 1), 0, 1)
-		var targetX, targetY = View.PointFromView(GameHUD.View, GameHUD.TeamGlory[1-hb.Team].X, GameHUD.TeamGlory[1-hb.Team].Y)
+		var targetX, targetY = View.PointFromView(SceneHUD.View, SceneHUD.TeamGlory[1-hb.Team].X, SceneHUD.TeamGlory[1-hb.Team].Y)
 		hb.Glory.X = number.Map(easing.CircOut(progress), 0, 1, hb.StartX, targetX)
 		hb.Glory.Y = number.Map(easing.CubicIn(progress), 0, 1, hb.StartY, targetY)
 
