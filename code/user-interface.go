@@ -146,8 +146,8 @@ func (h *HUD) PickupSlotPosition(slot int) (x, y float32) {
 }
 
 func (h *HUD) UpdateBack() {
-	const scale = 0.85 // 0.9
-	h.View.Zoom = scale * 5
+	const scale = 2.65
+	h.View.FitSize(1920/scale, 1080/scale) // always fit the HUD based on 16:9, regardless of resolution
 
 	var tx, ty = h.View.PointFromEdge(0.5, 0)
 	h.UnitsPanel.Y = ty + h.Top.Height + h.UnitsPanel.Height/2 - TileSize - 2
