@@ -2,12 +2,16 @@ package game
 
 import (
 	"game/code/constants/icon"
+	"game/code/constants/screen"
 	"game/code/constants/zone"
 	"pure-game-kit/packages/assets"
 	"pure-game-kit/packages/geometry"
 	"pure-game-kit/packages/gui"
+	"pure-game-kit/packages/input/mouse"
+	"pure-game-kit/packages/input/mouse/cursor"
 	"pure-game-kit/packages/utility/color/palette"
 	"pure-game-kit/packages/utility/text"
+	"pure-game-kit/packages/window"
 )
 
 func InitTitleScreen() {
@@ -39,30 +43,30 @@ func UpdateTitleScreen() {
 
 	var noMask = geometry.Area{}
 	gui.Button(menuStory.Get(), geometry.NewArea(hud.X, hud.Y-TileSize*0.5, 120, 28), noMask, ThemeUI, true)
-	// if gui.IsJustClicked() {
-	// 	PlayAmbience(CurrentZone.Kind)
-	// 	Screen = screen.Scene
-	// }
+	if gui.IsJustClicked() {
+		PlayAmbience(CurrentZone.Kind)
+		Screen = screen.Scene
+	}
 
-	// gui.Button(menuArena.Get(), geometry.NewArea(hud.X, hud.Y+TileSize*0.5, 120, 28), geometry.Area{}, ThemeUI, false)
-	// if gui.IsFocused() {
-	// 	mouse.SetCursor(cursor.NotAllowed)
-	// }
+	gui.Button(menuArena.Get(), geometry.NewArea(hud.X, hud.Y+TileSize*0.5, 120, 28), geometry.Area{}, ThemeUI, false)
+	if gui.IsFocused() {
+		mouse.SetCursor(cursor.NotAllowed)
+	}
 
-	// gui.Button(menuSettings.Get(), geometry.NewArea(hud.X, hud.Y+TileSize*2, 100, 28), geometry.Area{}, ThemeUI, true)
-	// if gui.IsJustClicked() {
-	// 	Screen = screen.Settings
-	// }
+	gui.Button(menuSettings.Get(), geometry.NewArea(hud.X, hud.Y+TileSize*2, 100, 28), geometry.Area{}, ThemeUI, true)
+	if gui.IsJustClicked() {
+		Screen = screen.Settings
+	}
 
-	// gui.Button(menuCredits.Get(), geometry.NewArea(hud.X, hud.Y+TileSize*3, 100, 28), geometry.Area{}, ThemeUI, true)
-	// if gui.IsJustClicked() {
-	// 	Screen = screen.Credits
-	// }
+	gui.Button(menuCredits.Get(), geometry.NewArea(hud.X, hud.Y+TileSize*3, 100, 28), geometry.Area{}, ThemeUI, true)
+	if gui.IsJustClicked() {
+		Screen = screen.Credits
+	}
 
-	// gui.Button(menuExit.Get(), geometry.NewArea(hud.X, hud.Y+TileSize*4, 100, 28), geometry.Area{}, ThemeUI, true)
-	// if gui.IsJustClicked() {
-	// 	window.Close()
-	// }
+	gui.Button(menuExit.Get(), geometry.NewArea(hud.X, hud.Y+TileSize*4, 100, 28), geometry.Area{}, ThemeUI, true)
+	if gui.IsJustClicked() {
+		window.Close()
+	}
 }
 
 // private ========================================================
