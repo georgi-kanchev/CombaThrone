@@ -45,11 +45,13 @@ func UpdateMainMenu() {
 	gui.Button(menuSettings.Get(), geometry.NewArea(hud.X, hud.Y+TileSize*2, 100, 28), geometry.Area{}, ThemeGUI, true)
 	if gui.IsJustClicked() {
 		Popup = popup.Settings
+		mouse.SetCursor(cursor.Arrow)
 	}
 
 	gui.Button(menuCredits.Get(), geometry.NewArea(hud.X, hud.Y+TileSize*3, 100, 28), geometry.Area{}, ThemeGUI, true)
 	if gui.IsJustClicked() {
 		Popup = popup.Credits
+		mouse.SetCursor(cursor.Arrow)
 	}
 
 	gui.Button(menuExit.Get(), geometry.NewArea(hud.X, hud.Y+TileSize*4, 100, 28), geometry.Area{}, ThemeGUI, true)

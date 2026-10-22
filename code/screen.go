@@ -42,18 +42,18 @@ func Init() {
 	InitScene()
 }
 func InitGUI() {
-	GUI = assets.LoadAtlas(assets.LoadImage("data/user-interface.png"), "data/user-interface.xml")
+	GUI = assets.LoadAtlas(assets.LoadImage("data/gui.png"), "data/gui.xml")
 
 	for i := range icon.COUNT {
 		assets.FontId(0).EmbedImage(text.At(Tags[i], 0), GUI.Crops("icons-text")[i])
 	}
 
-	ThemeGUI = assets.LoadGUITheme("data/user-interface-theme.xml")
+	ThemeGUI = assets.LoadGUITheme("data/gui-theme.xml")
 	SlotId = GUI.Crops("slot")[0]
 
 	var btn = GUI.Crops("button")
-	ButtonUpId = assets.LoadImage9Patch(btn[0], 8, 8, 8, 8)
-	ButtonDownId = assets.LoadImage9Patch(btn[1], 8, 8, 8, 8)
+	ButtonUpId = assets.LoadImage9Patch(btn[0], 8, 8, 8, 8).DuplicateId(-12345_1)   // ensuring the ImageIds are known after
+	ButtonDownId = assets.LoadImage9Patch(btn[1], 8, 8, 8, 8).DuplicateId(-12345_2) // load/crop for GUI themes
 	PanelId = assets.LoadImage9Patch(GUI.Crops("panel")[0], 8, 8, 8, 8)
 }
 
