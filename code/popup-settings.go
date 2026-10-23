@@ -3,28 +3,68 @@ package game
 import (
 	"pure-game-kit/packages/assets"
 	"pure-game-kit/packages/geometry"
-	"pure-game-kit/packages/graphics"
-	"pure-game-kit/packages/utility/color/palette"
+	"pure-game-kit/packages/gui"
+	"pure-game-kit/packages/window"
 )
 
+type Settings struct {
+	Fullscreen bool
+}
+
+var CurrentSettings Settings
+
 func InitSettings() {
-	settingsView = new(graphics.NewView(1))
 	settingsLayout = assets.LoadGUILayout("data/gui-settings.xml")
+
+	CurrentSettings = Settings{Fullscreen: false}
 }
 
 func UpdateSettings() {
-	// var sc = View.Zoom
-	// settingsView.Zoom = sc
+	const scale = 0.2
+	var gfx, _, _ = settingsLayout.Box(1, scale)
+	var sfx, _, _ = settingsLayout.Box(2, scale)
+	gui.Image(PanelId, gfx, false)
+	gui.Image(PanelId, sfx, false)
 
-	// var panel, _, _ = settingsLayout.Box(0)
-	// var gfx, _, _ = settingsLayout.Box(0)
+	var titleGfx, _ = settingsLayout.Item(0, 0, 0, scale)
+	gui.Text("🔊Graphics", titleGfx, geometry.Area{}, ThemeGUI, false, false)
 
-	var area, _, _ = settingsLayout.Box(0)
-	settingsView.DrawShape(area.X, area.Y, 100, 100, 0, 1, palette.White, geometry.Area{})
-	// settingsView.DrawImage(area.X, area.Y, area.Width, area.Height, 0, PanelId, palette.White, geometry.Area{})
+	for i, txt := range settingsLabels {
+		var area, _ = settingsLayout.Item(1+i*2, 0, 0, scale)
+		gui.Text(txt, area, geometry.Area{}, ThemeGUI.Variant(1), false, false)
+	}
+
+	var fullscreen, _ = settingsLayout.Item(2, 0, 0, scale)
+	fullscreen.X -= fullscreen.Width/2 - fullscreen.Height
+	fullscreen.Width = fullscreen.Height
+	gui.Button(settingsFullscreen, fullscreen, geometry.Area{}, ThemeGUI.Variant(1), true)
+	if gui.IsJustClicked() {
+		CurrentSettings.Fullscreen = !CurrentSettings.Fullscreen
+		settingsFullscreen = ""
+		if CurrentSettings.Fullscreen {
+			settingsFullscreen = "X"
+		}
+		ApplySettings()
+	}
+
+	var titleSfx, _ = settingsLayout.Item(25, 0, 0, scale)
+	gui.Text("🔊Audio", titleSfx, geometry.Area{}, ThemeGUI, false, false)
+}
+
+func ApplySettings() {
+	if CurrentSettings.Fullscreen {
+		window.SetMode(window.ModeFullscreenBorderless)
+	} else {
+		window.SetMode(window.ModeMaximized)
+	}
 }
 
 // private ========================================================
 
-var settingsView *graphics.View
 var settingsLayout assets.GUILayoutId
+
+var settingsLabels = []string{
+	"Fullscreen", "Monitor", "Quality", "Antialiasing", "Vsync", "Limit FPS", "Show FPS", "",
+	"Brightness", "Contrast", "Gamma", "Saturation",
+}
+var settingsFullscreen string

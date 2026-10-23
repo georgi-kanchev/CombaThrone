@@ -49,7 +49,7 @@ func InitGUI() {
 	}
 
 	ThemeGUI = assets.LoadGUITheme("data/gui-theme.xml")
-	SlotId = GUI.Crops("slot")[0]
+	SlotId = GUI.Crops("slot")[0].DuplicateId(-12345_3)
 
 	var btn = GUI.Crops("button")
 	ButtonUpId = assets.LoadImage9Patch(btn[0], 8, 8, 8, 8).DuplicateId(-12345_1)   // ensuring the ImageIds are known after

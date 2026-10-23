@@ -28,6 +28,7 @@ func UpdateMainMenu() {
 
 	View.FitSize(320, 320) // always fit logo + buttons on screen, regardless of resolution
 	gui.Scale = View.Zoom
+	gui.ScaleNinePatches = View.Zoom
 
 	var noMask = geometry.Area{}
 	gui.Button(menuStory.Get(), geometry.NewArea(hud.X, hud.Y-TileSize*0.5, 120, 28), noMask, ThemeGUI, true)
