@@ -343,12 +343,13 @@
     <group name="boar-icon" cropIndexes="416"/>
     <group name="boar-idle" cropIndexes="417 418 419 420"/>
     <group name="boar-move" cropIndexes="421 422 423 424 425 426"/>
-    <group name="shaman-toad-icon" cropIndexes="427"/>
-    <group name="shaman-toad-idle" cropIndexes="428 429 430 431"/>
-    <group name="shaman-toad-move" cropIndexes="432 433 434 435 436 437"/>
-    <group name="shaman-toad-act" cropIndexes="438 439 440"/>
-    <group name="shaman-toad-hurt" cropIndexes="441 442"/>
-    <group name="shaman-toad-die" cropIndexes="443 444 445"/>
+    <group name="shaman-icon" cropIndexes="427"/>
+    <group name="shaman-idle" cropIndexes="428 429 430 431"/>
+    <group name="shaman-move" cropIndexes="432 433 434 435 436 437"/>
+    <group name="shaman-prepare" cropIndexes="438 439"/>
+    <group name="shaman-recover" cropIndexes="440"/>
+    <group name="shaman-hurt" cropIndexes="441 442"/>
+    <group name="shaman-die" cropIndexes="443 444 445"/>
     <group name="cutthroat-toad-icon" cropIndexes="446"/>
     <group name="cutthroat-toad-idle" cropIndexes="447 448 449 450"/>
     <group name="cutthroat-toad-move" cropIndexes="451 452 453 454 455 456"/>

@@ -510,7 +510,7 @@ func (h *HUD) trySummon(lastSummonIndex int) {
 			takenGarrisons = append(takenGarrisons, pu.Lane)
 		}
 	}
-	if unit.Values.ActRange > 2 && Bases[team.Ally].Kind >= base.Fort {
+	if unit.Values.ActRange > 2 && Bases[team.Ally].Kind >= base.Fort && unit.Values.Role == role.Backliner {
 		var garrisonsFull = len(takenGarrisons) == 6
 		var garrisonX, garrisonY = PointAtCell(0.5, 4)
 		var shape = geometry.NewRectangle(garrisonX, garrisonY, size, size, 0)

@@ -9,6 +9,7 @@ import (
 	"pure-game-kit/packages/assets"
 	"pure-game-kit/packages/audio"
 	"pure-game-kit/packages/geometry"
+	"pure-game-kit/packages/utility/color"
 	"pure-game-kit/packages/utility/number"
 	"pure-game-kit/packages/utility/text"
 )
@@ -34,6 +35,7 @@ type CharProjectile struct {
 	Kind                      proj.Enum
 	ParabolaMultiplier, Speed float32
 	CastCustomSplashInstead   splash.Enum
+	Tint                      uint
 }
 type Character struct {
 	Values              Values
@@ -182,6 +184,12 @@ func InitCharacters() {
 	Characters[char.Boar] = NewCharacter(geometry.NewRoundedRectangle(0, 4, 40, 25, 0, 1),
 		Values{Name: "Boar", Wage: 20, Role: role.Griefer, MoveSpeed: 60, ReviveTimer: 30.0},
 		"Charges, then 🟧"+Tags[icon.Griefer]+"pushes⬜ and 🌓⬜"+Tags[icon.Stun]+"stuns⬜ for 4s.")
+
+	Characters[char.Shaman] = NewCharacter(geometry.NewRoundedRectangle(-1, 9, 20, 30, 0, 1),
+		Values{Name: "Shaman", Wage: 20, Role: role.Backliner,
+			MaxHealth: 14, MoveSpeed: 20, ActPoints: 8, ActTimer: 8.0, ActRange: 8, ReviveTimer: 30.0},
+		"Inflicts 🟧"+Tags[icon.Debuff]+"weakness⬜ on 🟥"+Tags[icon.Unit]+"enemy⬜ hit.",
+		CharProjectile{ParabolaMultiplier: 0.4, Speed: 2.0, Kind: proj.MediumSpit, Tint: color.TagHex("#ccf61f")})
 
 	for i, c := range Characters {
 		if c == nil {

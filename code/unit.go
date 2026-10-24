@@ -305,6 +305,10 @@ func (u *Unit) AffectHealth(value int, particles bool, hurtBy *Unit) {
 }
 
 func (u *Unit) AddEffect(effect effect.Enum) {
+	if effect == 0 { // fuck it, name collision - i don't care
+		return
+	}
+
 	var _, has = u.Effects[effect]
 	if !has {
 		u.Effects[effect] = Effects[effect]

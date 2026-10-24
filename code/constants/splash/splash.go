@@ -14,5 +14,6 @@ const (
 	Whirlwind
 	WaterShield
 	LightningZap
+	PoisonSpit
 	COUNT
 )

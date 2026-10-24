@@ -1,6 +1,7 @@
 package game
 
 import (
+	"game/code/constants/effect"
 	"game/code/constants/entrance"
 	proj "game/code/constants/projectile"
 	"game/code/constants/splash"
@@ -39,6 +40,7 @@ type ProjectileBase struct {
 	FadeOutTime, MissMultiplier           float32
 	FreeRotation, PersistOnImpact         bool
 	ParticlesFunc                         func(p *particles.Particle) bool
+	Effect                                effect.Enum
 }
 
 var Projectiles, ProjectilesBehind []*Projectile = make([]*Projectile, 0, 32), make([]*Projectile, 0, 32)
@@ -51,6 +53,7 @@ var ProjectilesBase = [proj.COUNT]ProjectileBase{
 		SplashMiddle: splash.Heal},
 	proj.YellowPotion: ProjectileBase{FadeOutTime: 10, FreeRotation: true, MissMultiplier: 1.0, ParticlesFunc: ParticlesGlass,
 		SplashMiddle: splash.PoisonCloud},
+	proj.MediumSpit: ProjectileBase{FadeOutTime: 0.1, MissMultiplier: 1.0, SplashMiddle: splash.PoisonSpit, Effect: effect.Shaman},
 }
 
 func (u *Unit) NewProjectile(x, y, z, targetX, targetY, targetZ float32, value int, kind proj.Enum, enemyEntrance *Entrance) *Projectile {
@@ -77,6 +80,7 @@ func (u *Unit) NewProjectile(x, y, z, targetX, targetY, targetZ float32, value i
 		TravelTime: totalTime, ArcHeight: dist / 3 * parabola, Value: value, EnemyEntrance: enemyEntrance,
 		FadeOutTime: fadeOutTime, FreeRoation: freeRotation, Particles: particles.NewSystem(),
 	}
+	proj.Details.Tint = Characters[u.Character].Projectile.Tint
 	return proj
 }
 
@@ -122,9 +126,9 @@ func (p *Projectile) Update() {
 			if e != nil && !e.IsOpen() && e.Health > 0 && number.IsWithin(p.X, e.Tiles[0].X, TileSize/2) {
 				e.TakeDamage(p.Value)
 				if e.Kind == entrance.ShortGate || e.Kind == entrance.TallGate {
-					p.trigger(28, true)
+					p.trigger(28)
 				} else {
-					p.trigger(0, true)
+					p.trigger(0)
 				}
 				if e.Health > 0 { // crumble sound played by entrance itself
 					var sounds = Characters[p.Owner.Character].Sounds.HitWood
@@ -134,7 +138,7 @@ func (p *Projectile) Update() {
 					PlaySound(sounds)
 				}
 			} else {
-				p.trigger(0, false)
+				p.trigger(0)
 				PlaySound(Characters[p.Owner.Character].Sounds.HitGround)
 			}
 		}
@@ -165,8 +169,9 @@ func (p *Projectile) Update() {
 		}
 
 		if !p.Triggered && p.Shape.Overlaps(hb) && number.IsWithin(p.Z, u.Z, 0.2) {
-			p.trigger(0, false)
+			p.trigger(0)
 			u.AffectHealth(-p.Value, true, p.Owner)
+			u.AddEffect(ProjectilesBase[p.Kind].Effect)
 			p.Hidden = true
 			PlaySound(Characters[p.Owner.Character].Sounds.HitFlesh)
 			return
@@ -185,7 +190,7 @@ func (p *Projectile) Update() {
 
 // private ========================================================
 
-func (p *Projectile) trigger(offsetY float32, gate bool) {
+func (p *Projectile) trigger(offsetY float32) {
 	var base = ProjectilesBase[p.Kind]
 	var top, mid, bot = base.SplashTop, base.SplashMiddle, base.SplashBottom
 	p.Triggered = true

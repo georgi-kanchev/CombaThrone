@@ -67,8 +67,8 @@ func InitScene() {
 	}
 	CurrentZone = Zones[zone.Field]
 
-	Bases[team.Ally] = NewBase(team.Ally, base.Fortress, garrison.Three, entrance.NONE, entrance.NONE, entrance.NONE)
-	Bases[team.Enemy] = NewBase(team.Enemy, base.Fortress, garrison.Three, entrance.Door, entrance.ShortGate, entrance.TallGate)
+	Bases[team.Ally] = NewBase(team.Ally, base.Fort, garrison.Three, entrance.NONE, entrance.NONE, entrance.NONE)
+	Bases[team.Enemy] = NewBase(team.Enemy, base.Fortress, garrison.Three, entrance.NONE, entrance.Door, entrance.ShortGate)
 
 	Units = append(Units, NewUnit(char.Stabber, team.Enemy, lane.Middle))
 	// Units = append(Units, NewUnit(CharMiner, TeamEnemy, LaneMiddle))
@@ -84,13 +84,13 @@ func InitScene() {
 
 	Player = NewPlayer()
 
-	Player.Units[0] = NewUnit(char.Bear, team.Ally, 0)
-	Player.Units[1] = NewUnit(char.Raven, team.Ally, 0)
-	Player.Units[2] = NewUnit(char.Windbender, team.Ally, 0)
-	Player.Units[3] = NewUnit(char.Vulture, team.Ally, 0)
-	Player.Units[4] = NewUnit(char.Fisherman, team.Ally, 0)
-	Player.Units[5] = NewUnit(char.Wolf, team.Ally, 0)
-	Player.Units[6] = NewUnit(char.Healer, team.Ally, 0)
+	Player.Units[0] = NewUnit(char.Shaman, team.Ally, 0)
+	Player.Units[1] = NewUnit(char.Healer, team.Ally, 0)
+	Player.Units[2] = NewUnit(char.Toxicologist, team.Ally, 0)
+	Player.Units[3] = NewUnit(char.Windbender, team.Ally, 0)
+	Player.Units[4] = NewUnit(char.Aquaweaver, team.Ally, 0)
+	Player.Units[5] = NewUnit(char.Stormcaller, team.Ally, 0)
+	Player.Units[6] = NewUnit(char.Bear, team.Ally, 0)
 	Player.Units[7] = NewUnit(char.Boar, team.Ally, 0)
 }
 func UpdateScene() {

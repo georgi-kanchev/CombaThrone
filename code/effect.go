@@ -36,11 +36,13 @@ var Effects = [effect.COUNT]Values{
 	effect.Snake: Values{MoveSpeed: -10, EffectTimer: number.Infinity(), EffectIconText: "🟥" + Tags[icon.Speed],
 		EffectInfo: "🟥" + Tags[icon.Minus] + "🌗🟨10 " + Tags[icon.Speed] + "speed ⬜(Snake)"},
 	effect.Aquaweaver: Values{ActPoints: 1000, EffectTimer: number.Infinity(), EffectIconText: "🟩" + Tags[icon.Defender],
-		EffectInfo: "🟩" + Tags[icon.Plus] + "🟧1000 " + Tags[icon.Defender] + "defence ⬜(Self)"},
+		EffectInfo: "🟩" + Tags[icon.Plus] + "🟧1000 " + Tags[icon.Defender] + "block ⬜(Self)"},
 	effect.Bear: Values{DisablesTimer: 1.0, EffectTimer: 0.95, EffectIconText: "🟥" + Tags[icon.Fear],
 		EffectInfo: "🌓⬜" + Tags[icon.Fear] + "in fear ⬜(Bear)"},
 	effect.Boar: Values{DisablesTimer: 4.0, EffectTimer: 3.95, EffectIconText: "🟥" + Tags[icon.Stun],
 		EffectInfo: "🌓⬜" + Tags[icon.Stun] + "stunned ⬜(Boar)"},
 	effect.Wolf: Values{EffectTimer: number.Infinity(), EffectIconText: "🟩" + Tags[icon.Hourglass],
 		EffectInfo: "🌗🟪" + Tags[icon.Hourglass] + "faster rest ⬜(Wolf)"},
+	effect.Shaman: Values{ActPoints: -10, EffectTimer: 5.0, EffectIconText: "🟥" + Tags[icon.Fighter], // TODO: find damage icon
+		EffectInfo: "🟥" + Tags[icon.Minus] + "🟧10 " + Tags[icon.Fighter] + "damage ⬜(Shaman)"},
 }

@@ -22,5 +22,6 @@ const (
 	Bear
 	Boar
 	Wolf
+	Shaman
 	COUNT
 )

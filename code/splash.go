@@ -53,6 +53,7 @@ var SplashBases = map[splash.Enum]SplashValues{
 		Update: splashUpdateWatershield},
 	splash.LightningZap: SplashValues{AnimName: "lightning-zap", FPS: 12, Damage: 6, SingleTick: true,
 		Tick: splashTickLightingZap},
+	splash.PoisonSpit: SplashValues{AnimName: "poison-spit", FPS: 16},
 }
 var Splashes = make([]*Splash, 0, 8)
 
