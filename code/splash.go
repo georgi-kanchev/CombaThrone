@@ -59,7 +59,7 @@ var Splashes = make([]*Splash, 0, 8)
 
 func NewSplash(kind splash.Enum, team team.Enum, x, y float32, owner *Unit) *Splash {
 	var frames = SplashAtlas.Crops(SplashBases[kind].AnimName)
-	var anim = motion.NewAnimation[assets.ImageId](SplashBases[kind].FPS, SplashBases[kind].Loop, frames...)
+	var anim = motion.NewAnimation(SplashBases[kind].FPS, SplashBases[kind].Loop, frames...)
 	var spr = graphics.NewSprite(x, y, 0, 0)
 	var result = &Splash{Object: spr, Kind: kind, Team: team, Anim: &anim, Values: SplashBases[kind], Owner: owner}
 	result.Update() // update width & height to be ready for single tick splashes

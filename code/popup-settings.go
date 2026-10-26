@@ -28,11 +28,12 @@ func UpdateSettings() {
 	gui.Image(PanelId, sfx, false)
 
 	var titleGfx, _ = settingsLayout.Item(0, 0, 0, scale)
-	gui.Text("🔊Graphics", titleGfx, geometry.Area{}, ThemeGUI, false)
+	gui.Text("🔊Graphics", titleGfx, geometry.Area{}, ThemeGUI, false, 0.5)
 
 	for i, txt := range settingsLabels {
 		var area, _ = settingsLayout.Item(1+i*2, 0, 0, scale)
-		gui.Text(txt, area, geometry.Area{}, ThemeGUI.Variant(1), false)
+		gui.Text(txt, area, geometry.Area{}, ThemeGUI.Variant(1), false, 0.8)
+		// gui.Rectangle(palette.White, area, geometry.Area{}, false)
 	}
 
 	var fullscreen, _ = settingsLayout.Item(2, 0, 0, scale)
@@ -48,8 +49,8 @@ func UpdateSettings() {
 		ApplySettings()
 	}
 
-	var titleSfx, _ = settingsLayout.Item(25, 0, 0, scale)
-	gui.Text("🔊Audio", titleSfx, geometry.Area{}, ThemeGUI, false)
+	var titleSfx, _ = settingsLayout.Item(27, 0, 0, scale)
+	gui.Text("🔊Audio", titleSfx, geometry.Area{}, ThemeGUI, false, 0.5)
 }
 
 func ApplySettings() {
