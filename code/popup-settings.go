@@ -35,13 +35,12 @@ func UpdateSettings() {
 	for i, txt := range settingsLabels {
 		var area, _ = settingsLayout.Item(1+i*2, 0, 0, scale)
 		gui.Text(txt, area, geometry.Area{}, ThemeGUI.Variant(1), false, 0.8)
-		// gui.Rectangle(palette.White, area, geometry.Area{}, false)
 	}
 
 	var fullscreen, _ = settingsLayout.Item(2, 0, 0, scale)
 	fullscreen.X -= fullscreen.Width/2 - fullscreen.Height
 	fullscreen.Width = fullscreen.Height
-	gui.Button(settingsFullscreen, fullscreen, geometry.Area{}, ThemeGUI.Variant(1), true)
+	gui.Button(settingsFullscreen, fullscreen, geometry.Area{}, ThemeGUI.Variant(1), true, 0.8)
 	if gui.IsJustClicked() {
 		CurrentSettings.Fullscreen = !CurrentSettings.Fullscreen
 		settingsFullscreen = ""
