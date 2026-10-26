@@ -39,7 +39,7 @@ func UpdateDebug() {
 	}
 
 	for i := range 10 {
-		if keyboard.IsKeyJustPressed(key.Number0 + i) {
+		if keyboard.IsKeyJustPressed(key.Number0 + key.Enum(i)) {
 			if keyboard.IsKeyPressed(key.Dot) {
 				TimeScale = float32(i) / 10
 			} else {

@@ -5,6 +5,7 @@ import (
 	"pure-game-kit/packages/geometry"
 	"pure-game-kit/packages/gui"
 	"pure-game-kit/packages/window"
+	"pure-game-kit/packages/window/mode"
 )
 
 type Settings struct {
@@ -27,11 +28,11 @@ func UpdateSettings() {
 	gui.Image(PanelId, sfx, false)
 
 	var titleGfx, _ = settingsLayout.Item(0, 0, 0, scale)
-	gui.Text("🔊Graphics", titleGfx, geometry.Area{}, ThemeGUI, false, false)
+	gui.Text("🔊Graphics", titleGfx, geometry.Area{}, ThemeGUI, false)
 
 	for i, txt := range settingsLabels {
 		var area, _ = settingsLayout.Item(1+i*2, 0, 0, scale)
-		gui.Text(txt, area, geometry.Area{}, ThemeGUI.Variant(1), false, false)
+		gui.Text(txt, area, geometry.Area{}, ThemeGUI.Variant(1), false)
 	}
 
 	var fullscreen, _ = settingsLayout.Item(2, 0, 0, scale)
@@ -48,14 +49,14 @@ func UpdateSettings() {
 	}
 
 	var titleSfx, _ = settingsLayout.Item(25, 0, 0, scale)
-	gui.Text("🔊Audio", titleSfx, geometry.Area{}, ThemeGUI, false, false)
+	gui.Text("🔊Audio", titleSfx, geometry.Area{}, ThemeGUI, false)
 }
 
 func ApplySettings() {
 	if CurrentSettings.Fullscreen {
-		window.SetMode(window.ModeFullscreenBorderless)
+		window.SetMode(mode.FullscreenBorderless)
 	} else {
-		window.SetMode(window.ModeMaximized)
+		window.SetMode(mode.Maximized)
 	}
 }
 
