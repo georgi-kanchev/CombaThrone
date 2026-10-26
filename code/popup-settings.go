@@ -21,6 +21,8 @@ func InitSettings() {
 }
 
 func UpdateSettings() {
+	gui.Scale = 5
+
 	const scale = 0.2
 	var gfx, _, _ = settingsLayout.Box(1, scale)
 	var sfx, _, _ = settingsLayout.Box(2, scale)
