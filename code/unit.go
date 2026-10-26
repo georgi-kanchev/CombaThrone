@@ -369,7 +369,7 @@ var effectsToRemove []effect.Enum
 
 func (u *Unit) particlesBlood(p *particles.Particle) (alive bool) {
 	if p.Age == 0 {
-		p.CustomData["y"] = random.Range[float32](p.Y+u.Height/2-4, p.Y+u.Height/2+4)
+		p.CustomData["y"] = random.Range(p.Y+u.Height/2-4, p.Y+u.Height/2+4)
 		p.Scale = random.Range[float32](0.2, 3)
 		p.VelocityX = random.Range[float32](30, 50)
 		p.VelocityY = random.Range[float32](-20, 20)

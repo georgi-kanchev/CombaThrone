@@ -35,25 +35,25 @@ type SplashValues struct {
 }
 
 var SplashBases = map[splash.Enum]SplashValues{
-	splash.Dust:   SplashValues{AnimName: "dust", FPS: 10},
-	splash.Pickup: SplashValues{AnimName: "pickup", FPS: 10},
-	splash.Fire3: SplashValues{AnimName: "fire-3", FPS: 10, Loop: true, Timer: 5, Damage: 3, FadeOutTime: 0.25,
+	splash.Dust:   {AnimName: "dust", FPS: 10},
+	splash.Pickup: {AnimName: "pickup", FPS: 10},
+	splash.Fire3: {AnimName: "fire-3", FPS: 10, Loop: true, Timer: 5, Damage: 3, FadeOutTime: 0.25,
 		Tick: splashTickFire},
-	splash.Fire2: SplashValues{AnimName: "fire-2", FPS: 10, Loop: true, Timer: 5, Damage: 2, FadeOutTime: 0.25,
+	splash.Fire2: {AnimName: "fire-2", FPS: 10, Loop: true, Timer: 5, Damage: 2, FadeOutTime: 0.25,
 		Tick: splashTickFire},
-	splash.Fire1: SplashValues{AnimName: "fire-1", FPS: 10, Loop: true, Timer: 5, Damage: 1, FadeOutTime: 0.25,
+	splash.Fire1: {AnimName: "fire-1", FPS: 10, Loop: true, Timer: 5, Damage: 1, FadeOutTime: 0.25,
 		Tick: splashTickFire},
-	splash.Heal: SplashValues{AnimName: "heal", FPS: 10, Loop: true, Timer: 5, Damage: -2, FadeOutTime: 0.25,
+	splash.Heal: {AnimName: "heal", FPS: 10, Loop: true, Timer: 5, Damage: -2, FadeOutTime: 0.25,
 		Tick: splashTickHeal},
-	splash.PoisonCloud: SplashValues{AnimName: "poison-cloud", FPS: 10, Loop: true, Timer: 5, Damage: 2, FadeOutTime: 0.25,
+	splash.PoisonCloud: {AnimName: "poison-cloud", FPS: 10, Loop: true, Timer: 5, Damage: 2, FadeOutTime: 0.25,
 		Tick: splashTickPoisonCloud},
-	splash.Whirlwind: SplashValues{AnimName: "whirlwind", FPS: 12, Loop: true, Timer: 20, Damage: 6, FadeOutTime: 0.5,
+	splash.Whirlwind: {AnimName: "whirlwind", FPS: 12, Loop: true, Timer: 20, Damage: 6, FadeOutTime: 0.5,
 		SingleTick: true, Tick: splashTickWhirlwind, Update: splashUpdateWhirlwind},
-	splash.WaterShield: SplashValues{AnimName: "water-shield", FPS: 12, Loop: true, Timer: 6, FadeOutTime: 0.5,
+	splash.WaterShield: {AnimName: "water-shield", FPS: 12, Loop: true, Timer: 6, FadeOutTime: 0.5,
 		Update: splashUpdateWatershield},
-	splash.LightningZap: SplashValues{AnimName: "lightning-zap", FPS: 12, Damage: 6, SingleTick: true,
+	splash.LightningZap: {AnimName: "lightning-zap", FPS: 12, Damage: 6, SingleTick: true,
 		Tick: splashTickLightingZap},
-	splash.PoisonSpit: SplashValues{AnimName: "poison-spit", FPS: 16},
+	splash.PoisonSpit: {AnimName: "poison-spit", FPS: 16},
 }
 var Splashes = make([]*Splash, 0, 8)
 

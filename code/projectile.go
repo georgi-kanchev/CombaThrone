@@ -45,15 +45,15 @@ type ProjectileBase struct {
 
 var Projectiles, ProjectilesBehind []*Projectile = make([]*Projectile, 0, 32), make([]*Projectile, 0, 32)
 var ProjectilesBase = [proj.COUNT]ProjectileBase{
-	proj.Arrow:       ProjectileBase{FadeOutTime: 10, PersistOnImpact: true, MissMultiplier: 1.0},
-	proj.SmallBullet: ProjectileBase{FadeOutTime: 0.1, MissMultiplier: 1.0},
-	proj.RedPotion: ProjectileBase{FadeOutTime: 10, FreeRotation: true, MissMultiplier: 1.0, ParticlesFunc: ParticlesGlass,
+	proj.Arrow:       {FadeOutTime: 10, PersistOnImpact: true, MissMultiplier: 1.0},
+	proj.SmallBullet: {FadeOutTime: 0.1, MissMultiplier: 1.0},
+	proj.RedPotion: {FadeOutTime: 10, FreeRotation: true, MissMultiplier: 1.0, ParticlesFunc: ParticlesGlass,
 		SplashTop: splash.Fire2, SplashMiddle: splash.Fire3, SplashBottom: splash.Fire2},
-	proj.GreenPotion: ProjectileBase{FadeOutTime: 10, FreeRotation: true, MissMultiplier: 0.2, ParticlesFunc: ParticlesGlass,
+	proj.GreenPotion: {FadeOutTime: 10, FreeRotation: true, MissMultiplier: 0.2, ParticlesFunc: ParticlesGlass,
 		SplashMiddle: splash.Heal},
-	proj.YellowPotion: ProjectileBase{FadeOutTime: 10, FreeRotation: true, MissMultiplier: 1.0, ParticlesFunc: ParticlesGlass,
+	proj.YellowPotion: {FadeOutTime: 10, FreeRotation: true, MissMultiplier: 1.0, ParticlesFunc: ParticlesGlass,
 		SplashMiddle: splash.PoisonCloud},
-	proj.MediumSpit: ProjectileBase{FadeOutTime: 0.1, MissMultiplier: 1.0, SplashMiddle: splash.PoisonSpit, Effect: effect.Shaman},
+	proj.MediumSpit: {FadeOutTime: 0.1, MissMultiplier: 1.0, SplashMiddle: splash.PoisonSpit, Effect: effect.Shaman},
 }
 
 func (u *Unit) NewProjectile(x, y, z, targetX, targetY, targetZ float32, value int, kind proj.Enum, enemyEntrance *Entrance) *Projectile {

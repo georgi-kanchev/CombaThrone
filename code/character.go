@@ -60,7 +60,7 @@ func NewCharacter(hitbox geometry.Shape, stats Values, info string, proj ...Char
 	var actNames = [role.COUNT]string{"damage", "damage", "block", "grief", "buff", "pickups"}
 
 	if len(proj) == 0 {
-		proj = []CharProjectile{CharProjectile{ParabolaMultiplier: 1, Speed: 1}}
+		proj = []CharProjectile{{ParabolaMultiplier: 1, Speed: 1}}
 	}
 
 	return &Character{Values: stats, Hitbox: hitbox,
