@@ -9,7 +9,7 @@ import (
 )
 
 type Settings struct {
-	Fullscreen bool
+	WindowState mode.Enum
 }
 
 var CurrentSettings Settings
@@ -17,7 +17,7 @@ var CurrentSettings Settings
 func InitSettings() {
 	settingsLayout = assets.LoadGUILayout("data/gui-settings.xml")
 
-	CurrentSettings = Settings{Fullscreen: false}
+	CurrentSettings = Settings{WindowState: mode.Maximized}
 }
 
 func UpdateSettings() {
@@ -38,16 +38,31 @@ func UpdateSettings() {
 	}
 
 	var fullscreen, _ = settingsLayout.Item(2, 0, 0, scale)
-	fullscreen.X -= fullscreen.Width/2 - fullscreen.Height
-	fullscreen.Width = fullscreen.Height
 	gui.Button(settingsFullscreen, fullscreen, geometry.Area{}, ThemeGUI.Variant(1), true, 0.8)
 	if gui.IsJustClicked() {
-		CurrentSettings.Fullscreen = !CurrentSettings.Fullscreen
-		settingsFullscreen = ""
-		if CurrentSettings.Fullscreen {
-			settingsFullscreen = "X"
+		settingsDropdown = !settingsDropdown
+	}
+	if settingsDropdown {
+		const height = 40.0
+		fullscreen.Y += fullscreen.Height/2 + height/2
+		fullscreen.Width *= 0.8
+		fullscreen.Height = height
+		gui.List(fullscreen, geometry.Area{}, ThemeGUI.Variant(1), true, 0.6, height/3, "Windowed", "Borderless", "Fullscreen")
+		if gui.IsListJustClicked(0) {
+			settingsDropdown = false
+			CurrentSettings.WindowState = mode.Maximized
+			ApplySettings()
 		}
-		ApplySettings()
+		if gui.IsListJustClicked(1) {
+			settingsDropdown = false
+			CurrentSettings.WindowState = mode.FullscreenBorderless
+			ApplySettings()
+		}
+		if gui.IsListJustClicked(2) {
+			settingsDropdown = false
+			CurrentSettings.WindowState = mode.Fullscreen
+			ApplySettings()
+		}
 	}
 
 	var titleSfx, _ = settingsLayout.Item(27, 0, 0, scale)
@@ -55,19 +70,16 @@ func UpdateSettings() {
 }
 
 func ApplySettings() {
-	if CurrentSettings.Fullscreen {
-		window.SetMode(mode.FullscreenBorderless)
-	} else {
-		window.SetMode(mode.Maximized)
-	}
+	window.SetMode(CurrentSettings.WindowState)
 }
 
 // private ========================================================
 
 var settingsLayout assets.GUILayoutId
+var settingsDropdown bool
+var settingsFullscreen string
 
 var settingsLabels = []string{
-	"Fullscreen", "Monitor", "Quality", "Antialiasing", "Vsync", "Limit FPS", "Show FPS", "",
+	"Window State", "Monitor", "Quality", "Antialiasing", "Vsync", "Limit FPS", "Show FPS", "",
 	"Brightness", "Contrast", "Gamma", "Saturation",
 }
-var settingsFullscreen string

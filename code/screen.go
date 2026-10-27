@@ -25,8 +25,7 @@ var Tags = [123]string{
 }
 var ThemeGUI assets.GUIThemeId
 var GUI assets.AtlasId
-var SlotId, ButtonUpId, ButtonDownId assets.ImageId
-var PanelId assets.ImageId
+var SlotId, PanelId, ButtonUpId, ButtonDownId assets.ImageId
 
 func Init() {
 	View = new(graphics.NewView(1))
@@ -49,7 +48,7 @@ func InitGUI() {
 	}
 
 	ThemeGUI = assets.LoadGUITheme("data/gui-theme.xml")
-	SlotId = GUI.Crops("slot")[0].DuplicateId(-12345_3)
+	SlotId = assets.LoadImage9Patch(GUI.Crops("slot")[0], 8, 8, 8, 8).DuplicateId(-12345_3)
 
 	var btn = GUI.Crops("button")
 	ButtonUpId = assets.LoadImage9Patch(btn[0], 8, 8, 8, 8).DuplicateId(-12345_1)   // ensuring the ImageIds are known after
