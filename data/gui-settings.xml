@@ -6,39 +6,39 @@
         itemSize="40 20" itemSpacing="0 0" itemGap="10" itemNewRow="0" itemAlign="0 0" />
     <box name="graphics" namePosition="br" visible="1" color="#909098"
         rectangle="113.83 64 227.67 256" math="tx ty tw/2 th" targets=" 0 0 0 0"
-        itemSize="ow/2-10 oh/15-3" itemSpacing="10 20" itemGap="0" itemNewRow="0" itemAlign="0 0" />
+        itemSize="ow/2 oh/15-3" itemSpacing="0 20" itemGap="5" itemNewRow="0" itemAlign="0 0" />
     <box name="audio" namePosition="bl" visible="1" color="#909098"
         rectangle="341.5 64 227.67 256" math="tx+tw/2 ty tw/2 th" targets=" 0 0 0 0"
         itemSize="ow/2-10 oh/14-3" itemSpacing="10 10" itemGap="0" itemNewRow="0" itemAlign="0 0" />
   </boxes>
   <items>
-    <item name="title" boxIndex="1" visible="1" size="207.67 21.1" math="mx my mw*2 mh*1.5" newRowMath="" />
-    <item name="label" boxIndex="1" visible="1" size="103.83 14.07" math="mx my mw mh" newRowMath="mnr+oh/15" />
-    <item name="value" boxIndex="1" visible="1" size="103.83 14.07" math="mx my mw mh" newRowMath="" />
-    <item name="label" boxIndex="1" visible="1" size="103.83 14.07" math="mx my mw mh" newRowMath="mnr" />
-    <item name="value" boxIndex="1" visible="1" size="103.83 14.07" math="mx my mw mh" newRowMath="" />
-    <item name="label" boxIndex="1" visible="1" size="103.83 14.07" math="mx my mw mh" newRowMath="mnr" />
-    <item name="value" boxIndex="1" visible="1" size="103.83 14.07" math="mx my mw mh" newRowMath="" />
-    <item name="label" boxIndex="1" visible="1" size="103.83 14.07" math="mx my mw mh" newRowMath="mnr" />
-    <item name="value" boxIndex="1" visible="1" size="103.83 14.07" math="mx my mw mh" newRowMath="" />
-    <item name="label" boxIndex="1" visible="1" size="103.83 14.07" math="mx my mw mh" newRowMath="mnr" />
-    <item name="value" boxIndex="1" visible="1" size="103.83 14.07" math="mx my mw mh" newRowMath="" />
-    <item name="label" boxIndex="1" visible="1" size="103.83 14.07" math="mx my mw mh" newRowMath="mnr" />
-    <item name="value" boxIndex="1" visible="1" size="103.83 14.07" math="mx my mw mh" newRowMath="" />
-    <item name="label" boxIndex="1" visible="1" size="103.83 14.07" math="mx my mw mh" newRowMath="mnr" />
-    <item name="value" boxIndex="1" visible="1" size="103.83 14.07" math="mx my mw mh" newRowMath="" />
-    <item name="label" boxIndex="1" visible="1" size="103.83 14.07" math="mx my mw mh" newRowMath="mnr" />
-    <item name="value" boxIndex="1" visible="1" size="103.83 14.07" math="mx my mw mh" newRowMath="" />
-    <item name="label" boxIndex="1" visible="1" size="103.83 14.07" math="mx my mw mh" newRowMath="mnr" />
-    <item name="value" boxIndex="1" visible="1" size="103.83 14.07" math="mx my mw mh" newRowMath="" />
-    <item name="label" boxIndex="1" visible="1" size="103.83 14.07" math="mx my mw mh" newRowMath="mnr" />
-    <item name="value" boxIndex="1" visible="1" size="103.83 14.07" math="mx my mw mh" newRowMath="" />
-    <item name="label" boxIndex="1" visible="1" size="103.83 14.07" math="mx my mw mh" newRowMath="mnr" />
-    <item name="value" boxIndex="1" visible="1" size="103.83 14.07" math="mx my mw mh" newRowMath="" />
-    <item name="label" boxIndex="1" visible="1" size="103.83 14.07" math="mx my mw mh" newRowMath="mnr" />
-    <item name="value" boxIndex="1" visible="1" size="103.83 14.07" math="mx my mw mh" newRowMath="" />
-    <item name="label" boxIndex="1" visible="1" size="103.83 14.07" math="mx my mw mh" newRowMath="mnr" />
-    <item name="value" boxIndex="1" visible="1" size="103.83 14.07" math="mx my mw mh" newRowMath="" />
+    <item name="title" boxIndex="1" visible="1" size="227.67 21.1" math="mx my mw*2 mh*1.5" newRowMath="" />
+    <item name="label" boxIndex="1" visible="1" size="75.89 14.07" math="mx my mw/1.5 mh" newRowMath="mnr+oh/15" />
+    <item name="value" boxIndex="1" visible="1" size="136.6 14.07" math="mx my mw*1.2 mh" newRowMath="" />
+    <item name="label" boxIndex="1" visible="1" size="75.89 14.07" math="mx my mw/1.5 mh" newRowMath="mnr" />
+    <item name="value" boxIndex="1" visible="1" size="136.6 14.07" math="mx my mw*1.2 mh" newRowMath="" />
+    <item name="label" boxIndex="1" visible="1" size="75.89 14.07" math="mx my mw/1.5 mh" newRowMath="mnr" />
+    <item name="value" boxIndex="1" visible="1" size="136.6 14.07" math="mx my mw*1.2 mh" newRowMath="" />
+    <item name="label" boxIndex="1" visible="1" size="75.89 14.07" math="mx my mw/1.5 mh" newRowMath="mnr" />
+    <item name="value" boxIndex="1" visible="1" size="136.6 14.07" math="mx my mw*1.2 mh" newRowMath="" />
+    <item name="label" boxIndex="1" visible="1" size="75.89 14.07" math="mx my mw/1.5 mh" newRowMath="mnr" />
+    <item name="value" boxIndex="1" visible="1" size="136.6 14.07" math="mx my mw*1.2 mh" newRowMath="" />
+    <item name="label" boxIndex="1" visible="1" size="75.89 14.07" math="mx my mw/1.5 mh" newRowMath="mnr" />
+    <item name="value" boxIndex="1" visible="1" size="136.6 14.07" math="mx my mw*1.2 mh" newRowMath="" />
+    <item name="label" boxIndex="1" visible="1" size="75.89 14.07" math="mx my mw/1.5 mh" newRowMath="mnr" />
+    <item name="value" boxIndex="1" visible="1" size="136.6 14.07" math="mx my mw*1.2 mh" newRowMath="" />
+    <item name="label" boxIndex="1" visible="1" size="75.89 14.07" math="mx my mw/1.5 mh" newRowMath="mnr" />
+    <item name="value" boxIndex="1" visible="1" size="136.6 14.07" math="mx my mw*1.2 mh" newRowMath="" />
+    <item name="label" boxIndex="1" visible="1" size="75.89 14.07" math="mx my mw/1.5 mh" newRowMath="mnr" />
+    <item name="value" boxIndex="1" visible="1" size="136.6 14.07" math="mx my mw*1.2 mh" newRowMath="" />
+    <item name="label" boxIndex="1" visible="1" size="75.89 14.07" math="mx my mw/1.5 mh" newRowMath="mnr" />
+    <item name="value" boxIndex="1" visible="1" size="136.6 14.07" math="mx my mw*1.2 mh" newRowMath="" />
+    <item name="label" boxIndex="1" visible="1" size="75.89 14.07" math="mx my mw/1.5 mh" newRowMath="mnr" />
+    <item name="value" boxIndex="1" visible="1" size="136.6 14.07" math="mx my mw*1.2 mh" newRowMath="" />
+    <item name="label" boxIndex="1" visible="1" size="75.89 14.07" math="mx my mw/1.5 mh" newRowMath="mnr" />
+    <item name="value" boxIndex="1" visible="1" size="136.6 14.07" math="mx my mw*1.2 mh" newRowMath="" />
+    <item name="label" boxIndex="1" visible="1" size="75.89 14.07" math="mx my mw/1.5 mh" newRowMath="mnr" />
+    <item name="value" boxIndex="1" visible="1" size="136.6 14.07" math="mx my mw*1.2 mh" newRowMath="" />
     <item name="title" boxIndex="2" visible="1" size="207.67 22.93" math="mx my mw*2 mh*1.5" newRowMath="" />
     <item name="label" boxIndex="2" visible="1" size="103.83 15.29" math="mx my mw mh" newRowMath="mnr+oh/15" />
     <item name="value" boxIndex="2" visible="1" size="103.83 15.29" math="mx my mw mh" newRowMath="" />
