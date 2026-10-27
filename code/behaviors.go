@@ -165,7 +165,7 @@ var Behaviors = map[char.Enum]func(self *Unit){
 			self.TickEffect(effect.Stabber)                        // tick original
 			eff.ActPoints += Effects[effect.Stabber].ActPoints     // accumulate the unit one
 		}
-		eff.EffectInfo = text.New("🟩", Tags[icon.Plus], "🟧", eff.ActPoints, " ", Tags[icon.Fighter], "damage ⬜(Self)")
+		eff.EffectInfo = text.New("🟩", Tags[icon.Plus], "🟧", eff.ActPoints, " ", Tags[icon.Wound], "damage ⬜(Self)")
 		self.Effects[effect.Stabber] = eff // return back to unit
 	},
 	char.Gunner: func(self *Unit) {
@@ -190,8 +190,7 @@ var Behaviors = map[char.Enum]func(self *Unit){
 		}
 	},
 	char.Raven: func(self *Unit) {
-		self.applyEffectInRange(effect.RavenFighter, 1-self.Team, []lane.Enum{self.Lane - 1}, []role.Enum{role.Fighter})
-		self.applyEffectInRange(effect.RavenBackliner, 1-self.Team, []lane.Enum{self.Lane - 1}, []role.Enum{role.Backliner})
+		self.applyEffectInRange(effect.Raven, 1-self.Team, []lane.Enum{self.Lane - 1}, nil)
 	},
 	char.Snake: func(self *Unit) {
 		self.applyEffectInRange(effect.Snake, 1-self.Team, []lane.Enum{self.Lane, self.Lane - 1}, nil)
@@ -255,8 +254,10 @@ var Behaviors = map[char.Enum]func(self *Unit){
 		if self.Hitbox().Overlaps(self.Following.Hitbox()) {
 			self.Values.DisablesTimer = 0.1
 			self.Values.MoveSpeed = self.Following.Values.MoveSpeed
-			self.Following.AddEffect(effect.Wolf)              // effect is just for tooltip, no stats
-			self.Following.ActTimer -= DeltaTimeScaled() * 0.5 // applied here instead
+			if self.Following.IsAlive() {
+				self.Following.AddEffect(effect.Wolf)              // effect is just for tooltip, no stats
+				self.Following.ActTimer -= DeltaTimeScaled() * 0.5 // applied here instead
+			}
 		}
 		if !self.Following.IsSummoned() {
 			self.IsReturning = true

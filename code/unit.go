@@ -3,8 +3,9 @@ package game
 import (
 	"game/code/constants/base"
 	char "game/code/constants/character"
-	"game/code/constants/effect"
+	e "game/code/constants/effect"
 	"game/code/constants/entrance"
+	"game/code/constants/icon"
 	"game/code/constants/lane"
 	"game/code/constants/pickup"
 	"game/code/constants/role"
@@ -37,7 +38,7 @@ type Unit struct {
 	Particles *particles.System
 	State     state.Enum
 
-	Effects           map[effect.Enum]Values
+	Effects           map[e.Enum]Values
 	EffectsKeysSorted []uint8
 	EffectsLabel      *graphics.Object
 	EffectsDynamic    text.Dynamic
@@ -70,11 +71,11 @@ func NewUnit(character char.Enum, fromTeam team.Enum, lane lane.Enum) *Unit {
 	var disablesLabel = graphics.NewTextbox(0, 0, 64, 12, 0)
 	var unit = Unit{Object: graphics.NewSprite(-2000, -2000, 1, 0), Character: character, Team: fromTeam, Lane: lane,
 		Anim: &anim, ActTimer: number.NaN(), HurtTimer: number.NaN(), LastState: state.WaitingToBeSummoned,
-		Effects: make(map[effect.Enum]Values, 8), Particles: particles.NewSystem(),
+		Effects: make(map[e.Enum]Values, 8), Particles: particles.NewSystem(),
 		EffectsLabel: &disablesLabel,
 	}
 
-	unit.EffectsLabel.Details.FillColor, unit.EffectsLabel.Details.TextLineHeight = 0, 10
+	unit.EffectsLabel.Details.FillColor, unit.EffectsLabel.Details.TextLineHeight = 0, 8
 	unit.EffectsLabel.Details.TextAlignX, unit.EffectsLabel.Details.TextAlignY = 0.5, 0.5
 	unit.EffectsLabel.Details.TextShadowColor, unit.EffectsLabel.Details.TextShadowWeight = 0, 0
 	unit.EffectsLabel.Details.OutlineSize, unit.EffectsLabel.Details.OutlineColor = 0.4, palette.Black
@@ -179,7 +180,7 @@ func (u *Unit) PrepareSpawn() {
 	clear(u.Effects)
 
 	if u.IsGarrisoner() {
-		u.AddEffect(effect.MoreRangeOnGarrison)
+		u.AddEffect(e.MoreRangeOnGarrison)
 	}
 
 	var col = Collisions[u.Lane]
@@ -304,20 +305,23 @@ func (u *Unit) AffectHealth(value int, particles bool, hurtBy *Unit) {
 	}
 }
 
-func (u *Unit) AddEffect(effect effect.Enum) {
-	if effect == 0 { // fuck it, name collision - i don't care
+func (u *Unit) AddEffect(effect e.Enum) {
+	if effect == 0 { // name collision - i don't care
 		return
 	}
 
-	var _, has = u.Effects[effect]
+	var eff, has = u.Effects[effect]
 	if !has {
 		u.Effects[effect] = Effects[effect]
 		u.EffectsKeysSorted = append(u.EffectsKeysSorted, uint8(effect))
 		collection.SortNumbers(u.EffectsKeysSorted...)
 		u.TickEffect(effect)
+	} else if eff.EffectTimer != number.Infinity() {
+		u.RemoveEffect(effect) // this effect has a timer
+		u.AddEffect(effect)    // refresh it
 	}
 }
-func (u *Unit) TickEffect(effect effect.Enum) {
+func (u *Unit) TickEffect(effect e.Enum) {
 	var _, has = u.Effects[effect]
 	if !has {
 		return
@@ -331,7 +335,7 @@ func (u *Unit) TickEffect(effect effect.Enum) {
 	u.Values.ActTimer += values.ActTimer
 	u.Values.DisablesTimer += values.DisablesTimer
 }
-func (u *Unit) RemoveEffect(effect effect.Enum) {
+func (u *Unit) RemoveEffect(effect e.Enum) {
 	var _, has = u.Effects[effect]
 	if !has {
 		return
@@ -347,6 +351,21 @@ func (u *Unit) RemoveEffect(effect effect.Enum) {
 
 	delete(u.Effects, effect)
 	u.EffectsKeysSorted = collection.Remove(u.EffectsKeysSorted, uint8(effect))
+}
+
+func (u *Unit) TimerIconEffect(effect e.Enum) string {
+	var eff = u.Effects[e.Enum(effect)]
+	if eff.EffectTimer == number.Infinity() || eff.EffectTimer == 0 || Effects[effect].EffectTimer < 0.15 {
+		return "" // no timers when infinite, 0 or too short (see Bear for too short one)
+	}
+
+	var max = Effects[effect].EffectTimer
+	if effect == e.Dead {
+		max = u.Values.ReviveTimer
+	}
+
+	var progress = number.Round(number.Map(eff.EffectTimer, 0, max, float32(icon.Time0), float32(icon.Time16)))
+	return Tags[uint8(progress)]
 }
 
 // private ========================================================
@@ -365,7 +384,7 @@ var laneMasks = map[lane.Enum]geometry.Area{
 	lane.UpperOff:  geometry.NewArea(0, 0, 428, 1000),
 }
 var teamColors = [team.COUNT]uint{team.Ally: palette.Green, team.Enemy: palette.Red}
-var effectsToRemove []effect.Enum
+var effectsToRemove []e.Enum
 
 func (u *Unit) particlesBlood(p *particles.Particle) (alive bool) {
 	if p.Age == 0 {
@@ -401,10 +420,10 @@ func (u *Unit) particlesBlood(p *particles.Particle) (alive bool) {
 func (u *Unit) applyState() {
 	var canBeActedUpon, entrance = u.EnemyEntrance()
 	var canAct = u.ActTimer < 0 || number.IsNaN(u.ActTimer)
-	var enemyEntranceInRange = canBeActedUpon && entrance != nil
+	var enemyEntranceInRange = canBeActedUpon && entrance != nil && !u.Values.CannotActVsEntrances
 	var hasMeleeTarget = u.UnitFront != nil && u.Team != u.UnitFront.Team
-	var melee = canAct && (hasMeleeTarget || enemyEntranceInRange) && u.Values.ActRange == 1
-	var canMove = !u.IsAtWall && u.IsGrounded
+	var melee = canAct && (hasMeleeTarget || enemyEntranceInRange) && u.Values.ActRange == 1 && u.Values.Role != role.Defender
+	var canMove = !u.IsAtWall && u.IsGrounded // Defenders act only against units (unless specified by behavior) ^ ^ ^ ^ ^ ^ ^
 
 	var closestDistX = number.ValueBiggest[float32]()
 	var actRange = float32(u.Values.ActRange) * TileSize
@@ -620,10 +639,11 @@ func (u *Unit) actUponState() {
 		u.VelocityX = 0
 
 		clear(u.Effects)
-		u.AddEffect(effect.Dead)
-		var eff = u.Effects[effect.Dead]
+		u.AddEffect(e.Dead)
+		var eff = u.Effects[e.Dead]
 		eff.EffectInfo += " (" + Characters[u.LastHurtBy.Character].Values.Name + ")"
-		u.Effects[effect.Dead] = eff
+		eff.EffectTimer = Characters[u.Character].Values.ReviveTimer
+		u.Effects[e.Dead] = eff
 	case state.Dying, state.DyingEnd: // empty
 	case state.Decaying:
 		if u.HurtTimer < -u.Values.ReviveTimer || u.IsGarrisoner() {
@@ -711,7 +731,7 @@ func (u *Unit) applyCollisions() {
 	u.UnitBehind, u.UnitFront = nil, nil
 	for _, other := range Units {
 		var ohb = other.Hitbox()
-		var anyoneDead = !u.IsAlive() || !other.IsAlive()
+		var anyoneDead = !u.IsAlive() || !other.IsAlive() || u.State == state.Decaying || other.State == state.Decaying
 		var isGarrison = other.IsGarrisoner() || u.IsGarrisoner()
 		var intruder = !u.IsOutsideOwnBase() && other.IsInsideEnemyBase(TileSize/2)
 		var _, otherFlying = CharactersFlying[other.Character]
@@ -722,15 +742,15 @@ func (u *Unit) applyCollisions() {
 			continue
 		}
 		var opposite = (!u.IsReturning && other.IsReturning) || (u.Team != other.Team)
-		if u.IsOffLaner() && other.IsOffLaner() && opposite {
+		if u.IsOffLaner() && other.IsOffLaner() && opposite && u.Character != char.Wolf { // hardcode wolf, loyal boi
 			u.IsReturning = true // face to face, gotta return to base
 		}
 
 		hb = hb.Collide(ohb)
 		u.X, u.Y = hb.X+diffX, hb.Y+diffY
-		if (u.Team == team.Ally && u.X < other.X) || (u.Team == team.Enemy && u.X > other.X) {
+		if (!u.IsFacingLeft() && u.X < other.X) || (u.IsFacingLeft() && u.X > other.X) {
 			u.UnitFront = other
-		} else if (u.Team == team.Ally && u.X > other.X) || (u.Team == team.Enemy && u.X < other.X) {
+		} else if (u.IsFacingLeft() && u.X > other.X) || (!u.IsFacingLeft() && u.X < other.X) {
 			u.UnitBehind = other
 		}
 	}
@@ -789,7 +809,12 @@ func (u *Unit) drawDisables() {
 
 		u.EffectsDynamic.Set()
 		for _, k := range u.EffectsKeysSorted {
-			u.EffectsDynamic.Append(u.Effects[effect.Enum(k)].EffectIconText)
+			u.EffectsDynamic.Append(u.Effects[e.Enum(k)].EffectIconText)
+
+			var eff = u.TimerIconEffect(e.Enum(k))
+			if eff != "" {
+				u.EffectsDynamic.Append(eff, " ")
+			}
 		}
 
 		u.EffectsLabel.Text = u.EffectsDynamic.Get()

@@ -3,6 +3,7 @@ package game
 import (
 	"game/code/constants/base"
 	"game/code/constants/effect"
+	e "game/code/constants/effect"
 	"game/code/constants/entrance"
 	"game/code/constants/icon"
 	"game/code/constants/lane"
@@ -274,7 +275,12 @@ func (u *Unit) DrawTooltip(shape geometry.Shape, bench bool) {
 		TooltipTexts[0].Set()
 
 		for _, k := range u.EffectsKeysSorted {
-			TooltipLabel.Text = TooltipTexts[0].Append(u.Effects[effect.Enum(k)].EffectInfo, "\n")
+			TooltipLabel.Text = TooltipTexts[0].Append(u.Effects[effect.Enum(k)].EffectInfo)
+			var eff = u.TimerIconEffect(e.Enum(k))
+			if eff != "" {
+				TooltipTexts[0].Append(" ", eff)
+			}
+			TooltipLabel.Text = TooltipTexts[0].Append("\n")
 		}
 		SceneHUD.View.DrawObject(TooltipLabel)
 	}
@@ -301,11 +307,16 @@ func (u *Unit) DrawTooltip(shape geometry.Shape, bench bool) {
 		TooltipTexts[1].Append("🌗🟨", Tags[icon.Speed], u.Values.MoveSpeed, " speed\n")
 	}
 	if u.Values.ActPoints > 0 {
+		var iconStr = Tags[char.RoleIcon]
+		if u.Values.Role == role.Fighter || u.Values.Role == role.Backliner {
+			iconStr = Tags[icon.Wound]
+		}
+
 		if u.Values.Role == role.Collector && u.IsSummoned() {
 			var name = char.ActPointsName
-			TooltipTexts[1].Append("🟧", Tags[char.RoleIcon], len(u.Carrying), "/", u.Values.ActPoints, " ", name, "\n")
+			TooltipTexts[1].Append("🟧", iconStr, len(u.Carrying), "/", u.Values.ActPoints, " ", name, "\n")
 		} else {
-			TooltipTexts[1].Append("🟧", Tags[char.RoleIcon], u.Values.ActPoints, " ", char.ActPointsName, "\n")
+			TooltipTexts[1].Append("🟧", iconStr, u.Values.ActPoints, " ", char.ActPointsName, "\n")
 		}
 	}
 	if u.Values.ActRange > 0 {

@@ -15,8 +15,7 @@ const (
 	Gunner1
 	Gunner2
 	Vulture
-	RavenFighter
-	RavenBackliner
+	Raven
 	Snake
 	Aquaweaver
 	Bear

@@ -32,6 +32,7 @@ const (
 	Unit
 	Book
 	Sword
+	Wound
 	Gear
 	Door
 	Music
@@ -39,10 +40,51 @@ const (
 	CircleMinus
 	Chest
 	Upgrade
-	_
+	Page
 	Star
 	Flag
 	Timer
 	Disable
+	Strong
+	Loop1
+	Loop2
+	QuestionMark
+	ExclamationMark
+	PieChart
+	User
+	XP
+	Hammer
+	Copy
+	Camera
+	DNA
+	Pentagon
+	Infinity
+	Swirl
+	Hit
+	Arrow
+	Time0
+	Time1
+	Time3
+	Time4
+	Time5
+	Time6
+	Time7
+	Time8
+	Time9
+	Time10
+	Time11
+	Time12
+	Time13
+	Time14
+	Time15
+	Time16
+	_
+	_
+	Lightning
+	Zap
+	Splash2
+	_
+	_
+	Swing
 	COUNT
 )

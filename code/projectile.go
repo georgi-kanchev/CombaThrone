@@ -10,6 +10,7 @@ import (
 	"pure-game-kit/packages/utility/angle"
 	"pure-game-kit/packages/utility/collection"
 	"pure-game-kit/packages/utility/color"
+	"pure-game-kit/packages/utility/color/palette"
 	"pure-game-kit/packages/utility/number"
 	"pure-game-kit/packages/utility/point"
 	"pure-game-kit/packages/utility/random"
@@ -80,7 +81,11 @@ func (u *Unit) NewProjectile(x, y, z, targetX, targetY, targetZ float32, value i
 		TravelTime: totalTime, ArcHeight: dist / 3 * parabola, Value: value, EnemyEntrance: enemyEntrance,
 		FadeOutTime: fadeOutTime, FreeRoation: freeRotation, Particles: particles.NewSystem(),
 	}
-	proj.Details.Tint = Characters[u.Character].Projectile.Tint
+	var tint = Characters[u.Character].Projectile.Tint
+	if tint == 0 {
+		tint = palette.White
+	}
+	proj.Details.Tint = tint
 	return proj
 }
 
