@@ -177,6 +177,7 @@ func (u *Unit) PrepareSpawn() {
 	u.IsReturning, u.Health = false, u.Values.MaxHealth
 	u.VelocityX, u.VelocityY = 0, 0
 	u.EffectsKeysSorted = collection.Clear(u.EffectsKeysSorted)
+	u.Values.DisablesTimer = 0
 	clear(u.Effects)
 
 	if u.IsGarrisoner() {
@@ -348,6 +349,7 @@ func (u *Unit) RemoveEffect(effect e.Enum) {
 	u.Values.ActPoints -= values.ActPoints
 	u.Values.ActRange -= values.ActRange
 	u.Values.ActTimer -= values.ActTimer
+	u.Values.DisablesTimer = max(u.Values.DisablesTimer-values.DisablesTimer, 0)
 
 	delete(u.Effects, effect)
 	u.EffectsKeysSorted = collection.Remove(u.EffectsKeysSorted, uint8(effect))
