@@ -1,38 +1,44 @@
 package game
 
 import (
+	"game/code/constants/popup"
 	"pure-game-kit/packages/assets"
 	"pure-game-kit/packages/geometry"
 	"pure-game-kit/packages/gui"
+	"pure-game-kit/packages/input/keyboard"
+	"pure-game-kit/packages/input/keyboard/key"
 	"pure-game-kit/packages/utility/number"
 	"pure-game-kit/packages/utility/text"
 	"pure-game-kit/packages/window"
-	"pure-game-kit/packages/window/filter"
+	f "pure-game-kit/packages/window/filter"
 	"pure-game-kit/packages/window/mode"
 )
 
 type Settings struct {
-	WindowState mode.Enum
-	Monitor     int
-	Quality     float32
+	Window            mode.Enum
+	Filter            f.Enum
+	Monitor           int
+	Quality, LimitFPS float32
+
+	Antialiasing, Vsync, ShowFPS bool
 }
 
-var CurrentSettings Settings
+var CurrentSettings = Settings{Window: mode.Maximized, Quality: 1}
 
 func InitSettings() {
 	settingsLayout = assets.LoadGUILayout("data/gui-settings.xml")
 	settingsMonitors, _ = window.Monitors()
 
-	CurrentSettings = Settings{WindowState: mode.Maximized, Quality: 1}
 	ApplySettings()
 }
 
 func UpdateSettings() {
+	var zero = geometry.Area{}
 	gui.Scale = 5
 
-	gui.Rectangle(0, gui.AreaHUD(0.5, 0.5, 1, 1), geometry.Area{}, true) // menu cancel area (entire screen)
+	gui.Rectangle(0, gui.AreaHUD(0.5, 0.5, 1, 1), zero, true) // menu cancel area (entire screen)
 	if gui.IsJustClicked() {
-		settingsDropdown = geometry.Area{}
+		settingsDropdown = zero
 	}
 
 	const scale = 0.2
@@ -44,37 +50,73 @@ func UpdateSettings() {
 	//=================================================================
 
 	var titleGfx, _ = settingsLayout.Item(0, 0, 0, scale)
-	gui.Text("🔊Graphics", titleGfx, geometry.Area{}, ThemeGUI, false, 0.5)
+	gui.Text("🔊Graphics", titleGfx, zero, ThemeGUI, false, 0.5)
 
 	for i, txt := range settingsLabels {
 		var area, _ = settingsLayout.Item(1+i*2, 0, 0, scale)
-		gui.Text(txt, area, geometry.Area{}, ThemeGUI.Variant(1), false, 0.8)
+		gui.Text(txt, area, zero, ThemeGUI.Variant(1), false, 0.8)
 	}
 
 	var state, _ = settingsLayout.Item(2, 0, 0, scale)
-	gui.Button(settingsWindowState, state, geometry.Area{}, ThemeGUI.Variant(1), true, 0.8)
+	gui.Button(settingsWindowState, state, zero, ThemeGUI.Variant(1), true, 0.8)
 	if gui.IsJustClicked() {
 		settingsDropdown = state
 	}
+
 	var monitor, _ = settingsLayout.Item(4, 0, 0, scale)
-	gui.Button(settingsMonitor, monitor, geometry.Area{}, ThemeGUI.Variant(1), true, 0.5)
+	gui.Button(settingsMonitor, monitor, zero, ThemeGUI.Variant(1), true, 0.5)
 	if gui.IsJustClicked() {
 		settingsDropdown = monitor
 	}
 
-	var quality, _ = settingsLayout.Item(6, 0, 0, scale)
-	gui.Slider(&CurrentSettings.Quality, 0.01, quality, geometry.Area{}, 0, true)
-	window.SetQuality(7-CurrentSettings.Quality*6, filter.Point)
-	gui.Text(settingsQualityDyn.Set(number.Round(CurrentSettings.Quality*10, 1)), quality, geometry.Area{}, ThemeGUI, false, 0.8)
+	var quality, _ = settingsLayout.Item(8, 0, 0, scale)
+	gui.Slider(&CurrentSettings.Quality, 0.01, quality, zero, ThemeGUI, true)
+	window.SetQuality(5-CurrentSettings.Quality*4, CurrentSettings.Filter)
+	gui.Text(settingsQuality.Set(number.Round(CurrentSettings.Quality*10, 1)), quality, zero, ThemeGUI, false, 0.8)
+
+	var filter, _ = settingsLayout.Item(10, 0, 0, scale)
+	gui.Button(settingsFilter, filter, zero, ThemeGUI.Variant(1), CurrentSettings.Quality < 1, 0.8)
+	if gui.IsJustClicked() {
+		settingsDropdown = filter
+	}
+
+	var aa, _ = settingsLayout.Item(12, 0, 0, scale)
+	gui.Button(settingsAA, aa, zero, ThemeGUI.Variant(1), true, 0.8)
+	if gui.IsJustClicked() {
+		CurrentSettings.Antialiasing = !CurrentSettings.Antialiasing
+		ApplySettings()
+	}
+
+	var vsync, _ = settingsLayout.Item(16, 0, 0, scale)
+	gui.Button(settingsVsync, vsync, zero, ThemeGUI.Variant(1), true, 0.8)
+	if gui.IsJustClicked() {
+		CurrentSettings.Vsync = !CurrentSettings.Vsync
+		ApplySettings()
+	}
+
+	var limitFPS, _ = settingsLayout.Item(18, 0, 0, scale)
+	gui.Slider(&CurrentSettings.LimitFPS, 0.01, limitFPS, zero, ThemeGUI, !CurrentSettings.Vsync)
+	window.SetTargetFPS(uint8(CurrentSettings.LimitFPS * float32(500)))
+	gui.Text(settingsLimitFPS.Set(number.Round(CurrentSettings.LimitFPS*500)), limitFPS, zero, ThemeGUI, false, 0.8)
+
+	var showFPS, _ = settingsLayout.Item(20, 0, 0, scale)
+	gui.Button(settingsShowFPS, showFPS, zero, ThemeGUI.Variant(1), true, 0.8)
+	if gui.IsJustClicked() {
+		CurrentSettings.ShowFPS = !CurrentSettings.ShowFPS
+		ApplySettings()
+	}
+
+	var hint, _ = settingsLayout.Item(22, 0, 0, scale)
+	gui.Text("* requires restart", hint, zero, ThemeGUI, false, 0.8)
 
 	var titleSfx, _ = settingsLayout.Item(27, 0, 0, scale)
-	gui.Text("🔊Audio", titleSfx, geometry.Area{}, ThemeGUI, false, 0.5)
+	gui.Text("🔊Audio", titleSfx, zero, ThemeGUI, false, 0.5)
 
 	// menus =================================================================
 
 	var windowResult = menu(state, "Windowed", "Borderless", "Fullscreen")
 	if windowResult != -1 {
-		CurrentSettings.WindowState = [3]mode.Enum{mode.Maximized, mode.FullscreenBorderless, mode.Fullscreen}[windowResult]
+		CurrentSettings.Window = [3]mode.Enum{mode.Maximized, mode.FullscreenBorderless, mode.Fullscreen}[windowResult]
 		ApplySettings()
 	}
 
@@ -83,32 +125,50 @@ func UpdateSettings() {
 		CurrentSettings.Monitor = monitorResult
 		ApplySettings()
 	}
+
+	var filterResult = menu(filter, settingsFilters...)
+	if filterResult != -1 {
+		CurrentSettings.Filter = f.Enum(filterResult)
+		ApplySettings()
+	}
+
+	if keyboard.IsKeyJustPressed(key.Escape) {
+		Popup = popup.MainMenu
+	}
 }
 
 func ApplySettings() {
-	window.SetMode(CurrentSettings.WindowState)
+	window.SetMode(CurrentSettings.Window)
 	window.MoveToMonitor(CurrentSettings.Monitor)
-	settingsWindowState = [4]string{"", "Windowed", "Fullscreen", "Borderless"}[CurrentSettings.WindowState]
+	window.SetQuality(5-CurrentSettings.Quality*4, CurrentSettings.Filter)
+	window.SetTargetFPS(uint8(CurrentSettings.LimitFPS * float32(500)))
+	settingsWindowState = [4]string{"", "Windowed", "Fullscreen", "Borderless"}[CurrentSettings.Window]
+	settingsFilter = settingsFilters[CurrentSettings.Filter]
 	settingsMonitor = settingsMonitors[CurrentSettings.Monitor]
+	settingsAA = settingsBool[CurrentSettings.Antialiasing]
+	settingsVsync = settingsBool[CurrentSettings.Vsync]
+	settingsShowFPS = settingsBool[CurrentSettings.ShowFPS]
 }
 
 // private ========================================================
 
 var settingsLayout assets.GUILayoutId
 var settingsDropdown geometry.Area
-var settingsWindowState, settingsMonitor string
+var settingsWindowState, settingsMonitor, settingsFilter, settingsAA, settingsVsync, settingsShowFPS string
 var settingsMonitors []string
-var settingsQualityDyn text.Dynamic
+var settingsQuality, settingsLimitFPS text.Dynamic
 
 var settingsLabels = []string{
-	"Window State", "Monitor", "Quality", "Antialiasing", "Vsync", "Limit FPS", "Show FPS", "",
-	"Brightness", "Contrast", "Gamma", "Saturation",
+	"Window", "Monitor", "", "Quality", "Filter", "Antialiasing*", "", "Vsync*", "Limit FPS", "Show FPS",
 }
+var settingsBool = map[bool]string{false: "Off", true: "On"}
+var settingsFilters = []string{"Point", "Bilinear", "Trilinear", "Anisotropic4x", "Anisotropic8x", "Anisotropic16x"}
 
 func menu(area geometry.Area, items ...string) (clicked int) {
 	if area == settingsDropdown {
+		var count = float32(len(items))
 		var itemHeight = area.Height
-		area = geometry.NewArea(area.X, area.Y+itemHeight/2+(itemHeight*3)/2, area.Width, itemHeight*3)
+		area = geometry.NewArea(area.X, area.Y+itemHeight/2+(itemHeight*count)/2, area.Width*1.1, itemHeight*count)
 		gui.List(area, geometry.Area{}, ThemeGUI.Variant(1), true, 0.5, itemHeight, items...)
 		for i := range items {
 			if gui.IsListJustClicked(i) {

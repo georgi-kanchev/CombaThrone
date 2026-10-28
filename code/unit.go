@@ -256,7 +256,7 @@ func (u *Unit) Update() {
 		}
 
 		p.Mask = u.Mask
-		p.X, p.Y = point.MoveToPointSmooth(p.X, p.Y, hb.X+offsetX, hb.Y-float32(i)*TileSize/2, 0.4)
+		p.X, p.Y = point.MoveToPointSmooth(p.X, p.Y, hb.X+offsetX, hb.Y-float32(i)*TileSize/2, 25*DeltaTimeScaled())
 	}
 
 	if TimeScale > 0 {

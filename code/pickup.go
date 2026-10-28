@@ -86,7 +86,7 @@ func (p *Pickup) Update() {
 
 		if p.Kind == pickup.Coin {
 			x, y = SceneHUD.Coins.X, SceneHUD.Coins.Y
-			p.X, p.Y = point.MoveToPointSmooth(p.X, p.Y, x, y, 0.06)
+			p.X, p.Y = point.MoveToPointSmooth(p.X, p.Y, x, y, 3*DeltaTimeScaled())
 
 			if p.SlotUI >= 0 && number.IsWithin(p.X, x, 3) && number.IsWithin(p.Y, y, 3) {
 				p.Effect()
@@ -94,7 +94,7 @@ func (p *Pickup) Update() {
 			}
 		}
 
-		p.X, p.Y = point.MoveToPointSmooth(p.X, p.Y, x, y, 0.06)
+		p.X, p.Y = point.MoveToPointSmooth(p.X, p.Y, x, y, 3*DeltaTimeScaled())
 	}
 	if p.HasShadow {
 		DrawShadow(p.X, p.Z-0.1, p.Width*0.6, p.Height*0.15, 0, p.Mask)

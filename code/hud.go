@@ -567,7 +567,7 @@ func (h *HUD) trySummon(lastSummonIndex int) {
 		}
 	}
 
-	h.SummonDragX, h.SummonDragY = point.MoveToPointSmooth(h.SummonDragX, h.SummonDragY, targetX, targetY, 0.4)
+	h.SummonDragX, h.SummonDragY = point.MoveToPointSmooth(h.SummonDragX, h.SummonDragY, targetX, targetY, 25*DeltaTimeScaled())
 
 	h.DrawPath(View, unitX, unitY, h.SummonDragX, h.SummonDragY)
 	var icon = Characters[unit.Character].Icon

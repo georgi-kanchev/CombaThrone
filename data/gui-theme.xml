@@ -16,6 +16,18 @@
 				<clicked align="0.5 0.5"/>
 			</value>
 		</button>
+		<slider>
+			<body imageId="-123453" color="#b5b5b5">
+				<disabled color="#b5b5b580" />
+				<focused color="#9c9c9c" />
+				<clicked color="#858585" />
+			</body>
+			<handle imageId="0" roundness="1.0" color="#b5b5b5" borderSize="-2" borderColor="#ffffff">
+				<disabled color="#b5b5b580" borderColor="#b5b5b5"/>
+				<focused color="#9c9c9c"/>
+				<clicked color="#858585"/>
+			</handle>
+		</slider>
 	</variant0>
 	<variant1>
 		<text color="#fcfefe" lineHeight="10" fontId="0" gap="10 0" align="1 0.5" weight="0.1" outlineSize="0.4" 
@@ -27,7 +39,7 @@
 				<clicked color="#858585"/>
 			</body>
 			<value color="#fcfefe" lineHeight="15" fontId="0" gap="10 0" align="0.5 0.5" weight="0.1" outlineSize="0.4" 
-		outlineColor="#2a304e">
+		outlineColor="#000000">
 				<disabled color="#fbfefe80" outlineColor="#2b315078"/>
 				<focused />
 				<clicked />
