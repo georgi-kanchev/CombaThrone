@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	window.Create("CombaThrone", game.CurrentSettings.Vsync, game.CurrentSettings.Antialiasing)
+	window.Create("CombaThrone", game.Settings.Vsync, game.Settings.Antialiasing)
 
 	game.Init()
 	for window.KeepOpen() {

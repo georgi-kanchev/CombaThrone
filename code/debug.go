@@ -50,7 +50,7 @@ func UpdateDebug() {
 
 	switch DebugMode {
 	case DebugOff:
-		if CurrentSettings.ShowFPS {
+		if Settings.ShowFPS {
 			View.DrawDebugInfo(false)
 		}
 	case DebugGame:

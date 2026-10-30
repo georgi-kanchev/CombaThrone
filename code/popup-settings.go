@@ -14,7 +14,7 @@ import (
 	"pure-game-kit/packages/window/mode"
 )
 
-type Settings struct {
+type SettingsData struct {
 	Window            mode.Enum
 	Filter            f.Enum
 	Monitor           int
@@ -23,7 +23,7 @@ type Settings struct {
 	Antialiasing, Vsync, ShowFPS bool
 }
 
-var CurrentSettings = Settings{Window: mode.Maximized, Quality: 1}
+var Settings = SettingsData{Window: mode.Maximized, Quality: 1}
 
 func InitSettings() {
 	settingsLayout = assets.LoadGUILayout("data/gui-settings.xml")
@@ -70,12 +70,12 @@ func UpdateSettings() {
 	}
 
 	var quality, _ = settingsLayout.Item(8, 0, 0, scale)
-	gui.Slider(&CurrentSettings.Quality, 0.01, quality, zero, ThemeGUI, true)
-	window.SetQuality(5-CurrentSettings.Quality*4, CurrentSettings.Filter)
-	gui.Text(settingsQuality.Set(number.Round(CurrentSettings.Quality*10, 1)), quality, zero, ThemeGUI, false, 0.8)
+	gui.Slider(&Settings.Quality, 0.01, quality, zero, ThemeGUI, true)
+	window.SetQuality(5-Settings.Quality*4, Settings.Filter)
+	gui.Text(settingsQuality.Set(number.Round(Settings.Quality*10, 1)), quality, zero, ThemeGUI, false, 0.8)
 
 	var filter, _ = settingsLayout.Item(10, 0, 0, scale)
-	gui.Button(settingsFilter, filter, zero, ThemeGUI.Variant(1), CurrentSettings.Quality < 1, 0.8)
+	gui.Button(settingsFilter, filter, zero, ThemeGUI.Variant(1), Settings.Quality < 1, 0.8)
 	if gui.IsJustClicked() {
 		settingsDropdown = filter
 	}
@@ -83,26 +83,26 @@ func UpdateSettings() {
 	var aa, _ = settingsLayout.Item(12, 0, 0, scale)
 	gui.Button(settingsAA, aa, zero, ThemeGUI.Variant(1), true, 0.8)
 	if gui.IsJustClicked() {
-		CurrentSettings.Antialiasing = !CurrentSettings.Antialiasing
+		Settings.Antialiasing = !Settings.Antialiasing
 		ApplySettings()
 	}
 
 	var vsync, _ = settingsLayout.Item(16, 0, 0, scale)
 	gui.Button(settingsVsync, vsync, zero, ThemeGUI.Variant(1), true, 0.8)
 	if gui.IsJustClicked() {
-		CurrentSettings.Vsync = !CurrentSettings.Vsync
+		Settings.Vsync = !Settings.Vsync
 		ApplySettings()
 	}
 
 	var limitFPS, _ = settingsLayout.Item(18, 0, 0, scale)
-	gui.Slider(&CurrentSettings.LimitFPS, 0.01, limitFPS, zero, ThemeGUI, !CurrentSettings.Vsync)
-	window.SetTargetFPS(uint8(CurrentSettings.LimitFPS * float32(500)))
-	gui.Text(settingsLimitFPS.Set(number.Round(CurrentSettings.LimitFPS*500)), limitFPS, zero, ThemeGUI, false, 0.8)
+	gui.Slider(&Settings.LimitFPS, 0.01, limitFPS, zero, ThemeGUI, !Settings.Vsync)
+	window.SetTargetFPS(uint8(Settings.LimitFPS * float32(500)))
+	gui.Text(settingsLimitFPS.Set(number.Round(Settings.LimitFPS*500)), limitFPS, zero, ThemeGUI, false, 0.8)
 
 	var showFPS, _ = settingsLayout.Item(20, 0, 0, scale)
 	gui.Button(settingsShowFPS, showFPS, zero, ThemeGUI.Variant(1), true, 0.8)
 	if gui.IsJustClicked() {
-		CurrentSettings.ShowFPS = !CurrentSettings.ShowFPS
+		Settings.ShowFPS = !Settings.ShowFPS
 		ApplySettings()
 	}
 
@@ -116,19 +116,19 @@ func UpdateSettings() {
 
 	var windowResult = menu(state, "Windowed", "Borderless", "Fullscreen")
 	if windowResult != -1 {
-		CurrentSettings.Window = [3]mode.Enum{mode.Maximized, mode.FullscreenBorderless, mode.Fullscreen}[windowResult]
+		Settings.Window = [3]mode.Enum{mode.Maximized, mode.FullscreenBorderless, mode.Fullscreen}[windowResult]
 		ApplySettings()
 	}
 
 	var monitorResult = menu(monitor, settingsMonitors...)
 	if monitorResult != -1 {
-		CurrentSettings.Monitor = monitorResult
+		Settings.Monitor = monitorResult
 		ApplySettings()
 	}
 
 	var filterResult = menu(filter, settingsFilters...)
 	if filterResult != -1 {
-		CurrentSettings.Filter = f.Enum(filterResult)
+		Settings.Filter = f.Enum(filterResult)
 		ApplySettings()
 	}
 
@@ -138,16 +138,16 @@ func UpdateSettings() {
 }
 
 func ApplySettings() {
-	window.SetMode(CurrentSettings.Window)
-	window.MoveToMonitor(CurrentSettings.Monitor)
-	window.SetQuality(5-CurrentSettings.Quality*4, CurrentSettings.Filter)
-	window.SetTargetFPS(uint8(CurrentSettings.LimitFPS * float32(500)))
-	settingsWindowState = [4]string{"", "Windowed", "Fullscreen", "Borderless"}[CurrentSettings.Window]
-	settingsFilter = settingsFilters[CurrentSettings.Filter]
-	settingsMonitor = settingsMonitors[CurrentSettings.Monitor]
-	settingsAA = settingsBool[CurrentSettings.Antialiasing]
-	settingsVsync = settingsBool[CurrentSettings.Vsync]
-	settingsShowFPS = settingsBool[CurrentSettings.ShowFPS]
+	window.SetMode(Settings.Window)
+	window.MoveToMonitor(Settings.Monitor)
+	window.SetQuality(5-Settings.Quality*4, Settings.Filter)
+	window.SetTargetFPS(uint8(Settings.LimitFPS * float32(500)))
+	settingsWindowState = [4]string{"", "Windowed", "Fullscreen", "Borderless"}[Settings.Window]
+	settingsFilter = settingsFilters[Settings.Filter]
+	settingsMonitor = settingsMonitors[Settings.Monitor]
+	settingsAA = settingsBool[Settings.Antialiasing]
+	settingsVsync = settingsBool[Settings.Vsync]
+	settingsShowFPS = settingsBool[Settings.ShowFPS]
 }
 
 // private ========================================================
