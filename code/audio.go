@@ -12,26 +12,25 @@ import (
 func InitAudio() {
 	loadMusic(music.Ambience, "ambience_field_S")
 
-	loadSound(sound.DoorOpen, 4, "door-open1", "door-open2")
-	loadSound(sound.DoorOpen, 4, "door-close1", "door-close2")
-	loadSound(sound.DoorOpen, 4, "gate-open1")
-	loadSound(sound.DoorOpen, 4, "gate-close1", "gate-close2")
-	loadSound(sound.DoorCrumble, 4, "door-crumble1", "door-crumble2", "door-crumble3", "door-crumble4", "door-crumble5")
-	loadSound(sound.GateCrumble, 4, "gate-crumble1", "gate-crumble2", "gate-crumble3", "gate-crumble4", "gate-crumble5")
+	loadSound(sound.DoorOpen, 4, "door_open1_PM", "door_open2_PM", "door_open3_PM")
+	loadSound(sound.DoorOpen, 4, "door_close_S")
+	loadSound(sound.DoorOpen, 4, "gate_open1_S", "gate_open2_S", "gate_open3_S")
+	loadSound(sound.DoorOpen, 4, "gate_close1_S", "gate_close2_S", "gate_close3_S")
+	loadSound(sound.DoorCrumble, 4, "door_crumble_O")
+	loadSound(sound.GateCrumble, 4, "gate_crumble_O")
 
-	loadSound(sound.MeleeFlesh, 4, "hit-flesh1", "hit-flesh2", "hit-flesh3", "hit-flesh4", "hit-flesh5", "hit-flesh6")
-	loadSound(sound.MeleeWood, 4, "hit-wood1", "hit-wood2")
-	loadSound(sound.MeleeFlesh, 4, "hit-metal1", "hit-metal2", "hit-metal3", "hit-metal4")
+	loadSound(sound.MeleeFlesh, 4, "hit_flesh1", "hit_flesh2", "hit_flesh3")
+	loadSound(sound.MeleeWood, 4, "hit_wood1", "hit_wood2")
+	loadSound(sound.MeleeFlesh, 4, "hit_metal1")
 
-	loadSound(sound.Bow, 4, "bow")
-	loadSound(sound.ArrowGround, 4, "projectile-ground")
-	loadSound(sound.ArrowWood, 4, "projectile-wood")
-	loadSound(sound.ArrowMetal, 4, "projectile-metal1", "projectile-metal2")
-	loadSound(sound.ArrowFlesh, 4, "projectile-flesh1", "projectile-flesh2", "projectile-flesh3", "projectile-flesh4",
-		"projectile-flesh5", "projectile-flesh6", "projectile-flesh7")
+	loadSound(sound.Bow, 4, "bow_S")
+	loadSound(sound.ArrowGround, 4, "arrow_ground1")
+	loadSound(sound.ArrowWood, 4, "arrow_wood1")
+	loadSound(sound.ArrowMetal, 4, "arrow_metal1", "arrow_metal2")
+	loadSound(sound.ArrowFlesh, 4, "arrow_flesh1", "arrow_flesh2", "arrow_flesh3", "arrow_flesh4")
 
-	loadSound(sound.GloryAlly, 4, "event-positive1", "event-positive2")
-	loadSound(sound.GloryEnemy, 4, "event-negative1", "event-negative2")
+	loadSound(sound.GloryAlly, 4, "event_positive1", "event_positive2")
+	loadSound(sound.GloryEnemy, 4, "event_negative1", "event_negative2")
 }
 
 //=================================================================
@@ -69,6 +68,7 @@ func loadSound(sound sound.Enum, stacks uint8, namesVariants ...string) {
 }
 func loadMusic(music music.Enum, namesVariants ...string) {
 	for _, n := range namesVariants {
-		allMusic[music] = append(allMusic[music], audio.New(assets.LoadMusic("data/music/"+n+".mp3")))
+		var path = "data/music/" + n + ".mp3"
+		allMusic[music] = append(allMusic[music], audio.New(assets.LoadMusic(path)))
 	}
 }
