@@ -5,9 +5,9 @@ import (
 	"game/code/constants/icon"
 	proj "game/code/constants/projectile"
 	"game/code/constants/role"
+	"game/code/constants/sound"
 	"game/code/constants/splash"
 	"pure-game-kit/packages/assets"
-	"pure-game-kit/packages/audio"
 	"pure-game-kit/packages/geometry"
 	"pure-game-kit/packages/utility/color"
 	"pure-game-kit/packages/utility/number"
@@ -32,7 +32,7 @@ type Values struct {
 	Role role.Enum
 }
 
-type CharSounds struct{ ActStart, ActTrigger, HitFlesh, HitWood, HitMetal, HitGround []audio.Audio }
+type CharSounds struct{ ActStart, ActTrigger, HitFlesh, HitWood, HitMetal, HitGround sound.Enum }
 type CharProjectile struct {
 	Kind                      proj.Enum
 	ParabolaMultiplier, Speed float32
@@ -66,7 +66,7 @@ func NewCharacter(hitbox geometry.Shape, stats Values, info string, projectile .
 	}
 
 	return &Character{Values: stats, Hitbox: hitbox,
-		Sounds: CharSounds{HitFlesh: AudioHitFlesh, HitWood: AudioHitWood, HitMetal: AudioHitMetal},
+		Sounds: CharSounds{HitFlesh: sound.MeleeFlesh, HitWood: sound.MeleeWood, HitMetal: sound.MeleeMetal},
 		Info:   info, ActPointsName: actNames[stats.Role], RoleIcon: roleIcons[stats.Role], RoleName: roleNames[stats.Role],
 		Projectile: projectile[0],
 	}
@@ -91,8 +91,8 @@ func InitCharacters() {
 			ActPoints: 4, ActTimer: 2.0, ActRange: 6, ReviveTimer: 10.0},
 		"🟩"+Tags[icon.Plus]+"🌗🟧2 "+Tags[icon.Range]+"range ⬜when 🌗🟨"+Tags[icon.Speed]+"grounded⬜.",
 		CharProjectile{Kind: proj.Arrow, ParabolaMultiplier: 1, Speed: 1})
-	Characters[char.Bowyer].Sounds = CharSounds{ActTrigger: AudioBow, HitGround: AudioProjectileGround,
-		HitFlesh: AudioProjectileFlesh, HitWood: AudioProjectileWood, HitMetal: AudioProjectileMetal}
+	Characters[char.Bowyer].Sounds = CharSounds{ActTrigger: sound.Bow, HitGround: sound.ArrowGround,
+		HitFlesh: sound.ArrowFlesh, HitWood: sound.ArrowWood, HitMetal: sound.ArrowMetal}
 	Characters[char.Smith] = NewCharacter(geometry.NewRoundedRectangle(0, 0, 24, 48, 0, 1),
 		Values{Name: "Smith", Wage: 20, Role: role.Defender, MaxHealth: 40, MoveSpeed: 12,
 			ActPoints: 1, ActTimer: 5.0, ActRange: 1, ReviveTimer: 20.0},

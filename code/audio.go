@@ -1,83 +1,74 @@
 package game
 
 import (
+	"game/code/constants/music"
+	"game/code/constants/sound"
 	"game/code/constants/zone"
 	"pure-game-kit/packages/assets"
 	"pure-game-kit/packages/audio"
 	"pure-game-kit/packages/utility/random"
-	"pure-game-kit/packages/utility/text"
 )
 
-var AudioAmbience audio.Audio
-var AudioDoorCrumble, AudioDoorOpen, AudioDoorClose, AudioGateCrumble, AudioGateOpen, AudioGateClose []audio.Audio
-var AudioBow, AudioProjectileGround, AudioProjectileWood, AudioProjectileMetal, AudioProjectileFlesh []audio.Audio
-var AudioHitFlesh, AudioHitWood, AudioHitMetal []audio.Audio
-var AudioEventPositive, AudioEventNegative []audio.Audio
-
 func InitAudio() {
-	ambiences[zone.Field] = assets.LoadMusic("data/music/ambience-plains.mp3")
-	AudioAmbience = audio.New(ambiences[zone.Field])
+	loadMusic(music.Ambience, "ambience_field_S")
 
-	AudioDoorOpen = append(AudioDoorOpen, audio.New(assets.LoadSound("data/sounds/door-open1.mp3", 4)))
-	AudioDoorOpen = append(AudioDoorOpen, audio.New(assets.LoadSound("data/sounds/door-open2.mp3", 4)))
-	AudioDoorClose = append(AudioDoorClose, audio.New(assets.LoadSound("data/sounds/door-close1.mp3", 4)))
-	AudioDoorClose = append(AudioDoorClose, audio.New(assets.LoadSound("data/sounds/door-close2.mp3", 4)))
-	AudioGateOpen = append(AudioGateOpen, audio.New(assets.LoadSound("data/sounds/gate-open1.mp3", 4)))
-	AudioGateClose = append(AudioGateClose, audio.New(assets.LoadSound("data/sounds/gate-close1.mp3", 4)))
-	AudioGateClose = append(AudioGateClose, audio.New(assets.LoadSound("data/sounds/gate-close2.mp3", 4)))
-	for i := 1; i < 5; i++ {
-		var door = assets.LoadSound(text.New("data/sounds/door-crumble", i, ".mp3"), 4)
-		var gate = assets.LoadSound(text.New("data/sounds/gate-crumble", i, ".mp3"), 4)
-		AudioDoorCrumble = append(AudioDoorCrumble, audio.New(door))
-		AudioGateCrumble = append(AudioGateCrumble, audio.New(gate))
-	}
+	loadSound(sound.DoorOpen, 4, "door-open1", "door-open2")
+	loadSound(sound.DoorOpen, 4, "door-close1", "door-close2")
+	loadSound(sound.DoorOpen, 4, "gate-open1")
+	loadSound(sound.DoorOpen, 4, "gate-close1", "gate-close2")
+	loadSound(sound.DoorCrumble, 4, "door-crumble1", "door-crumble2", "door-crumble3", "door-crumble4", "door-crumble5")
+	loadSound(sound.GateCrumble, 4, "gate-crumble1", "gate-crumble2", "gate-crumble3", "gate-crumble4", "gate-crumble5")
 
-	AudioHitWood = append(AudioHitWood, audio.New(assets.LoadSound("data/sounds/hit-wood1.mp3", 4)))
-	AudioHitWood = append(AudioHitWood, audio.New(assets.LoadSound("data/sounds/hit-wood2.mp3", 4)))
-	for i := 1; i < 6; i++ {
-		AudioHitFlesh = append(AudioHitFlesh, audio.New(assets.LoadSound(text.New("data/sounds/hit-flesh", i, ".mp3"), 4)))
-	}
-	for i := 1; i < 4; i++ {
-		AudioHitMetal = append(AudioHitMetal, audio.New(assets.LoadSound(text.New("data/sounds/hit-metal", i, ".mp3"), 4)))
-	}
+	loadSound(sound.MeleeFlesh, 4, "hit-flesh1", "hit-flesh2", "hit-flesh3", "hit-flesh4", "hit-flesh5", "hit-flesh6")
+	loadSound(sound.MeleeWood, 4, "hit-wood1", "hit-wood2")
+	loadSound(sound.MeleeFlesh, 4, "hit-metal1", "hit-metal2", "hit-metal3", "hit-metal4")
 
-	AudioBow = append(AudioBow, audio.New(assets.LoadSound("data/sounds/bow.mp3", 4)))
-	AudioProjectileGround = append(AudioProjectileGround, audio.New(assets.LoadSound("data/sounds/projectile-ground.mp3", 4)))
-	AudioProjectileWood = append(AudioProjectileWood, audio.New(assets.LoadSound("data/sounds/projectile-wood.mp3", 4)))
-	AudioProjectileMetal = append(AudioProjectileMetal, audio.New(assets.LoadSound("data/sounds/projectile-metal1.mp3", 4)))
-	AudioProjectileMetal = append(AudioProjectileMetal, audio.New(assets.LoadSound("data/sounds/projectile-metal2.mp3", 4)))
-	for i := 1; i <= 7; i++ {
-		var asset = assets.LoadSound(text.New("data/sounds/projectile-flesh", i, ".mp3"), 4)
-		AudioProjectileFlesh = append(AudioProjectileFlesh, audio.New(asset))
-	}
+	loadSound(sound.Bow, 4, "bow")
+	loadSound(sound.ArrowGround, 4, "projectile-ground")
+	loadSound(sound.ArrowWood, 4, "projectile-wood")
+	loadSound(sound.ArrowMetal, 4, "projectile-metal1", "projectile-metal2")
+	loadSound(sound.ArrowFlesh, 4, "projectile-flesh1", "projectile-flesh2", "projectile-flesh3", "projectile-flesh4",
+		"projectile-flesh5", "projectile-flesh6", "projectile-flesh7")
 
-	AudioEventPositive = append(AudioEventPositive, audio.New(assets.LoadSound("data/sounds/event-positive1.mp3", 4)))
-	AudioEventPositive = append(AudioEventPositive, audio.New(assets.LoadSound("data/sounds/event-positive2.mp3", 4)))
-	AudioEventNegative = append(AudioEventNegative, audio.New(assets.LoadSound("data/sounds/event-negative1.mp3", 4)))
-	AudioEventNegative = append(AudioEventNegative, audio.New(assets.LoadSound("data/sounds/event-negative2.mp3", 4)))
+	loadSound(sound.GloryAlly, 4, "event-positive1", "event-positive2")
+	loadSound(sound.GloryEnemy, 4, "event-negative1", "event-negative2")
 }
 
 //=================================================================
 
-func UpdateAudio() {
-	if AudioAmbience.IsJustFinished() {
-		AudioAmbience.Play()
+func UpdateMusic() {
+	for _, m := range allMusic {
+		for _, a := range m {
+			if a.IsJustFinished() {
+				a.Play()
+			}
+		}
 	}
 }
 
-func PlaySound(variations []audio.Audio) {
-	if len(variations) == 0 {
-		return
+func PlaySound(audio sound.Enum) {
+	var variations, has = allSounds[audio]
+	if has {
+		var sound = random.PickFrom(variations)
+		sound.Play()
 	}
-	var sound = random.PickFrom(variations)
-	sound.Play()
 }
 func PlayAmbience(zone zone.Enum) {
-	AudioAmbience.AssetId = ambiences[zone]
-	AudioAmbience.ApplyProperties()
-	AudioAmbience.Play()
+	allMusic[music.Ambience][zone].Play()
 }
 
 // private ========================================================
 
-var ambiences [zone.COUNT]assets.AudioId
+var allSounds = make(map[sound.Enum][]audio.Audio)
+var allMusic = make(map[music.Enum][]audio.Audio)
+
+func loadSound(sound sound.Enum, stacks uint8, namesVariants ...string) {
+	for _, n := range namesVariants {
+		allSounds[sound] = append(allSounds[sound], audio.New(assets.LoadSound("data/sounds/"+n+".mp3", stacks)))
+	}
+}
+func loadMusic(music music.Enum, namesVariants ...string) {
+	for _, n := range namesVariants {
+		allMusic[music] = append(allMusic[music], audio.New(assets.LoadMusic("data/music/"+n+".mp3")))
+	}
+}

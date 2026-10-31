@@ -4,6 +4,7 @@ import (
 	"game/code/constants/base"
 	"game/code/constants/entrance"
 	"game/code/constants/lane"
+	"game/code/constants/sound"
 	"game/code/constants/team"
 	"pure-game-kit/packages/execution/condition"
 	"pure-game-kit/packages/geometry"
@@ -147,20 +148,20 @@ func (e *Entrance) Update() {
 
 		if e.Health > 0 {
 			if condition.JustTurnedTrue(e.IsOpen(), int(e.Tiles[0].X)) {
-				PlaySound(AudioDoorOpen)
+				PlaySound(sound.DoorOpen)
 			}
 			if condition.JustTurnedTrue(!e.IsOpen(), int(e.Tiles[0].X)*30) && InGameTimer > 1.0 {
-				PlaySound(AudioDoorClose)
+				PlaySound(sound.DoorClose)
 			}
 		}
 
 		e.Tiles[0].ImageId = Decor.Crops("door")[breakIndex]
 	case entrance.ShortGate, entrance.TallGate:
 		if condition.JustTurnedTrue(e.OpenY > 0, int(e.Tiles[0].X)) {
-			PlaySound(AudioGateOpen)
+			PlaySound(sound.GateOpen)
 		}
 		if condition.JustTurnedTrue(e.OpenY == 0, int(e.Tiles[0].X*30)) && InGameTimer > 1.0 {
-			PlaySound(AudioGateClose)
+			PlaySound(sound.GateClose)
 		}
 
 		for i := len(e.Tiles) / 2; i < len(e.Tiles); i++ {
@@ -190,9 +191,9 @@ func (e *Entrance) TakeDamage(damage int) {
 
 		switch e.Kind {
 		case entrance.Door:
-			PlaySound(AudioDoorCrumble)
+			PlaySound(sound.DoorCrumble)
 		case entrance.ShortGate, entrance.TallGate:
-			PlaySound(AudioGateCrumble)
+			PlaySound(sound.GateCrumble)
 		}
 	}
 

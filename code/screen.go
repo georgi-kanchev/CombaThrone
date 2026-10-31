@@ -57,7 +57,7 @@ func InitGUI() {
 }
 
 func Update() {
-	UpdateAudio()
+	UpdateMusic()
 
 	switch Screen {
 	case screen.Title:

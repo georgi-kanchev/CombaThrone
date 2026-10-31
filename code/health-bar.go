@@ -2,6 +2,7 @@ package game
 
 import (
 	"game/code/constants/icon"
+	"game/code/constants/sound"
 	"game/code/constants/team"
 	"pure-game-kit/packages/geometry"
 	"pure-game-kit/packages/graphics"
@@ -65,9 +66,9 @@ func (hb *HealthBar) MoveToGlory(duration float32) {
 	hb.Glory.Text = text.New(Tags[icon.Glory], -hb.LastValue)
 
 	if hb.Team == team.Ally {
-		PlaySound(AudioEventPositive)
+		PlaySound(sound.GloryAlly)
 	} else {
-		PlaySound(AudioEventNegative)
+		PlaySound(sound.GloryEnemy)
 	}
 }
 
