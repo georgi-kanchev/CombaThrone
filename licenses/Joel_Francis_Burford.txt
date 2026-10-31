@@ -1,0 +1,31 @@
+// This license is not official - it was made according to the creator saying everything is royalty-free and can be used
+// however, whenever, wherever but they have no knowledge of it. I am not trying to re-license their work, but rather
+// just provide SOMETHING. In case it needs to be changed/removed/appended - let me know.
+
+THIRD-PARTY AUDIO ASSET LICENSE & ATTRIBUTION
+
+Composer / Creator:   Joel Francis Burford
+Source:               https://joelfrancisburford.itch.io/
+
+TERMS OF USE (ROYALTY-FREE LICENSE)
+
+1. GRANT OF LICENSE
+   The copyright owner hereby grants the user a non-exclusive, worldwide, 
+   royalty-free license to use, reproduce, modify, edit, sync, and integrate 
+   the audio asset(s) into commercial and non-commercial interactive software, 
+   video games, multimedia projects, and promotional trailers.
+
+2. RESTRICTIONS
+   - You may not sell, sub-license, host, or redistribute the raw audio asset(s)
+     as standalone files, audio samples, or music pack products.
+   - You may not claim original authorship or legal copyright ownership of the 
+     underlying audio composition(s).
+   - The audio asset(s) may not be used in standalone soundtrack releases 
+     or NFT / Web3 projects without explicit written consent from the creator.
+
+3. ATTRIBUTION (OPTIONAL)
+   Attribution in your project's credits or documentation is not legally 
+   required, but is appreciated. If you choose to credit the author, the 
+   following format is recommended:
+
+   "Music/SFX by Joel Francis Burford (https://joelfrancisburford.itch.io/)"
