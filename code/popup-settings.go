@@ -1,12 +1,10 @@
 package game
 
 import (
-	"game/code/constants/popup"
+	"game/code/constants/music"
 	"pure-game-kit/packages/assets"
 	"pure-game-kit/packages/geometry"
 	"pure-game-kit/packages/gui"
-	"pure-game-kit/packages/input/keyboard"
-	"pure-game-kit/packages/input/keyboard/key"
 	"pure-game-kit/packages/utility/number"
 	"pure-game-kit/packages/utility/text"
 	"pure-game-kit/packages/window"
@@ -132,8 +130,12 @@ func UpdateSettings() {
 		ApplySettings()
 	}
 
-	if keyboard.IsKeyJustPressed(key.Escape) {
-		Popup = popup.MainMenu
+	// music =================================================================
+
+	if CurrentMusic() != nil {
+		ShowCurrentMusic()
+	} else {
+		PlayMusic(music.Menu)
 	}
 }
 

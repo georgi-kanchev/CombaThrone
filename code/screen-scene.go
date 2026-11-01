@@ -8,12 +8,14 @@ import (
 	"game/code/constants/garrison"
 	"game/code/constants/lane"
 	"game/code/constants/pickup"
+	"game/code/constants/popup"
 	"game/code/constants/state"
 	"game/code/constants/team"
 	"game/code/constants/zone"
 	"pure-game-kit/packages/assets"
 	"pure-game-kit/packages/geometry"
 	"pure-game-kit/packages/graphics"
+	"pure-game-kit/packages/gui"
 	"pure-game-kit/packages/input/keyboard"
 	"pure-game-kit/packages/input/keyboard/key"
 	"pure-game-kit/packages/input/mouse"
@@ -110,7 +112,7 @@ func UpdateScene() {
 	iterateRemovable(&Bases[team.Enemy].Entrances, func(e *Entrance) { e.Update() })
 	CurrentZone.UpdateFront()
 
-	iterateRemovable(&ProjectilesBehind, func(p *Projectile) { p.Update() })
+	iterateRemovable(&ShotsBehind, func(p *Shot) { p.Update() })
 	iterateRemovable(&Pickups, func(p *Pickup) { p.Update() })
 
 	if mouse.IsAnyButtonJustPressed() {
@@ -140,7 +142,7 @@ func UpdateScene() {
 	iterateRemovable(&Splashes, func(s *Splash) { s.Update() })
 
 	SceneHUD.UpdateBack()
-	iterateRemovable(&Projectiles, func(p *Projectile) { p.Update() })
+	iterateRemovable(&Shots, func(p *Shot) { p.Update() })
 
 	for _, g := range Bases[team.Ally].Entrances {
 		g.HealthBar.Update(g.Tiles[0].Shape, g.Health, g.MaxHealth, geometry.Area{})
@@ -159,6 +161,10 @@ func UpdateScene() {
 
 	SceneHUD.UpdateFront()
 	Player.Update()
+
+	if Popup != popup.NONE {
+		gui.Rectangle(color.RGBA(0, 0, 0, 180), gui.AreaHUD(0.5, 0.5, 1, 1), geometry.Area{}, true) // dim popup background
+	}
 }
 
 func DrawShadow(x, z, width, height, angle float32, mask geometry.Area) {

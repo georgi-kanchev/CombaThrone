@@ -21,10 +21,13 @@ func InitMainMenu() {
 }
 
 func UpdateMainMenu() {
-	var logo = GUI.Crops("logo")[0]
-	var logoCrop = logo.CropArea()
 	var hud = gui.AreaHUD(0.5, 0.5, 0, 0)
-	gui.Image(logo, geometry.NewArea(hud.X, hud.Y-TileSize*3, logoCrop.Width, logoCrop.Height), false)
+
+	if Screen == screen.Title {
+		var logo = GUI.Crops("logo")[0]
+		var logoCrop = logo.CropArea()
+		gui.Image(logo, geometry.NewArea(hud.X, hud.Y-TileSize*3, logoCrop.Width, logoCrop.Height), false)
+	}
 
 	View.FitSize(320, 320) // always fit logo + buttons on screen, regardless of resolution
 	gui.Scale = View.Zoom
@@ -36,6 +39,8 @@ func UpdateMainMenu() {
 		PlayAmbience(CurrentZone.Kind)
 		Screen = screen.Scene
 		Popup = popup.NONE
+		TimeScale = 1
+		StopMusic()
 	}
 
 	gui.Button(menuArena.Get(), geometry.NewArea(hud.X, hud.Y+TileSize*0.5, 120, 28), geometry.Area{}, ThemeGUI, false)

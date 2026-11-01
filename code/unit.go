@@ -9,6 +9,7 @@ import (
 	"game/code/constants/lane"
 	"game/code/constants/pickup"
 	"game/code/constants/role"
+	"game/code/constants/sound"
 	"game/code/constants/splash"
 	"game/code/constants/state"
 	"game/code/constants/team"
@@ -572,8 +573,8 @@ func (u *Unit) actUponState() {
 		u.VelocityX = 0
 		PlaySound(Characters[u.Character].Sounds.ActStart)
 	case state.ActTrigger:
-		var projectile = Characters[u.Character].Projectile
-		var splashInstead = projectile.CastCustomSplashInstead
+		var shot = Characters[u.Character].ShotInfo
+		var splashInstead = shot.CastCustomSplashInstead
 
 		u.Anim.Frames = Characters[u.Character].Animations.Recover
 		u.Anim.IsLooping, u.Anim.FPS, u.Anim.Time = false, 8, 0
@@ -603,7 +604,7 @@ func (u *Unit) actUponState() {
 			break
 		}
 
-		if u.Values.Role != role.Backliner { // non-rangers cannot shoot projectiles in the default way
+		if u.Values.Role != role.Backliner { // non-rangers cannot shoot shots in the default way
 			return // if required (like a supplier throwing a heal potion), it should happen through behaviors manually
 		}
 
@@ -624,7 +625,7 @@ func (u *Unit) actUponState() {
 				if e.Kind == entrance.TallGate {
 					y += TileSize
 				}
-				Projectiles = append(Projectiles, u.NewProjectile(u.X, u.Y, u.Z, x, y, laneZs[e.Lane], dmg, projectile.Kind, e))
+				Shots = append(Shots, u.NewShot(u.X, u.Y, u.Z, x, y, laneZs[e.Lane], dmg, shot.Kind, e))
 			}
 			PlaySound(Characters[u.Character].Sounds.ActTrigger)
 		}
@@ -646,7 +647,11 @@ func (u *Unit) actUponState() {
 		eff.EffectInfo += " (" + Characters[u.LastHurtBy.Character].Values.Name + ")"
 		eff.EffectTimer = Characters[u.Character].Values.ReviveTimer
 		u.Effects[e.Dead] = eff
-	case state.Dying, state.DyingEnd: // empty
+	case state.Dying: // empty
+	case state.DyingEnd:
+		if u.Team == team.Ally {
+			PlaySound(sound.Death)
+		}
 	case state.Decaying:
 		if u.HurtTimer < -u.Values.ReviveTimer || u.IsGarrisoner() {
 			Units = collection.Remove(Units, u)
@@ -707,8 +712,9 @@ func (u *Unit) applyCollisions() {
 				hb = hb.Collide(s)
 				u.X, u.Y = hb.X+diffX, hb.Y+diffY
 
-				if u.VelocityY > 30 && u.IsOutsideOwnBase() && !u.IsInsideEnemyBase(0) {
+				if u.VelocityY > 30 && u.IsOutsideOwnBase() && !u.IsInsideEnemyBase(0) { // fall effects
 					Splashes = append(Splashes, NewSplash(splash.Dust, 0, hb.X, hb.Y+hb.Height/2-14, u))
+					PlaySound(sound.Drop)
 				}
 
 				if u.VelocityY > 130 {
@@ -835,8 +841,8 @@ func (u *Unit) shootAt(target *Unit) {
 	if u.Team == team.Enemy {
 		offsetX = -u.Width / 3
 	}
-	var projectileKind = Characters[u.Character].Projectile.Kind
-	var proj = u.NewProjectile(u.X+offsetX, u.Y, u.Z, t.X+prediction, t.Y+t.Height/2-8, t.Z, dmg, projectileKind, nil)
-	Projectiles = append(Projectiles, proj)
+	var shotKind = Characters[u.Character].ShotInfo.Kind
+	var proj = u.NewShot(u.X+offsetX, u.Y, u.Z, t.X+prediction, t.Y+t.Height/2-8, t.Z, dmg, shotKind, nil)
+	Shots = append(Shots, proj)
 	PlaySound(Characters[u.Character].Sounds.ActTrigger)
 }

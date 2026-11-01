@@ -2,10 +2,13 @@ package game
 
 import (
 	"game/code/constants/icon"
+	"game/code/constants/music"
 	"game/code/constants/popup"
 	"game/code/constants/screen"
 	"pure-game-kit/packages/assets"
 	"pure-game-kit/packages/graphics"
+	"pure-game-kit/packages/input/keyboard"
+	"pure-game-kit/packages/input/keyboard/key"
 	"pure-game-kit/packages/utility/text"
 )
 
@@ -57,8 +60,6 @@ func InitGUI() {
 }
 
 func Update() {
-	UpdateMusic()
-
 	switch Screen {
 	case screen.Title:
 		UpdateTitleScreen()
@@ -72,6 +73,28 @@ func Update() {
 	case popup.Settings:
 		UpdateSettings()
 	case popup.Credits:
+		UpdateCredits()
+	}
+
+	if keyboard.IsKeyJustPressed(key.Escape) {
+		if Popup != popup.MainMenu {
+			Popup = popup.MainMenu
+			TimeScale = 0
+		} else {
+			Popup = popup.NONE
+			TimeScale = 1
+			StopMusic()
+		}
+	}
+
+	var curMusic = CurrentMusic()
+	if Popup != popup.NONE && curMusic != nil {
+		ShowCurrentMusic()
+	}
+	if curMusic == nil {
+		if Popup == popup.MainMenu || Popup == popup.Settings || Popup == popup.Credits {
+			PlayMusic(music.Menu)
+		}
 	}
 
 	UpdateDebug()

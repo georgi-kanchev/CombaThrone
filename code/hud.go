@@ -8,6 +8,7 @@ import (
 	"game/code/constants/icon"
 	"game/code/constants/lane"
 	"game/code/constants/pickup"
+	"game/code/constants/popup"
 	"game/code/constants/role"
 	"game/code/constants/state"
 	"game/code/constants/team"
@@ -120,7 +121,7 @@ func (h *HUD) UpdateBack() {
 	h.View.DrawObject(h.UnitsPanel)
 
 	var lastSummonIndex = h.SummonIndex
-	if mouse.IsAnyButtonJustPressed() {
+	if Popup == popup.NONE && mouse.IsAnyButtonJustPressed() {
 		h.SummonIndex = -1
 	}
 
@@ -136,7 +137,7 @@ func (h *HUD) UpdateBack() {
 	iterateRemovable(&h.Pickups, func(p *Pickup) {
 		p.Update()
 
-		if p != nil && p.Kind != pickup.Coin && p.ContainsPoint(h.View.MousePosition()) {
+		if Popup == popup.NONE && p != nil && p.Kind != pickup.Coin && p.ContainsPoint(h.View.MousePosition()) {
 			mouse.SetCursor(cursor.Hand)
 			p.DrawTooltip(true)
 
@@ -169,6 +170,10 @@ func (h *HUD) UpdateFront() {
 		h.DrawTooltip(enemy.Shape, TooltipTexts[0].Set("Enemy\n🟥", Tags[icon.Glory], "Glory⬜"), icons[1])
 	}
 
+	if Popup != popup.NONE {
+		return
+	}
+
 	if h.SummonIndex < 0 {
 		var unitHovered = false
 		for _, u := range Units {
@@ -197,6 +202,9 @@ func (h *HUD) UpdateFront() {
 }
 
 func (h *HUD) Highlight(view *graphics.View, shape geometry.Shape, color uint) {
+	if Popup != popup.NONE {
+		return
+	}
 	shape.Width += 2
 	shape.Height += 2
 	h.HoverHighlight.Shape = shape
@@ -228,6 +236,9 @@ func (h *HUD) ShapeToUI(gameShape geometry.Shape) geometry.Shape {
 }
 
 func (h *HUD) DrawTooltip(shape geometry.Shape, text string, icon assets.ImageId) {
+	if Popup != popup.NONE {
+		return
+	}
 	const width, height = 80.0, TileSize + 6
 	var col, noMask = palette.White, geometry.Area{}
 	var x, y = shape.X, shape.Y + shape.Height/2 + height/2
@@ -245,6 +256,9 @@ func (h *HUD) DrawTooltip(shape geometry.Shape, text string, icon assets.ImageId
 //=================================================================
 
 func (u *Unit) DrawTooltip(shape geometry.Shape, bench bool) {
+	if Popup != popup.NONE {
+		return
+	}
 	var tsz float32 = TileSize
 	var col, noMask = palette.White, geometry.Area{}
 	const width, height, effWidth = 130.0, 94.0, 105.0
@@ -358,6 +372,9 @@ func (u *Unit) DrawTooltip(shape geometry.Shape, bench bool) {
 	}
 }
 func (p *Pickup) DrawTooltip(bench bool) {
+	if Popup != popup.NONE {
+		return
+	}
 	const width, height = 140.0, TileSize + 12
 	var shape = SceneHUD.ShapeToUI(p.Object.Shape)
 	var col, noMask = palette.White, geometry.Area{}
@@ -384,8 +401,8 @@ func (p *Pickup) DrawTooltip(bench bool) {
 
 func (h *HUD) drawBenchUnits(lastSummonIndex int) {
 	var noMask geometry.Area
-	var drop = h.SummonIndex >= 0 && mouse.IsButtonJustReleased(button.Left)
-	var click = mouse.IsButtonJustPressed(button.Left)
+	var drop = h.SummonIndex >= 0 && mouse.IsButtonJustReleased(button.Left) && Popup == popup.NONE
+	var click = mouse.IsButtonJustPressed(button.Left) && Popup == popup.NONE
 	var sz float32 = TileSize
 	var hoveredUnit *Unit
 	var hoveredShape geometry.Shape
@@ -471,7 +488,7 @@ func (h *HUD) drawBenchUnits(lastSummonIndex int) {
 	}
 }
 func (h *HUD) trySummon(lastSummonIndex int) {
-	if lastSummonIndex < 0 {
+	if lastSummonIndex < 0 || Popup != popup.NONE {
 		return
 	}
 

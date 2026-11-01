@@ -11,13 +11,16 @@ const (
 	GateClose
 	GateCrumble
 	Bow
-	ArrowGround
-	ArrowFlesh
-	ArrowWood
-	ArrowMetal
-	MeleeFlesh
-	MeleeWood
-	MeleeMetal
+	ShotGround
+	ShotFlesh
+	ShotWood
+	ShotMetal
+	HitFlesh
+	HitWood
+	HitMetal
+	Stab
+	Drop
+	Death
 	GloryAlly
 	GloryEnemy
 )

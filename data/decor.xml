@@ -48,6 +48,6 @@
     <group name="flag-docks" cropIndexes="97 98 99 100 101 102"/>
     <group name="flag-ocean" cropIndexes="103 104 105 106"/>
     <group name="flag-forest" cropIndexes="107 108 109 110"/>
-    <group name="projectiles" cropIndexes="111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133"/>
+    <group name="shots" cropIndexes="111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133"/>
   </groups>
 </data>
