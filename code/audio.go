@@ -64,10 +64,13 @@ func PlayMusic(audio music.Enum) {
 	allMusic[audio].Play()
 }
 func PlayAmbience(zone zone.Enum) {
+	StopAmbience()
+	allAmbiences[zone].Play()
+}
+func StopAmbience() {
 	for _, a := range allAmbiences {
 		a.Stop()
 	}
-	allAmbiences[zone].Play()
 }
 func StopMusic() {
 	for _, a := range allMusic {
@@ -87,7 +90,7 @@ func CurrentMusic() *audio.Audio {
 func ShowCurrentMusic() {
 	var curMusic = CurrentMusic()
 	if curMusic != nil {
-		gui.Text(musicNames[curMusic.AssetId], gui.AreaHUD(1.0, 0.0, 400, 15), geometry.Area{}, ThemeGUI, false)
+		gui.Text(musicNames[curMusic.CurrentAssetId()], gui.AreaHUD(1.0, 0.0, 400, 15), geometry.Area{}, ThemeGUI, false)
 	}
 }
 

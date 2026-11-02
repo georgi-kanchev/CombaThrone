@@ -76,16 +76,7 @@ func Update() {
 		UpdateCredits()
 	}
 
-	if keyboard.IsKeyJustPressed(key.Escape) {
-		if Popup != popup.MainMenu {
-			Popup = popup.MainMenu
-			TimeScale = 0
-		} else {
-			Popup = popup.NONE
-			TimeScale = 1
-			StopMusic()
-		}
-	}
+	handleEscape()
 
 	var curMusic = CurrentMusic()
 	if Popup != popup.NONE && curMusic != nil {
@@ -106,4 +97,24 @@ func AlignView() {
 	var _, h = View.Size()
 	View.Y = (bly - h/2) - 2
 	// View.Zoom = 4 // left for debug purposes
+}
+
+// private ========================================================
+
+func handleEscape() {
+	if Screen == screen.Title && Popup == popup.MainMenu {
+		return
+	}
+
+	if keyboard.IsKeyJustPressed(key.Escape) {
+		if Popup != popup.MainMenu {
+			Popup = popup.MainMenu
+			TimeScale = 0
+			StopAmbience()
+		} else {
+			Popup = popup.NONE
+			TimeScale = 1
+			StopMusic()
+		}
+	}
 }
