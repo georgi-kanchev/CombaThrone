@@ -9,12 +9,22 @@ import (
 	"pure-game-kit/packages/audio"
 	"pure-game-kit/packages/geometry"
 	"pure-game-kit/packages/gui"
-	"pure-game-kit/packages/utility/random"
 	"pure-game-kit/packages/utility/text"
 )
 
 func InitAudio() {
-	loadMusic(music.Ambience, "ambience_field_S")
+	loadAmbience(zone.Field, "field_S")
+	loadAmbience(zone.Ruins, "ruins_S")
+	loadAmbience(zone.Forest, "forest_S")
+	loadAmbience(zone.Swamp, "swamp_S")
+	loadAmbience(zone.Desert, "desert_S")
+	loadAmbience(zone.Docks, "docks_S")
+	loadAmbience(zone.Ocean, "ocean_PM")
+	loadAmbience(zone.Glacier, "glacier_S")
+	loadAmbience(zone.Cave, "cave_S")
+	loadAmbience(zone.Mine, "mine_JFB")
+	loadAmbience(zone.Hell, "hell_PM")
+
 	loadMusic(music.Menu, "menu_Homeland_Return_JS", "menu_Little_Village_JS", "menu_Old_Palace_JS")
 
 	loadSound(sound.DoorOpen, 4, "door_open1_PM", "door_open2_PM", "door_open3_PM")
@@ -45,41 +55,30 @@ func InitAudio() {
 //=================================================================
 
 func PlaySound(audio sound.Enum) {
-	var variations, has = allSounds[audio]
-	if has {
-		var sound = random.PickFrom(variations)
-		sound.Play()
-	}
+	allSounds[audio].Play()
 }
 func PlayMusic(audio music.Enum) {
-	var variations, has = allMusic[audio]
-	for _, m := range allMusic {
-		for _, a := range m {
-			a.Pause()
-		}
+	for _, a := range allMusic {
+		a.Stop()
 	}
-	if has {
-		var music = random.PickFrom(variations)
-		music.Play()
-	}
+	allMusic[audio].Play()
 }
 func PlayAmbience(zone zone.Enum) {
-	allMusic[music.Ambience][zone].Play()
+	for _, a := range allAmbiences {
+		a.Stop()
+	}
+	allAmbiences[zone].Play()
 }
 func StopMusic() {
-	for _, v := range allMusic {
-		for _, a := range v {
-			a.Pause()
-		}
+	for _, a := range allMusic {
+		a.Stop()
 	}
 }
 
 func CurrentMusic() *audio.Audio {
-	for _, variations := range allMusic {
-		for _, v := range variations {
-			if v.IsPlaying() {
-				return v
-			}
+	for _, a := range allMusic {
+		if a.IsPlaying() {
+			return a
 		}
 	}
 	return nil
@@ -94,19 +93,24 @@ func ShowCurrentMusic() {
 
 // private ========================================================
 
-var allSounds = make(map[sound.Enum][]*audio.Audio)
-var allMusic = make(map[music.Enum][]*audio.Audio)
+var allSounds = make(map[sound.Enum]*audio.Audio)
+var allMusic = make(map[music.Enum]*audio.Audio)
+var allAmbiences = make(map[zone.Enum]*audio.Audio)
 var musicNames = make(map[assets.AudioId]string)
 
 func loadSound(sound sound.Enum, stacks uint8, namesVariants ...string) {
-	for _, n := range namesVariants {
-		allSounds[sound] = append(allSounds[sound], new(audio.New(assets.LoadSound(stacks, "data/sounds/"+n+".ogg"))))
+	var ids = make([]assets.AudioId, len(namesVariants))
+	for i, n := range namesVariants {
+		var id = assets.LoadSound(stacks, "data/sounds/"+n+".ogg")
+		ids[i] = id
 	}
+	allSounds[sound] = new(audio.New(assets.LoadAudioVariations(ids...)))
 }
 func loadMusic(music music.Enum, namesVariants ...string) {
-	for _, n := range namesVariants {
+	var ids = make([]assets.AudioId, len(namesVariants))
+	for i, n := range namesVariants {
 		var id = assets.LoadMusic("data/music/" + n + ".ogg")
-		allMusic[music] = append(allMusic[music], new(audio.New(id)))
+		ids[i] = id
 
 		if text.ContainsOneOf(n, "ambience") {
 			n = ""
@@ -118,4 +122,8 @@ func loadMusic(music music.Enum, namesVariants ...string) {
 		}
 		musicNames[id] = n
 	}
+	allMusic[music] = new(audio.New(assets.LoadAudioVariations(ids...)))
+}
+func loadAmbience(zone zone.Enum, name string) {
+	allAmbiences[zone] = new(audio.New(assets.LoadMusic("data/ambiences/" + name + ".ogg")))
 }

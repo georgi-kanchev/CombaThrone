@@ -33,9 +33,11 @@ func UpdateDebug() {
 
 	if keyboard.IsKeyJustPressed(key.RightArrow) && CurrentZone.Kind < zone.Hell {
 		CurrentZone = Zones[CurrentZone.Kind+1]
+		PlayAmbience(CurrentZone.Kind)
 	}
 	if keyboard.IsKeyJustPressed(key.LeftArrow) && CurrentZone.Kind > zone.Field {
 		CurrentZone = Zones[CurrentZone.Kind-1]
+		PlayAmbience(CurrentZone.Kind)
 	}
 
 	for i := range 10 {

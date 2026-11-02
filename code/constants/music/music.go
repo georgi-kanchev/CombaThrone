@@ -3,6 +3,7 @@ package music
 type Enum uint8
 
 const (
-	Ambience Enum = iota
-	Menu
+	Menu Enum = iota
+	SceneSlow
+	SceneFast
 )
