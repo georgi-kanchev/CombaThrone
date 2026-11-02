@@ -100,7 +100,7 @@ var musicNames = make(map[assets.AudioId]string)
 
 func loadSound(sound sound.Enum, stacks uint8, namesVariants ...string) {
 	for _, n := range namesVariants {
-		allSounds[sound] = append(allSounds[sound], new(audio.New(assets.LoadSound("data/sounds/"+n+".ogg", stacks))))
+		allSounds[sound] = append(allSounds[sound], new(audio.New(assets.LoadSound(stacks, "data/sounds/"+n+".ogg"))))
 	}
 }
 func loadMusic(music music.Enum, namesVariants ...string) {
