@@ -571,7 +571,10 @@ func (u *Unit) actUponState() {
 		u.Anim.Frames = Characters[u.Character].Animations.Prepare
 		u.Anim.IsLooping, u.Anim.FPS, u.Anim.Time = false, 8, 0
 		u.VelocityX = 0
-		PlaySound(Characters[u.Character].Sounds.ActStart)
+		var sound = Characters[u.Character].Sounds.ActStart
+		if sound != 0 {
+			PlaySound(sound)
+		}
 	case state.ActTrigger:
 		var shot = Characters[u.Character].ShotInfo
 		var splashInstead = shot.CastCustomSplashInstead

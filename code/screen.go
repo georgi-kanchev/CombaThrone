@@ -110,11 +110,11 @@ func handleEscape() {
 		if Popup != popup.MainMenu {
 			Popup = popup.MainMenu
 			TimeScale = 0
-			StopAmbience()
+			PauseAmbience()
 		} else {
 			Popup = popup.NONE
 			TimeScale = 1
-			StopMusic()
+			PauseMusic()
 		}
 	}
 }

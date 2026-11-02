@@ -58,28 +58,34 @@ func PlaySound(audio sound.Enum) {
 	allSounds[audio].Play()
 }
 func PlayMusic(audio music.Enum) {
-	for _, a := range allMusic {
-		a.Stop()
-	}
+	PauseMusic()
 	allMusic[audio].Play()
 }
 func PlayAmbience(zone zone.Enum) {
-	StopAmbience()
+	PauseAmbience()
 	allAmbiences[zone].Play()
 }
-func StopAmbience() {
+func PauseAmbience() {
 	for _, a := range allAmbiences {
-		a.Stop()
+		a.Pause()
 	}
 }
-func StopMusic() {
+func PauseMusic() {
 	for _, a := range allMusic {
-		a.Stop()
+		a.Pause()
 	}
 }
 
 func CurrentMusic() *audio.Audio {
 	for _, a := range allMusic {
+		if a.IsPlaying() {
+			return a
+		}
+	}
+	return nil
+}
+func CurrentAmbience() *audio.Audio {
+	for _, a := range allAmbiences {
 		if a.IsPlaying() {
 			return a
 		}

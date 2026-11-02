@@ -96,6 +96,10 @@ func InitScene() {
 	Player.Units[7] = NewUnit(char.Boar, team.Ally, 0)
 }
 func UpdateScene() {
+	if Popup == popup.NONE && CurrentAmbience() == nil {
+		PlayAmbience(CurrentZone.Kind)
+	}
+
 	InGameTimer += DeltaTimeScaled()
 	AlignView()
 

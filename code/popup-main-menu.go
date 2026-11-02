@@ -36,11 +36,10 @@ func UpdateMainMenu() {
 	var noMask = geometry.Area{}
 	gui.Button(menuStory.Get(), geometry.NewArea(hud.X, hud.Y-TileSize*0.5, 120, 28), noMask, ThemeGUI, true)
 	if gui.IsJustClicked() {
-		PlayAmbience(CurrentZone.Kind)
 		Screen = screen.Scene
 		Popup = popup.NONE
 		TimeScale = 1
-		StopMusic()
+		PauseMusic()
 	}
 
 	gui.Button(menuArena.Get(), geometry.NewArea(hud.X, hud.Y+TileSize*0.5, 120, 28), geometry.Area{}, ThemeGUI, false)
