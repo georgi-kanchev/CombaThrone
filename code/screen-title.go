@@ -1,6 +1,7 @@
 package game
 
 import (
+	"game/code/constants/screen"
 	"game/code/constants/zone"
 	"pure-game-kit/packages/assets"
 	"pure-game-kit/packages/geometry"
@@ -12,6 +13,10 @@ func InitTitleScreen() {
 }
 
 func UpdateTitleScreen() {
+	if Screen == screen.Title && CurrentAmbience() == nil {
+		PlayAmbience(zone.Ruins)
+	}
+
 	AlignView()
 
 	var bgrCrop = titleScreen.CropArea()

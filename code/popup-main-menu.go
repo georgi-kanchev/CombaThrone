@@ -40,6 +40,7 @@ func UpdateMainMenu() {
 		Popup = popup.NONE
 		TimeScale = 1
 		PauseMusic()
+		PauseAmbience()
 	}
 
 	gui.Button(menuArena.Get(), geometry.NewArea(hud.X, hud.Y+TileSize*0.5, 120, 28), geometry.Area{}, ThemeGUI, false)

@@ -3,6 +3,7 @@ package game
 import (
 	"game/code/constants/icon"
 	"game/code/constants/music"
+	"game/code/constants/popup"
 	"game/code/constants/sound"
 	"game/code/constants/zone"
 	"pure-game-kit/packages/assets"
@@ -54,6 +55,20 @@ func InitAudio() {
 
 //=================================================================
 
+func UpdateMusic() {
+	var curMusic = CurrentMusic()
+	if Popup != popup.NONE && curMusic != nil {
+		ShowCurrentMusic()
+	}
+	if curMusic == nil {
+		if Popup == popup.MainMenu || Popup == popup.Settings || Popup == popup.Credits {
+			PlayMusic(music.Menu)
+		}
+	} else if curMusic.IsJustFinished() {
+		PlayMusic(music.Menu)
+	}
+}
+
 func PlaySound(audio sound.Enum) {
 	allSounds[audio].Play()
 }
@@ -75,10 +90,22 @@ func PauseMusic() {
 		a.Pause()
 	}
 }
+func PauseSounds() {
+	for _, a := range allSounds {
+		a.Pause()
+	}
+}
+func ResumeSounds() {
+	for _, a := range allSounds {
+		if a.IsPaused() {
+			a.Play()
+		}
+	}
+}
 
 func CurrentMusic() *audio.Audio {
 	for _, a := range allMusic {
-		if a.IsPlaying() {
+		if a.IsPlaying() || a.IsJustFinished() {
 			return a
 		}
 	}

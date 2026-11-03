@@ -2,7 +2,6 @@ package game
 
 import (
 	"game/code/constants/icon"
-	"game/code/constants/music"
 	"game/code/constants/popup"
 	"game/code/constants/screen"
 	"pure-game-kit/packages/assets"
@@ -77,17 +76,7 @@ func Update() {
 	}
 
 	handleEscape()
-
-	var curMusic = CurrentMusic()
-	if Popup != popup.NONE && curMusic != nil {
-		ShowCurrentMusic()
-	}
-	if curMusic == nil {
-		if Popup == popup.MainMenu || Popup == popup.Settings || Popup == popup.Credits {
-			PlayMusic(music.Menu)
-		}
-	}
-
+	UpdateMusic()
 	UpdateDebug()
 }
 
@@ -110,11 +99,26 @@ func handleEscape() {
 		if Popup != popup.MainMenu {
 			Popup = popup.MainMenu
 			TimeScale = 0
+			PauseSounds()
 			PauseAmbience()
 		} else {
 			Popup = popup.NONE
 			TimeScale = 1
 			PauseMusic()
+			ResumeSounds()
+		}
+	}
+	if keyboard.IsKeyJustPressed(key.Backtick) {
+		if TimeScale == 1 {
+			// Popup = popup.MainMenu
+			TimeScale = 0
+			PauseSounds()
+			PauseAmbience()
+		} else {
+			// Popup = popup.NONE
+			TimeScale = 1
+			PauseMusic()
+			ResumeSounds()
 		}
 	}
 }
