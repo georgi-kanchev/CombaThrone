@@ -104,7 +104,7 @@ func UpdateSettings() {
 		ApplySettings()
 	}
 
-	var hint, _ = settingsLayout.Item(22, 0, 0, scale)
+	var hint, _ = settingsLayout.Item(24, 0, 0, scale)
 	gui.Text("* requires restart", hint, zero, ThemeGUI, false, 0.8)
 
 	var titleSfx, _ = settingsLayout.Item(27, 0, 0, scale)

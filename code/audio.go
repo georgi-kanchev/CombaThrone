@@ -126,8 +126,8 @@ func loadMusic(music music.Enum, namesVariants ...string) {
 		} else {
 			n = text.Remove(n, "menu_")
 			n = text.Replace(n, "_", " ")
-			n = text.Replace(n, "JS", "(by Joel Steudler)")
-			n = "➡" + Tags[icon.Music] + n + " "
+			n = text.Replace(n, "JS", "")
+			n = "➡" + Tags[icon.Music] + n
 		}
 		musicNames[id] = n
 	}
