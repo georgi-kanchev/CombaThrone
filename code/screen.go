@@ -100,24 +100,18 @@ func handleEscape() {
 			Popup = popup.MainMenu
 			TimeScale = 0
 			PauseSounds()
-			PauseAmbience()
 		} else {
 			Popup = popup.NONE
 			TimeScale = 1
-			PauseMusic()
 			ResumeSounds()
 		}
 	}
 	if keyboard.IsKeyJustPressed(key.Backtick) {
 		if TimeScale == 1 {
-			// Popup = popup.MainMenu
 			TimeScale = 0
 			PauseSounds()
-			PauseAmbience()
 		} else {
-			// Popup = popup.NONE
 			TimeScale = 1
-			PauseMusic()
 			ResumeSounds()
 		}
 	}

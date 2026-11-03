@@ -155,7 +155,7 @@ func (h *HUD) UpdateFront() {
 	h.Coins.Text = CoinsText.Set(Tags[icon.Coins], Player.Coins)
 	h.View.DrawObject(h.Coins)
 	if h.Coins.ContainsPoint(h.View.MousePosition()) {
-		h.DrawTooltip(h.Coins.Shape, TooltipTexts[0].Set("Your\n🟨", Tags[icon.Coins], "Coins⬜"), icons[0])
+		h.DrawTooltip(h.Coins.Shape, TooltipTexts[0].Set("Total\n🟨", Tags[icon.Coins], "Coins⬜"), icons[0])
 	}
 
 	var ally, enemy = h.TeamGlory[team.Ally], h.TeamGlory[team.Enemy]
@@ -165,7 +165,7 @@ func (h *HUD) UpdateFront() {
 	h.View.DrawObject(enemy)
 
 	if ally.ContainsPoint(h.View.MousePosition()) {
-		h.DrawTooltip(ally.Shape, TooltipTexts[0].Set("Your\n🟩", Tags[icon.Glory], "Glory⬜"), icons[1])
+		h.DrawTooltip(ally.Shape, TooltipTexts[0].Set("Ally\n🟩", Tags[icon.Glory], "Glory⬜"), icons[1])
 	} else if enemy.ContainsPoint(h.View.MousePosition()) {
 		h.DrawTooltip(enemy.Shape, TooltipTexts[0].Set("Enemy\n🟥", Tags[icon.Glory], "Glory⬜"), icons[1])
 	}

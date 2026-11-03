@@ -7,6 +7,7 @@ import (
 	"game/code/constants/entrance"
 	"game/code/constants/garrison"
 	"game/code/constants/lane"
+	"game/code/constants/music"
 	"game/code/constants/pickup"
 	"game/code/constants/popup"
 	"game/code/constants/state"
@@ -87,7 +88,7 @@ func InitScene() {
 	Player = NewPlayer()
 
 	Player.Units[0] = NewUnit(char.Wolf, team.Ally, 0)
-	Player.Units[1] = NewUnit(char.Horse, team.Ally, 0)
+	Player.Units[1] = NewUnit(char.Spearlin, team.Ally, 0)
 	Player.Units[2] = NewUnit(char.Bowyer, team.Ally, 0)
 	Player.Units[3] = NewUnit(char.Windbender, team.Ally, 0)
 	Player.Units[4] = NewUnit(char.Kid, team.Ally, 0)
@@ -98,6 +99,9 @@ func InitScene() {
 func UpdateScene() {
 	if TimeScale == 1 && Popup == popup.NONE && CurrentAmbience() == nil {
 		PlayAmbience(CurrentZone.Kind)
+	}
+	if TimeScale == 1 && Popup == popup.NONE && CurrentMusic() == nil {
+		PlayMusic(music.SceneEarly)
 	}
 
 	InGameTimer += DeltaTimeScaled()

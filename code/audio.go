@@ -4,6 +4,7 @@ import (
 	"game/code/constants/icon"
 	"game/code/constants/music"
 	"game/code/constants/popup"
+	"game/code/constants/screen"
 	"game/code/constants/sound"
 	"game/code/constants/zone"
 	"pure-game-kit/packages/assets"
@@ -26,6 +27,13 @@ func InitAudio() {
 	loadAmbience(zone.Mine, "mine_JFB")
 	loadAmbience(zone.Hell, "hell_PM")
 
+	loadMusic(music.Map, "map_Childhood_Home_JS", "map_Pleasant_Peasants_JS")
+	loadMusic(music.SceneEarly, "battle1_Duel_For_Honor_JS", "battle1_Funeral_March_JS", "battle1_Greatest_Nation_JS",
+		"battle1_Nothing_Can_Stop_You_JS", "battle1_Overwhelming_Numbers_JS", "battle1_Protect_The_Realm_JS",
+		"battle1_Shattered_Lands_JS", "battle1_The_Mad_King_JS", "battle1_Tournament_Time_JS")
+	loadMusic(music.SceneLate, "battle2_Escape_Room_JS", "battle2_Hidden_Stairways_JS", "battle2_Maze_Trap_JS",
+		"battle2_Sacred_Catacombs_JS")
+
 	loadMusic(music.Menu, "menu_Homeland_Return_JS", "menu_Little_Village_JS", "menu_Old_Palace_JS")
 
 	loadSound(sound.DoorOpen, 4, "door_open1_PM", "door_open2_PM", "door_open3_PM")
@@ -38,6 +46,7 @@ func InitAudio() {
 	loadSound(sound.Drop, 4, "drop1_S")
 	loadSound(sound.Death, 4, "death1_JFB", "death2_JFB")
 
+	loadSound(sound.Swing, 4, "swing1_S")
 	loadSound(sound.HitFlesh, 4, "hit_flesh1_PM", "hit_flesh2_PM", "hit_flesh3_PM")
 	loadSound(sound.HitWood, 4, "hit_wood1_S", "hit_wood2_S")
 	loadSound(sound.HitMetal, 4, "hit_metal1_PM", "hit_metal2_S")
@@ -61,11 +70,15 @@ func UpdateMusic() {
 		ShowCurrentMusic()
 	}
 	if curMusic == nil {
-		if Popup == popup.MainMenu || Popup == popup.Settings || Popup == popup.Credits {
+		if Screen == screen.Title {
 			PlayMusic(music.Menu)
 		}
 	} else if curMusic.IsJustFinished() {
-		PlayMusic(music.Menu)
+		if Screen == screen.Title {
+			PlayMusic(music.Menu)
+		} else {
+			PlayMusic(music.SceneEarly)
+		}
 	}
 }
 
@@ -121,6 +134,10 @@ func CurrentAmbience() *audio.Audio {
 }
 
 func ShowCurrentMusic() {
+	if Settings.VolumeMusic == 0 {
+		return
+	}
+
 	var curMusic = CurrentMusic()
 	if curMusic != nil {
 		gui.Text(musicNames[curMusic.CurrentAssetId()], gui.AreaHUD(1.0, 0.0, 400, 15), geometry.Area{}, ThemeGUI, false)
@@ -152,6 +169,8 @@ func loadMusic(music music.Enum, namesVariants ...string) {
 			n = ""
 		} else {
 			n = text.Remove(n, "menu_")
+			n = text.Remove(n, "battle1_")
+			n = text.Remove(n, "battle2_")
 			n = text.Replace(n, "_", " ")
 			n = text.Replace(n, "JS", "")
 			n = "➡" + Tags[icon.Music] + n

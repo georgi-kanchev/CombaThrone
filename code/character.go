@@ -65,7 +65,7 @@ func NewCharacter(hitbox geometry.Shape, stats Values, info string, shot *ShotIn
 		shot = new(ShotInfo{Kind: proj.Arrow, ParabolaMultiplier: 1, Speed: 1})
 	}
 	if sounds == nil {
-		sounds = new(CharSounds{HitFlesh: sound.HitFlesh, HitWood: sound.HitWood, HitMetal: sound.HitMetal})
+		sounds = new(CharSounds{ActStart: sound.Swing, HitFlesh: sound.HitFlesh, HitWood: sound.HitWood, HitMetal: sound.HitMetal})
 	}
 
 	return &Character{Values: stats, Hitbox: hitbox, Sounds: *sounds, Info: info, ActPointsName: actNames[stats.Role],
@@ -121,7 +121,7 @@ func InitCharacters() {
 		Values{Name: "Spearlin", Wage: 20, Role: role.Fighter,
 			MaxHealth: 12, MoveSpeed: 25, ActPoints: 2, ActTimer: 1.5, ActRange: 1, ReviveTimer: 20.0},
 		"🟩"+Tags[icon.Plus]+"🟧"+"2 "+Tags[icon.Wound]+"damage ⬜against "+Tags[icon.Defender]+"Defenders.", nil,
-		new(CharSounds{HitFlesh: sound.Stab, HitWood: sound.HitWood, HitMetal: sound.HitMetal}))
+		new(CharSounds{ActStart: sound.Swing, HitFlesh: sound.Stab, HitWood: sound.HitWood, HitMetal: sound.HitMetal}))
 	Characters[char.Arbalestier] = NewCharacter(geometry.NewRoundedRectangle(-2, 0, 18, 30, 0, 1),
 		Values{Name: "Arbalestier", Wage: 20, Role: role.Backliner,
 			MaxHealth: 12, MoveSpeed: 25, ActPoints: 6, ActTimer: 3.0, ActRange: 4, ReviveTimer: 20.0},
@@ -130,7 +130,8 @@ func InitCharacters() {
 	Characters[char.Stabber] = NewCharacter(geometry.NewRoundedRectangle(-4, 7, 20, 33, 0, 1),
 		Values{Name: "Stabber", Wage: 20, Role: role.Fighter,
 			MaxHealth: 16, MoveSpeed: 20, ActPoints: 2, ActTimer: 1.0, ActRange: 1, ReviveTimer: 30.0},
-		"🟩"+Tags[icon.Plus]+"🟧"+"2 "+Tags[icon.Wound]+"damage ⬜upon killing an 🟥"+Tags[icon.Unit]+"enemy⬜.", nil, nil)
+		"🟩"+Tags[icon.Plus]+"🟧"+"2 "+Tags[icon.Wound]+"damage ⬜upon killing an 🟥"+Tags[icon.Unit]+"enemy⬜.", nil,
+		new(CharSounds{ActStart: sound.Swing, HitFlesh: sound.Stab, HitWood: sound.HitWood, HitMetal: sound.HitMetal}))
 	Characters[char.Gunner] = NewCharacter(geometry.NewRoundedRectangle(-1, 7, 20, 33, 0, 1),
 		Values{Name: "Gunner", Wage: 20, Role: role.Backliner,
 			MaxHealth: 14, MoveSpeed: 20, ActPoints: 8, ActTimer: 8.0, ActRange: 8, ReviveTimer: 30.0},

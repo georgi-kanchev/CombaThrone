@@ -15,6 +15,7 @@ const (
 	ShotFlesh
 	ShotWood
 	ShotMetal
+	Swing
 	HitFlesh
 	HitWood
 	HitMetal
