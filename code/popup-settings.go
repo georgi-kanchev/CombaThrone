@@ -3,7 +3,6 @@ package game
 import (
 	"game/code/constants/music"
 	"game/code/constants/popup"
-	"game/code/constants/sound"
 	"pure-game-kit/packages/assets"
 	"pure-game-kit/packages/audio"
 	"pure-game-kit/packages/geometry"
@@ -67,29 +66,34 @@ func UpdateSettings() {
 
 	var state, _ = settingsLayout.Item(2, 0, 0, scale)
 	gui.Button(settingsWindowState, state, zero, ThemeGUI.Variant(1), true, 0.8)
+	TryPlayButtonSound()
 	if gui.IsJustClicked() {
 		settingsDropdown = state
 	}
 
 	var monitor, _ = settingsLayout.Item(4, 0, 0, scale)
 	gui.Button(settingsMonitor, monitor, zero, ThemeGUI.Variant(1), true, 0.5)
+	TryPlayButtonSound()
 	if gui.IsJustClicked() {
 		settingsDropdown = monitor
 	}
 
 	var quality, _ = settingsLayout.Item(8, 0, 0, scale)
 	gui.Slider(&Settings.Quality, 0.01, quality, zero, ThemeGUI, true)
+	TryPlayButtonSound()
 	window.SetQuality(5-Settings.Quality*4, Settings.Filter)
 	gui.Text(settingsQuality.Set(number.Round(Settings.Quality*10, 1)), quality, zero, ThemeGUI, false, 0.8)
 
 	var filter, _ = settingsLayout.Item(10, 0, 0, scale)
 	gui.Button(settingsFilter, filter, zero, ThemeGUI.Variant(1), Settings.Quality < 1, 0.8)
+	TryPlayButtonSound()
 	if gui.IsJustClicked() {
 		settingsDropdown = filter
 	}
 
 	var aa, _ = settingsLayout.Item(12, 0, 0, scale)
 	gui.Button(settingsAA, aa, zero, ThemeGUI.Variant(1), true, 0.8)
+	TryPlayButtonSound()
 	if gui.IsJustClicked() {
 		Settings.Antialiasing = !Settings.Antialiasing
 		applySettings()
@@ -97,6 +101,7 @@ func UpdateSettings() {
 
 	var vsync, _ = settingsLayout.Item(16, 0, 0, scale)
 	gui.Button(settingsVsync, vsync, zero, ThemeGUI.Variant(1), true, 0.8)
+	TryPlayButtonSound()
 	if gui.IsJustClicked() {
 		Settings.Vsync = !Settings.Vsync
 		applySettings()
@@ -104,11 +109,13 @@ func UpdateSettings() {
 
 	var limitFPS, _ = settingsLayout.Item(18, 0, 0, scale)
 	gui.Slider(&Settings.LimitFPS, 0.01, limitFPS, zero, ThemeGUI, !Settings.Vsync)
+	TryPlayButtonSound()
 	window.SetTargetFPS(uint8(Settings.LimitFPS * float32(500)))
 	gui.Text(settingsLimitFPS.Set(number.Round(Settings.LimitFPS*500)), limitFPS, zero, ThemeGUI, false, 0.8)
 
 	var showFPS, _ = settingsLayout.Item(20, 0, 0, scale)
 	gui.Button(settingsShowFPS, showFPS, zero, ThemeGUI.Variant(1), true, 0.8)
+	TryPlayButtonSound()
 	if gui.IsJustClicked() {
 		Settings.ShowFPS = !Settings.ShowFPS
 		applySettings()
@@ -124,6 +131,7 @@ func UpdateSettings() {
 
 	var master, _ = settingsLayout.Item(29, 0, 0, scale)
 	gui.Slider(&Settings.VolumeMaster, 0.01, master, zero, ThemeGUI, true)
+	TryPlayButtonSound()
 	if audio.Volume != Settings.VolumeMaster {
 		audio.Volume = Settings.VolumeMaster
 		applyAudioVolume()
@@ -132,14 +140,15 @@ func UpdateSettings() {
 
 	var snd, _ = settingsLayout.Item(31, 0, 0, scale)
 	gui.Slider(&Settings.VolumeSounds, 0.01, snd, zero, ThemeGUI, true)
+	TryPlayButtonSound()
 	if gui.IsSliderJustChanged() {
 		applyAudioVolume()
-		PlaySound(sound.Bow)
 	}
 	gui.Text(settingsSounds.Set(number.Round(Settings.VolumeSounds*100, 1), "%"), snd, zero, ThemeGUI, false, 0.8)
 
 	var mus, _ = settingsLayout.Item(33, 0, 0, scale)
 	gui.Slider(&Settings.VolumeMusic, 0.01, mus, zero, ThemeGUI, true)
+	TryPlayButtonSound()
 	if gui.IsSliderJustChanged() {
 		applyAudioVolume()
 	}
@@ -147,6 +156,7 @@ func UpdateSettings() {
 
 	var amb, _ = settingsLayout.Item(35, 0, 0, scale)
 	gui.Slider(&Settings.VolumeAmbience, 0.01, amb, zero, ThemeGUI, true)
+	TryPlayButtonSound()
 	if gui.IsSliderJustChanged() {
 		applyAudioVolume()
 	}
@@ -185,6 +195,7 @@ func UpdateSettings() {
 	var panel, _, _ = settingsLayout.Box(0, scale)
 	panel = geometry.NewArea(panel.X, panel.Y+panel.Height/2+10, 60, 20)
 	gui.Button("Back", panel, zero, ThemeGUI.Variant(1), true, 0.7)
+	TryPlayButtonSound()
 	if gui.IsJustClicked() {
 		Popup = popup.MainMenu
 	}

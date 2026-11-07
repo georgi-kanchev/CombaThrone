@@ -60,7 +60,7 @@ type Unit struct {
 	LastState                state.Enum
 }
 
-const Gravity, GroundFriction, BloodMultiplier = 256.0, 400.0, 40.0
+const Gravity, GroundFriction = 256.0, 400.0
 
 var Units []*Unit = make([]*Unit, 0, 16)
 var Collisions = map[lane.Enum][]geometry.Shape{}
@@ -300,8 +300,12 @@ func (u *Unit) AffectHealth(value int, particles bool, hurtBy *Unit) {
 			u.HurtTimer = 0.5
 
 			if particles {
-				var multiplier = 1 - float32(u.Health)/float32(u.Values.MaxHealth)
-				u.Particles.EmitFromLine(int(multiplier*BloodMultiplier), u.X, u.Y-6, u.X, u.Y+6, u.particlesBlood)
+				u.Particles.EmitFromLine((-value)*3, u.X, u.Y-6, u.X, u.Y+6, u.particlesBlood)
+			}
+		} else {
+			PlaySound(sound.Heal)
+			if particles {
+				u.Particles.EmitFromPoint(value*3, u.X, u.Y, u.particlesHeal)
 			}
 		}
 	}
@@ -416,6 +420,56 @@ func (u *Unit) particlesBlood(p *particles.Particle) (alive bool) {
 
 	var alpha = number.Map(p.Age, 1.0, 1.5, 255, 0)
 	var col = color.RGBA(byte(p.Color), 0, 0, byte(number.Limit(alpha, 0, 255)))
+	View.DrawShape(p.X, p.Y, p.Scale, p.Scale, 0, 1, col, u.Mask)
+	return p.Age < 1.5
+}
+func (u *Unit) particlesGround(p *particles.Particle) (alive bool) {
+	if p.Age == 0 {
+		p.CustomData["y"] = random.Range(p.Y-4, p.Y+4)
+		p.Scale = random.Range[float32](0.2, 3)
+		p.VelocityX = random.Range[float32](-40, 40)
+		p.VelocityY = random.Range[float32](-50, -30)
+		p.Color = color.Darken(palette.Brown, random.Range[float32](-0.5, 0.5))
+	}
+
+	var dt = DeltaTimeScaled()
+	p.Age += dt
+	p.VelocityY += Gravity / 2 * dt
+
+	p.X += p.VelocityX * dt
+	p.Y += p.VelocityY * dt
+
+	if p.Y > p.CustomData["y"].(float32) {
+		p.Y = p.CustomData["y"].(float32)
+		p.VelocityX, p.VelocityY = 0, 0
+	}
+
+	var alpha = number.Map(p.Age, 1.0, 1.5, 255, 0)
+	var r, g, b, _ = color.Channels(p.Color)
+	var col = color.RGBA(r, g, b, byte(number.Limit(alpha, 0, 255)))
+	View.DrawShape(p.X, p.Y, p.Scale, p.Scale, 0, 1, col, u.Mask)
+	return p.Age < 1.5
+}
+func (u *Unit) particlesHeal(p *particles.Particle) (alive bool) {
+	if p.Age == 0 {
+		p.CustomData["offset"] = random.Range[float32](0, 1)
+		p.Scale = random.Range[float32](0.2, 3)
+		p.X, p.Y = random.Range[float32](p.X-16, p.X+16), random.Range[float32](p.Y-16, p.Y+16)
+		p.VelocityY = random.Range[float32](-30, -10)
+		p.Color = color.Brighten(palette.Green, random.Range[float32](-0.2, 0.2))
+	}
+
+	var dt = DeltaTimeScaled()
+	p.Age += dt
+	p.VelocityX = (number.Sine(p.Age*10) * p.CustomData["offset"].(float32)) * 10
+	p.VelocityY -= Gravity / 20 * dt
+
+	p.X += p.VelocityX * dt
+	p.Y += p.VelocityY * dt
+
+	var alpha = number.Map(p.Age, 1.0, 1.5, 255, 0)
+	var r, g, b, _ = color.Channels(p.Color)
+	var col = color.RGBA(r, g, b, byte(number.Limit(alpha, 0, 255)))
 	View.DrawShape(p.X, p.Y, p.Scale, p.Scale, 0, 1, col, u.Mask)
 	return p.Age < 1.5
 }
@@ -718,6 +772,7 @@ func (u *Unit) applyCollisions() {
 				if u.VelocityY > 30 && u.IsOutsideOwnBase() && !u.IsInsideEnemyBase(0) { // fall effects
 					Splashes = append(Splashes, NewSplash(splash.Dust, 0, hb.X, hb.Y+hb.Height/2-14, u))
 					PlaySound(sound.Drop)
+					u.Particles.EmitFromPoint(30, hb.X, hb.Y+hb.Height/2, u.particlesGround)
 				}
 
 				if u.VelocityY > 130 {

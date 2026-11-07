@@ -73,7 +73,7 @@ func InitScene() {
 	Bases[team.Ally] = NewBase(team.Ally, base.Fort, garrison.Three, entrance.NONE, entrance.NONE, entrance.NONE)
 	Bases[team.Enemy] = NewBase(team.Enemy, base.Fortress, garrison.Three, entrance.NONE, entrance.Door, entrance.ShortGate)
 
-	Units = append(Units, NewUnit(char.Stabber, team.Enemy, lane.Middle))
+	// Units = append(Units, NewUnit(char.Stabber, team.Enemy, lane.Lower))
 	// Units = append(Units, NewUnit(CharMiner, TeamEnemy, LaneMiddle))
 
 	Pickups = append(Pickups, NewPickup(-240, pickup.Relic, lane.LowerOff))
@@ -87,14 +87,14 @@ func InitScene() {
 
 	Player = NewPlayer()
 
-	Player.Units[0] = NewUnit(char.Wolf, team.Ally, 0)
-	Player.Units[1] = NewUnit(char.Spearlin, team.Ally, 0)
-	Player.Units[2] = NewUnit(char.Bowyer, team.Ally, 0)
-	Player.Units[3] = NewUnit(char.Windbender, team.Ally, 0)
-	Player.Units[4] = NewUnit(char.Kid, team.Ally, 0)
-	Player.Units[5] = NewUnit(char.Stormcaller, team.Ally, 0)
-	Player.Units[6] = NewUnit(char.Bear, team.Ally, 0)
-	Player.Units[7] = NewUnit(char.Boar, team.Ally, 0)
+	Player.Units[0] = NewUnit(char.Dummy, team.Ally, 0)
+	Player.Units[1] = NewUnit(char.Miner, team.Ally, 0)
+	Player.Units[2] = NewUnit(char.Cook, team.Ally, 0)
+	Player.Units[3] = NewUnit(char.Bowyer, team.Ally, 0)
+	Player.Units[4] = NewUnit(char.Smith, team.Ally, 0)
+	Player.Units[5] = NewUnit(char.Kid, team.Ally, 0)
+	Player.Units[6] = NewUnit(char.Fisherman, team.Ally, 0)
+	Player.Units[7] = NewUnit(char.Horse, team.Ally, 0)
 }
 func UpdateScene() {
 	if TimeScale == 1 && Popup == popup.NONE && CurrentAmbience() == nil {
@@ -111,6 +111,9 @@ func UpdateScene() {
 
 	if keyboard.IsKeyJustPressed(key.A) {
 		Units = append(Units, NewUnit(char.Stabber, team.Enemy, lane.Middle))
+	}
+	if keyboard.IsKeyJustPressed(key.S) {
+		Units[0].AffectHealth(-20, false, nil)
 	}
 
 	CurrentZone.UpdateBack()

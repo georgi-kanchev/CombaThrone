@@ -11,6 +11,7 @@ import (
 	"pure-game-kit/packages/audio"
 	"pure-game-kit/packages/geometry"
 	"pure-game-kit/packages/gui"
+	"pure-game-kit/packages/utility/file"
 	"pure-game-kit/packages/utility/text"
 )
 
@@ -36,30 +37,38 @@ func InitAudio() {
 
 	loadMusic(music.Menu, "menu_Homeland_Return_JS", "menu_Little_Village_JS", "menu_Old_Palace_JS")
 
-	loadSound(sound.DoorOpen, 4, "door_open1_PM", "door_open2_PM", "door_open3_PM")
-	loadSound(sound.DoorClose, 4, "door_close_S")
-	loadSound(sound.DoorCrumble, 4, "door_crumble1_O", "door_crumble2_O")
-	loadSound(sound.GateOpen, 4, "gate_open1_S", "gate_open2_S", "gate_open3_S")
-	loadSound(sound.GateClose, 4, "gate_close1_S", "gate_close2_S", "gate_close3_S")
-	loadSound(sound.GateCrumble, 4, "gate_crumble1_O", "gate_crumble2_O")
+	loadSound(sound.Button, 1, "ui_button")
 
-	loadSound(sound.Drop, 4, "drop1_S")
-	loadSound(sound.Death, 4, "death1_JFB", "death2_JFB")
+	loadSound(sound.Play, 1, "play")
 
-	loadSound(sound.Swing, 4, "swing1_S")
-	loadSound(sound.HitFlesh, 4, "hit_flesh1_PM", "hit_flesh2_PM", "hit_flesh3_PM")
-	loadSound(sound.HitWood, 4, "hit_wood1_S", "hit_wood2_S")
-	loadSound(sound.HitMetal, 4, "hit_metal1_PM", "hit_metal2_S")
-	loadSound(sound.Stab, 4, "stab1_PM", "stab2_PM")
+	loadSound(sound.DoorOpen, 4, "door_open")
+	loadSound(sound.DoorClose, 4, "door_close")
+	loadSound(sound.DoorCrumble, 4, "door_crumble")
+	loadSound(sound.GateOpen, 4, "gate_open")
+	loadSound(sound.GateClose, 4, "gate_close")
+	loadSound(sound.GateCrumble, 4, "gate_crumble")
 
-	loadSound(sound.Bow, 4, "bow1_S")
-	loadSound(sound.ShotGround, 4, "proj_ground1_PM")
-	loadSound(sound.ShotWood, 4, "proj_wood1_S")
-	loadSound(sound.ShotMetal, 4, "proj_metal1_PM", "proj_metal2_PM")
-	loadSound(sound.ShotFlesh, 4, "proj_flesh1_PM", "proj_flesh2_PM", "proj_flesh3_PM", "proj_flesh4_PM")
+	loadSound(sound.GloryAlly, 4, "event_positive")
+	loadSound(sound.GloryEnemy, 4, "event_negative")
 
-	loadSound(sound.GloryAlly, 4, "event_positive1_JFB", "event_positive2_JFB")
-	loadSound(sound.GloryEnemy, 4, "event_negative1_JFB", "event_negative2_JFB")
+	loadSound(sound.Drop, 4, "drop")
+	loadSound(sound.Death, 4, "death")
+
+	loadSound(sound.SwingLight, 4, "swing_light")
+	loadSound(sound.SwingHeavy, 4, "swing_heavy")
+	loadSound(sound.HitFlesh, 4, "hit_flesh")
+	loadSound(sound.HitWood, 4, "hit_wood")
+	loadSound(sound.HitMetal, 4, "hit_metal")
+	loadSound(sound.Stab, 4, "stab")
+	loadSound(sound.Stomp, 2, "stomp")
+
+	loadSound(sound.Bow, 4, "bow")
+	loadSound(sound.ShotGround, 4, "shot_ground")
+	loadSound(sound.ShotWood, 4, "shot_wood")
+	loadSound(sound.ShotMetal, 4, "shot_metal")
+	loadSound(sound.ShotFlesh, 4, "shot_flesh")
+
+	loadSound(sound.Heal, 4, "heal")
 }
 
 //=================================================================
@@ -144,6 +153,12 @@ func ShowCurrentMusic() {
 	}
 }
 
+func TryPlayButtonSound() {
+	if gui.IsJustPressed() {
+		PlaySound(sound.Button)
+	}
+}
+
 // private ========================================================
 
 var allSounds = make(map[sound.Enum]*audio.Audio)
@@ -151,11 +166,10 @@ var allMusic = make(map[music.Enum]*audio.Audio)
 var allAmbiences = make(map[zone.Enum]*audio.Audio)
 var musicNames = make(map[assets.AudioId]string)
 
-func loadSound(sound sound.Enum, stacks uint8, namesVariants ...string) {
-	var ids = make([]assets.AudioId, len(namesVariants))
-	for i, n := range namesVariants {
-		var id = assets.LoadSound(stacks, "data/sounds/"+n+".ogg")
-		ids[i] = id
+func loadSound(sound sound.Enum, stacks uint8, baseName string) {
+	var ids []assets.AudioId
+	for i := 1; i <= 9; i++ {
+		ids = tryLoadSound(ids, "data/sounds/"+baseName+text.New(i), stacks, "PM", "JFB", "S", "O", "JS")
 	}
 	allSounds[sound] = new(audio.New(assets.LoadAudioVariations(ids...)))
 }
@@ -181,4 +195,14 @@ func loadMusic(music music.Enum, namesVariants ...string) {
 }
 func loadAmbience(zone zone.Enum, name string) {
 	allAmbiences[zone] = new(audio.New(assets.LoadMusic("data/ambiences/" + name + ".ogg")))
+}
+
+func tryLoadSound(ids []assets.AudioId, path string, stacks uint8, suffixes ...string) []assets.AudioId {
+	for _, s := range suffixes {
+		var p = path + "_" + s + ".ogg"
+		if file.Exists(p) {
+			ids = append(ids, assets.LoadSound(stacks, p))
+		}
+	}
+	return ids
 }

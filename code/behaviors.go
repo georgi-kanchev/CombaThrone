@@ -6,6 +6,7 @@ import (
 	"game/code/constants/icon"
 	"game/code/constants/lane"
 	"game/code/constants/role"
+	"game/code/constants/sound"
 	"game/code/constants/splash"
 	"game/code/constants/state"
 	"game/code/constants/team"
@@ -40,8 +41,12 @@ var Behaviors = map[char.Enum]func(self *Unit){
 	char.Cook: func(self *Unit) {
 		var canAct = number.IsNaN(self.ActTimer) || self.ActTimer < 0
 		var targetUnit *Unit
+		var curRange = float32(TileSize) * 0.5
+		if self.State == state.ActTrigger {
+			curRange *= 2 // have some more buffer range upon acting in case the target unit moved slightly outisde while casting
+		}
 		for _, u := range Units {
-			var isClose = number.IsWithin(u.X, self.X, TileSize*0.5)
+			var isClose = number.IsWithin(u.X, self.X, curRange)
 			var isMaxHp = u.Health == u.Values.MaxHealth
 			if u.Team == self.Team && u != self && u.Lane == self.Lane-1 && isClose && !isMaxHp && u.IsAlive() {
 				targetUnit = u
@@ -70,9 +75,9 @@ var Behaviors = map[char.Enum]func(self *Unit){
 			self.UnitFront.VelocityY = -10
 			self.UnitFront.Values.DisablesTimer += 1.5
 			if self.Team == team.Ally {
-				self.UnitFront.VelocityX = 50
+				self.UnitFront.VelocityX = 80
 			} else {
-				self.UnitFront.VelocityX = -50
+				self.UnitFront.VelocityX = -80
 			}
 		}
 	},
@@ -133,13 +138,18 @@ var Behaviors = map[char.Enum]func(self *Unit){
 		}
 	},
 	char.Troll: func(self *Unit) {
-		if self.State == state.ActTrigger {
+		var canAct = number.IsNaN(self.ActTimer) || self.ActTimer < 0
+		if self.State == state.Idling && self.UnitFront != nil && canAct {
+			self.State = state.ActStart
+		} else if self.State == state.ActTrigger && self.UnitFront != nil {
 			var hb = self.Hitbox()
 			var offX float32 = 12
 			if self.IsFacingLeft() {
 				offX *= -1
 			}
 			Splashes = collection.Add(Splashes, NewSplash(splash.Dust, 0, hb.X+offX, hb.Y+hb.Height/2-14, self))
+			self.Particles.EmitFromPoint(50, hb.X+offX, hb.Y+hb.Height/2, self.particlesGround)
+			PlaySound(sound.Stomp)
 			for _, u := range Units {
 				if self.Team != u.Team && number.IsWithin(self.X, u.X, TileSize*2) {
 					var dirX, dirY = direction.BetweenPoints(self.X, self.Y+self.Height/2, u.X, u.Y)

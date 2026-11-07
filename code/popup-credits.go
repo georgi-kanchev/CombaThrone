@@ -23,6 +23,7 @@ func UpdateCredits() {
 
 	panel = geometry.NewArea(panel.X, panel.Y+panel.Height/2+10, 60, 20)
 	gui.Button("Back", panel, geometry.Area{}, ThemeGUI.Variant(1), true, 0.7)
+	TryPlayButtonSound()
 	if gui.IsJustClicked() {
 		Popup = popup.MainMenu
 	}

@@ -4,24 +4,36 @@ type Enum uint16
 
 const (
 	Ambience Enum = iota
+
+	Button
+	Play
+
 	DoorOpen
 	DoorClose
 	DoorCrumble
 	GateOpen
 	GateClose
 	GateCrumble
+
+	GloryAlly
+	GloryEnemy
+
 	Bow
 	ShotGround
 	ShotFlesh
 	ShotWood
 	ShotMetal
-	Swing
+
+	SwingLight
+	SwingHeavy
 	HitFlesh
 	HitWood
 	HitMetal
 	Stab
+
 	Drop
 	Death
-	GloryAlly
-	GloryEnemy
+
+	Stomp
+	Heal
 )

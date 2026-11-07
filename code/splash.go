@@ -8,10 +8,12 @@ import (
 	"pure-game-kit/packages/assets"
 	"pure-game-kit/packages/graphics"
 	"pure-game-kit/packages/motion"
+	"pure-game-kit/packages/utility/angle"
 	"pure-game-kit/packages/utility/collection"
 	"pure-game-kit/packages/utility/color"
 	"pure-game-kit/packages/utility/direction"
 	"pure-game-kit/packages/utility/number"
+	"pure-game-kit/packages/utility/point"
 )
 
 type Splash struct {
@@ -194,13 +196,13 @@ func splashUpdateWatershield(self *Splash) {
 	}
 }
 func splashTickLightingZap(self *Splash) {
-	var offsetX float32 = TileSize * 1.55
-	if self.Team == team.Enemy {
-		offsetX *= -1
+	var enemy = self.Owner.ClosestEnemyInRange
+	if enemy != nil {
+		self.Angle = angle.BetweenPoints(self.X, self.Y, enemy.X, enemy.Y)
+		self.X, self.Y = point.MoveAtAngle(self.X, self.Y, self.Angle, TileSize*1.55)
+		self.Y -= 6
+		self.tryDamageEnemy()
 	}
-	self.X += offsetX
-	self.Y -= 6
-	self.tryDamageEnemy()
 }
 
 func (s *Splash) tryDamageEnemy() {
