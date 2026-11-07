@@ -132,7 +132,7 @@ func (u *Unit) IsGarrisoner() bool {
 	return u.Lane >= lane.Garrison1
 }
 func (u *Unit) IsSummoned() bool {
-	return u != nil && u.State != state.WaitingToBeSummoned
+	return u != nil && u.State != state.WaitingToBeSummoned && u.State != state.Revived
 }
 func (u *Unit) IsOutsideOwnBase() bool {
 	if u.IsGarrisoner() {
@@ -568,6 +568,13 @@ func (u *Unit) applyState() {
 	} else if (u.State == state.HurtStart && u.Health <= 0) || (u.State == state.Hurting && !u.IsAlive()) {
 		u.State = state.DyingStart
 	}
+
+	if u.State == state.Revived {
+		u.State = state.WaitingToBeSummoned
+	}
+	if u.State == state.Decaying && u.HurtTimer < -u.Values.ReviveTimer || u.IsGarrisoner() {
+		u.State = state.Revived
+	}
 }
 func (u *Unit) actUponState() {
 	switch u.State {
@@ -710,20 +717,20 @@ func (u *Unit) actUponState() {
 			PlaySound(sound.Death)
 		}
 	case state.Decaying:
-		if u.HurtTimer < -u.Values.ReviveTimer || u.IsGarrisoner() {
-			Units = collection.Remove(Units, u)
-			if PinnedUnit == u {
-				PinnedUnit = nil
-			}
-
-			if u.Team == team.Ally {
-				u.State = state.WaitingToBeSummoned
-				u.PrepareSpawn()
-			} else {
-				Units = collection.Remove(Units, u)
-			}
-		} else if u.HurtTimer < 0 {
+		if u.HurtTimer < 0 {
 			u.Details.Tint = color.RGBA(255, 255, 255, byte(number.Map(u.HurtTimer, 0, -u.Values.ReviveTimer, 255, 0)))
+		}
+	case state.Revived:
+		Units = collection.Remove(Units, u)
+		if PinnedUnit == u {
+			PinnedUnit = nil
+		}
+
+		if u.Team == team.Ally {
+			PlaySound(sound.Revive)
+			u.PrepareSpawn()
+		} else {
+			Units = collection.Remove(Units, u)
 		}
 	}
 }

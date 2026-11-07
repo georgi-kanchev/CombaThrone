@@ -53,6 +53,7 @@ func InitAudio() {
 
 	loadSound(sound.Drop, 4, "drop")
 	loadSound(sound.Death, 4, "death")
+	loadSound(sound.Revive, 4, "revive")
 
 	loadSound(sound.SwingLight, 4, "swing_light")
 	loadSound(sound.SwingHeavy, 4, "swing_heavy")

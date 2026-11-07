@@ -33,6 +33,7 @@ const (
 
 	Drop
 	Death
+	Revive
 
 	Stomp
 	Heal

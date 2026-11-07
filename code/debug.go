@@ -102,6 +102,7 @@ var debugStates = []string{
 	state.Idling: "idle", state.Moving: "walk",
 	state.HurtStart: "hurt", state.Hurting: "hurt",
 	state.DyingStart: "dying", state.Dying: "dying", state.DyingEnd: "dying", state.Decaying: "dead",
-	state.ActStart: "act charge", state.ActCharging: "act charge", state.ActTrigger: "act charge",
+	state.WaitingToBeSummoned: "waiting to be summoned",
+	state.ActStart:            "act charge", state.ActCharging: "act charge", state.ActTrigger: "act charge",
 	state.ActRecovering: "act recover", state.ActEnd: "act recover"}
 var debugInfo = ""

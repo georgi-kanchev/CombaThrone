@@ -16,6 +16,7 @@ const ( // states
 	Dying      // continuous
 	DyingEnd   // single frame
 	Decaying   // continuous
+	Revived    // single frame
 
 	ActStart      // single frame
 	ActCharging   // continuous
