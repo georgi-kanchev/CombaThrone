@@ -48,9 +48,10 @@ func UpdateMainMenu() {
 		gui.Button(menuStory.Get(), geometry.NewArea(hud.X, hud.Y-TileSize*0.5, 120, 28), noMask, ThemeGUI, true)
 		TryPlayButtonSound()
 		if gui.IsJustClicked() {
-			Screen = screen.Scene
+			Screen = screen.StoryMap
 			Popup = popup.NONE
 			TimeScale = 1
+			mouse.SetCursor(cursor.Arrow)
 			PauseMusic()
 			PauseAmbience()
 			PlaySound(sound.Play)
@@ -81,6 +82,7 @@ func UpdateMainMenu() {
 	if gui.IsJustClicked() {
 		Popup = popup.NONE
 		TimeScale = 1
+		mouse.SetCursor(cursor.Arrow)
 		ResumeSounds()
 	}
 

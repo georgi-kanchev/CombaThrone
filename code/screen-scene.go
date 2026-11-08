@@ -38,7 +38,6 @@ var TimeScale float32 = 1
 var SceneHUD *HUD
 var CurrentZone *Zone
 var Layers []assets.TileLayerId
-var SortedY []*graphics.Object // for units & pickups
 
 var Player *PlayerState
 
@@ -96,6 +95,9 @@ func InitScene() {
 	Player.Units[6] = NewUnit(char.Fisherman, team.Ally, 0)
 	Player.Units[7] = NewUnit(char.Horse, team.Ally, 0)
 }
+
+//=================================================================
+
 func UpdateScene() {
 	if TimeScale == 1 && Popup == popup.NONE && CurrentAmbience() == nil {
 		PlayAmbience(CurrentZone.Kind)

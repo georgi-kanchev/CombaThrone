@@ -40,6 +40,7 @@ func Init() {
 	InitCredits()
 
 	InitTitleScreen()
+	InitStoryMap()
 	InitScene()
 }
 func InitGUI() {
@@ -62,6 +63,8 @@ func Update() {
 	switch Screen {
 	case screen.Title:
 		UpdateTitleScreen()
+	case screen.StoryMap:
+		UpdateStoryMap()
 	case screen.Scene:
 		UpdateScene()
 	}
