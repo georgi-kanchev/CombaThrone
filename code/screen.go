@@ -5,9 +5,14 @@ import (
 	"game/code/constants/popup"
 	"game/code/constants/screen"
 	"pure-game-kit/packages/assets"
+	"pure-game-kit/packages/geometry"
 	"pure-game-kit/packages/graphics"
+	"pure-game-kit/packages/gui"
 	"pure-game-kit/packages/input/keyboard"
 	"pure-game-kit/packages/input/keyboard/key"
+	"pure-game-kit/packages/motion"
+	"pure-game-kit/packages/utility/color"
+	"pure-game-kit/packages/utility/easing"
 	"pure-game-kit/packages/utility/text"
 )
 
@@ -28,9 +33,11 @@ var Tags = [123]string{
 var ThemeGUI assets.GUIThemeId
 var GUI assets.AtlasId
 var SlotId, PanelId, ButtonUpId, ButtonDownId assets.ImageId
+var ScreenFade = motion.NewTween(255)
 
 func Init() {
 	View = new(graphics.NewView(1))
+	ScreenFade.GoTo(0.35, easing.SineIn, 0)
 
 	InitAudio()
 	InitGUI()
@@ -81,14 +88,20 @@ func Update() {
 	handleEscape()
 	UpdateMusic()
 	UpdateDebug()
+
+	View.DrawColor(color.RGBA(0, 0, 0, uint8(ScreenFade.CurrentValues()[0])))
 }
 
 func AlignView() {
 	var _, bly = CurrentZone.Ground.PointFromEdge(0.5, 1)
 	View.FitSize(CurrentZone.Ground.Width, 0)
 	var _, h = View.Size()
-	View.Y = (bly - h/2) - 2
+	View.X, View.Y = 0, (bly-h/2)-2
 	// View.Zoom = 4 // left for debug purposes
+}
+
+func DimScreenUI() {
+	gui.Rectangle(color.RGBA(0, 0, 0, 180), gui.AreaHUD(0.5, 0.5, 1, 1), geometry.Area{}, true) // dim popup background
 }
 
 // private ========================================================

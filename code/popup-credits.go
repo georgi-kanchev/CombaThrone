@@ -3,6 +3,7 @@ package game
 import (
 	"game/code/constants/music"
 	"game/code/constants/popup"
+	"game/code/constants/screen"
 	"pure-game-kit/packages/geometry"
 	"pure-game-kit/packages/gui"
 )
@@ -11,6 +12,10 @@ func InitCredits() {
 }
 
 func UpdateCredits() {
+	if Screen != screen.Title {
+		DimScreenUI()
+	}
+
 	const scale = 0.2
 	var panel, _, _ = settingsLayout.Box(0, scale)
 	panel.Width /= 2

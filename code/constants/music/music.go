@@ -4,7 +4,7 @@ type Enum uint8
 
 const (
 	Menu Enum = iota
-	Map
+	StoryMap
 	SceneEarly
 	SceneLate
 )

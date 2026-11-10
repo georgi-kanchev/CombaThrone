@@ -3,6 +3,7 @@ package game
 import (
 	"game/code/constants/music"
 	"game/code/constants/popup"
+	"game/code/constants/screen"
 	"pure-game-kit/packages/assets"
 	"pure-game-kit/packages/audio"
 	"pure-game-kit/packages/geometry"
@@ -25,7 +26,7 @@ type SettingsData struct {
 	VolumeMaster, VolumeSounds, VolumeMusic, VolumeAmbience float32
 }
 
-var Settings = SettingsData{Window: mode.Maximized, Quality: 1, VolumeMaster: 1, VolumeSounds: 1, VolumeMusic: 0.3, VolumeAmbience: 1.0}
+var Settings = SettingsData{Window: mode.Maximized, Quality: 1, VolumeMaster: 1, VolumeSounds: 1, VolumeMusic: 0.0, VolumeAmbience: 1.0}
 
 func InitSettings() {
 	settingsLayout = assets.LoadGUILayout("data/gui-settings.xml")
@@ -36,6 +37,10 @@ func InitSettings() {
 }
 
 func UpdateSettings() {
+	if Screen != screen.Title {
+		DimScreenUI()
+	}
+
 	var zero = geometry.Area{}
 	gui.Scale = 5.56
 

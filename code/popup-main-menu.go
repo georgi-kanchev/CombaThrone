@@ -24,6 +24,10 @@ func InitMainMenu() {
 }
 
 func UpdateMainMenu() {
+	if Screen != screen.Title {
+		DimScreenUI()
+	}
+
 	var hud = gui.AreaHUD(0.5, 0.5, 0, 0)
 	var noMask = geometry.Area{}
 
@@ -52,6 +56,7 @@ func UpdateMainMenu() {
 			Popup = popup.NONE
 			TimeScale = 1
 			mouse.SetCursor(cursor.Arrow)
+			ScreenFade.GoTo(0, nil, 255).Wait(0.2).GoTo(2.5, nil, 0)
 			PauseMusic()
 			PauseAmbience()
 			PlaySound(sound.Play)
@@ -93,6 +98,7 @@ func UpdateMainMenu() {
 		Popup = popup.MainMenu
 		PauseMusic()
 		PauseAmbience()
+		StopSounds()
 	}
 }
 

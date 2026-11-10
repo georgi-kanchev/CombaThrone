@@ -28,7 +28,7 @@ func InitAudio() {
 	loadAmbience(zone.Mine, "mine_JFB")
 	loadAmbience(zone.Hell, "hell_PM")
 
-	loadMusic(music.Map, "map_Childhood_Home_JS", "map_Pleasant_Peasants_JS")
+	loadMusic(music.StoryMap, "map_Childhood_Home_JS", "map_Pleasant_Peasants_JS")
 	loadMusic(music.SceneEarly, "battle1_Duel_For_Honor_JS", "battle1_Funeral_March_JS", "battle1_Greatest_Nation_JS",
 		"battle1_Nothing_Can_Stop_You_JS", "battle1_Overwhelming_Numbers_JS", "battle1_Protect_The_Realm_JS",
 		"battle1_Shattered_Lands_JS", "battle1_The_Mad_King_JS", "battle1_Tournament_Time_JS")
@@ -79,14 +79,12 @@ func UpdateMusic() {
 	if Popup != popup.NONE && curMusic != nil {
 		ShowCurrentMusic()
 	}
-	if curMusic == nil {
+	if curMusic == nil || curMusic.IsJustFinished() {
 		if Screen == screen.Title {
 			PlayMusic(music.Menu)
-		}
-	} else if curMusic.IsJustFinished() {
-		if Screen == screen.Title {
-			PlayMusic(music.Menu)
-		} else {
+		} else if Screen == screen.StoryMap {
+			PlayMusic(music.StoryMap)
+		} else if Screen == screen.Scene {
 			PlayMusic(music.SceneEarly)
 		}
 	}
@@ -116,6 +114,11 @@ func PauseMusic() {
 func PauseSounds() {
 	for _, a := range allSounds {
 		a.Pause()
+	}
+}
+func StopSounds() {
+	for _, a := range allSounds {
+		a.Stop()
 	}
 }
 func ResumeSounds() {
@@ -186,6 +189,7 @@ func loadMusic(music music.Enum, namesVariants ...string) {
 			n = text.Remove(n, "menu_")
 			n = text.Remove(n, "battle1_")
 			n = text.Remove(n, "battle2_")
+			n = text.Remove(n, "map_")
 			n = text.Replace(n, "_", " ")
 			n = text.Replace(n, "JS", "")
 			n = "➡" + Tags[icon.Music] + n
