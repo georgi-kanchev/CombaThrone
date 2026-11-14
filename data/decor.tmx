@@ -212,7 +212,7 @@
   </layer>
   <layer id="93" name="FieldBuildings" width="18" height="10" visible="0">
    <data encoding="base64" compression="zlib">
-   eJzVzEsKQFAYhuFjEQdlHUopu1BK2YVSCptQJi7LMHHZBFaCqXcJR2cgXz2Tv/5XiG8mYcPR7Ljw4CPQ6ISIECN5+bthx4EUGXIUKFEpdk5cuFGjQYsOPQbFjjSEMGHBwchtwowFq2Lnj3sAlrQSmA==
+   eJzVzssJwlAQQNFnEVEhdQQEIdiEEBBCmhAEQW1CcOOnjGyiNhGtRN16SngSCDhwNgNzmRD6mYQxacdOxoQpeYfOnIIF5Y+3LQ+eLFmxZsOWXWTnxZsPew4cOXHmwiyikwxCGDIipbZruHLjThX507/PF2NCEzg=
   </data>
   </layer>
   <layer id="106" name="RuinsGround" width="18" height="10" visible="0">
@@ -317,46 +317,46 @@
   </layer>
  </group>
  <group id="95" name="Collisions">
-  <objectgroup id="61" name="Lower" visible="0">
-   <object id="3" x="-237" y="309" width="1013" height="8"/>
+  <objectgroup id="61" name="Lower">
+   <object id="3" x="-237" y="309" width="1013" height="50"/>
   </objectgroup>
-  <objectgroup id="90" name="LowerOff" visible="0">
-   <object id="51" x="-237" y="294" width="1013" height="8"/>
+  <objectgroup id="90" name="LowerOff">
+   <object id="51" x="-237" y="294" width="1013" height="50"/>
   </objectgroup>
-  <objectgroup id="62" name="Middle" visible="0">
-   <object id="2" x="-237" y="277" width="1013" height="8"/>
+  <objectgroup id="62" name="Middle">
+   <object id="2" x="-237" y="277" width="1013" height="50"/>
   </objectgroup>
-  <objectgroup id="89" name="MiddleOff" visible="0">
-   <object id="50" x="-237" y="262" width="1013" height="8"/>
+  <objectgroup id="89" name="MiddleOff">
+   <object id="50" x="-237" y="262" width="1013" height="50"/>
   </objectgroup>
-  <objectgroup id="63" name="Upper" visible="0">
-   <object id="1" x="-237" y="245" width="1013" height="8"/>
+  <objectgroup id="63" name="Upper">
+   <object id="1" x="-237" y="245" width="1013" height="50"/>
   </objectgroup>
-  <objectgroup id="88" name="UpperOff" visible="0">
-   <object id="49" x="-237" y="230" width="1013" height="8"/>
+  <objectgroup id="88" name="UpperOff">
+   <object id="49" x="-237" y="230" width="1013" height="50"/>
   </objectgroup>
-  <objectgroup id="65" name="Garrison1" visible="0">
-   <object id="7" x="-40" y="182" width="71" height="4"/>
+  <objectgroup id="65" name="Garrison1">
+   <object id="7" x="-40" y="182" width="71" height="50"/>
    <object id="12" x="27" y="158" width="4" height="24"/>
   </objectgroup>
-  <objectgroup id="78" name="Garrison2" visible="0">
-   <object id="35" x="-40" y="158" width="100" height="4"/>
+  <objectgroup id="78" name="Garrison2">
+   <object id="35" x="-40" y="158" width="100" height="50"/>
    <object id="36" x="56" y="134" width="4" height="24"/>
   </objectgroup>
-  <objectgroup id="67" name="Garrison3" visible="0">
-   <object id="14" x="-40" y="134" width="132" height="4"/>
+  <objectgroup id="67" name="Garrison3">
+   <object id="14" x="-40" y="134" width="132" height="50"/>
    <object id="16" x="88" y="110" width="4" height="24"/>
   </objectgroup>
-  <objectgroup id="69" name="GarrisonPlus1" visible="0">
+  <objectgroup id="69" name="GarrisonPlus1">
    <object id="22" x="-40" y="126" width="168" height="4"/>
    <object id="23" x="124" y="102" width="4" height="24"/>
   </objectgroup>
-  <objectgroup id="70" name="GarrisonPlus2" visible="0">
+  <objectgroup id="70" name="GarrisonPlus2">
    <object id="24" x="-40" y="126" width="200" height="4"/>
    <object id="25" x="156" y="102" width="4" height="24"/>
   </objectgroup>
-  <objectgroup id="71" name="GarrisonPlus3" visible="0">
-   <object id="26" x="-40" y="126" width="232" height="4"/>
+  <objectgroup id="71" name="GarrisonPlus3">
+   <object id="26" x="-40" y="126" width="232" height="50"/>
    <object id="27" x="188" y="102" width="4" height="24"/>
   </objectgroup>
  </group>

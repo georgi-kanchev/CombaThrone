@@ -1,9 +1,12 @@
 package game
 
+import "game/code/constants/progress"
+
 type PlayerState struct {
-	Coins   int
-	Pickups []*Pickup
-	Units   []*Unit
+	Progress progress.Enum
+	Coins    int
+	Pickups  []*Pickup
+	Units    []*Unit
 }
 
 func NewPlayer() *PlayerState {
