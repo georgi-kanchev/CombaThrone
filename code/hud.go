@@ -618,7 +618,7 @@ func (h *HUD) updateScore() {
 		h.Coins.X, h.Coins.Y = area.X+TileSize*0.9, area.Y+4
 
 		var demoText = geometry.NewArea(h.Coins.X, h.Coins.Y+TileSize*1.1, TileSize*2.5, TileSize)
-		gui.Text("You have\nno artifacts.", demoText, geometry.Area{}, ThemeGUI, false)
+		gui.Text("Artifacts are\nunavailable in\nthe demo.", demoText, geometry.Area{}, ThemeGUI, false)
 	}
 
 	h.Coins.Text = CoinsText.Set(Tags[icon.Coins], Player.Coins)

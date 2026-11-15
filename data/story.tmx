@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="36" height="50" tilewidth="32" tileheight="32" infinite="0" nextlayerid="26" nextobjectid="2">
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="36" height="50" tilewidth="32" tileheight="32" infinite="0" nextlayerid="27" nextobjectid="4">
  <tileset firstgid="1" name="story" tilewidth="32" tileheight="32" tilecount="456" columns="24">
   <image source="story.png" width="768" height="608"/>
  </tileset>
@@ -219,7 +219,7 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
- <layer id="22" name="Ruins" width="36" height="50" visible="0" opacity="0.5">
+ <layer id="22" name="Ruins" width="36" height="50" opacity="0.5">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -435,4 +435,9 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
+ <objectgroup id="26" name="Paths">
+  <object id="3" x="-24" y="496">
+   <polyline points="0,0 40,0 72,0 104,0 136,32 136,64 232,64 296,64"/>
+  </object>
+ </objectgroup>
 </map>

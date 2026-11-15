@@ -7,7 +7,6 @@ import (
 	"game/code/constants/entrance"
 	"game/code/constants/garrison"
 	"game/code/constants/lane"
-	"game/code/constants/music"
 	"game/code/constants/pickup"
 	"game/code/constants/popup"
 	"game/code/constants/state"
@@ -99,13 +98,6 @@ func InitScene() {
 //=================================================================
 
 func UpdateScene() {
-	if TimeScale == 1 && Popup == popup.NONE && CurrentAmbience() == nil {
-		PlayAmbience(CurrentZone.Kind)
-	}
-	if TimeScale == 1 && Popup == popup.NONE && CurrentMusic() == nil {
-		PlayMusic(music.SceneEarly)
-	}
-
 	InGameTimer += DeltaTimeScaled()
 	AlignView()
 

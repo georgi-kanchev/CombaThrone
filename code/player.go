@@ -7,10 +7,12 @@ type PlayerState struct {
 	Glory, Coins int
 	Pickups      []*Pickup
 	Units        []*Unit
+
+	MapCellX, MapCellY float32
 }
 
 func NewPlayer() *PlayerState {
-	return &PlayerState{Units: make([]*Unit, 8)}
+	return &PlayerState{Units: make([]*Unit, 8), MapCellX: -1, MapCellY: 5}
 }
 
 //=================================================================

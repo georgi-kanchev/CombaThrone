@@ -75,7 +75,7 @@ func InitAudio() {
 //=================================================================
 
 func UpdateMusic() {
-	var curMusic = CurrentMusic()
+	var curMusic, curAmbience = CurrentMusic(), CurrentAmbience()
 	if Popup != popup.NONE && curMusic != nil {
 		ShowCurrentMusic()
 	}
@@ -86,6 +86,15 @@ func UpdateMusic() {
 			PlayMusic(music.StoryMap)
 		} else if Screen == screen.Scene {
 			PlayMusic(music.SceneEarly)
+		}
+	}
+	if curAmbience == nil || curAmbience.IsJustFinished() {
+		if Screen == screen.Title {
+			PlayAmbience(zone.Ruins)
+		} else if Screen == screen.StoryMap {
+			PlayAmbience(zone.Ruins)
+		} else if Screen == screen.Scene {
+			PlayAmbience(CurrentZone.Kind)
 		}
 	}
 }

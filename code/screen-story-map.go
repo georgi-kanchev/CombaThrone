@@ -1,6 +1,7 @@
 package game
 
 import (
+	char "game/code/constants/character"
 	"pure-game-kit/packages/assets"
 	"pure-game-kit/packages/geometry"
 	"pure-game-kit/packages/graphics"
@@ -28,6 +29,7 @@ func InitStoryMap() {
 		storyMapFogFade = append(storyMapFogFade, motion.NewTween(FOG_OPACITY))
 	}
 	storyMapLayers[0].Details.Tint = palette.White
+	storyMapPaths = storyMapLayers[len(storyMapLayers)-1].TilemapPaths()
 }
 func Progress() {
 	storyMapFogFade[3+Player.Progress].GoTo(1.0, nil, 0)
@@ -57,6 +59,15 @@ func UpdateStoryMap() {
 
 	SceneHUD.UpdateBack()
 	SceneHUD.UpdateFront()
+
+	var x, y = PointAtCell(Player.MapCellX, Player.MapCellY)
+	gui.Image(Characters[char.Explorer].Icon, geometry.NewArea(x, y, TileSize, TileSize), false)
+
+	if keyboard.IsKeyPressed(key.D) {
+		Player.MapCellX += DeltaTimeScaled()
+	}
+
+	View.DrawPath(storyMapPaths, 1, palette.White, geometry.Area{})
 }
 
 // private ========================================================
@@ -65,3 +76,4 @@ const FOG_OPACITY = 128
 
 var storyMapLayers []*graphics.Object
 var storyMapFogFade []*motion.Tween
+var storyMapPaths []float32
