@@ -48,7 +48,7 @@ func UpdateStoryMap() {
 	}
 
 	gui.Scale = View.Zoom
-	gui.Image(PanelId, geometry.NewArea(-TileSize*5-8, -TileSize*3.5-8, TileSize*8, TileSize*3), false)
+	gui.Image(PanelId, geometry.NewArea(-TileSize*5-8, -TileSize*3.5-8, TileSize*8.6, TileSize*3), false)
 }
 
 // private ========================================================
