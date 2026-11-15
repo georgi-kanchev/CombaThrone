@@ -565,7 +565,8 @@
     <group name="explorer-icon" cropIndexes="1495"/>
     <group name="explorer-idle" cropIndexes="1496 1497 1498 1499"/>
     <group name="explorer-move" cropIndexes="1500 1501 1502 1503 1504 1505"/>
-    <group name="explorer-act" cropIndexes="1506 1507 1508 1509 1510"/>
+    <group name="explorer-prepare" cropIndexes="1506"/>
+    <group name="explorer-recover" cropIndexes="1507 1508 1509 1510"/>
     <group name="explorer-hurt" cropIndexes="1511 1512"/>
     <group name="explorer-death" cropIndexes="1513 1514 1515 1516 1517"/>
   </groups>

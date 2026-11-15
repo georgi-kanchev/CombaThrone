@@ -86,14 +86,14 @@ func InitScene() {
 
 	Player = NewPlayer()
 
-	Player.Units[0] = NewUnit(char.Dummy, team.Ally, 0)
-	Player.Units[1] = NewUnit(char.Miner, team.Ally, 0)
-	Player.Units[2] = NewUnit(char.Cook, team.Ally, 0)
-	Player.Units[3] = NewUnit(char.Bowyer, team.Ally, 0)
-	Player.Units[4] = NewUnit(char.Smith, team.Ally, 0)
-	Player.Units[5] = NewUnit(char.Kid, team.Ally, 0)
-	Player.Units[6] = NewUnit(char.Fisherman, team.Ally, 0)
-	Player.Units[7] = NewUnit(char.Horse, team.Ally, 0)
+	// Player.Units[0] = NewUnit(char.Explorer, team.Ally, 0)
+	// Player.Units[1] = NewUnit(char.Miner, team.Ally, 0)
+	// Player.Units[2] = NewUnit(char.Cook, team.Ally, 0)
+	// Player.Units[3] = NewUnit(char.Bowyer, team.Ally, 0)
+	// Player.Units[4] = NewUnit(char.Smith, team.Ally, 0)
+	// Player.Units[5] = NewUnit(char.Kid, team.Ally, 0)
+	// Player.Units[6] = NewUnit(char.Fisherman, team.Ally, 0)
+	// Player.Units[7] = NewUnit(char.Horse, team.Ally, 0)
 }
 
 //=================================================================
@@ -109,7 +109,7 @@ func UpdateScene() {
 	InGameTimer += DeltaTimeScaled()
 	AlignView()
 
-	mouse.SetCursor(cursor.Default)
+	mouse.SetCursor(cursor.Arrow)
 
 	if keyboard.IsKeyJustPressed(key.A) {
 		Units = append(Units, NewUnit(char.Stabber, team.Enemy, lane.Middle))
@@ -152,9 +152,11 @@ func UpdateScene() {
 
 	Bases[team.Ally].UpdateFront()
 	Bases[team.Enemy].UpdateFront()
-	iterateRemovable(&Splashes, func(s *Splash) { s.Update() })
 
+	const scale = 2.65
+	SceneHUD.View.FitSize(1920/scale, 1080/scale) // always fit the HUD based on 16:9, regardless of resolution
 	SceneHUD.UpdateBack()
+	iterateRemovable(&Splashes, func(s *Splash) { s.Update() })
 	iterateRemovable(&Shots, func(p *Shot) { p.Update() })
 
 	for _, g := range Bases[team.Ally].Entrances {

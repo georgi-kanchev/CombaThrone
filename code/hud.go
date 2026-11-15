@@ -10,11 +10,13 @@ import (
 	"game/code/constants/pickup"
 	"game/code/constants/popup"
 	"game/code/constants/role"
+	"game/code/constants/screen"
 	"game/code/constants/state"
 	"game/code/constants/team"
 	"pure-game-kit/packages/assets"
 	"pure-game-kit/packages/geometry"
 	"pure-game-kit/packages/graphics"
+	"pure-game-kit/packages/gui"
 	"pure-game-kit/packages/input/mouse"
 	"pure-game-kit/packages/input/mouse/button"
 	"pure-game-kit/packages/input/mouse/cursor"
@@ -84,6 +86,10 @@ func (h *HUD) UnitIconPosition(index int) (x, y float32) {
 	var width, height = float32(TileSize) + 7, float32(TileSize) + 7
 	var offX, offY float32 = width/2 - width*2, height/2 - height
 	var i, j = index / 4, index % 4
+
+	if Screen == screen.StoryMap {
+		offX, offY = offX-TileSize*3.6, offY-TileSize*3.7
+	}
 	return h.UnitsPanel.X + float32(j)*width + offX, h.UnitsPanel.Y + float32(i)*height + offY
 }
 func (h *HUD) FreePickupSlot() int {
@@ -113,12 +119,11 @@ func (h *HUD) PickupSlotPosition(slot int) (x, y float32) {
 }
 
 func (h *HUD) UpdateBack() {
-	const scale = 2.65
-	h.View.FitSize(1920/scale, 1080/scale) // always fit the HUD based on 16:9, regardless of resolution
-
 	var tx, ty = h.View.PointFromEdge(0.5, 0)
-	h.UnitsPanel.Y = ty + h.Top.Height + h.UnitsPanel.Height/2 - TileSize - 2
-	h.View.DrawObject(h.UnitsPanel)
+	if Screen == screen.Scene {
+		h.UnitsPanel.Y = ty + h.Top.Height + h.UnitsPanel.Height/2 - TileSize - 2
+		h.View.DrawObject(h.UnitsPanel)
+	}
 
 	var lastSummonIndex = h.SummonIndex
 	if Popup == popup.NONE && mouse.IsAnyButtonJustPressed() {
@@ -127,12 +132,14 @@ func (h *HUD) UpdateBack() {
 
 	h.drawBenchUnits(lastSummonIndex)
 
-	h.Top.X, h.Top.Y = tx, ty+h.Top.Height/2
-	h.View.DrawObject(h.Top)
+	if Screen == screen.Scene {
+		h.Top.X, h.Top.Y = tx, ty+h.Top.Height/2
+		h.View.DrawObject(h.Top)
 
-	h.ZoneInfo.Text = CurrentZone.Info
-	h.ZoneInfo.X, h.ZoneInfo.Y = h.Top.X, h.Top.Y-TileSize+4.5
-	h.View.DrawObject(h.ZoneInfo)
+		h.ZoneInfo.Text = CurrentZone.Info
+		h.ZoneInfo.X, h.ZoneInfo.Y = h.Top.X, h.Top.Y-TileSize+4.5
+		h.View.DrawObject(h.ZoneInfo)
+	}
 
 	iterateRemovable(&h.Pickups, func(p *Pickup) {
 		p.Update()
@@ -150,25 +157,7 @@ func (h *HUD) UpdateBack() {
 	h.trySummon(lastSummonIndex)
 }
 func (h *HUD) UpdateFront() {
-	var icons = GUI.Crops("icons-hud")
-	h.Coins.X, h.Coins.Y = h.Top.X, h.Top.Y-9
-	h.Coins.Text = CoinsText.Set(Tags[icon.Coins], Player.Coins)
-	h.View.DrawObject(h.Coins)
-	if h.Coins.ContainsPoint(h.View.MousePosition()) {
-		h.DrawTooltip(h.Coins.Shape, TooltipTexts[0].Set("Total\n🟨", Tags[icon.Coins], "Coins⬜"), icons[0])
-	}
-
-	var ally, enemy = h.TeamGlory[team.Ally], h.TeamGlory[team.Enemy]
-	ally.X, ally.Y = h.Top.X-TileSize*3.5, h.Top.Y-6
-	enemy.X, enemy.Y = h.Top.X+TileSize*3.5, h.Top.Y-6
-	h.View.DrawObject(ally)
-	h.View.DrawObject(enemy)
-
-	if ally.ContainsPoint(h.View.MousePosition()) {
-		h.DrawTooltip(ally.Shape, TooltipTexts[0].Set("Ally\n🟩", Tags[icon.Glory], "Glory⬜"), icons[1])
-	} else if enemy.ContainsPoint(h.View.MousePosition()) {
-		h.DrawTooltip(enemy.Shape, TooltipTexts[0].Set("Enemy\n🟥", Tags[icon.Glory], "Glory⬜"), icons[1])
-	}
+	h.updateScore()
 
 	if Popup != popup.NONE {
 		return
@@ -264,8 +253,10 @@ func (u *Unit) DrawTooltip(shape geometry.Shape, bench bool) {
 	const width, height, effWidth = 130.0, 94.0, 105.0
 	var extraWidth float32
 	var x, y = shape.X, shape.Y - shape.Height/2 - height/2 - 14
-	if bench {
+	if bench && Screen == screen.Scene {
 		x, y = 0, SceneHUD.UnitsPanel.Y+SceneHUD.UnitsPanel.Height/2+height/2
+	} else if Screen == screen.StoryMap {
+		x, y = shape.X, -TileSize*1
 	}
 
 	if len(u.Effects) > 0 {
@@ -274,9 +265,11 @@ func (u *Unit) DrawTooltip(shape geometry.Shape, bench bool) {
 	}
 
 	var area = geometry.NewArea(x, y, width+extraWidth, height).Inside(SceneHUD.View.Bounds())
-	area = area.Outside(SceneHUD.UnitsPanel.Shape.Bounds(), true, false)
-	area = area.Outside(SceneHUD.TeamGlory[team.Ally].Shape.Bounds(), true, false)
-	area = area.Outside(SceneHUD.TeamGlory[team.Enemy].Shape.Bounds(), true, false)
+	if Screen == screen.Scene {
+		area = area.Outside(SceneHUD.UnitsPanel.Shape.Bounds(), true, false)
+		area = area.Outside(SceneHUD.TeamGlory[team.Ally].Shape.Bounds(), true, false)
+		area = area.Outside(SceneHUD.TeamGlory[team.Enemy].Shape.Bounds(), true, false)
+	}
 	x, y = area.X, area.Y
 
 	TooltipLabel.Details.TextAlignX, TooltipLabel.Details.TextAlignY = 0, 0
@@ -589,4 +582,48 @@ func (h *HUD) trySummon(lastSummonIndex int) {
 	h.DrawPath(View, unitX, unitY, h.SummonDragX, h.SummonDragY)
 	var icon = Characters[unit.Character].Icon
 	View.DrawImage(h.SummonDragX, h.SummonDragY, size, size, 0, icon, palette.White, geometry.Area{})
+}
+
+func (h *HUD) updateScore() {
+	var icons = GUI.Crops("icons-hud")
+	var ally, enemy = h.TeamGlory[team.Ally], h.TeamGlory[team.Enemy]
+	ally.X, ally.Y = h.Top.X-TileSize*3.5, h.Top.Y-6
+	enemy.X, enemy.Y = h.Top.X+TileSize*3.5, h.Top.Y-6
+
+	for _, b := range Bases {
+		if b.Team == team.Ally && Player.CoinsJustChanged() {
+			SceneHUD.Coins.Text = text.New(Player.Coins)
+		}
+
+		if b.Glory != b.LastGlory {
+			SceneHUD.TeamGlory[b.Team].Text = text.New(Tags[icon.Glory], b.Glory)
+			b.LastGlory = b.Glory
+		}
+	}
+
+	if Screen == screen.Scene {
+		h.View.DrawObject(ally)
+		if ally.ContainsPoint(h.View.MousePosition()) {
+			h.DrawTooltip(ally.Shape, TooltipTexts[0].Set("Your\n🟩", Tags[icon.Glory], "Glory⬜"), icons[1])
+		}
+
+		h.View.DrawObject(enemy)
+		if enemy.ContainsPoint(h.View.MousePosition()) {
+			h.DrawTooltip(enemy.Shape, TooltipTexts[0].Set("Enemy\n🟥", Tags[icon.Glory], "Glory⬜"), icons[1])
+		}
+
+		h.Coins.X, h.Coins.Y = h.Top.X, h.Top.Y-9
+	} else if Screen == screen.StoryMap {
+		var area = gui.AreaHUD(0, 0, h.Coins.Width, h.Coins.Height)
+		h.Coins.X, h.Coins.Y = area.X+TileSize*0.9, area.Y+4
+
+		var demoText = geometry.NewArea(h.Coins.X, h.Coins.Y+TileSize*1.1, TileSize*2.5, TileSize)
+		gui.Text("You have\nno artifacts.", demoText, geometry.Area{}, ThemeGUI, false)
+	}
+
+	h.Coins.Text = CoinsText.Set(Tags[icon.Coins], Player.Coins)
+	h.View.DrawObject(h.Coins)
+	if h.Coins.ContainsPoint(h.View.MousePosition()) {
+		h.DrawTooltip(h.Coins.Shape, TooltipTexts[0].Set("Your\n🟨", Tags[icon.Coins], "Coins⬜"), icons[0])
+	}
 }

@@ -4,14 +4,12 @@ import (
 	"game/code/constants/base"
 	"game/code/constants/entrance"
 	"game/code/constants/garrison"
-	"game/code/constants/icon"
 	"game/code/constants/lane"
 	"game/code/constants/team"
 	"game/code/constants/zone"
 	"pure-game-kit/packages/assets"
 	"pure-game-kit/packages/graphics"
 	"pure-game-kit/packages/motion"
-	"pure-game-kit/packages/utility/text"
 )
 
 type Base struct {
@@ -129,17 +127,12 @@ func (b *Base) UpdateBack() {
 }
 func (b *Base) UpdateFront() {
 	b.Glory = max(b.Glory, 0)
+	if b.Team == team.Ally {
+		Player.Glory = b.Glory
+	}
 
 	if b.Glory == 0 {
 		//TimeScale = 0 // game over
-	}
-
-	if b.Team == team.Ally && Player.CoinsJustChanged() {
-		SceneHUD.Coins.Text = text.New(Player.Coins, "$")
-	}
-	if b.Glory != b.LastGlory {
-		SceneHUD.TeamGlory[b.Team].Text = text.New(Tags[icon.Glory], b.Glory)
-		b.LastGlory = b.Glory
 	}
 
 	View.DrawObject(b.Front)

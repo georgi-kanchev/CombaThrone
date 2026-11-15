@@ -4,6 +4,8 @@ type Enum uint8
 
 const (
 	NONE Enum = iota
+	Explorer
+
 	Dummy
 	Miner
 	Cook

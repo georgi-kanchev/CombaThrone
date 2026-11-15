@@ -7,6 +7,8 @@ import (
 	"pure-game-kit/packages/gui"
 	"pure-game-kit/packages/input/keyboard"
 	"pure-game-kit/packages/input/keyboard/key"
+	"pure-game-kit/packages/input/mouse"
+	"pure-game-kit/packages/input/mouse/cursor"
 	"pure-game-kit/packages/motion"
 	"pure-game-kit/packages/utility/color"
 	"pure-game-kit/packages/utility/color/palette"
@@ -33,6 +35,7 @@ func Progress() {
 }
 func UpdateStoryMap() {
 	View.FillSize(TileSize*18, TileSize*10)
+	mouse.SetCursor(cursor.Arrow)
 
 	View.X, View.Y = PointAtCell(-0.5, -5.5)
 	for i, l := range storyMapLayers {
@@ -47,8 +50,13 @@ func UpdateStoryMap() {
 		Progress()
 	}
 
+	SceneHUD.View.Zoom = View.Zoom
 	gui.Scale = View.Zoom
+	gui.ScaleNinePatches = gui.Scale
 	gui.Image(PanelId, geometry.NewArea(-TileSize*5-8, -TileSize*3.5-8, TileSize*8.6, TileSize*3), false)
+
+	SceneHUD.UpdateBack()
+	SceneHUD.UpdateFront()
 }
 
 // private ========================================================
