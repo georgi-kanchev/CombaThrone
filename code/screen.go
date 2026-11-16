@@ -37,6 +37,7 @@ var ScreenFade = motion.NewTween(255)
 
 func Init() {
 	View = new(graphics.NewView(1))
+	Player = NewPlayer()
 	ScreenFade.GoTo(0.35, easing.SineIn, 0)
 
 	InitAudio()
@@ -47,8 +48,8 @@ func Init() {
 	InitCredits()
 
 	InitTitleScreen()
-	InitStoryMap()
 	InitScene()
+	InitStoryMap()
 }
 func InitGUI() {
 	GUI = assets.LoadAtlas(assets.LoadImage("data/gui.png"), "data/gui.xml")

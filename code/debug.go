@@ -92,6 +92,11 @@ func UpdateDebug() {
 			View.DrawText(debugInfo, topX, topY, 50, 0, palette.White, geometry.Area{})
 		}
 	case DebugProfile:
+		var x, y = View.PointFromEdge(0.5, 0)
+		var mx, my = View.MousePosition()
+		var cx, cy = CellAtPoint(mx, my)
+		debugCoords.Set("Mouse[", int(mx), ", ", int(my), "] Cell[", int(cx), ", ", int(cy), "]")
+		View.DrawText(debugCoords.Get(), x, y, 50, 0, palette.White, geometry.Area{})
 		View.DrawDebugInfo(true)
 	}
 }
@@ -106,3 +111,4 @@ var debugStates = []string{
 	state.ActStart:            "act charge", state.ActCharging: "act charge", state.ActTrigger: "act charge",
 	state.ActRecovering: "act recover", state.ActEnd: "act recover"}
 var debugInfo = ""
+var debugCoords text.Dynamic

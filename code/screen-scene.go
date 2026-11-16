@@ -83,8 +83,6 @@ func InitScene() {
 	Pickups = append(Pickups, NewPickup(150, pickup.Key, lane.LowerOff))
 	Pickups = append(Pickups, NewPickup(150, pickup.Star, lane.MiddleOff))
 
-	Player = NewPlayer()
-
 	// Player.Units[0] = NewUnit(char.Explorer, team.Ally, 0)
 	// Player.Units[1] = NewUnit(char.Miner, team.Ally, 0)
 	// Player.Units[2] = NewUnit(char.Cook, team.Ally, 0)

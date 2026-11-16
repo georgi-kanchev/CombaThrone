@@ -9,4 +9,5 @@ const (
 	South
 	North
 	Underground
+	COUNT
 )

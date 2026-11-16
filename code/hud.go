@@ -194,8 +194,7 @@ func (h *HUD) Highlight(view *graphics.View, shape geometry.Shape, color uint) {
 	if Popup != popup.NONE {
 		return
 	}
-	shape.Width += 2
-	shape.Height += 2
+	shape.Width, shape.Height, shape.Roundness = shape.Width+2, shape.Height+2, 0
 	h.HoverHighlight.Shape = shape
 	h.HoverHighlight.Details.Tint = color
 	view.DrawObject(h.HoverHighlight)
@@ -618,7 +617,7 @@ func (h *HUD) updateScore() {
 		h.Coins.X, h.Coins.Y = area.X+TileSize*0.9, area.Y+4
 
 		var demoText = geometry.NewArea(h.Coins.X, h.Coins.Y+TileSize*1.1, TileSize*2.5, TileSize)
-		gui.Text("Artifacts are\nunavailable in\nthe demo.", demoText, geometry.Area{}, ThemeGUI, false)
+		gui.Text("Artifacts are\nnot available\nin the demo.", demoText, geometry.Area{}, ThemeGUI, false)
 	}
 
 	h.Coins.Text = CoinsText.Set(Tags[icon.Coins], Player.Coins)
