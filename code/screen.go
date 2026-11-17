@@ -12,6 +12,7 @@ import (
 	"pure-game-kit/packages/input/keyboard/key"
 	"pure-game-kit/packages/motion"
 	"pure-game-kit/packages/utility/color"
+	"pure-game-kit/packages/utility/color/palette"
 	"pure-game-kit/packages/utility/easing"
 	"pure-game-kit/packages/utility/text"
 )
@@ -33,6 +34,8 @@ var Tags = [123]string{
 var ThemeGUI assets.GUIThemeId
 var GUI assets.AtlasId
 var SlotId, PanelId, ButtonUpId, ButtonDownId assets.ImageId
+var CallForActionAnim *motion.Animation[assets.ImageId]
+var CallForAction *graphics.Object
 var ScreenFade = motion.NewTween(255)
 
 func Init() {
@@ -53,6 +56,9 @@ func Init() {
 }
 func InitGUI() {
 	GUI = assets.LoadAtlas(assets.LoadImage("data/gui.png"), "data/gui.xml")
+	CallForActionAnim = new(motion.NewAnimation(7.5, false, GUI.Crops("call-for-action")...))
+	CallForAction = new(graphics.NewSprite(0, 0, 0, 0))
+	CallForAction.Details.Tint = color.FadeOut(palette.White, 0.35)
 
 	for i := range icon.COUNT {
 		assets.FontId(0).EmbedImage(text.At(Tags[i], 0), GUI.Crops("icons-text")[i])
@@ -91,6 +97,11 @@ func Update() {
 	UpdateDebug()
 
 	View.DrawColor(color.RGBA(0, 0, 0, uint8(ScreenFade.CurrentValues()[0])))
+
+	if CallForActionAnim.IsPlaying() {
+		CallForAction.ImageId = CallForActionAnim.Frame()
+		View.DrawObject(CallForAction)
+	}
 }
 
 func AlignView() {
@@ -100,9 +111,13 @@ func AlignView() {
 	View.X, View.Y = 0, (bly-h/2)-2
 	// View.Zoom = 4 // left for debug purposes
 }
-
 func DimScreenUI() {
 	gui.Rectangle(color.RGBA(0, 0, 0, 180), gui.AreaHUD(0.5, 0.5, 1, 1), geometry.Area{}, true) // dim popup background
+}
+func PlayCallForAction(x, y float32) {
+	CallForActionAnim.Time = 0
+	CallForAction.Width, CallForAction.Height = TileSize*3, TileSize*3
+	CallForAction.X, CallForAction.Y = x, y
 }
 
 // private ========================================================

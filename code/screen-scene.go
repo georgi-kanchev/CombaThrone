@@ -104,9 +104,6 @@ func UpdateScene() {
 	if keyboard.IsKeyJustPressed(key.A) {
 		Units = append(Units, NewUnit(char.Stabber, team.Enemy, lane.Middle))
 	}
-	if keyboard.IsKeyJustPressed(key.S) {
-		Units[0].AffectHealth(-20, false, nil)
-	}
 
 	CurrentZone.UpdateBack()
 	Bases[team.Ally].UpdateBack()
