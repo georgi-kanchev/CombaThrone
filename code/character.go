@@ -2,6 +2,7 @@ package game
 
 import (
 	char "game/code/constants/character"
+	"game/code/constants/emotion"
 	"game/code/constants/icon"
 	"game/code/constants/role"
 	proj "game/code/constants/shot"
@@ -49,6 +50,7 @@ type Character struct {
 	RoleIcon            icon.Enum
 	RoleName            string
 	IsFlying            bool
+	Portraits           [emotion.COUNT]assets.ImageId
 
 	ShotInfo ShotInfo
 }
@@ -218,6 +220,11 @@ func InitCharacters() {
 		var _, flying = CharactersFlying[char.Enum(i)]
 		c.IsFlying = flying
 		c.Icon = atlas.Crops(prefix + "-icon")[0]
+
+		var portraits = GUI.Crops("portrait-" + prefix)
+		for i, p := range portraits {
+			c.Portraits[i+1] = p
+		}
 
 		if c.IsFlying {
 			c.Hitbox.Height += TileSize

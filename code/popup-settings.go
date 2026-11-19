@@ -42,7 +42,7 @@ func UpdateSettings() {
 	}
 
 	var zero = geometry.Area{}
-	gui.Scale = 5.56
+	gui.Scale = 5.567
 
 	gui.Rectangle(0, gui.AreaHUD(0.5, 0.5, 1, 1), zero, true) // menu cancel area (entire screen)
 	if gui.IsJustClicked() {

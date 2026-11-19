@@ -2,13 +2,12 @@ package game
 
 import (
 	char "game/code/constants/character"
+	"game/code/constants/emotion"
 	"game/code/constants/progress"
 	"pure-game-kit/packages/assets"
 	"pure-game-kit/packages/geometry"
 	"pure-game-kit/packages/graphics"
 	"pure-game-kit/packages/gui"
-	"pure-game-kit/packages/input/keyboard"
-	"pure-game-kit/packages/input/keyboard/key"
 	"pure-game-kit/packages/input/mouse"
 	"pure-game-kit/packages/input/mouse/cursor"
 	"pure-game-kit/packages/motion"
@@ -27,7 +26,6 @@ func InitStoryMap() {
 			storyMapFogFade = append(storyMapFogFade, nil)
 			continue
 		}
-
 		storyMapFogFade = append(storyMapFogFade, motion.NewTween(FOG_OPACITY))
 	}
 	storyMapLayers[0].Details.Tint = palette.White
@@ -41,10 +39,11 @@ func InitStoryMap() {
 
 	var diff, info = GUI.Crops("difficulty"), GUI.Crops("info")
 	storyProgressImages = [progress.COUNT]assets.ImageId{0, info[0], diff[0], diff[1], diff[2], diff[3]}
+
+	EventPortraitLeft = Characters[char.Explorer].Portraits[emotion.Calm]
+	EventText.Set("⬅...")
 }
 func UpdateStoryMap() {
-	UpdateEvents()
-
 	View.FillSize(TileSize*18, TileSize*10)
 	mouse.SetCursor(cursor.Arrow)
 
@@ -59,17 +58,18 @@ func UpdateStoryMap() {
 		}
 	}
 
-	if keyboard.IsKeyJustPressed(key.F) {
-		ProgressOnMap()
-	}
-
+	var panel = geometry.NewArea(-TileSize*5-8, -TileSize*3.5-8, TileSize*8.6, TileSize*3)
 	SceneHUD.View.Zoom = View.Zoom
 	gui.Scale = View.Zoom
 	gui.ScaleNinePatches = gui.Scale
-	gui.Image(PanelId, geometry.NewArea(-TileSize*5-8, -TileSize*3.5-8, TileSize*8.6, TileSize*3), false)
+	gui.Image(PanelId, panel, false)
 
-	SceneHUD.UpdateBack()
-	SceneHUD.UpdateFront()
+	if EventText.Get() == "" {
+		SceneHUD.UpdateBack()
+		SceneHUD.UpdateFront()
+	} else {
+		UpdateEvents(panel)
+	}
 
 	var hovered, cur = geometry.Shape{}, progress.Start
 	for i := progress.Tutorial; i <= progress.Underground; i++ {
@@ -96,10 +96,6 @@ func UpdateStoryMap() {
 	if hovered != (geometry.Shape{}) && Player.Progress == cur {
 		SceneHUD.Highlight(View, hovered, palette.White)
 		mouse.SetCursor(cursor.Hand)
-
-		if mouse.IsAnyButtonJustPressed() {
-			MoveOnMap(hovered.X, hovered.Y)
-		}
 	} else if hovered != (geometry.Shape{}) {
 		SceneHUD.Highlight(View, hovered, palette.Red)
 		mouse.SetCursor(cursor.NotAllowed)

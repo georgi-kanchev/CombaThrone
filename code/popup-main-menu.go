@@ -96,6 +96,9 @@ func UpdateMainMenu() {
 	if gui.IsJustClicked() {
 		Screen = screen.Title
 		Popup = popup.MainMenu
+		for _, m := range allMusic {
+			m.Stop()
+		}
 		PauseMusic()
 		PauseAmbience()
 		StopSounds()

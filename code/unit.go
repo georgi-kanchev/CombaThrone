@@ -116,7 +116,7 @@ func (u *Unit) EnemyEntrance() (canBeActedUpon bool, entrance *Entrance) {
 	if u.IsLaner() || u.IsOffLaner() {
 		e = Bases[1-u.Team].Entrances[u.Lane/2]
 		var actRange = float32(u.Values.ActRange) * TileSize
-		var melee = u.Values.ActRange == 1 && number.IsWithin(u.X, e.Tiles[0].X, TileSize/2)
+		var melee = u.Values.ActRange <= 1 && number.IsWithin(u.X, e.Tiles[0].X, TileSize/2)
 		var ranged = u.Values.ActRange > 1 && number.Absolute(u.X-e.Tiles[0].X) < actRange
 		canBeActedUpon = !e.IsOpen() && e.Health > 0 && (melee || ranged)
 	}
@@ -187,7 +187,7 @@ func (u *Unit) PrepareSpawn() {
 
 	var col = Collisions[u.Lane]
 	var hb = u.Hitbox()
-	var laneY = col[0].Y - col[0].Height/2 - hb.Height
+	var laneY = col[0].Y - col[0].Height/2 - hb.Height/2
 	switch u.Lane {
 	case lane.Lower, lane.LowerOff:
 		u.X, u.Y = TileSize*9.8, laneY
@@ -789,7 +789,7 @@ func (u *Unit) applyCollisions() {
 				u.VelocityY = 0
 				u.IsGrounded = true
 
-				if s.Height > 12 { // we have a wall
+				if s.Height > 20 { // we have a wall
 					u.VelocityX = 0
 					u.IsAtWall = true
 				}

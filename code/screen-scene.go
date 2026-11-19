@@ -8,14 +8,12 @@ import (
 	"game/code/constants/garrison"
 	"game/code/constants/lane"
 	"game/code/constants/pickup"
-	"game/code/constants/popup"
 	"game/code/constants/state"
 	"game/code/constants/team"
 	"game/code/constants/zone"
 	"pure-game-kit/packages/assets"
 	"pure-game-kit/packages/geometry"
 	"pure-game-kit/packages/graphics"
-	"pure-game-kit/packages/gui"
 	"pure-game-kit/packages/input/keyboard"
 	"pure-game-kit/packages/input/keyboard/key"
 	"pure-game-kit/packages/input/mouse"
@@ -68,10 +66,10 @@ func InitScene() {
 	}
 	CurrentZone = Zones[zone.Field]
 
-	Bases[team.Ally] = NewBase(team.Ally, base.Fort, garrison.Three, entrance.NONE, entrance.NONE, entrance.NONE)
-	Bases[team.Enemy] = NewBase(team.Enemy, base.Fortress, garrison.Three, entrance.NONE, entrance.Door, entrance.ShortGate)
+	Bases[team.Ally] = NewBase(team.Ally, base.NONE, garrison.NONE, entrance.NONE, entrance.NONE, entrance.NONE)
+	Bases[team.Enemy] = NewBase(team.Enemy, base.Barrack, garrison.NONE, entrance.NONE, entrance.ShortGate, entrance.Door)
 
-	// Units = append(Units, NewUnit(char.Stabber, team.Enemy, lane.Lower))
+	Units = append(Units, NewUnit(char.Explorer, team.Ally, lane.Middle))
 	// Units = append(Units, NewUnit(CharMiner, TeamEnemy, LaneMiddle))
 
 	Pickups = append(Pickups, NewPickup(-240, pickup.Relic, lane.LowerOff))
@@ -164,9 +162,7 @@ func UpdateScene() {
 	SceneHUD.UpdateFront()
 	Player.Update()
 
-	if Popup != popup.NONE {
-		gui.Rectangle(color.RGBA(0, 0, 0, 180), gui.AreaHUD(0.5, 0.5, 1, 1), geometry.Area{}, true) // dim popup background
-	}
+	UpdateEvents(geometry.Area{})
 }
 
 func DrawShadow(x, z, width, height, angle float32, mask geometry.Area) {

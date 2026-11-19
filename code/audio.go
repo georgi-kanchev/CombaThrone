@@ -130,6 +130,11 @@ func StopSounds() {
 		a.Stop()
 	}
 }
+func StopMusic() {
+	for _, m := range allMusic {
+		m.Stop()
+	}
+}
 func ResumeSounds() {
 	for _, a := range allSounds {
 		if a.IsPaused() {

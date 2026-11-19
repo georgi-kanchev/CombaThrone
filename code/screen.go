@@ -98,7 +98,7 @@ func Update() {
 
 	View.DrawColor(color.RGBA(0, 0, 0, uint8(ScreenFade.CurrentValues()[0])))
 
-	if CallForActionAnim.IsPlaying() {
+	if CallForActionAnim.IsPlaying() && TimeScale > 0 {
 		CallForAction.ImageId = CallForActionAnim.Frame()
 		View.DrawObject(CallForAction)
 	}
@@ -109,7 +109,7 @@ func AlignView() {
 	View.FitSize(CurrentZone.Ground.Width, 0)
 	var _, h = View.Size()
 	View.X, View.Y = 0, (bly-h/2)-2
-	// View.Zoom = 4 // left for debug purposes
+	// View.Zoom = 4 // for debug purposes
 }
 func DimScreenUI() {
 	gui.Rectangle(color.RGBA(0, 0, 0, 180), gui.AreaHUD(0.5, 0.5, 1, 1), geometry.Area{}, true) // dim popup background
