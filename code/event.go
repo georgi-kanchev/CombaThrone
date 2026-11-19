@@ -69,12 +69,8 @@ func UpdateEvents(panel geometry.Area) {
 		Units[0].Values.DisablesTimer = 5
 	}
 
-	if EventPortraitLeft != 0 {
-		gui.Image(EventPortraitLeft, geometry.NewArea(panel.X-panel.Width/2+TileSize*1.5, panel.Y, TileSize*2, TileSize*3), false)
-	}
-	if EventPortraitRight != 0 {
-		gui.Image(EventPortraitRight, geometry.NewArea(panel.X+panel.Width/2-TileSize-6, panel.Y, -TileSize*2, TileSize*3), false)
-	}
+	gui.Image(EventPortraitLeft, geometry.NewArea(panel.X-panel.Width/2+TileSize*1.5, panel.Y, TileSize*2, TileSize*3), false)
+	gui.Image(EventPortraitRight, geometry.NewArea(panel.X+panel.Width/2-TileSize-6, panel.Y, -TileSize*2, TileSize*3), false)
 	panel.Width, panel.X = panel.Width-TileSize*4.5, panel.X+4
 	gui.Text(EventText.Get(), panel, geometry.Area{}, ThemeGUI, false)
 }
