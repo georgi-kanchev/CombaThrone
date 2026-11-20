@@ -15,6 +15,7 @@ import (
 	"pure-game-kit/packages/utility/color/palette"
 	"pure-game-kit/packages/utility/easing"
 	"pure-game-kit/packages/utility/text"
+	"pure-game-kit/packages/utility/time"
 )
 
 var View *graphics.View
@@ -39,6 +40,8 @@ var CallForAction *graphics.Object
 var ScreenFade = motion.NewTween(255)
 
 func Init() {
+	time.SetFixedTickRate(30) // for unit physics only
+
 	View = new(graphics.NewView(1))
 	Player = NewPlayer()
 	ScreenFade.GoTo(0.35, easing.SineIn, 0)

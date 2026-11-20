@@ -26,7 +26,7 @@ func InitStoryMap() {
 			storyMapFogFade = append(storyMapFogFade, nil)
 			continue
 		}
-		storyMapFogFade = append(storyMapFogFade, motion.NewTween(FOG_OPACITY))
+		storyMapFogFade = append(storyMapFogFade, motion.NewTween(fog_opacity))
 	}
 	storyMapLayers[0].Details.Tint = palette.White
 
@@ -120,7 +120,7 @@ func MoveOnMap(targetX, targetY float32) {
 
 // private ========================================================
 
-const FOG_OPACITY, COLLISION_TILE_ID = 128, 144
+const fog_opacity, collision_tile_id = 128, 144
 
 var storyMapProgressPoints []geometry.Shape
 var storyMapLayers []*graphics.Object

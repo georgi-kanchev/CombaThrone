@@ -69,8 +69,9 @@ func InitScene() {
 	Bases[team.Ally] = NewBase(team.Ally, base.NONE, garrison.NONE, entrance.NONE, entrance.NONE, entrance.NONE)
 	Bases[team.Enemy] = NewBase(team.Enemy, base.Barrack, garrison.NONE, entrance.NONE, entrance.ShortGate, entrance.Door)
 
-	Units = append(Units, NewUnit(char.Explorer, team.Ally, lane.Middle))
-	// Units = append(Units, NewUnit(CharMiner, TeamEnemy, LaneMiddle))
+	// Units = append(Units, NewUnit(char.Explorer, team.Ally, lane.Middle))
+	Units = append(Units, NewUnit(char.Troll, team.Ally, lane.Middle))
+	Units = append(Units, NewUnit(char.Miner, team.Enemy, lane.Middle))
 
 	Pickups = append(Pickups, NewPickup(-240, pickup.Relic, lane.LowerOff))
 	Pickups = append(Pickups, NewPickup(0, pickup.Gem, lane.MiddleOff))

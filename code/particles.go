@@ -21,7 +21,7 @@ func ParticlesGlass(p *particles.Particle) (alive bool) {
 	var dt = DeltaTimeScaled()
 	var ang = random.Range[float32](0, 360)
 	p.Age += dt
-	p.VelocityY += Gravity / 2 * dt
+	p.VelocityY += gravity / 2 * dt
 
 	p.X += p.VelocityX * dt
 	p.Y += p.VelocityY * dt

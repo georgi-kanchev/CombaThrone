@@ -39,7 +39,6 @@ var Behaviors = map[char.Enum]func(self *Unit){
 		}
 	},
 	char.Cook: func(self *Unit) {
-		var canAct = number.IsNaN(self.ActTimer) || self.ActTimer < 0
 		var targetUnit *Unit
 		var curRange = float32(TileSize) * 0.5
 		if self.State == state.ActTrigger {
@@ -50,7 +49,7 @@ var Behaviors = map[char.Enum]func(self *Unit){
 			var isMaxHp = u.Health == u.Values.MaxHealth
 			if u.Team == self.Team && u != self && u.Lane == self.Lane-1 && isClose && !isMaxHp && u.IsAlive() {
 				targetUnit = u
-				if canAct {
+				if self.IsAbleToAct() {
 					self.State = state.ActStart
 				}
 				break
@@ -68,8 +67,7 @@ var Behaviors = map[char.Enum]func(self *Unit){
 		}
 	},
 	char.Smith: func(self *Unit) {
-		var canAct = number.IsNaN(self.ActTimer) || self.ActTimer < 0
-		if self.State == state.Idling && self.UnitFront != nil && canAct {
+		if self.State == state.Idling && self.UnitFront != nil && self.IsAbleToAct() {
 			self.State = state.ActStart
 		} else if self.State == state.ActTrigger && self.UnitFront != nil {
 			self.UnitFront.VelocityY = -10
@@ -138,8 +136,7 @@ var Behaviors = map[char.Enum]func(self *Unit){
 		}
 	},
 	char.Troll: func(self *Unit) {
-		var canAct = number.IsNaN(self.ActTimer) || self.ActTimer < 0
-		if self.State == state.Idling && self.UnitFront != nil && canAct {
+		if self.State == state.Idling && self.UnitFront != nil && self.IsAbleToAct() {
 			self.State = state.ActStart
 		} else if self.State == state.ActTrigger && self.UnitFront != nil {
 			var hb = self.Hitbox()
@@ -206,7 +203,6 @@ var Behaviors = map[char.Enum]func(self *Unit){
 		self.applyEffectInRange(effect.Snake, 1-self.Team, []lane.Enum{self.Lane, self.Lane - 1}, nil)
 	},
 	char.Healer: func(self *Unit) {
-		var canAct = number.IsNaN(self.ActTimer) || self.ActTimer < 0
 		var target *Unit
 		for _, u := range Units {
 			var isClose = self.IsUnitInRange(u)
@@ -218,7 +214,7 @@ var Behaviors = map[char.Enum]func(self *Unit){
 			}
 		}
 		if target != nil {
-			if canAct {
+			if self.IsAbleToAct() {
 				self.State = state.ActStart
 			}
 			if self.State == state.ActTrigger {

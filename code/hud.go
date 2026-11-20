@@ -329,8 +329,9 @@ func (u *Unit) DrawTooltip(shape geometry.Shape, bench bool) {
 		TooltipTexts[1].Append("🌗🟧", Tags[icon.Range], u.Values.ActRange, " range\n")
 	}
 	if u.Values.ActTimer > 0 {
-		var canAct = u.ActTimer < 0 || u.ActTimer > u.Values.ActTimer
-		if !u.IsSummoned() || canAct || number.IsNaN(u.ActTimer) || u.State == state.Decaying {
+		// u.IsAbleToAct() will not show correct time when disabled, so custom check below
+		var canAct = number.IsNaN(u.ActTimer) || u.ActTimer < 0 || u.ActTimer > u.Values.ActTimer
+		if !u.IsSummoned() || canAct || u.State == state.Decaying {
 			TooltipTexts[1].Append("🌖🟪", Tags[icon.Hourglass], number.Round(u.Values.ActTimer, 1), "s rest\n")
 		} else if u.IsSummoned() {
 			TooltipTexts[1].Append("🌖🟪", Tags[icon.Hourglass], max(number.Round(u.ActTimer, 1), 0), "/",

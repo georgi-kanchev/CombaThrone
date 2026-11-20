@@ -60,8 +60,6 @@ type Unit struct {
 	LastState                state.Enum
 }
 
-const Gravity, GroundFriction = 256.0, 400.0
-
 var Units []*Unit = make([]*Unit, 0, 16)
 var Collisions = map[lane.Enum][]geometry.Shape{}
 var PinnedUnit *Unit
@@ -169,6 +167,9 @@ func (u *Unit) IsFacingLeft() bool {
 }
 func (u *Unit) IsUnitInRange(unit *Unit) bool {
 	return number.IsWithin(unit.X, u.X, float32(u.Values.ActRange)*TileSize)
+}
+func (u *Unit) IsAbleToAct() bool {
+	return (number.IsNaN(u.ActTimer) || u.ActTimer < 0) && u.Values.DisablesTimer == 0
 }
 
 func (u *Unit) PrepareSpawn() {
@@ -377,6 +378,8 @@ func (u *Unit) TimerIconEffect(effect e.Enum) string {
 
 // private ========================================================
 
+const gravity, ground_friction = 256.0, 400.0
+
 var laneZs = [lane.COUNT]float32{
 	lane.Lower: 0, lane.LowerOff: 0.5, lane.Middle: 1, lane.MiddleOff: 1.5, lane.Upper: 2, lane.UpperOff: 2.5,
 	lane.Garrison1: 0, lane.Garrison2: 1, lane.Garrison3: 2,
@@ -408,7 +411,7 @@ func (u *Unit) particlesBlood(p *particles.Particle) (alive bool) {
 
 	var dt = DeltaTimeScaled()
 	p.Age += dt
-	p.VelocityY += Gravity / 2 * dt
+	p.VelocityY += gravity / 2 * dt
 
 	p.X += p.VelocityX * dt
 	p.Y += p.VelocityY * dt
@@ -434,7 +437,7 @@ func (u *Unit) particlesGround(p *particles.Particle) (alive bool) {
 
 	var dt = DeltaTimeScaled()
 	p.Age += dt
-	p.VelocityY += Gravity / 2 * dt
+	p.VelocityY += gravity / 2 * dt
 
 	p.X += p.VelocityX * dt
 	p.Y += p.VelocityY * dt
@@ -462,7 +465,7 @@ func (u *Unit) particlesHeal(p *particles.Particle) (alive bool) {
 	var dt = DeltaTimeScaled()
 	p.Age += dt
 	p.VelocityX = (number.Sine(p.Age*10) * p.CustomData["offset"].(float32)) * 10
-	p.VelocityY -= Gravity / 20 * dt
+	p.VelocityY -= gravity / 20 * dt
 
 	p.X += p.VelocityX * dt
 	p.Y += p.VelocityY * dt
@@ -476,7 +479,7 @@ func (u *Unit) particlesHeal(p *particles.Particle) (alive bool) {
 
 func (u *Unit) applyState() {
 	var canBeActedUpon, entrance = u.EnemyEntrance()
-	var canAct = u.ActTimer < 0 || number.IsNaN(u.ActTimer)
+	var canAct = u.IsAbleToAct()
 	var enemyEntranceInRange = canBeActedUpon && entrance != nil && !u.Values.CannotActVsEntrances
 	var hasMeleeTarget = u.UnitFront != nil && u.Team != u.UnitFront.Team
 	var melee = canAct && (hasMeleeTarget || enemyEntranceInRange) && u.Values.ActRange == 1 && u.Values.Role != role.Defender
@@ -754,16 +757,17 @@ func (u *Unit) updateEffects() {
 }
 
 func (u *Unit) applyPhysics() {
+	var dt = DeltaTimeScaled()
 	if u.IsGrounded {
-		u.VelocityX *= 1.0 - (GroundFriction/100)*DeltaTimeScaled()
+		u.VelocityX *= 1.0 - (ground_friction/100)*dt
 	}
 	var canBeActedUpon, entry = u.EnemyEntrance()
 	if u.IsLaner() && canBeActedUpon && entry != nil {
 		u.VelocityX = 0
 	}
 
-	u.VelocityY += Gravity * DeltaTimeScaled()
-	u.X, u.Y = u.X+u.VelocityX*DeltaTimeScaled(), u.Y+u.VelocityY*DeltaTimeScaled()
+	u.VelocityY += gravity * dt
+	u.X, u.Y = u.X+u.VelocityX*dt, u.Y+u.VelocityY*dt
 }
 func (u *Unit) applyCollisions() {
 	var hb = u.Hitbox()
