@@ -95,7 +95,7 @@ var Behaviors = map[char.Enum]func(self *Unit){
 		}
 
 		var offset float32 = TileSize / 2.5
-		if self.IsReturning {
+		if self.IsFacingLeft() {
 			offset *= -1
 		}
 		if self.LastState == state.ActTrigger { // is fishing
@@ -113,7 +113,7 @@ var Behaviors = map[char.Enum]func(self *Unit){
 			}
 			var height float32 = TileSize * 0.7
 			var x, y = self.X + 18.5, self.Y + height
-			if (self.Team == team.Ally && self.IsReturning) || (self.Team == team.Enemy && !self.IsReturning) {
+			if self.IsFacingLeft() {
 				x = self.X - 18.5
 			}
 			View.DrawShape(x, y, 3, height, 0, 0, color.RGB(37, 19, 26), geometry.Area{})
@@ -138,7 +138,7 @@ var Behaviors = map[char.Enum]func(self *Unit){
 	char.Troll: func(self *Unit) {
 		if self.State == state.Idling && self.UnitFront != nil && self.IsAbleToAct() {
 			self.State = state.ActStart
-		} else if self.State == state.ActTrigger && self.UnitFront != nil {
+		} else if self.State == state.ActTrigger && self.UnitFront != nil && self.UnitFront.Team != self.Team {
 			var hb = self.Hitbox()
 			var offX float32 = 12
 			if self.IsFacingLeft() {

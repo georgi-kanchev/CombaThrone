@@ -40,8 +40,8 @@ func InitStoryMap() {
 	var diff, info = GUI.Crops("difficulty"), GUI.Crops("info")
 	storyProgressImages = [progress.COUNT]assets.ImageId{0, info[0], diff[0], diff[1], diff[2], diff[3]}
 
-	EventPortraitLeft = Characters[char.Explorer].Portraits[emotion.Calm]
-	EventText.Set("⬅...")
+	storyPortraitLeft = Characters[char.Explorer].Portraits[emotion.Calm]
+	storyText.Set("⬅...")
 }
 func UpdateStoryMap() {
 	View.FillSize(TileSize*18, TileSize*10)
@@ -58,17 +58,15 @@ func UpdateStoryMap() {
 		}
 	}
 
-	var panel = geometry.NewArea(-TileSize*5-8, -TileSize*3.5-8, TileSize*8.6, TileSize*3)
 	SceneHUD.View.Zoom = View.Zoom
 	gui.Scale = View.Zoom
 	gui.ScaleNinePatches = gui.Scale
-	gui.Image(PanelId, panel, false)
 
-	if EventText.Get() == "" {
+	if storyText.Get() == "" {
 		SceneHUD.UpdateBack()
 		SceneHUD.UpdateFront()
 	} else {
-		UpdateEvents(panel)
+		UpdateStory()
 	}
 
 	var hovered, cur = geometry.Shape{}, progress.Start

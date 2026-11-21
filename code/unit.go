@@ -533,10 +533,10 @@ func (u *Unit) applyState() {
 		u.State = state.ActEnd
 	} else if u.State == state.ActTrigger {
 		u.State = state.ActRecovering
-	} else if u.State == state.ActCharging && u.Anim.IsJustFinished() {
+	} else if u.State == state.ActPreparing && u.Anim.IsJustFinished() {
 		u.State = state.ActTrigger
 	} else if u.State == state.ActStart {
-		u.State = state.ActCharging
+		u.State = state.ActPreparing
 	} else if (u.State == state.Idling || u.State == state.Moving) && melee && !u.IsOffLaner() {
 		u.State = state.ActStart
 	} else if (u.State == state.Idling || u.State == state.Moving) && ranged && garrisonOrNot && canShoot && !u.IsOffLaner() {
@@ -696,7 +696,7 @@ func (u *Unit) actUponState() {
 			}
 			PlaySound(Characters[u.Character].Sounds.ActTrigger)
 		}
-	case state.ActCharging, state.ActRecovering, state.ActEnd: // empty
+	case state.ActPreparing, state.ActRecovering, state.ActEnd: // empty
 	case state.HurtStart:
 		u.Anim.Frames = Characters[u.Character].Animations.Hurt
 		u.Anim.IsLooping, u.Anim.FPS, u.Anim.Time = false, 5, 0

@@ -2,20 +2,16 @@ package game
 
 import (
 	"game/code/constants/base"
-	char "game/code/constants/character"
 	"game/code/constants/clouds"
 	"game/code/constants/entrance"
 	"game/code/constants/garrison"
 	"game/code/constants/lane"
-	"game/code/constants/pickup"
 	"game/code/constants/state"
 	"game/code/constants/team"
 	"game/code/constants/zone"
 	"pure-game-kit/packages/assets"
 	"pure-game-kit/packages/geometry"
 	"pure-game-kit/packages/graphics"
-	"pure-game-kit/packages/input/keyboard"
-	"pure-game-kit/packages/input/keyboard/key"
 	"pure-game-kit/packages/input/mouse"
 	"pure-game-kit/packages/input/mouse/cursor"
 	"pure-game-kit/packages/utility/collection"
@@ -69,18 +65,17 @@ func InitScene() {
 	Bases[team.Ally] = NewBase(team.Ally, base.NONE, garrison.NONE, entrance.NONE, entrance.NONE, entrance.NONE)
 	Bases[team.Enemy] = NewBase(team.Enemy, base.Barrack, garrison.NONE, entrance.NONE, entrance.ShortGate, entrance.Door)
 
-	// Units = append(Units, NewUnit(char.Explorer, team.Ally, lane.Middle))
-	Units = append(Units, NewUnit(char.Troll, team.Ally, lane.Middle))
-	Units = append(Units, NewUnit(char.Miner, team.Enemy, lane.Middle))
+	// Units = append(Units, NewUnit(char.Troll, team.Ally, lane.Middle))
+	// Units = append(Units, NewUnit(char.Miner, team.Enemy, lane.Middle))
 
-	Pickups = append(Pickups, NewPickup(-240, pickup.Relic, lane.LowerOff))
-	Pickups = append(Pickups, NewPickup(0, pickup.Gem, lane.MiddleOff))
-	Pickups = append(Pickups, NewPickup(0, pickup.Coin, lane.UpperOff))
-	Pickups = append(Pickups, NewPickup(100, pickup.Snowflake, lane.LowerOff))
-	Pickups = append(Pickups, NewPickup(100, pickup.Crystal, lane.MiddleOff))
-	Pickups = append(Pickups, NewPickup(100, pickup.Rune, lane.UpperOff))
-	Pickups = append(Pickups, NewPickup(150, pickup.Key, lane.LowerOff))
-	Pickups = append(Pickups, NewPickup(150, pickup.Star, lane.MiddleOff))
+	// Pickups = append(Pickups, NewPickup(-240, pickup.Relic, lane.LowerOff))
+	// Pickups = append(Pickups, NewPickup(0, pickup.Gem, lane.MiddleOff))
+	// Pickups = append(Pickups, NewPickup(0, pickup.Coin, lane.UpperOff))
+	// Pickups = append(Pickups, NewPickup(100, pickup.Snowflake, lane.LowerOff))
+	// Pickups = append(Pickups, NewPickup(100, pickup.Crystal, lane.MiddleOff))
+	// Pickups = append(Pickups, NewPickup(100, pickup.Rune, lane.UpperOff))
+	// Pickups = append(Pickups, NewPickup(150, pickup.Key, lane.LowerOff))
+	// Pickups = append(Pickups, NewPickup(150, pickup.Star, lane.MiddleOff))
 
 	// Player.Units[0] = NewUnit(char.Explorer, team.Ally, 0)
 	// Player.Units[1] = NewUnit(char.Miner, team.Ally, 0)
@@ -99,10 +94,6 @@ func UpdateScene() {
 	AlignView()
 
 	mouse.SetCursor(cursor.Arrow)
-
-	if keyboard.IsKeyJustPressed(key.A) {
-		Units = append(Units, NewUnit(char.Stabber, team.Enemy, lane.Middle))
-	}
 
 	CurrentZone.UpdateBack()
 	Bases[team.Ally].UpdateBack()
@@ -160,10 +151,10 @@ func UpdateScene() {
 		}
 	}
 
+	UpdateStory()
+
 	SceneHUD.UpdateFront()
 	Player.Update()
-
-	UpdateEvents(geometry.Area{})
 }
 
 func DrawShadow(x, z, width, height, angle float32, mask geometry.Area) {

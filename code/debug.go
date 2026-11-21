@@ -108,7 +108,7 @@ var debugStates = []string{
 	state.HurtStart: "hurt", state.Hurting: "hurt",
 	state.DyingStart: "dying", state.Dying: "dying", state.DyingEnd: "dying", state.Decaying: "dead",
 	state.WaitingToBeSummoned: "waiting to be summoned",
-	state.ActStart:            "act charge", state.ActCharging: "act charge", state.ActTrigger: "act charge",
+	state.ActStart:            "act prepare", state.ActPreparing: "act prepare", state.ActTrigger: "act prepare",
 	state.ActRecovering: "act recover", state.ActEnd: "act recover"}
 var debugInfo = ""
 var debugCoords text.Dynamic

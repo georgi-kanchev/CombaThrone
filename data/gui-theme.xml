@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <theme>
 	<variant0>
-		<text color="#fcfefe" lineHeight="10" fontId="0" gap="10 0" align="0.5 0.5" weight="0.1" outlineSize="0.4" 
+		<text color="#fcfefe" lineHeight="10" fontId="0" gap="10 -20" align="0.5 0.5" weight="0.1" outlineSize="0.4" 
 		outlineColor="#000000"/>
 		<button>
 			<body imageId="-123451" color="#ffd569">
@@ -30,7 +30,7 @@
 		</slider>
 	</variant0>
 	<variant1>
-		<text color="#fcfefe" lineHeight="10" fontId="0" gap="10 0" align="1 0.5" weight="0.1" outlineSize="0.4" 
+		<text color="#fcfefe" lineHeight="10" fontId="0" gap="10 -20" align="1 0.5" weight="0.1" outlineSize="0.4" 
 		outlineColor="#000000"/>
 		<button>
 			<body imageId="-123453" color="#b5b5b5">

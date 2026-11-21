@@ -19,7 +19,7 @@ const ( // states
 	Revived    // single frame
 
 	ActStart      // single frame
-	ActCharging   // continuous
+	ActPreparing  // continuous
 	ActTrigger    // single frame
 	ActRecovering // continuous
 	ActEnd        // single frame
