@@ -77,7 +77,7 @@ func InitScene() {
 	// Pickups = append(Pickups, NewPickup(150, pickup.Key, lane.LowerOff))
 	// Pickups = append(Pickups, NewPickup(150, pickup.Star, lane.MiddleOff))
 
-	// Player.Units[0] = NewUnit(char.Explorer, team.Ally, 0)
+	// Player.Units[0] = NewUnit(char.Adventurer, team.Ally, 0)
 	// Player.Units[1] = NewUnit(char.Miner, team.Ally, 0)
 	// Player.Units[2] = NewUnit(char.Cook, team.Ally, 0)
 	// Player.Units[3] = NewUnit(char.Bowyer, team.Ally, 0)
@@ -132,29 +132,35 @@ func UpdateScene() {
 
 	const scale = 2.65
 	SceneHUD.View.FitSize(1920/scale, 1080/scale) // always fit the HUD based on 16:9, regardless of resolution
-	SceneHUD.UpdateBack()
-	iterateRemovable(&Splashes, func(s *Splash) { s.Update() })
-	iterateRemovable(&Shots, func(p *Shot) { p.Update() })
 
-	for _, g := range Bases[team.Ally].Entrances {
-		g.HealthBar.Update(g.Tiles[0].Shape, g.Health, g.MaxHealth, geometry.Area{})
+	if Story > 100 {
+		SceneHUD.UpdateBack()
 	}
-	for _, g := range Bases[team.Enemy].Entrances {
-		g.HealthBar.Update(g.Tiles[0].Shape, g.Health, g.MaxHealth, geometry.Area{})
-	}
-	for _, u := range Units { // health bars take the Z order of the units
-		if u.IsSummoned() { // this check prevents healthbar flash the very first summon frame
-			var hb = u.Hitbox()
-			hb.Height += 8
-			u.HealthBar.Update(hb, u.Health, u.Values.MaxHealth, u.Mask)
-			u.drawDisables()
+
+	iterateRemovable(&Splashes, func(s *Splash) { s.Update() })
+
+	if Story > 100 {
+		iterateRemovable(&Shots, func(p *Shot) { p.Update() })
+
+		for _, g := range Bases[team.Ally].Entrances {
+			g.HealthBar.Update(g.Tiles[0].Shape, g.Health, g.MaxHealth, geometry.Area{})
 		}
+		for _, g := range Bases[team.Enemy].Entrances {
+			g.HealthBar.Update(g.Tiles[0].Shape, g.Health, g.MaxHealth, geometry.Area{})
+		}
+		for _, u := range Units { // health bars take the Z order of the units
+			if u.IsSummoned() { // this check prevents healthbar flash the very first summon frame
+				var hb = u.Hitbox()
+				hb.Height += 8
+				u.HealthBar.Update(hb, u.Health, u.Values.MaxHealth, u.Mask)
+				u.drawDisables()
+			}
+		}
+		SceneHUD.UpdateFront()
+		Player.Update()
 	}
 
 	UpdateStory()
-
-	SceneHUD.UpdateFront()
-	Player.Update()
 }
 
 func DrawShadow(x, z, width, height, angle float32, mask geometry.Area) {

@@ -562,12 +562,12 @@
     <group name="elk-icon" cropIndexes="1125"/>
     <group name="elk-idle" cropIndexes="1126 1127 1128 1129"/>
     <group name="elk-move" cropIndexes="1130 1131 1132 1133 1134 1135"/>
-    <group name="explorer-icon" cropIndexes="1495"/>
-    <group name="explorer-idle" cropIndexes="1496 1497 1498 1499"/>
-    <group name="explorer-move" cropIndexes="1500 1501 1502 1503 1504 1505"/>
-    <group name="explorer-prepare" cropIndexes="1506"/>
-    <group name="explorer-recover" cropIndexes="1507 1508 1509 1510"/>
-    <group name="explorer-hurt" cropIndexes="1511 1512"/>
-    <group name="explorer-death" cropIndexes="1513 1514 1515 1516 1517"/>
+    <group name="adventurer-icon" cropIndexes="1495"/>
+    <group name="adventurer-idle" cropIndexes="1496 1497 1498 1499"/>
+    <group name="adventurer-move" cropIndexes="1500 1501 1502 1503 1504 1505"/>
+    <group name="adventurer-prepare" cropIndexes="1506"/>
+    <group name="adventurer-recover" cropIndexes="1507 1508 1509 1510"/>
+    <group name="adventurer-hurt" cropIndexes="1511 1512"/>
+    <group name="adventurer-death" cropIndexes="1513 1514 1515 1516 1517"/>
   </groups>
 </data>

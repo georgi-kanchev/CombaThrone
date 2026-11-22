@@ -103,6 +103,10 @@ func (b *Base) UpdateBack() {
 	View.DrawObject(b.Back)
 	View.DrawObject(b.GarrisonBack)
 
+	if b.Team == team.Ally && Story < 100 {
+		return
+	}
+
 	var x, y = b.Flag.X, b.Flag.Y
 	b.FlagAnim.Frames = CurrentZone.FlagFrames
 	if b.Team == team.Ally {

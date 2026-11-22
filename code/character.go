@@ -77,8 +77,8 @@ func NewCharacter(hitbox geometry.Shape, stats Values, info string, shot *ShotIn
 func InitCharacters() {
 	var atlas = assets.LoadAtlas(assets.LoadImage("data/units.png"), "data/units.xml")
 
-	Characters[char.Explorer] = NewCharacter(geometry.NewRoundedRectangle(0, 6, 18, 34, 0, 1),
-		Values{Name: "Explorer", Role: role.Defender, MaxHealth: 20, MoveSpeed: 20,
+	Characters[char.Adventurer] = NewCharacter(geometry.NewRoundedRectangle(0, 6, 18, 34, 0, 1),
+		Values{Name: "Adventurer", Role: role.Defender, MaxHealth: 20, MoveSpeed: 20,
 			ActTimer: 3.0, ReviveTimer: 20.0},
 		"Rolls behind an 🟥"+Tags[icon.Unit]+"enemy⬜.", nil, nil)
 

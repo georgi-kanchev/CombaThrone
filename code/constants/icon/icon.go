@@ -64,6 +64,7 @@ const (
 	Arrow
 	Time0
 	Time1
+	Time2
 	Time3
 	Time4
 	Time5
@@ -78,7 +79,7 @@ const (
 	Time14
 	Time15
 	Time16
-	_
+	ArrowRight
 	_
 	Lightning
 	Zap

@@ -48,7 +48,7 @@
     <group name="info" cropIndexes="25"/>
     <group name="call-for-action" cropIndexes="111 112 113 114 115 116 117"/>
     <group name="portrait-fisherman" cropIndexes="128 129 130 131 132"/>
-    <group name="portrait-explorer" cropIndexes="123 124 125 126 127"/>
+    <group name="portrait-adventurer" cropIndexes="123 124 125 126 127"/>
     <group name="portrait-miner" cropIndexes="133 134 135 136 137"/>
     <group name="portrait-bowyer" cropIndexes="138 139 140 141 142"/>
     <group name="portrait-cook" cropIndexes="143 144 145 146 147"/>

@@ -40,7 +40,7 @@ func InitStoryMap() {
 	var diff, info = GUI.Crops("difficulty"), GUI.Crops("info")
 	storyProgressImages = [progress.COUNT]assets.ImageId{0, info[0], diff[0], diff[1], diff[2], diff[3]}
 
-	storySetPanel("⬅. . .", char.Explorer, 0, emotion.Calm, 0)
+	storySetPanel("⬅. . .", char.Adventurer, 0, emotion.Calm, 0)
 }
 func UpdateStoryMap() {
 	View.FillSize(TileSize*18, TileSize*10)
@@ -88,7 +88,7 @@ func UpdateStoryMap() {
 
 	storyMapMoveTween.TimeScale = TimeScale
 	var pos = storyMapMoveTween.CurrentValues()
-	View.DrawImage(pos[0], pos[1], TileSize, TileSize, 0, Characters[char.Explorer].Icon, palette.White, geometry.Area{})
+	View.DrawImage(pos[0], pos[1], TileSize, TileSize, 0, Characters[char.Adventurer].Icon, palette.White, geometry.Area{})
 
 	if hovered != (geometry.Shape{}) && Player.Progress == cur {
 		SceneHUD.Highlight(View, hovered, palette.White)

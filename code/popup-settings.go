@@ -26,7 +26,7 @@ type SettingsData struct {
 	VolumeMaster, VolumeSounds, VolumeMusic, VolumeAmbience float32
 }
 
-var Settings = SettingsData{Window: mode.Maximized, Quality: 1, VolumeMaster: 1, VolumeSounds: 1, VolumeMusic: 0.0, VolumeAmbience: 1.0}
+var Settings = SettingsData{Window: mode.Maximized, Quality: 1, VolumeMaster: 1, VolumeSounds: 0, VolumeMusic: 0, VolumeAmbience: 0}
 
 func InitSettings() {
 	settingsLayout = assets.LoadGUILayout("data/gui-settings.xml")
