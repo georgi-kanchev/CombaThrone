@@ -40,8 +40,7 @@ func InitStoryMap() {
 	var diff, info = GUI.Crops("difficulty"), GUI.Crops("info")
 	storyProgressImages = [progress.COUNT]assets.ImageId{0, info[0], diff[0], diff[1], diff[2], diff[3]}
 
-	storyPortraitLeft = Characters[char.Explorer].Portraits[emotion.Calm]
-	storyText.Set("⬅...")
+	storySetPanel("⬅. . .", char.Explorer, 0, emotion.Calm, 0)
 }
 func UpdateStoryMap() {
 	View.FillSize(TileSize*18, TileSize*10)

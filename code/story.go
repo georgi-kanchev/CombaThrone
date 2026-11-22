@@ -85,7 +85,7 @@ func UpdateStory() {
 		if storyJustContinued(panel) {
 			storyExplorer = NewUnit(char.Explorer, team.Ally, lane.Middle)
 			Units = append(Units, storyExplorer)
-			storySetPanel("...", 0, 0, 0, 0)
+			storySetPanel(". . .", 0, 0, 0, 0)
 			storyNext()
 		}
 	case 8:
@@ -100,27 +100,85 @@ func UpdateStory() {
 		}
 	case 9:
 		storyFisherman.ActTimer, storyExplorer.Values.DisablesTimer = storyFisherman.Values.ActTimer, 1
-
 		if storyJustContinued(panel) {
 			storySetPanel("➡🟨Fishing, obviously?!\nWhat does it look like?", char.Explorer, char.Fisherman, emotion.Calm, emotion.Talk)
 			storyNext()
 		}
 	case 10:
 		storyFisherman.ActTimer, storyExplorer.Values.DisablesTimer = storyFisherman.Values.ActTimer, 1
-
 		if storyJustContinued(panel) {
 			storySetPanel("⬅Ha-ha-ha!", char.Explorer, char.Fisherman, emotion.Happy, emotion.Calm)
 			storyNext()
 		}
 	case 11:
 		storyFisherman.ActTimer, storyExplorer.Values.DisablesTimer = storyFisherman.Values.ActTimer, 1
-
 		if storyJustContinued(panel) {
 			storySetPanel("➡🟨What?\nWho are you anyway?", char.Explorer, char.Fisherman, emotion.Happy, emotion.Talk)
 			storyNext()
 		}
 	case 12:
 		storyFisherman.ActTimer, storyExplorer.Values.DisablesTimer = storyFisherman.Values.ActTimer, 1
+		if storyJustContinued(panel) {
+			storySetPanel("⬅I'm an explorer. Do you know of any adventures worth taking around here?",
+				char.Explorer, char.Fisherman, emotion.Talk, emotion.Calm)
+			storyNext()
+		}
+	case 13:
+		storyFisherman.ActTimer, storyExplorer.Values.DisablesTimer = storyFisherman.Values.ActTimer, 1
+		if storyJustContinued(panel) {
+			storySetPanel("➡🟨No, but my cousin is a miner and yesterday they found something interesting deep underground.",
+				char.Explorer, char.Fisherman, emotion.Calm, emotion.Talk)
+			storyNext()
+		}
+	case 14:
+		storyFisherman.ActTimer, storyExplorer.Values.DisablesTimer = storyFisherman.Values.ActTimer, 1
+		if storyJustContinued(panel) {
+			storySetPanel("➡🟨Wait here, I will go bring him. Not getting any bites anyway.",
+				char.Explorer, char.Fisherman, emotion.Calm, emotion.Talk)
+			storyNext()
+		}
+	case 15:
+		storyExplorer.Values.DisablesTimer = 1
+		if storyJustContinued(panel) {
+			storyFisherman.ActTimer = 0
+			storySetPanel(". . .", 0, 0, 0, 0)
+			storyNext()
+		}
+	case 16:
+		storyFisherman.ActTimer, storyExplorer.Values.DisablesTimer = storyFisherman.Values.ActTimer, 1
+		storyWaitFor(0.65)
+	case 17:
+		storyFisherman.IsReturning = true
+		storyNext()
+	case 18:
+		storyFisherman.ActTimer, storyExplorer.Values.DisablesTimer = storyFisherman.Values.ActTimer, 1
+		if !storyFisherman.IsOutsideOwnBase() {
+			storyMiner = NewUnit(char.Miner, team.Enemy, lane.Middle)
+			Units = append(Units, storyMiner)
+			storyNext()
+		}
+	case 19:
+		storyExplorer.Values.DisablesTimer = 1
+		if number.IsWithin(storyMiner.X, -TileSize, 8) {
+			storySetPanel("➡🟨G'day, stranger! Looking for an adventure, I hear?", char.Explorer, char.Miner, emotion.Calm, emotion.Talk)
+			storyNext()
+		}
+	case 20:
+		storyExplorer.Values.DisablesTimer, storyMiner.Values.DisablesTimer = 1, 1
+		if storyJustContinued(panel) {
+			storySetPanel("⬅Yes, sir! Your cousin mentioned you found something underground?",
+				char.Explorer, char.Miner, emotion.Talk, emotion.Calm)
+			storyNext()
+		}
+	case 21:
+		storyExplorer.Values.DisablesTimer, storyMiner.Values.DisablesTimer = 1, 1
+		if storyJustContinued(panel) {
+			storySetPanel("➡🟨Oh, dear! We found great evils - this is no place for a lady!",
+				char.Explorer, char.Miner, emotion.Calm, emotion.Talk)
+			storyNext()
+		}
+	case 22:
+		storyExplorer.Values.DisablesTimer, storyMiner.Values.DisablesTimer = 1, 1
 	}
 
 	if storyPortraitLeft != 0 {
@@ -135,7 +193,7 @@ func UpdateStory() {
 
 // private ========================================================
 
-var storyExplorer, storyFisherman *Unit
+var storyExplorer, storyFisherman, storyMiner *Unit
 var story int
 var storyTimer float32
 var storyPortraitLeft, storyPortraitRight assets.ImageId
