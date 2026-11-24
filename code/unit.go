@@ -49,6 +49,8 @@ type Unit struct {
 	IsGrounded, IsAtWall bool
 	IsReturning          bool // for OffLaners only
 
+	IsGoingThroughUnits bool // used only by Adventurer character (but may be useful for other stuff too perhaps)
+
 	UnitFront, UnitBehind, ClosestEnemyInRange, LastHurtBy *Unit
 
 	Following *Unit // used only by the Wolf character
@@ -809,13 +811,13 @@ func (u *Unit) applyCollisions() {
 	for _, other := range Units {
 		var ohb = other.Hitbox()
 		var anyoneDead = !u.IsAlive() || !other.IsAlive() || u.State == state.Decaying || other.State == state.Decaying
-		var isGarrison = other.IsGarrisoner() || u.IsGarrisoner()
+		var diffLane, isGarrison = u.Lane != other.Lane, other.IsGarrisoner() || u.IsGarrisoner()
 		var intruder = !u.IsOutsideOwnBase() && other.IsInsideEnemyBase(TileSize/2)
 		var _, otherFlying = CharactersFlying[other.Character]
 		var _, meFlying = CharactersFlying[u.Character]
-		var anyoneFlying = otherFlying || meFlying
+		var anyoneFlying, through = otherFlying || meFlying, u.IsGoingThroughUnits || other.IsGoingThroughUnits
 		var ohbWider = other.Hitbox(2) // some small buffer to help imprecisions
-		if other == u || u.Lane != other.Lane || anyoneDead || isGarrison || !hb.Overlaps(ohbWider) || intruder || anyoneFlying {
+		if other == u || diffLane || anyoneDead || isGarrison || !hb.Overlaps(ohbWider) || intruder || anyoneFlying || through {
 			continue
 		}
 		var opposite = (!u.IsReturning && other.IsReturning) || (u.Team != other.Team)

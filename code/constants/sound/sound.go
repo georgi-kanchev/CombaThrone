@@ -35,6 +35,7 @@ const (
 	Death
 	Revive
 
+	Whistle
 	Stomp
 	Heal
 )

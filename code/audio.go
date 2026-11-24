@@ -61,7 +61,6 @@ func InitAudio() {
 	loadSound(sound.HitWood, 4, "hit_wood")
 	loadSound(sound.HitMetal, 4, "hit_metal")
 	loadSound(sound.Stab, 4, "stab")
-	loadSound(sound.Stomp, 2, "stomp")
 
 	loadSound(sound.Bow, 4, "bow")
 	loadSound(sound.ShotGround, 4, "shot_ground")
@@ -69,6 +68,8 @@ func InitAudio() {
 	loadSound(sound.ShotMetal, 4, "shot_metal")
 	loadSound(sound.ShotFlesh, 4, "shot_flesh")
 
+	loadSound(sound.Whistle, 2, "whistle")
+	loadSound(sound.Stomp, 2, "stomp")
 	loadSound(sound.Heal, 4, "heal")
 }
 
@@ -85,7 +86,11 @@ func UpdateMusic() {
 		} else if Screen == screen.StoryMap {
 			PlayMusic(music.StoryMap)
 		} else if Screen == screen.Scene {
-			PlayMusic(music.SceneEarly)
+			if CurrentZone.Kind == zone.Field {
+				PlayMusic(music.StoryMap)
+			} else {
+				PlayMusic(music.SceneEarly)
+			}
 		}
 	}
 	if curAmbience == nil || curAmbience.IsJustFinished() {

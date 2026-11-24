@@ -204,55 +204,107 @@ func UpdateStory() {
 	case 25:
 		storyAdventurer.Values.DisablesTimer, storyMiner.Values.DisablesTimer = 1, 1
 		if storyJustContinued(panel) {
-			storySetPanel("⬅This is absolutely terrible! I should investigate and bring peace upon your people!",
+			storySetPanel("⬅This is absolutely terrible!",
 				char.Adventurer, char.Miner, emotion.Talk, emotion.Sad)
 			storyNext()
 		}
 	case 26:
 		storyAdventurer.Values.DisablesTimer, storyMiner.Values.DisablesTimer = 1, 1
 		if storyJustContinued(panel) {
-			storySetPanel("➡🟨Don't be silly, dear! This horrible place is deadly for our strongest men, let alone a lady.",
-				char.Adventurer, char.Miner, emotion.Calm, emotion.Sad)
+			storySetPanel("➡🟨We need your help to understand more about the red crystals these... creatures were made of.",
+				char.Adventurer, char.Miner, emotion.Calm, emotion.Angry)
 			storyNext()
 		}
 	case 27:
 		storyAdventurer.Values.DisablesTimer, storyMiner.Values.DisablesTimer = 1, 1
 		if storyJustContinued(panel) {
-			storySetPanel("➡🟨We need your help to understand more about the red crystals these... creatures were made of.",
-				char.Adventurer, char.Miner, emotion.Calm, emotion.Angry)
-			storyNext()
-		}
-	case 28:
-		storyAdventurer.Values.DisablesTimer, storyMiner.Values.DisablesTimer = 1, 1
-		if storyJustContinued(panel) {
-			storySetPanel("➡🟨We managed to bring this one home. Have a look.", char.Adventurer, char.Miner, emotion.Calm, emotion.Calm)
+			storySetPanel("➡🟨We managed to bring this one home. Here, have a look.",
+				char.Adventurer, char.Miner, emotion.Calm, emotion.Talk)
 			var crystal = NewPickup(storyMiner.X-12, pickup.Crystal, lane.MiddleOff)
 			Pickups = append(Pickups, crystal)
 			Splashes = append(Splashes, NewSplash(splash.Pickup, team.Enemy, crystal.X, crystal.Y, nil))
 			storyNext()
 		}
+	case 28:
+		storyAdventurer.Values.DisablesTimer, storyMiner.Values.DisablesTimer = 1, 1
+		if storyJustContinued(panel) {
+			storySetPanel("⬅Hmm... looks like just a boring crystal to me, perhaps a ruby... or...",
+				char.Adventurer, char.Miner, emotion.Talk, emotion.Calm)
+			storyNext()
+		}
 	case 29:
 		storyAdventurer.Values.DisablesTimer, storyMiner.Values.DisablesTimer = 1, 1
 		if storyJustContinued(panel) {
-			storySetPanel("⬅Hmm... looks like a regular boring crystal to me, perhaps a ruby... but not quite the same.",
-				char.Adventurer, char.Miner, emotion.Calm, emotion.Calm)
+			storySetPanel("⬅Did you bring more samples? I will have to break this one to do some tests on its internal structure.",
+				char.Adventurer, char.Miner, emotion.Talk, emotion.Calm)
 			storyNext()
 		}
 	case 30:
 		storyAdventurer.Values.DisablesTimer, storyMiner.Values.DisablesTimer = 1, 1
 		if storyJustContinued(panel) {
-			storySetPanel("⬅Did you bring more samples? I will have to break this one to do some tests on its internal structure.",
-				char.Adventurer, char.Miner, emotion.Calm, emotion.Calm)
+			storySetPanel("➡🟨Oh, not really. You have to understand - we were busy running for our lives, ma'am!",
+				char.Adventurer, char.Miner, emotion.Calm, emotion.Happy)
 			storyNext()
 		}
 	case 31:
 		storyAdventurer.Values.DisablesTimer, storyMiner.Values.DisablesTimer = 1, 1
 		if storyJustContinued(panel) {
-			storySetPanel("➡🟨Oh, not really. You have to understand, we were busy running for our lives, ma'am!",
-				char.Adventurer, char.Miner, emotion.Calm, emotion.Happy)
+			storySetPanel("⬅Well, in that case, I have to visit the site and retrieve more straight from the source!",
+				char.Adventurer, char.Miner, emotion.Talk, emotion.Calm)
 			storyNext()
 		}
 	case 32:
+		storyAdventurer.Values.DisablesTimer, storyMiner.Values.DisablesTimer = 1, 1
+		if storyJustContinued(panel) {
+			storySetPanel("➡🟨Don't be silly, dear! This horrible place is deadly for our strongest men, let alone a lady.",
+				char.Adventurer, char.Miner, emotion.Calm, emotion.Talk)
+			storyNext()
+		}
+	case 33:
+		storyAdventurer.Values.DisablesTimer, storyMiner.Values.DisablesTimer = 1, 1
+		if storyJustContinued(panel) {
+			storySetPanel("⬅You can't scare an advanturer like me! Bring me to that place!",
+				char.Adventurer, char.Miner, emotion.Talk, emotion.Calm)
+			storyNext()
+		}
+	case 34:
+		storyAdventurer.Values.DisablesTimer, storyMiner.Values.DisablesTimer = 1, 1
+		if storyJustContinued(panel) {
+			storySetPanel("➡🟨If I can't change your mind, I can at least help you prepare for what's out there. What can you do?",
+				char.Adventurer, char.Miner, emotion.Calm, emotion.Talk)
+			storyNext()
+		}
+	case 35:
+		storyAdventurer.Values.DisablesTimer, storyMiner.Values.DisablesTimer = 1, 1
+		if storyJustContinued(panel) {
+			storySetPanel("⬅Oh! Oh! I can play this whistle!", char.Adventurer, char.Miner, emotion.Talk, emotion.Calm)
+			PlaySound(sound.Whistle)
+			storyNext()
+		}
+	case 36:
+		storyAdventurer.Values.DisablesTimer, storyMiner.Values.DisablesTimer = 1, 1
+		if storyJustContinued(panel) {
+			storySetPanel("➡🟨I... I meant for fighting those creatures, dummy. Show me what you can do.",
+				char.Adventurer, char.Miner, emotion.Calm, emotion.Talk)
+			storyNext()
+		}
+	case 37:
+		storyAdventurer.Values.DisablesTimer, storyMiner.Values.DisablesTimer = 1, 1
+		if storyJustContinued(panel) {
+			storyAdventurer.Values.DisablesTimer = 0
+			storySetPanel("⬅...", char.Adventurer, char.Miner, emotion.Calm, emotion.Calm)
+			storyNext()
+		}
+	case 38:
+		storyMiner.Values.DisablesTimer = 1
+		storyWaitFor(1.0)
+	case 39:
+		storyAdventurer.Values.DisablesTimer, storyMiner.Values.DisablesTimer = 1, 1
+		if storyJustContinued(panel) {
+			storySetPanel("➡🟨Not bad! May come in handy during combat.", char.Adventurer, char.Miner, emotion.Calm, emotion.Talk)
+			storyNext()
+		}
+	case 40:
 		storyAdventurer.Values.DisablesTimer, storyMiner.Values.DisablesTimer = 1, 1
 	}
 

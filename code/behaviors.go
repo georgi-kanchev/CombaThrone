@@ -19,6 +19,24 @@ import (
 )
 
 var Behaviors = map[char.Enum]func(self *Unit){
+	char.Adventurer: func(self *Unit) {
+		if self.State != state.ActRecovering {
+			self.IsGoingThroughUnits = false
+		}
+
+		if self.State == state.Idling && self.UnitFront != nil && self.IsAbleToAct() {
+			self.State = state.ActStart
+		} else if self.State == state.ActTrigger && self.UnitFront != nil {
+			self.IsGoingThroughUnits = true
+			self.VelocityY = -20
+			self.Values.DisablesTimer += 1.5
+			if self.Team == team.Ally {
+				self.VelocityX = 150
+			} else {
+				self.VelocityX = -150
+			}
+		}
+	},
 	char.Dummy: func(self *Unit) {
 		switch self.State {
 		case state.DyingStart:
