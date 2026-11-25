@@ -25,6 +25,8 @@ import (
 	"pure-game-kit/packages/utility/time"
 )
 
+const STORY_UNLOCK_HOVER, STORY_UNLOCK_STATS = 40, 44
+
 var Story int
 
 func UpdateStory() {
@@ -77,7 +79,7 @@ func UpdateStory() {
 		storyFisherman.X, storyFisherman.Values.MoveSpeed = 0, 30
 		Units = append(Units, storyFisherman)
 
-		storySetPanel("When indicated by "+Tags[icon.ArrowRight]+", click on this panel or press any key to continue. ", 0, 0, 0, 0)
+		storySetPanel("🟩When indicated by ⬜"+Tags[icon.ArrowRight]+"🟩, click on this panel or press any key to continue. ", 0, 0, 0, 0)
 
 		PauseMusic()
 		PauseAmbience()
@@ -228,7 +230,7 @@ func UpdateStory() {
 	case 28:
 		storyAdventurer.Values.DisablesTimer, storyMiner.Values.DisablesTimer = 1, 1
 		if storyJustContinued(panel) {
-			storySetPanel("⬅Hmm... looks like just a boring crystal to me, perhaps a ruby... or...",
+			storySetPanel("⬅Hmm... looks just like a boring crystal to me, perhaps a ruby... or...",
 				char.Adventurer, char.Miner, emotion.Talk, emotion.Calm)
 			storyNext()
 		}
@@ -277,7 +279,7 @@ func UpdateStory() {
 	case 35:
 		storyAdventurer.Values.DisablesTimer, storyMiner.Values.DisablesTimer = 1, 1
 		if storyJustContinued(panel) {
-			storySetPanel("⬅Oh! Oh! I can play this whistle!", char.Adventurer, char.Miner, emotion.Talk, emotion.Calm)
+			storySetPanel("⬅Oh! Oh! I can play this whistle! Listen...", char.Adventurer, char.Miner, emotion.Talk, emotion.Calm)
 			PlaySound(sound.Whistle)
 			storyNext()
 		}
@@ -292,7 +294,7 @@ func UpdateStory() {
 		storyAdventurer.Values.DisablesTimer, storyMiner.Values.DisablesTimer = 1, 1
 		if storyJustContinued(panel) {
 			storyAdventurer.Values.DisablesTimer = 0
-			storySetPanel("⬅...", char.Adventurer, char.Miner, emotion.Calm, emotion.Calm)
+			storySetPanel(". . .", 0, 0, 0, 0)
 			storyNext()
 		}
 	case 38:
@@ -300,12 +302,82 @@ func UpdateStory() {
 		storyWaitFor(1.0)
 	case 39:
 		storyAdventurer.Values.DisablesTimer, storyMiner.Values.DisablesTimer = 1, 1
+		storySetPanel("🟩Every ⬜"+Tags[icon.Unit]+"unit🟩 in this world has a skill they can perform. Hover over them "+
+			"with your mouse cursor, to understand what they do. Try it!", 0, 0, 0, 0)
+		storyNext()
+	case STORY_UNLOCK_HOVER:
+		storyAdventurer.Values.DisablesTimer, storyMiner.Values.DisablesTimer = 1, 1
 		if storyJustContinued(panel) {
-			storySetPanel("➡🟨Not bad! May come in handy during combat.", char.Adventurer, char.Miner, emotion.Calm, emotion.Talk)
+			storySetPanel("🟩Click on a ⬜"+Tags[icon.Unit]+"unit🟩 to keep their info visible at all times (indicated by ⬜"+
+				Tags[icon.Locked]+"🟩).",
+				0, 0, 0, 0)
 			storyNext()
 		}
-	case 40:
+	case 41:
 		storyAdventurer.Values.DisablesTimer, storyMiner.Values.DisablesTimer = 1, 1
+		if storyJustContinued(panel) {
+			storySetPanel("🟩Upon hover, notice the roles below their title.\nThere are 6 of them:\n⬜"+
+				Tags[icon.Fighter]+"Fighter, "+Tags[icon.Backliner]+"Backliner, "+Tags[icon.Defender]+"Defender,\n"+
+				Tags[icon.Griefer]+"Griefer, "+Tags[icon.Supplier]+"Supplier & "+Tags[icon.Collector]+"Collector.\n"+
+				"🟩The first 3 participate in the combat directly, while the second 3 do so indirectly.", 0, 0, 0, 0)
+			storyNext()
+		}
+	case 42:
+		storyAdventurer.Values.DisablesTimer, storyMiner.Values.DisablesTimer = 1, 1
+		if storyJustContinued(panel) {
+			storyAdventurer.IsReturning, storyMiner.IsReturning = true, true
+			storySetPanel("⬅🟨Not too bad! That move will definitely help you during combat.",
+				char.Miner, char.Adventurer, emotion.Talk, emotion.Calm)
+			storyNext()
+		}
+	case 43:
+		storyAdventurer.Values.DisablesTimer, storyMiner.Values.DisablesTimer = 1, 1
+		if storyJustContinued(panel) {
+			storySetPanel("⬅🟨Let's test your reactions. THINK FAST!!", char.Miner, char.Adventurer, emotion.Talk, emotion.Calm)
+			storyDummy = NewUnit(char.Dummy, team.Enemy, lane.Middle)
+			Units = append(Units, storyDummy)
+			storyNext()
+		}
+	case STORY_UNLOCK_STATS:
+		storyAdventurer.Values.DisablesTimer, storyMiner.Values.DisablesTimer = 1, 1
+		storyDummy.X = storyAdventurer.X + 12
+		storyNext()
+	case 45:
+		storyAdventurer.Values.DisablesTimer, storyMiner.Values.DisablesTimer = 1, 1
+		if storyAdventurer.UnitBehind != nil {
+			storyAdventurer.AffectHealth(-storyAdventurer.Health, true, storyDummy)
+			storyNext()
+		}
+	case 46:
+		storyAdventurer.HurtTimer, storyMiner.Values.DisablesTimer = 0, 1
+		if storyJustContinued(panel) {
+			storySetPanel("➡Ouch! Where did that come from?! Wait... am I... DEAD??",
+				char.Miner, char.Adventurer, emotion.Calm, emotion.Sad)
+			storyNext()
+		}
+	case 47:
+		storyAdventurer.HurtTimer, storyMiner.Values.DisablesTimer = 0, 1
+		if storyJustContinued(panel) {
+			storySetPanel("⬅🟨Danger can come from anywhere at any time, milady. "+
+				"Death is part of life. But we live on in other forms and the beautiful cycle continues...",
+				char.Miner, char.Adventurer, emotion.Talk, emotion.Sad)
+			storyNext()
+		}
+	case 48:
+		storyAdventurer.HurtTimer, storyMiner.Values.DisablesTimer = 0, 1
+		if storyJustContinued(panel) {
+			storySetPanel("🟥"+Tags[icon.Skull]+"Dead🟩 characters 🌗🟦"+Tags[icon.Revive]+"revive🟩 after some time "+
+				"and may join the combat again. That time is indicated above the character and also upon hover.", 0, 0, 0, 0)
+			storyNext()
+		}
+	case 49:
+		storyMiner.Values.DisablesTimer = 1
+		if storyAdventurer.HurtTimer < storyAdventurer.Values.ReviveTimer {
+			storyNext()
+		}
+	case 50:
+		storyMiner.Values.DisablesTimer = 1
+
 	}
 
 	if storyPortraitLeft != 0 {
@@ -314,13 +386,18 @@ func UpdateStory() {
 	if storyPortraitRight != 0 {
 		gui.Image(storyPortraitRight, geometry.NewArea(panel.X+panel.Width/2-TileSize, panel.Y, -TileSize*2, TileSize*3), false)
 	}
-	panel.Width, panel.X = panel.Width-TileSize*3.5, panel.X
+	if storyPortraitLeft != 0 || storyPortraitRight != 0 {
+		panel.Width = panel.Width - TileSize*3.5
+	} else {
+		panel.Width *= 0.9
+	}
+
 	gui.Text(storyText.Get(), panel, geometry.Area{}, ThemeGUI, false)
 }
 
 // private ========================================================
 
-var storyAdventurer, storyFisherman, storyMiner *Unit
+var storyAdventurer, storyFisherman, storyMiner, storyDummy *Unit
 var storyTimer float32
 var storyPortraitLeft, storyPortraitRight assets.ImageId
 var storyText text.Dynamic

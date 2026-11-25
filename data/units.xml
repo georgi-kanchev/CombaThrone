@@ -226,7 +226,7 @@
     <group name="adventurer-prepare" cropIndexes="1506"/>
     <group name="adventurer-recover" cropIndexes="1507 1508 1509 1510"/>
     <group name="adventurer-hurt" cropIndexes="1511 1512"/>
-    <group name="adventurer-death" cropIndexes="1513 1514 1515 1516 1517"/>
+    <group name="adventurer-die" cropIndexes="1513 1514 1515 1516 1517"/>
     <group name="dummy-icon" cropIndexes="0"/>
     <group name="dummy-idle" cropIndexes="1"/>
     <group name="dummy-hurt" cropIndexes="2 3 4 5 6"/>

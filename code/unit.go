@@ -747,6 +747,10 @@ func (u *Unit) updateEffects() {
 	effectsToRemove = collection.Clear(effectsToRemove)
 	for k, v := range u.Effects {
 		v.EffectTimer -= DeltaTimeScaled()
+		if k == e.Dead {
+			v.EffectTimer = Characters[u.Character].Values.ReviveTimer + u.HurtTimer
+		}
+
 		u.Effects[k] = v
 
 		if v.EffectTimer <= 0 {
@@ -829,7 +833,7 @@ func (u *Unit) applyCollisions() {
 		u.X, u.Y = hb.X+diffX, hb.Y+diffY
 		if (!u.IsFacingLeft() && u.X < other.X) || (u.IsFacingLeft() && u.X > other.X) {
 			u.UnitFront = other
-		} else if (u.IsFacingLeft() && u.X > other.X) || (!u.IsFacingLeft() && u.X < other.X) {
+		} else if (u.IsFacingLeft() && u.X < other.X) || (!u.IsFacingLeft() && u.X > other.X) {
 			u.UnitBehind = other
 		}
 	}

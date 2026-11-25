@@ -63,6 +63,7 @@ func UpdateStoryMap() {
 
 	if storyText.Get() == "" {
 		SceneHUD.UpdateBack()
+		SceneHUD.UpdateScore()
 		SceneHUD.UpdateFront()
 	} else {
 		UpdateStory()

@@ -157,8 +157,6 @@ func (h *HUD) UpdateBack() {
 	h.trySummon(lastSummonIndex)
 }
 func (h *HUD) UpdateFront() {
-	h.updateScore()
-
 	if Popup != popup.NONE {
 		return
 	}
@@ -177,7 +175,7 @@ func (h *HUD) UpdateFront() {
 				break
 			}
 		}
-		if !unitHovered {
+		if !unitHovered && Story > 100 {
 			for _, p := range Pickups {
 				if p != nil && p.ContainsPoint(View.MousePosition()) {
 					p.DrawTooltip(false)
@@ -264,7 +262,7 @@ func (u *Unit) DrawTooltip(shape geometry.Shape, bench bool) {
 	}
 
 	var area = geometry.NewArea(x, y, width+extraWidth, height).Inside(SceneHUD.View.Bounds())
-	if Screen == screen.Scene {
+	if Screen == screen.Scene && Story > 100 {
 		area = area.Outside(SceneHUD.UnitsPanel.Shape.Bounds(), true, false)
 		area = area.Outside(SceneHUD.TeamGlory[team.Ally].Shape.Bounds(), true, false)
 		area = area.Outside(SceneHUD.TeamGlory[team.Enemy].Shape.Bounds(), true, false)
@@ -300,51 +298,54 @@ func (u *Unit) DrawTooltip(shape geometry.Shape, bench bool) {
 	SceneHUD.View.DrawImage(x+width/2-tsz/2-6, y-height/2+tsz/2+6, -tsz, tsz, 0, char.Icon, col, noMask)
 
 	TooltipTexts[1].Set()
-	if !u.IsOffLaner() {
-		if u.Values.MaxHealth > 0 {
-			if !u.IsSummoned() || u.Health == u.Values.MaxHealth {
-				TooltipTexts[1].Append("🌗🟩", Tags[icon.Health], u.Values.MaxHealth, " health\n")
-			} else if u.IsSummoned() {
-				TooltipTexts[1].Append("🌗🟩", Tags[icon.Health], max(u.Health, 0), "/", u.Values.MaxHealth, " health\n")
+	if Story > STORY_UNLOCK_STATS {
+		if !u.IsOffLaner() {
+			if u.Values.MaxHealth > 0 {
+				if !u.IsSummoned() || u.Health == u.Values.MaxHealth {
+					TooltipTexts[1].Append("🌗🟩", Tags[icon.Health], u.Values.MaxHealth, " health\n")
+				} else if u.IsSummoned() {
+					TooltipTexts[1].Append("🌗🟩", Tags[icon.Health], max(u.Health, 0), "/", u.Values.MaxHealth, " health\n")
+				}
 			}
 		}
-	}
-	if u.Values.MoveSpeed > 0 {
-		TooltipTexts[1].Append("🌗🟨", Tags[icon.Speed], u.Values.MoveSpeed, " speed\n")
-	}
-	if u.Values.ActPoints > 0 {
-		var iconStr = Tags[char.RoleIcon]
-		if u.Values.Role == role.Fighter || u.Values.Role == role.Backliner {
-			iconStr = Tags[icon.Wound]
+		if u.Values.MoveSpeed > 0 {
+			TooltipTexts[1].Append("🌗🟨", Tags[icon.Speed], u.Values.MoveSpeed, " speed\n")
+		}
+		if u.Values.ActPoints > 0 {
+			var iconStr = Tags[char.RoleIcon]
+			if u.Values.Role == role.Fighter || u.Values.Role == role.Backliner {
+				iconStr = Tags[icon.Wound]
+			}
+
+			if u.Values.Role == role.Collector && u.IsSummoned() {
+				var name = char.ActPointsName
+				TooltipTexts[1].Append("🟧", iconStr, len(u.Carrying), "/", u.Values.ActPoints, " ", name, "\n")
+			} else {
+				TooltipTexts[1].Append("🟧", iconStr, u.Values.ActPoints, " ", char.ActPointsName, "\n")
+			}
+		}
+		if u.Values.ActRange > 0 {
+			TooltipTexts[1].Append("🌗🟧", Tags[icon.Range], u.Values.ActRange, " range\n")
+		}
+		if u.Values.ActTimer > 0 {
+			// u.IsAbleToAct() will not show correct time when disabled, so custom check below
+			var canAct = number.IsNaN(u.ActTimer) || u.ActTimer < 0 || u.ActTimer > u.Values.ActTimer
+			if !u.IsSummoned() || canAct || u.State == state.Decaying {
+				TooltipTexts[1].Append("🌖🟪", Tags[icon.Hourglass], number.Round(u.Values.ActTimer, 1), "s rest\n")
+			} else if u.IsSummoned() {
+				TooltipTexts[1].Append("🌖🟪", Tags[icon.Hourglass], max(number.Round(u.ActTimer, 1), 0), "/",
+					number.Round(u.Values.ActTimer, 1), "s rest\n")
+			}
+		}
+		if u.Values.ReviveTimer > 0 {
+			if !u.IsSummoned() || u.State != state.Decaying {
+				TooltipTexts[1].Append("🌗🟦", Tags[icon.Revive], number.Round(u.Values.ReviveTimer, 1), "s revive\n")
+			} else if u.Values.ReviveTimer > 0 && u.State == state.Decaying && u.HurtTimer > -u.Values.ReviveTimer {
+				TooltipTexts[1].Append("🌗🟦", Tags[icon.Revive], max(number.Round(u.Values.ReviveTimer+u.HurtTimer, 1), 0), "/",
+					number.Round(char.Values.ReviveTimer, 1), "s revive\n")
+			}
 		}
 
-		if u.Values.Role == role.Collector && u.IsSummoned() {
-			var name = char.ActPointsName
-			TooltipTexts[1].Append("🟧", iconStr, len(u.Carrying), "/", u.Values.ActPoints, " ", name, "\n")
-		} else {
-			TooltipTexts[1].Append("🟧", iconStr, u.Values.ActPoints, " ", char.ActPointsName, "\n")
-		}
-	}
-	if u.Values.ActRange > 0 {
-		TooltipTexts[1].Append("🌗🟧", Tags[icon.Range], u.Values.ActRange, " range\n")
-	}
-	if u.Values.ActTimer > 0 {
-		// u.IsAbleToAct() will not show correct time when disabled, so custom check below
-		var canAct = number.IsNaN(u.ActTimer) || u.ActTimer < 0 || u.ActTimer > u.Values.ActTimer
-		if !u.IsSummoned() || canAct || u.State == state.Decaying {
-			TooltipTexts[1].Append("🌖🟪", Tags[icon.Hourglass], number.Round(u.Values.ActTimer, 1), "s rest\n")
-		} else if u.IsSummoned() {
-			TooltipTexts[1].Append("🌖🟪", Tags[icon.Hourglass], max(number.Round(u.ActTimer, 1), 0), "/",
-				number.Round(u.Values.ActTimer, 1), "s rest\n")
-		}
-	}
-	if u.Values.ReviveTimer > 0 {
-		if !u.IsSummoned() || u.State != state.Decaying {
-			TooltipTexts[1].Append("🌗🟦", Tags[icon.Revive], number.Round(u.Values.ReviveTimer, 1), "s revive\n")
-		} else if u.Values.ReviveTimer > 0 && u.State == state.Decaying && u.HurtTimer > -u.Values.ReviveTimer {
-			TooltipTexts[1].Append("🌗🟦", Tags[icon.Revive], max(number.Round(u.Values.ReviveTimer+u.HurtTimer, 1), 0), "/",
-				number.Round(char.Values.ReviveTimer, 1), "s revive\n")
-		}
 	}
 	TooltipLabel.Shape = geometry.NewRectangle(x, y+6, width-14, height, 0)
 	TooltipLabel.Details.TextAlignX, TooltipLabel.Details.TextLineHeight = 0, 10
@@ -584,7 +585,7 @@ func (h *HUD) trySummon(lastSummonIndex int) {
 	View.DrawImage(h.SummonDragX, h.SummonDragY, size, size, 0, icon, palette.White, geometry.Area{})
 }
 
-func (h *HUD) updateScore() {
+func (h *HUD) UpdateScore() {
 	var icons = GUI.Crops("icons-hud")
 	var ally, enemy = h.TeamGlory[team.Ally], h.TeamGlory[team.Enemy]
 	ally.X, ally.Y = h.Top.X-TileSize*3.5, h.Top.Y-6
