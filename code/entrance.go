@@ -89,6 +89,18 @@ func NewEntrance(entry entrance.Enum, owner base.Enum, forTeam team.Enum, atLane
 
 //=================================================================
 
+func (e *Entrance) SummonIndicator() geometry.Shape {
+	const size = TileSize * 0.85
+	var shape = e.Shape()
+	if Bases[team.Ally].Kind < base.Barrack {
+		shape.X += TileSize / 1.5
+		shape.Y += TileSize
+	} else if e.Kind == entrance.TallGate {
+		shape.Y += TileSize / 2
+	}
+	shape.Width, shape.Height = size, size
+	return shape
+}
 func (e *Entrance) Shape() geometry.Shape {
 	var shape geometry.Shape
 	switch e.Kind {

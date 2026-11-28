@@ -133,7 +133,9 @@ func UpdateScene() {
 	const scale = 2.65
 	SceneHUD.View.FitSize(1920/scale, 1080/scale) // always fit the HUD based on 16:9, regardless of resolution
 
-	if Story > 100 {
+	UpdateStory()
+
+	if Story > STORY_BENCH {
 		SceneHUD.UpdateBack()
 	}
 
@@ -148,7 +150,7 @@ func UpdateScene() {
 			g.HealthBar.Update(g.Tiles[0].Shape, g.Health, g.MaxHealth, geometry.Area{})
 		}
 	}
-	if Story > STORY_UNLOCK_STATS {
+	if Story > STORY_STATS {
 		for _, u := range Units { // health bars take the Z order of the units
 			if u.IsSummoned() { // this check prevents healthbar flash the very first summon frame
 				var hb = u.Hitbox()
@@ -158,14 +160,12 @@ func UpdateScene() {
 			}
 		}
 	}
-	if Story > 100 {
+	if Story > STORY_BENCH {
 		SceneHUD.UpdateScore()
 		Player.Update()
 	}
 
-	UpdateStory()
-
-	if Story >= STORY_UNLOCK_HOVER {
+	if Story >= STORY_HOVER {
 		SceneHUD.UpdateFront()
 	}
 }

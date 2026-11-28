@@ -25,7 +25,7 @@ import (
 	"pure-game-kit/packages/utility/time"
 )
 
-const STORY_UNLOCK_HOVER, STORY_UNLOCK_STATS = 40, 44
+const STORY_HOVER, STORY_STATS, STORY_BENCH, STORY_SUMMON = 40, 43, 47, 49
 
 var Story int
 
@@ -50,7 +50,7 @@ func UpdateStory() {
 	case 3:
 		ProgressOnMap()
 		storyNext()
-		storySetPanel("⬅(This has to be it...)", char.Adventurer, 0, emotion.Calm, 0)
+		storySetPanel("⬅🩵(This has to be it...)", char.Adventurer, 0, emotion.Calm, 0)
 	case 4:
 		for i := progress.Tutorial; i <= progress.Underground; i++ {
 			var p = storyMapProgressPoints[i]
@@ -79,7 +79,7 @@ func UpdateStory() {
 		storyFisherman.X, storyFisherman.Values.MoveSpeed = 0, 30
 		Units = append(Units, storyFisherman)
 
-		storySetPanel("🟩When indicated by ⬜"+Tags[icon.ArrowRight]+"🟩, click on this panel or press any key to continue. ", 0, 0, 0, 0)
+		storySetPanel("When indicated by "+Tags[icon.ArrowRight]+", click on this panel or press any key to continue. ", 0, 0, 0, 0)
 
 		PauseMusic()
 		PauseAmbience()
@@ -93,6 +93,7 @@ func UpdateStory() {
 		if storyJustContinued(panel) {
 			storyAdventurer = NewUnit(char.Adventurer, team.Ally, lane.Middle)
 			storyAdventurer.Values.MoveSpeed = 30
+			Player.Units[0] = storyAdventurer
 			Units = append(Units, storyAdventurer)
 			storySetPanel(". . .", 0, 0, 0, 0)
 			storyNext()
@@ -104,7 +105,8 @@ func UpdateStory() {
 		}
 
 		if number.IsWithin(storyAdventurer.X, 0, TileSize*2) {
-			storySetPanel("⬅G'day, mister! Uhh, wh... what are you doing?", char.Adventurer, char.Fisherman, emotion.Talk, emotion.Calm)
+			storySetPanel("⬅🩵G'day, mister! Uhh, wh... what are you doing?",
+				char.Adventurer, char.Fisherman, emotion.Talk, emotion.Calm)
 			storyNext()
 		}
 	case 9:
@@ -116,7 +118,7 @@ func UpdateStory() {
 	case 10:
 		storyFisherman.ActTimer, storyAdventurer.Values.DisablesTimer = storyFisherman.Values.ActTimer, 1
 		if storyJustContinued(panel) {
-			storySetPanel("⬅Ha-ha-ha!", char.Adventurer, char.Fisherman, emotion.Happy, emotion.Calm)
+			storySetPanel("⬅🩵Ha-ha-ha!", char.Adventurer, char.Fisherman, emotion.Happy, emotion.Calm)
 			storyNext()
 		}
 	case 11:
@@ -128,14 +130,14 @@ func UpdateStory() {
 	case 12:
 		storyFisherman.ActTimer, storyAdventurer.Values.DisablesTimer = storyFisherman.Values.ActTimer, 1
 		if storyJustContinued(panel) {
-			storySetPanel("⬅I'm an adventurer by heart and archeologist by duty, sir.",
+			storySetPanel("⬅🩵I'm an adventurer by heart and archeologist by duty, sir.",
 				char.Adventurer, char.Fisherman, emotion.Talk, emotion.Calm)
 			storyNext()
 		}
 	case 13:
 		storyFisherman.ActTimer, storyAdventurer.Values.DisablesTimer = storyFisherman.Values.ActTimer, 1
 		if storyJustContinued(panel) {
-			storySetPanel("⬅I heard of the recent accident in the mines. Do you happen to know any of the miners?",
+			storySetPanel("⬅🩵I heard of the recent accident in the mines. Do you happen to know any of the miners?",
 				char.Adventurer, char.Fisherman, emotion.Talk, emotion.Calm)
 			storyNext()
 		}
@@ -171,7 +173,7 @@ func UpdateStory() {
 		storyWaitFor(4.0)
 	case 20:
 		storySetPanel(
-			"⬅(These villagers must have lost their minds! Fishing on dry land? And I swear, these roads and doors make no sense...)",
+			"⬅🩵(These villagers must have lost their minds! Fishing on dry land? And I swear, these roads and doors make no sense...)",
 			char.Adventurer, 0, emotion.Calm, 0)
 		storyNext()
 	case 21:
@@ -192,7 +194,7 @@ func UpdateStory() {
 	case 23:
 		storyAdventurer.Values.DisablesTimer, storyMiner.Values.DisablesTimer = 1, 1
 		if storyJustContinued(panel) {
-			storySetPanel("⬅Yes, sir! What happened down there?", char.Adventurer, char.Miner, emotion.Talk, emotion.Calm)
+			storySetPanel("⬅🩵Yes, sir! What happened down there?", char.Adventurer, char.Miner, emotion.Talk, emotion.Calm)
 			storyNext()
 		}
 	case 24:
@@ -206,7 +208,7 @@ func UpdateStory() {
 	case 25:
 		storyAdventurer.Values.DisablesTimer, storyMiner.Values.DisablesTimer = 1, 1
 		if storyJustContinued(panel) {
-			storySetPanel("⬅This is absolutely terrible!",
+			storySetPanel("⬅🩵This is absolutely terrible!",
 				char.Adventurer, char.Miner, emotion.Talk, emotion.Sad)
 			storyNext()
 		}
@@ -230,14 +232,14 @@ func UpdateStory() {
 	case 28:
 		storyAdventurer.Values.DisablesTimer, storyMiner.Values.DisablesTimer = 1, 1
 		if storyJustContinued(panel) {
-			storySetPanel("⬅Hmm... looks just like a boring crystal to me, perhaps a ruby... or...",
+			storySetPanel("⬅🩵Hmm... looks just like a boring crystal to me, perhaps a ruby... or...",
 				char.Adventurer, char.Miner, emotion.Talk, emotion.Calm)
 			storyNext()
 		}
 	case 29:
 		storyAdventurer.Values.DisablesTimer, storyMiner.Values.DisablesTimer = 1, 1
 		if storyJustContinued(panel) {
-			storySetPanel("⬅Did you bring more samples? I will have to break this one to do some tests on its internal structure.",
+			storySetPanel("⬅🩵Did you bring more samples? I will have to break this one to do some tests on its internal structure.",
 				char.Adventurer, char.Miner, emotion.Talk, emotion.Calm)
 			storyNext()
 		}
@@ -251,7 +253,7 @@ func UpdateStory() {
 	case 31:
 		storyAdventurer.Values.DisablesTimer, storyMiner.Values.DisablesTimer = 1, 1
 		if storyJustContinued(panel) {
-			storySetPanel("⬅Well, in that case, I have to visit the site and retrieve more straight from the source!",
+			storySetPanel("⬅🩵Well, in that case, I have to visit the site to retrieve some more straight from the source.",
 				char.Adventurer, char.Miner, emotion.Talk, emotion.Calm)
 			storyNext()
 		}
@@ -265,7 +267,7 @@ func UpdateStory() {
 	case 33:
 		storyAdventurer.Values.DisablesTimer, storyMiner.Values.DisablesTimer = 1, 1
 		if storyJustContinued(panel) {
-			storySetPanel("⬅You can't scare an advanturer like me! Bring me to that place!",
+			storySetPanel("⬅🩵You can't scare an advanturer like me! Bring me to that place!",
 				char.Adventurer, char.Miner, emotion.Talk, emotion.Calm)
 			storyNext()
 		}
@@ -279,14 +281,14 @@ func UpdateStory() {
 	case 35:
 		storyAdventurer.Values.DisablesTimer, storyMiner.Values.DisablesTimer = 1, 1
 		if storyJustContinued(panel) {
-			storySetPanel("⬅Oh! Oh! I can play this whistle! Listen...", char.Adventurer, char.Miner, emotion.Talk, emotion.Calm)
+			storySetPanel("⬅🩵Oh! Oh! I can play this whistle! Listen...", char.Adventurer, char.Miner, emotion.Talk, emotion.Calm)
 			PlaySound(sound.Whistle)
 			storyNext()
 		}
 	case 36:
 		storyAdventurer.Values.DisablesTimer, storyMiner.Values.DisablesTimer = 1, 1
 		if storyJustContinued(panel) {
-			storySetPanel("➡🟨I... I meant for fighting those creatures, dummy. Show me what you can do.",
+			storySetPanel("➡🟨I... I meant for fighting those creatures, dummy. Show me your combat skills.",
 				char.Adventurer, char.Miner, emotion.Calm, emotion.Talk)
 			storyNext()
 		}
@@ -302,27 +304,18 @@ func UpdateStory() {
 		storyWaitFor(1.0)
 	case 39:
 		storyAdventurer.Values.DisablesTimer, storyMiner.Values.DisablesTimer = 1, 1
-		storySetPanel("🟩Every ⬜"+Tags[icon.Unit]+"unit🟩 in this world has a skill they can perform. Hover over them "+
+		storySetPanel("Every "+Tags[icon.Unit]+"unit has a skill they can perform. Hover over them "+
 			"with your mouse cursor, to understand what they do. Try it!", 0, 0, 0, 0)
 		storyNext()
-	case STORY_UNLOCK_HOVER:
+	case STORY_HOVER:
 		storyAdventurer.Values.DisablesTimer, storyMiner.Values.DisablesTimer = 1, 1
 		if storyJustContinued(panel) {
-			storySetPanel("🟩Click on a ⬜"+Tags[icon.Unit]+"unit🟩 to keep their info visible at all times (indicated by ⬜"+
-				Tags[icon.Locked]+"🟩).",
+			storySetPanel("Click on a "+Tags[icon.Unit]+"unit to keep their hover info visible at all times (indicated by "+
+				Tags[icon.Locked]+").",
 				0, 0, 0, 0)
 			storyNext()
 		}
 	case 41:
-		storyAdventurer.Values.DisablesTimer, storyMiner.Values.DisablesTimer = 1, 1
-		if storyJustContinued(panel) {
-			storySetPanel("🟩Upon hover, notice the roles below their title.\nThere are 6 of them:\n⬜"+
-				Tags[icon.Fighter]+"Fighter, "+Tags[icon.Backliner]+"Backliner, "+Tags[icon.Defender]+"Defender,\n"+
-				Tags[icon.Griefer]+"Griefer, "+Tags[icon.Supplier]+"Supplier & "+Tags[icon.Collector]+"Collector.\n"+
-				"🟩The first 3 participate in the combat directly, while the second 3 do so indirectly.", 0, 0, 0, 0)
-			storyNext()
-		}
-	case 42:
 		storyAdventurer.Values.DisablesTimer, storyMiner.Values.DisablesTimer = 1, 1
 		if storyJustContinued(panel) {
 			storyAdventurer.IsReturning, storyMiner.IsReturning = true, true
@@ -330,7 +323,7 @@ func UpdateStory() {
 				char.Miner, char.Adventurer, emotion.Talk, emotion.Calm)
 			storyNext()
 		}
-	case 43:
+	case 42:
 		storyAdventurer.Values.DisablesTimer, storyMiner.Values.DisablesTimer = 1, 1
 		if storyJustContinued(panel) {
 			storySetPanel("⬅🟨Let's test your reactions. THINK FAST!!", char.Miner, char.Adventurer, emotion.Talk, emotion.Calm)
@@ -338,47 +331,73 @@ func UpdateStory() {
 			Units = append(Units, storyDummy)
 			storyNext()
 		}
-	case STORY_UNLOCK_STATS:
+	case STORY_STATS:
 		storyAdventurer.Values.DisablesTimer, storyMiner.Values.DisablesTimer = 1, 1
 		storyDummy.X = storyAdventurer.X + 12
 		storyNext()
-	case 45:
+	case 44:
 		storyAdventurer.Values.DisablesTimer, storyMiner.Values.DisablesTimer = 1, 1
 		if storyAdventurer.UnitBehind != nil {
 			storyAdventurer.AffectHealth(-storyAdventurer.Health, true, storyDummy)
 			storyNext()
 		}
-	case 46:
+	case 45:
 		storyAdventurer.HurtTimer, storyMiner.Values.DisablesTimer = 0, 1
 		if storyJustContinued(panel) {
-			storySetPanel("➡Ouch! Where did that come from?! Wait... am I... DEAD??",
+			storySetPanel("➡🩵Ouch! Where did that come from?! Wait... am I... DEAD??",
 				char.Miner, char.Adventurer, emotion.Calm, emotion.Sad)
 			storyNext()
 		}
-	case 47:
+	case 46:
 		storyAdventurer.HurtTimer, storyMiner.Values.DisablesTimer = 0, 1
 		if storyJustContinued(panel) {
 			storySetPanel("⬅🟨Danger can come from anywhere at any time, milady. "+
-				"Death is part of life. But we live on in other forms and the beautiful cycle continues...",
+				"Death is part of life. But we live on in other forms... and the beautiful cycle continues...",
 				char.Miner, char.Adventurer, emotion.Talk, emotion.Sad)
 			storyNext()
 		}
-	case 48:
+	case STORY_BENCH:
 		storyAdventurer.HurtTimer, storyMiner.Values.DisablesTimer = 0, 1
 		if storyJustContinued(panel) {
-			storySetPanel("🟥"+Tags[icon.Skull]+"Dead🟩 characters 🌗🟦"+Tags[icon.Revive]+"revive🟩 after some time "+
-				"and may join the combat again. That time is indicated above the character and also upon hover.", 0, 0, 0, 0)
+			storySetPanel("🟥"+Tags[icon.Skull]+"Dead⬜ characters 🌗🟦"+Tags[icon.Revive]+"revive⬜ after some time, "+
+				"indicated above the "+Tags[icon.Unit]+"unit, upon hover and also in their slot in the panel above.", 0, 0, 0, 0)
 			storyNext()
 		}
-	case 49:
+	case 48:
 		storyMiner.Values.DisablesTimer = 1
-		if storyAdventurer.HurtTimer < storyAdventurer.Values.ReviveTimer {
+		if storyAdventurer.State == state.WaitingToBeSummoned {
+			storySetPanel("Once 🌗🟦"+Tags[icon.Revive]+"revived⬜, the character may be summoned again by clicking or dragging, "+
+				"then dropping on the desired lane.", 0, 0, 0, 0)
+			storyNext()
+		}
+	case STORY_SUMMON:
+		storyMiner.Values.DisablesTimer = 1
+		if condition.TrueEvery(2, 0xCFA) {
+			if SceneHUD.SummonIndex == 0 {
+				var summon = Bases[team.Ally].Entrances[1].SummonIndicator()
+				PlayCallForAction(summon.X, summon.Y)
+			} else {
+				var x, y = SceneHUD.UnitIconPosition(0)
+				PlayCallForAction(View.PointFromView(SceneHUD.View, x, y))
+			}
+		}
+
+		if storyAdventurer.State == state.Summoned {
+			storySetPanel(". . .", 0, 0, 0, 0)
 			storyNext()
 		}
 	case 50:
 		storyMiner.Values.DisablesTimer = 1
-
 	}
+
+	// storyAdventurer.Values.DisablesTimer, storyMiner.Values.DisablesTimer = 1, 1
+	// 	if storyJustContinued(panel) {
+	// 		storySetPanel("Upon hover, notice the roles below their title.\nThere are 6 of them:\n"+
+	// 			Tags[icon.Fighter]+"Fighter, "+Tags[icon.Backliner]+"Backliner, "+Tags[icon.Defender]+"Defender,\n"+
+	// 			Tags[icon.Griefer]+"Griefer, "+Tags[icon.Supplier]+"Supplier & "+Tags[icon.Collector]+"Collector.\n"+
+	// 			"The first 3 participate in the combat directly, while the second 3 do so indirectly.", 0, 0, 0, 0)
+	// 		storyNext()
+	// 	}
 
 	if storyPortraitLeft != 0 {
 		gui.Image(storyPortraitLeft, geometry.NewArea(panel.X-panel.Width/2+TileSize, panel.Y, TileSize*2, TileSize*3), false)

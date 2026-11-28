@@ -95,9 +95,7 @@ func NewBase(forTeam team.Enum, kind base.Enum, garr garrison.Enum, entranceLow,
 	return b
 }
 
-//=================================================================
-
-var baseGlory = map[base.Enum]int{base.NONE: 10, base.Camp: 15, base.Barrack: 30, base.Fort: 90, base.Fortress: 360}
+// =================================================================
 
 func (b *Base) UpdateBack() {
 	View.DrawObject(b.Back)
@@ -142,3 +140,7 @@ func (b *Base) UpdateFront() {
 	View.DrawObject(b.Front)
 	View.DrawObject(b.GarrisonFront)
 }
+
+// private ========================================================
+
+var baseGlory = [base.COUNT]int{base.NONE: 50, base.Camp: 100, base.Barrack: 200, base.Fort: 400, base.Fortress: 500}

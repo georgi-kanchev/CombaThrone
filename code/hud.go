@@ -4,7 +4,6 @@ import (
 	"game/code/constants/base"
 	"game/code/constants/effect"
 	e "game/code/constants/effect"
-	"game/code/constants/entrance"
 	"game/code/constants/icon"
 	"game/code/constants/lane"
 	"game/code/constants/pickup"
@@ -298,7 +297,7 @@ func (u *Unit) DrawTooltip(shape geometry.Shape, bench bool) {
 	SceneHUD.View.DrawImage(x+width/2-tsz/2-6, y-height/2+tsz/2+6, -tsz, tsz, 0, char.Icon, col, noMask)
 
 	TooltipTexts[1].Set()
-	if Story > STORY_UNLOCK_STATS {
+	if Story > STORY_STATS {
 		if !u.IsOffLaner() {
 			if u.Values.MaxHealth > 0 {
 				if !u.IsSummoned() || u.Health == u.Values.MaxHealth {
@@ -499,30 +498,24 @@ func (h *HUD) trySummon(lastSummonIndex int) {
 	mouse.SetCursor(cursor.Move)
 
 	var targetX, targetY = mx, my
-	var hoverShape geometry.Shape
+	var summon, hoverShape geometry.Shape
 	var drop, click = mouse.IsButtonJustReleased(button.Left), mouse.IsButtonJustPressed(button.Left)
 	var smallestDist = number.Infinity()
-	const size = TileSize * 0.85
 	var atLane lane.Enum
 
-	for _, e := range Bases[team.Ally].Entrances {
-		var shape = e.Shape()
-		if Bases[team.Ally].Kind < base.Barrack {
-			shape.X += TileSize / 1.5
-			shape.Y += TileSize
-		} else if e.Kind == entrance.TallGate {
-			shape.Y += TileSize / 2
+	for i, e := range Bases[team.Ally].Entrances {
+		if (i == 0 || i == 2) && Story == STORY_SUMMON {
+			continue
 		}
-		shape.Width, shape.Height = size, size
-
-		var dist = point.DistanceToPoint(shape.X, shape.Y, mx, my)
+		summon = e.SummonIndicator()
+		var dist = point.DistanceToPoint(summon.X, summon.Y, mx, my)
 		if dist < smallestDist && dist < TileSize*1.5 {
 			smallestDist = dist
-			hoverShape = shape
+			hoverShape = summon
 			atLane = e.Lane
 		}
-		View.DrawShape(shape.X, shape.Y, shape.Width, shape.Height, 0, 0, color.RGBA(0, 255, 0, 80), geometry.Area{})
-		h.Highlight(View, shape, palette.Green)
+		View.DrawShape(summon.X, summon.Y, summon.Width, summon.Height, 0, 0, color.RGBA(0, 255, 0, 80), geometry.Area{})
+		h.Highlight(View, summon, palette.Green)
 	}
 
 	var from, to = int(lane.Garrison3 + lane.Enum(Bases[team.Ally].Garrison)), int(lane.Garrison1)
@@ -535,7 +528,7 @@ func (h *HUD) trySummon(lastSummonIndex int) {
 	if unit.Values.ActRange > 2 && Bases[team.Ally].Kind >= base.Fort && unit.Values.Role == role.Backliner {
 		var garrisonsFull = len(takenGarrisons) == 6
 		var garrisonX, garrisonY = PointAtCell(0.5, 4)
-		var shape = geometry.NewRectangle(garrisonX, garrisonY, size, size, 0)
+		var shape = geometry.NewRectangle(garrisonX, garrisonY, summon.Width, summon.Height, 0)
 
 		var dist = point.DistanceToPoint(shape.X, shape.Y, mx, my)
 		if !garrisonsFull && dist < smallestDist && dist < TileSize*1.5 {
@@ -582,7 +575,7 @@ func (h *HUD) trySummon(lastSummonIndex int) {
 
 	h.DrawPath(View, unitX, unitY, h.SummonDragX, h.SummonDragY)
 	var icon = Characters[unit.Character].Icon
-	View.DrawImage(h.SummonDragX, h.SummonDragY, size, size, 0, icon, palette.White, geometry.Area{})
+	View.DrawImage(h.SummonDragX, h.SummonDragY, summon.Width, summon.Height, 0, icon, palette.White, geometry.Area{})
 }
 
 func (h *HUD) UpdateScore() {

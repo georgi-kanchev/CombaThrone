@@ -36,7 +36,7 @@ type SplashValues struct {
 	Update                  func(self *Splash)
 }
 
-var SplashBases = map[splash.Enum]SplashValues{
+var SplashBases = [splash.COUNT]SplashValues{
 	splash.Dust:   {AnimName: "dust", FPS: 10},
 	splash.Pickup: {AnimName: "pickup", FPS: 10},
 	splash.Fire3: {AnimName: "fire-3", FPS: 10, Loop: true, Timer: 5, Damage: 3, FadeOutTime: 0.25,

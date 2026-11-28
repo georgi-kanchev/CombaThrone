@@ -7,4 +7,6 @@ const (
 	StoryMap
 	SceneEarly
 	SceneLate
+
+	COUNT
 )

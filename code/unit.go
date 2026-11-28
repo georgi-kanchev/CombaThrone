@@ -63,7 +63,7 @@ type Unit struct {
 }
 
 var Units []*Unit = make([]*Unit, 0, 16)
-var Collisions = map[lane.Enum][]geometry.Shape{}
+var Collisions = [lane.COUNT][]geometry.Shape{}
 var PinnedUnit *Unit
 
 func NewUnit(character char.Enum, fromTeam team.Enum, lane lane.Enum) *Unit {

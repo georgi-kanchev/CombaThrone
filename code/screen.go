@@ -99,6 +99,7 @@ func Update() {
 	UpdateMusic()
 	UpdateDebug()
 
+	ScreenFade.TimeScale = TimeScale
 	View.DrawColor(color.RGBA(0, 0, 0, uint8(ScreenFade.CurrentValues()[0])))
 
 	if CallForActionAnim.IsPlaying() && TimeScale > 0 {

@@ -16,6 +16,10 @@ import (
 )
 
 func InitAudio() {
+	allSounds[0] = &audio.Audio{}
+	allMusic[0] = &audio.Audio{}
+	allAmbiences[0] = &audio.Audio{}
+
 	loadAmbience(zone.Field, "field_S")
 	loadAmbience(zone.Ruins, "ruins_S")
 	loadAmbience(zone.Forest, "forest_S")
@@ -184,9 +188,9 @@ func TryPlayButtonSound() {
 
 // private ========================================================
 
-var allSounds = make(map[sound.Enum]*audio.Audio)
-var allMusic = make(map[music.Enum]*audio.Audio)
-var allAmbiences = make(map[zone.Enum]*audio.Audio)
+var allSounds [sound.COUNT]*audio.Audio
+var allMusic [music.COUNT]*audio.Audio
+var allAmbiences [zone.COUNT]*audio.Audio
 var musicNames = make(map[assets.AudioId]string)
 
 func loadSound(sound sound.Enum, stacks uint8, baseName string) {

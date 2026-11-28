@@ -38,4 +38,6 @@ const (
 	Whistle
 	Stomp
 	Heal
+
+	COUNT
 )
