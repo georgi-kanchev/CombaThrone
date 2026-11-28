@@ -63,7 +63,7 @@ func InitScene() {
 	CurrentZone = Zones[zone.Field]
 
 	Bases[team.Ally] = NewBase(team.Ally, base.NONE, garrison.NONE, entrance.NONE, entrance.NONE, entrance.NONE)
-	Bases[team.Enemy] = NewBase(team.Enemy, base.Barrack, garrison.NONE, entrance.NONE, entrance.ShortGate, entrance.Door)
+	Bases[team.Enemy] = NewBase(team.Enemy, base.Barrack, garrison.NONE, entrance.Door, entrance.NONE, entrance.Door)
 
 	// Units = append(Units, NewUnit(char.Troll, team.Ally, lane.Middle))
 	// Units = append(Units, NewUnit(char.Miner, team.Enemy, lane.Middle))

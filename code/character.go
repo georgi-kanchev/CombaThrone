@@ -79,7 +79,7 @@ func InitCharacters() {
 
 	Characters[char.Adventurer] = NewCharacter(geometry.NewRoundedRectangle(0, 6, 18, 34, 0, 1),
 		Values{Name: "Adventurer", Role: role.Defender, MaxHealth: 20, MoveSpeed: 20,
-			ActTimer: 3.0, ReviveTimer: 20.0},
+			ActPoints: 1, ActTimer: 3.0, ReviveTimer: 20.0},
 		"Rolls behind an 🟥"+Tags[icon.Unit]+"enemy⬜.", nil, nil)
 
 	Characters[char.Dummy] = NewCharacter(geometry.NewRoundedRectangle(0, 6, 24, 34, 0, 1),

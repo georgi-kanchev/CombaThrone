@@ -29,7 +29,7 @@ var Behaviors = map[char.Enum]func(self *Unit){
 		} else if self.State == state.ActTrigger && self.UnitFront != nil {
 			self.IsGoingThroughUnits = true
 			self.VelocityY = -20
-			self.Values.DisablesTimer += 1.5
+			self.Values.DisablesTimer += 1.2
 			if self.Team == team.Ally {
 				self.VelocityX = 150
 			} else {

@@ -337,11 +337,15 @@ func (u *Unit) DrawTooltip(shape geometry.Shape, bench bool) {
 			}
 		}
 		if u.Values.ReviveTimer > 0 {
+			var term = "revive"
+			if u.Health > 0 && u.State == state.Decaying {
+				term = "return"
+			}
 			if !u.IsSummoned() || u.State != state.Decaying {
-				TooltipTexts[1].Append("🌗🟦", Tags[icon.Revive], number.Round(u.Values.ReviveTimer, 1), "s revive\n")
+				TooltipTexts[1].Append("🌗🟦", Tags[icon.Revive], number.Round(u.Values.ReviveTimer, 1), "s ", term, "\n")
 			} else if u.Values.ReviveTimer > 0 && u.State == state.Decaying && u.HurtTimer > -u.Values.ReviveTimer {
 				TooltipTexts[1].Append("🌗🟦", Tags[icon.Revive], max(number.Round(u.Values.ReviveTimer+u.HurtTimer, 1), 0), "/",
-					number.Round(char.Values.ReviveTimer, 1), "s revive\n")
+					number.Round(char.Values.ReviveTimer, 1), "s ", term, "\n")
 			}
 		}
 
@@ -598,12 +602,12 @@ func (h *HUD) UpdateScore() {
 	if Screen == screen.Scene {
 		h.View.DrawObject(ally)
 		if ally.ContainsPoint(h.View.MousePosition()) {
-			h.DrawTooltip(ally.Shape, TooltipTexts[0].Set("Your\n🟩", Tags[icon.Glory], "Glory⬜"), icons[1])
+			h.DrawTooltip(ally.Shape, TooltipTexts[0].Set("🟩Your\n⬜", Tags[icon.Glory], "Glory"), icons[1])
 		}
 
 		h.View.DrawObject(enemy)
 		if enemy.ContainsPoint(h.View.MousePosition()) {
-			h.DrawTooltip(enemy.Shape, TooltipTexts[0].Set("Enemy\n🟥", Tags[icon.Glory], "Glory⬜"), icons[1])
+			h.DrawTooltip(enemy.Shape, TooltipTexts[0].Set("🟥Enemy\n⬜", Tags[icon.Glory], "Glory"), icons[1])
 		}
 
 		h.Coins.X, h.Coins.Y = h.Top.X, h.Top.Y-9
@@ -618,6 +622,6 @@ func (h *HUD) UpdateScore() {
 	h.Coins.Text = CoinsText.Set(Tags[icon.Coins], Player.Coins)
 	h.View.DrawObject(h.Coins)
 	if h.Coins.ContainsPoint(h.View.MousePosition()) {
-		h.DrawTooltip(h.Coins.Shape, TooltipTexts[0].Set("Your\n🟨", Tags[icon.Coins], "Coins⬜"), icons[0])
+		h.DrawTooltip(h.Coins.Shape, TooltipTexts[0].Set("🟩Your\n🟨", Tags[icon.Coins], "Coins"), icons[0])
 	}
 }

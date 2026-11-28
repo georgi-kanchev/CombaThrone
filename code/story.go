@@ -20,6 +20,7 @@ import (
 	"pure-game-kit/packages/input/keyboard/key"
 	"pure-game-kit/packages/input/mouse"
 	"pure-game-kit/packages/input/mouse/cursor"
+	"pure-game-kit/packages/utility/collection"
 	"pure-game-kit/packages/utility/number"
 	"pure-game-kit/packages/utility/text"
 	"pure-game-kit/packages/utility/time"
@@ -30,11 +31,14 @@ const STORY_HOVER, STORY_STATS, STORY_BENCH, STORY_SUMMON = 40, 43, 47, 49
 var Story int
 
 func UpdateStory() {
+
 	var panel = geometry.NewArea(-TileSize*5, -TileSize*3.5, TileSize*7.5, TileSize*2.5)
 	if Screen == screen.Scene {
 		panel.X, panel.Y = 0, -TileSize/2
 	}
-	gui.Image(PanelId, panel, false)
+	if storyText.Get() != "" {
+		gui.Image(PanelId, panel, false)
+	}
 
 	storyTimer += DeltaTimeScaled()
 
@@ -95,7 +99,7 @@ func UpdateStory() {
 			storyAdventurer.Values.MoveSpeed = 30
 			Player.Units[0] = storyAdventurer
 			Units = append(Units, storyAdventurer)
-			storySetPanel(". . .", 0, 0, 0, 0)
+			storySetPanel("", 0, 0, 0, 0)
 			storyNext()
 		}
 	case 8:
@@ -159,7 +163,7 @@ func UpdateStory() {
 		storyFisherman.ActTimer, storyAdventurer.Values.DisablesTimer = storyFisherman.Values.ActTimer, 1
 		if storyJustContinued(panel) {
 			storyFisherman.ActTimer = 0
-			storySetPanel(". . .", 0, 0, 0, 0)
+			storySetPanel("", 0, 0, 0, 0)
 			storyNext()
 		}
 	case 17:
@@ -296,12 +300,14 @@ func UpdateStory() {
 		storyAdventurer.Values.DisablesTimer, storyMiner.Values.DisablesTimer = 1, 1
 		if storyJustContinued(panel) {
 			storyAdventurer.Values.DisablesTimer = 0
-			storySetPanel(". . .", 0, 0, 0, 0)
+			storySetPanel("", 0, 0, 0, 0)
 			storyNext()
 		}
 	case 38:
 		storyMiner.Values.DisablesTimer = 1
-		storyWaitFor(1.0)
+		if storyAdventurer.X > storyMiner.X && !number.IsWithin(storyAdventurer.X, storyMiner.X, TileSize) {
+			storyNext()
+		}
 	case 39:
 		storyAdventurer.Values.DisablesTimer, storyMiner.Values.DisablesTimer = 1, 1
 		storySetPanel("Every "+Tags[icon.Unit]+"unit has a skill they can perform. Hover over them "+
@@ -338,7 +344,7 @@ func UpdateStory() {
 	case 44:
 		storyAdventurer.Values.DisablesTimer, storyMiner.Values.DisablesTimer = 1, 1
 		if storyAdventurer.UnitBehind != nil {
-			storyAdventurer.AffectHealth(-storyAdventurer.Health, true, storyDummy)
+			storyAdventurer.AffectHealth(-(storyAdventurer.Health + storyAdventurer.Values.ActPoints), true, storyDummy)
 			storyNext()
 		}
 	case 45:
@@ -383,21 +389,136 @@ func UpdateStory() {
 		}
 
 		if storyAdventurer.State == state.Summoned {
-			storySetPanel(". . .", 0, 0, 0, 0)
+			storyAdventurer.Values.MoveSpeed = 30
+			storySetPanel("", 0, 0, 0, 0)
 			storyNext()
 		}
 	case 50:
 		storyMiner.Values.DisablesTimer = 1
+		if number.IsWithin(storyAdventurer.X, storyMiner.X, TileSize) {
+			storyMiner.IsReturning = false
+			storySetPanel("⬅🩵Hey, that wasn't very nice!", char.Adventurer, char.Miner, emotion.Talk, emotion.Calm)
+			storyNext()
+		}
+	case 51:
+		storyAdventurer.Values.DisablesTimer, storyMiner.Values.DisablesTimer = 1, 1
+		if storyJustContinued(panel) {
+			storySetPanel("➡🟨Learning the hard way is never nice but always necessary, dear. You need to get used to dying - so is the life of the ⬜"+Tags[icon.Defender]+"Defender🟨.", char.Adventurer, char.Miner, emotion.Calm, emotion.Talk)
+			storyNext()
+		}
+	case 52:
+		storyAdventurer.Values.DisablesTimer, storyMiner.Values.DisablesTimer = 1, 1
+		if storyJustContinued(panel) {
+			storySetPanel("⬅🩵Me? A ⬜"+Tags[icon.Defender]+"Defender🩵? Cool, I like it! What does my role do?",
+				char.Adventurer, char.Miner, emotion.Happy, emotion.Calm)
+			storyNext()
+		}
+	case 53:
+		storyAdventurer.Values.DisablesTimer, storyMiner.Values.DisablesTimer = 1, 1
+		if storyJustContinued(panel) {
+			storySetPanel("➡🟨All ⬜"+Tags[icon.Defender]+"Defenders🟨 participate in the combat directly, alongside the ⬜"+
+				Tags[icon.Fighter]+"Fighters🟨 and ⬜"+Tags[icon.Backliner]+"Backliners🟨.",
+				char.Adventurer, char.Miner, emotion.Calm, emotion.Talk)
+			storyNext()
+		}
+	case 54:
+		storyAdventurer.Values.DisablesTimer, storyMiner.Values.DisablesTimer = 1, 1
+		if storyJustContinued(panel) {
+			storySetPanel("➡⬜"+Tags[icon.Defender]+"Defenders🟨 push or slow lanes down. They 🟧"+
+				Tags[icon.Defender]+"block🟨 some incoming 🟧"+Tags[icon.Wound]+"damage🟨 from the ⬜"+Tags[icon.Fighter]+
+				"Fighters🟨 and ⬜"+Tags[icon.Backliner]+"Backliners🟨 but don't cause any themselves.",
+				char.Adventurer, char.Miner, emotion.Calm, emotion.Talk)
+			storyNext()
+		}
+	case 55:
+		storyAdventurer.Values.DisablesTimer, storyMiner.Values.DisablesTimer = 1, 1
+		if storyJustContinued(panel) {
+			storySetPanel("⬅🩵Awesome! Wait, so if everybody 🌗🟦"+Tags[icon.Revive]+"revives🩵, what is our combat goal then?",
+				char.Adventurer, char.Miner, emotion.Talk, emotion.Calm)
+			storyNext()
+		}
+	case 56:
+		storyAdventurer.Values.DisablesTimer, storyMiner.Values.DisablesTimer = 1, 1
+		if storyJustContinued(panel) {
+			storySetPanel("➡🟨We fight for ⬜"+Tags[icon.Glory]+"Glory🟨, madam! We lose some of it when an 🟥"+
+				Tags[icon.Unit]+"enemy🟨 or a stranger like you enters our base. Try it - get in our barrack! We don't bite!",
+				char.Adventurer, char.Miner, emotion.Calm, emotion.Happy)
+			storyNext()
+		}
+	case 57:
+		storyAdventurer.Values.DisablesTimer, storyMiner.Values.DisablesTimer = 1, 1
+		if storyJustContinued(panel) {
+			storySetPanel("➡🟨Did I hear \"bite\"? The fish must be calling me!", 0, char.Fisherman, 0, emotion.Happy)
+			Units = collection.Remove(Units, storyFisherman)
+			storyFisherman = NewUnit(char.Fisherman, team.Enemy, lane.LowerOff)
+			storyFisherman.Values.MoveSpeed = 30
+			Units = append(Units, storyFisherman)
+			storyNext()
+		}
+	case 58:
+		storyMiner.Values.DisablesTimer, storyFisherman.ActTimer = 1, storyFisherman.Values.ActTimer
+		storyWaitFor(5.0)
+	case 59:
+		storyFisherman.ActTimer = 0
+		storyNext()
+	case 60:
+		storyMiner.Values.DisablesTimer, storyFisherman.ActTimer = 1, storyFisherman.Values.ActTimer
+		if storyFisherman.State == state.ActPreparing {
+			storyNext()
+		}
+	case 61:
+		storyMiner.Values.DisablesTimer, storyFisherman.ActTimer = 1, storyFisherman.Values.ActTimer
+		if storyAdventurer.State == state.Decaying {
+			storySetPanel("🟩"+Tags[icon.Unit]+"Allies⬜ that reach the 🟥enemy base⬜ will 🌗🟦"+Tags[icon.Revive]+
+				"return⬜ after some time, as if they were to 🌗🟦"+Tags[icon.Revive]+"revive⬜. Their remaining 🌗🟩"+
+				Tags[icon.Health]+"health⬜ is subtracted from the 🟥enemy ⬜"+Tags[icon.Glory]+"Glory. The first team to have no "+
+				Tags[icon.Glory]+"Glory loses the battle.",
+				0, 0, 0, 0)
+			storyNext()
+		}
+	case 62:
+		storyMiner.Values.DisablesTimer, storyFisherman.ActTimer = 1, storyFisherman.Values.ActTimer
+		if storyAdventurer.State == state.WaitingToBeSummoned {
+			Player.Units[1] = NewUnit(char.Bowyer, team.Ally, 0)
+			Player.Units[2] = NewUnit(char.Smith, team.Ally, 0)
+			Player.Units[3] = NewUnit(char.Cook, team.Ally, 0)
+			Player.Units[4] = NewUnit(char.Kid, team.Ally, 0)
+
+			storySetPanel("", 0, 0, 0, 0)
+			Units = append(Units, storyAdventurer)
+			storyAdventurer.Lane = lane.Middle
+			storyAdventurer.PrepareSpawn()
+			storyNext()
+		}
+	case 63:
+		storyMiner.Values.DisablesTimer, storyFisherman.ActTimer = 1, storyFisherman.Values.ActTimer
+		if number.IsWithin(storyAdventurer.X, storyMiner.X, TileSize) {
+			storySetPanel("⬅🩵I made some friends inside. They agreed to help me on my upcoming journey you are preparing me for. "+
+				"My whistle is our signal!",
+				char.Adventurer, char.Miner, emotion.Talk, emotion.Calm)
+			storyNext()
+		}
+	case 64:
+		storyMiner.Values.DisablesTimer, storyFisherman.ActTimer = 1, storyFisherman.Values.ActTimer
+		storyAdventurer.Values.DisablesTimer = 1
 	}
 
 	// storyAdventurer.Values.DisablesTimer, storyMiner.Values.DisablesTimer = 1, 1
+	// if storyJustContinued(panel) {
+	// 	storySetPanel("There are 6 roles in total:\n"+
+	// 		Tags[icon.Fighter]+"Fighter, "+Tags[icon.Backliner]+"Backliner, "+Tags[icon.Defender]+"Defender,\n"+
+	// 		Tags[icon.Griefer]+"Griefer, "+Tags[icon.Supplier]+"Supplier & "+Tags[icon.Collector]+"Collector.\n"+
+	// 		"The first 3 participate in the combat directly, while the second 3 do so indirectly.\n"+
+	// 		"The "+Tags[icon.Unit]+"unit hover info shows their role.", 0, 0, 0, 0)
+	// 	storyNext()
+	// }
+
+	// 	storyAdventurer.HurtTimer, storyMiner.Values.DisablesTimer = 0, 1
 	// 	if storyJustContinued(panel) {
-	// 		storySetPanel("Upon hover, notice the roles below their title.\nThere are 6 of them:\n"+
-	// 			Tags[icon.Fighter]+"Fighter, "+Tags[icon.Backliner]+"Backliner, "+Tags[icon.Defender]+"Defender,\n"+
-	// 			Tags[icon.Griefer]+"Griefer, "+Tags[icon.Supplier]+"Supplier & "+Tags[icon.Collector]+"Collector.\n"+
-	// 			"The first 3 participate in the combat directly, while the second 3 do so indirectly.", 0, 0, 0, 0)
+	// 		storyMiner.IsReturning = false
+	// 		storySetPanel(Tags[icon.Unit]+"Units that reach the end of the lane and enter the enemy base will "+
+	// 			"🌗🟦"+Tags[icon.Revive]+"return⬜ after some time.", 0, 0, 0, 0)
 	// 		storyNext()
-	// 	}
 
 	if storyPortraitLeft != 0 {
 		gui.Image(storyPortraitLeft, geometry.NewArea(panel.X-panel.Width/2+TileSize, panel.Y, TileSize*2, TileSize*3), false)
